@@ -4,94 +4,185 @@ namespace Core;
 
 class App
 {
-    protected $controller = 'Login';
-    protected $method = 'index';
-    protected $params = [];
+    protected $controller = 'Login'; // Controlador predeterminado
+    protected $method = 'index';      // Método predeterminado
+    protected $params = [];           // Parámetros de la URL
+    protected $debug = 0;             // Variable de depuración, cámbiala a 0 para desactivar logs
 
     public function __construct()
     {
+        if ($this->debug == 1) {
+            echo "<h2>Ya estamos dentro de core\App.</h2>";
+        }
+        
         // Procesar la URL
         $url = $this->parseUrl();
-
-        var_dump($url); // Imprime la URL procesada
-        
-        // Verificar si el controlador solicitado existe
-        if ($url && file_exists("../app/controllers/" . ucfirst($url[0]) . ".php")) {
-            echo '<br> Si existe el controlador es:'."../app/controllers/" . ucfirst($url[0]) . ".php";
-            $this->controller = ucfirst($url[0]);
-            unset($url[0]);
-            echo '<br> thisController='.$this->controller;
-        } else {
-            // Redirige a la página de error 404 si el controlador no existe
-            echo 'Aqui ya valio no existe';
-            require_once "../app/views/errors/404.php";
-            exit();
+        if ($this->debug == 1) {
+            echo '<br>Retorno de parseUrl:';
+            var_dump($url); // Imprime la URL procesada
+            echo '<br>';
         }
 
-        // Instancia el controlador
-        require_once "../app/controllers/" . $this->controller . ".php";
-        # $this->controller = new $this->controller;
-        $this->controller = new ("App\Controllers\\" . $this->controller);
+        // Si la URL está vacía, establecer el controlador y método predeterminados
+        if (empty($url)) {
+            if ($this->debug == 1) {
+                echo '<br>La funcion parseUrl no detecto solicitud a ningun controlador sera redirigido a Login:<br>';
+            }
+            $url = [$this->controller, $this->method]; // [Login, index]
+        }
 
-        // Verifica si el método solicitado existe en el controlador
+        // Verificar si la URL tiene un controlador en una subcarpeta
+        $controllerPath = "../app/controllers/" . ucfirst($url[0]);
+        if (is_dir($controllerPath) && isset($url[1])) {
+            $controllerFile = $controllerPath . '/' . ucfirst($url[1]) . 'Controller.php';
+            if (file_exists($controllerFile)) {
+                $this->controller = ucfirst($url[0]) . '\\' . ucfirst($url[1]) . 'Controller';
+                unset($url[0], $url[1]);
+                if ($this->debug == 1) {
+                    echo "Controlador en subcarpeta encontrado: '" . $this->controller . "'<br>";
+                }
+            } else {
+                $this->logAndRedirect404("Controlador en subcarpeta no encontrado", $url[1] ?? 'N/A');
+            }
+        } 
+
+        // Verificar si el controlador solicitado existe en /app/controllers/
+        elseif ($url && file_exists("../app/controllers/" . ucfirst($url[0]) . ".php")) {
+            $this->controller = ucfirst($url[0]);
+            unset($url[0]);
+            if ($this->debug == 1) {
+                echo "Controlador encontrado: '" . $this->controller . "'<br>";
+            }
+        } else {
+            // Si el controlador no existe, redirigir a la página 404
+            if ($this->debug == 1) {
+                echo "Controlador no encontrado, redirigiendo a 404.<br>";
+                exit();
+            }
+            $this->logAndRedirect404("Controlador como archivo no encontrado", $url[0] ?? 'N/A');
+        }
+
+        // Incluir y crear una instancia del controlador
+        require_once "../app/controllers/" . $this->controller . ".php";
+        $controllerClass = "App\\Controllers\\" . $this->controller;
+        $this->controller = new $controllerClass;
+
+        // Verificar si el método solicitado existe en el controlador
         if (isset($url[1])) {
-            echo '<br> Si existe el metodo';
             if (method_exists($this->controller, $url[1])) {
                 $this->method = $url[1];
                 unset($url[1]);
+                if ($this->debug == 1) {
+                    echo "Método encontrado: " . $this->method . "<br>";
+                }
             } else {
-                echo '<br> No existe el metodo';
-                // Redirige a la página de error 404 si el método no existe
-                require_once "../app/views/errors/404.php";
-                exit();
+                // Redirigir a 404 si el método no existe
+                if ($this->debug == 1) {
+                    echo "Método no encontrado, redirigiendo a 404.<br>";
+                    exit();
+                }
+                $this->logAndRedirect404("Metodo no encontrado", $url[1] ?? 'N/A');
             }
         }
 
-        // Procesar los parámetros restantes
+        // Procesar cualquier parámetro adicional en la URL
         $this->params = $url ? array_values($url) : [];
+        
+        if ($this->debug == 1) {
+            echo 'Retorno de Parametros:';
+            var_dump($this->params); // Imprime los parámetros procesados
+            echo '<br>';
+        }
 
         // Llamar al método del controlador con los parámetros
         call_user_func_array([$this->controller, $this->method], $this->params);
     }
 
+    // Método para descomponer la URL en partes
     private function parseUrl()
-{
-    // Ajuste para entorno local en subcarpeta
-    if (strpos($_SERVER['REQUEST_URI'], '/EQX-PortalProveedores_V2/public/') !== false) {
-        // Remover la parte '/EQX-PortalProveedores_V2/public/' para obtener solo la ruta relativa
-        $url = str_replace('/EQX-PortalProveedores_V2/public/', '', $_SERVER['REQUEST_URI']);
-        return explode('/', filter_var(rtrim($url, '/'), FILTER_SANITIZE_URL));
+    {
+        if ($this->debug == 1) {
+            if (empty($_GET['url'])) {
+                echo "No trae contenido la URL.";
+            } else {
+                echo "Detalle de URL: ".$_GET['url'];
+            }            
+        }
+        // Asumimos que estamos en producción
+        if (isset($_GET['url'])) {
+            return explode('/', filter_var(rtrim($_GET['url'], '/'), FILTER_SANITIZE_URL));
+        }
+        return [];
     }
 
-    // En entorno de producción o cuando no está en subcarpeta
-    if (isset($_GET['url'])) {
-        return explode('/', filter_var(rtrim($_GET['url'], '/'), FILTER_SANITIZE_URL));
+    private function logAndRedirect404($error, $detail)
+    {
+        $timestamp = date("Y-m-d H:i:s");
+        error_log("[$timestamp] core/App.php ->$error: " . $detail . PHP_EOL, 3, LOG_FILE);
+        if ($this->debug == 1) {
+            echo "$error: " . $detail . "<br>";
+        }
+        require_once "../app/views/errors/404.php";
+        exit();
     }
-    return [];
 }
 
-    // Función para descomponer la URL en partes
-    private function parseUrlANt()
+use App\Models\Login_Mdl;
+
+// Clase base Controller 
+class Controller
+{
+    protected $debug = 0; 
+
+    // Método para cargar vistas
+    protected function view($view, $data = [])
     {
-        // Si estás en entorno local y usando la carpeta public
-        if (strpos($_SERVER['REQUEST_URI'], '/public/') !== false) {
-
-            // Extrae la parte de la URL que sigue a /public/
-            $url = str_replace('/public/', '', $_SERVER['REQUEST_URI']);
-            return explode('/', filter_var(rtrim($url, '/'), FILTER_SANITIZE_URL));
+        // Generar la ruta de la vista
+        $viewPath = "../app/views/" . rtrim($view, '/') . ".php";
+        if ($this->debug == 1) {
+            echo '<br>Ruta de Vista:'.$viewPath.'<br>';
         }
 
-        // Para producción o cuando no está en la carpeta public
-        if (isset($_GET['url'])) {
-            return explode('/', filter_var(rtrim($_GET['url'], '/'), FILTER_SANITIZE_URL));
+        if (file_exists($viewPath)) {
+            extract($data); // Extraer variables
+            require_once $viewPath;
+        } else {
+            $timestamp = date("Y-m-d H:i:s");
+            error_log("[$timestamp] core/App.php ->La vista no existe: " . $view . PHP_EOL, 3, LOG_FILE);
+            die("La vista no existe.");
         }
-        return [];
     }
-    private function parseUrlProductivo()
-    {
-        if (isset($_GET['url'])) {
-            return explode('/', filter_var(rtrim($_GET['url'], '/'), FILTER_SANITIZE_URL));
+
+    // Método para verificar la autenticación de sesión y el estatus del usuario
+    protected function checkSession()
+    {        
+        // Verificar si el usuario está autenticado y que no esté bloqueado
+        if (!isset($_SESSION['EQXident'])) {
+            // Redirigir al login si no existe la sesión
+            if ($this->debug == 1) {
+                echo "No se detecto un inicio de session por lo que seras redireccionado al Index, para que inicies session.<br>";
+                exit();
+            } else {
+                header('Location: ' . URL_BASE_PROYECT . '/login');
+                exit();
+            }
         }
-        return [];
+
+        // Verificar si el usuario sigue activo
+        $loginModel = new Login_Mdl();
+        $userStatus = $loginModel->verificarEstatusUsuario($_SESSION['EQXident']);
+        
+        if (!$userStatus['active']) {
+            // Cerrar sesión y redirigir con un mensaje si el usuario está bloqueado
+            if ($this->debug == 1) {
+                echo "Se detecto que tu usuario ya Bloqueado, te sacaremos del sistema. **Redirección a Index.<br>";
+                exit();
+            } else {
+                session_destroy();
+                $_SESSION['error_message'] = 'El usuario ha sido bloqueado.';
+                header('Location: ' . URL_BASE_PROYECT . '/login');
+                exit();
+            }
+        }
     }
 }

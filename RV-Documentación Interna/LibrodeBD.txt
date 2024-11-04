@@ -1,0 +1,15 @@
+# *********   DOCUMENTACIÓN DE VISTAS Y PROCEDIMEINTOS ALMACENADOS   *********
+
+# vw para las Views (Vistas de BD)
+# sp para los Store Procedure (Procedimientos Almacenados de BD)
+# NOTA: Para documentar una vista o procedimiento usar estructura --> NombreDeLaVista{ Query que genera la Vista.}
+
+Views (Vistas de BD)[
+    vw_data__Proveedores_AccesoProveedores{
+        SELECT * FROM proveedores
+    }
+]
+
+Store Procedure (Procedimientos Almacenados de BD)[
+
+]

@@ -1,71 +1,122 @@
 <?php
+if (!defined('INCLUDE_CHECK')) die('No se puede leer este archivo');
 
-namespace Config;
+class BD_Connect {
+    private static $conn;        // Conexión de la base de datos
+    private static $debug = 0;   // Cambia a 0 para desactivar los mensajes de depuración
+    private static $logFile = '../logs/debug_BD.log'; // Archivo de log para errores de conexión
 
-use mysqli;
+    /**
+     * Obtiene la conexión a la base de datos
+     *
+     * @return PDO
+     */
+    public static function getConnection() {
+        if (!isset(self::$conn)) {
+            try {
+                // Configura los detalles de conexión de PDO
+                $host = '82.165.209.227';
+                $database = 'EQX_PortalProveedoresV2';
+                $username = 'RVSetysTest';
+                $password = 'RV53ty5.p4$$wd';
 
-class BD_Connect
-{
-    private $host = '82.165.209.227';
-    private $user = 'RVSetysTest';
-    private $password = 'RV53ty5.p4$$wd';
-    private $database = "EQX_PortalProveedoresV2";
-    private $link;
-    private static $instance = null;
+                $dsn = "mysql:host=".$host.";dbname=".$database.";charset=utf8";
 
-    private function __construct()
-    {
-        $this->connect();
-    }
+                // Crea la conexión con PDO y establece opciones
+                self::$conn = new PDO($dsn, $username, $password, [
+                    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+                    PDO::ATTR_PERSISTENT => false, // Desactiva la conexión persistente
+                    PDO::ATTR_EMULATE_PREPARES => false // Usa consultas preparadas reales en MySQL
+                ]);
 
-    private function connect()
-    {
-        $this->link = new mysqli($this->host, $this->user, $this->password, $this->database);
-
-        if ($this->link->connect_error) {
-            die("Error al conectar a la base de datos: " . $this->link->connect_error);
+                if (self::$debug) {
+                    echo "<br>Conexión a la base de datos establecida con PDO.";
+                }
+            } catch (PDOException $e) {
+                $timestamp = date("Y-m-d H:i:s"); // Obtiene la fecha y hora actual
+                $errorMessage = "[{$timestamp}] Error en la conexión: " . $e->getMessage() . "\n";
+                error_log($errorMessage, 3, self::$logFile);
+                echo "<br>Error en la conexión a la base de datos.";
+                exit;
+            }
         }
-
-        // Configuraciones adicionales
-        $this->link->query("SET NAMES 'utf8mb4'");
-        $this->link->query("SET time_zone = '-06:00'");
-        $this->link->query("SET lc_time_names = 'es_MX'");
-        $this->link->query("SET @@global.wait_timeout=300");
-
-        // Iniciar transacción automáticamente si es necesario
-        $this->link->begin_transaction();
+        return self::$conn;
     }
 
-    public static function getConnection()
-    {
-        if (self::$instance === null) {
-            self::$instance = new BD_Connect();
-        }
-        return self::$instance->link;
+    /**
+     * Prepara una consulta SQL
+     *
+     * @param string $sql
+     * @return PDOStatement
+     */
+    public static function prepare($sql) {
+        $conn = self::getConnection(); // Obtiene la conexión
+        return $conn->prepare($sql); // Prepara y retorna la consulta
     }
 
-    // Función para realizar commit
-    public function commit()
-    {
-        $this->link->commit();
-    }
-
-    // Función para realizar rollback
-    public function rollback()
-    {
-        $this->link->rollback();
-    }
-
-    // Función para cerrar la conexión
-    public function close()
-    {
-        if ($this->link) {
-            $this->link->close();
+    /**
+     * Inicia una transacción en la base de datos
+     *
+     * @return void
+     */
+    public static function beginTransaction() {
+        if (self::$conn && !self::$conn->inTransaction()) {
+            self::$conn->beginTransaction();
+            if (self::$debug) {
+                echo "<br>Transacción iniciada.";
+            }
         }
     }
+    
+    /**
+     * Confirma la transacción en la base de datos
+     *
+     * @return void
+     */
+    public static function commit() {
+        if (self::$conn && self::$conn->inTransaction()) {
+            self::$conn->commit();
+            if (self::$debug) {
+                echo "<br>Transacción confirmada.";
+            }
+        }
+    }
 
-    public function __destruct()
-    {
-        $this->close();
+    /**
+     * Cancela la transacción en la base de datos
+     *
+     * @return void
+     */
+    public static function rollBack() {
+        if (self::$conn && self::$conn->inTransaction()) {
+            self::$conn->rollBack();
+            if (self::$debug) {
+                echo "<br>Transacción revertida.";
+            }
+        }
+    }
+
+    /**
+     * Cierra la conexión a la base de datos
+     *
+     * @return void
+     */
+    public static function closeConnection() {
+        if (isset(self::$conn)) {
+            self::$conn = null;
+            if (self::$debug) {
+                echo "<br>Conexión a la base de datos cerrada.";
+            }
+        }
+    }
+
+    public function imprimirConsulta($sql, $params, $msj) {
+        foreach ($params as $key => $value) {
+            // Escapar los valores para evitar inyecciones de SQL
+            $value = is_null($value) ? 'NULL' : "'".addslashes($value)."'";
+            $sql = preg_replace('/' . preg_quote($key, '/') . '/', $value, $sql, 1);
+        }
+        echo '<br>Consulta '.$msj.':'. $sql.'<br>';
     }
 }

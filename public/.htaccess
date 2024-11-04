@@ -1,20 +1,5 @@
-# Redirigir todo el tráfico a index.php --En Productivo
-#RewriteEngine On
-#RewriteCond %{REQUEST_FILENAME} !-f
-#RewriteCond %{REQUEST_FILENAME} !-d
-#RewriteRule ^(.*)$ index.php?url=$1 [QSA,L]
-
-<IfModule mod_rewrite.c>
-    RewriteEngine On
-    RewriteBase /EQX-PortalProveedores_V2/public/
-
-    # Redirigir el tráfico hacia index.php
-    RewriteRule ^index\.php$ - [QSA,L]
-
-    # Asegurarse de que los archivos y directorios existentes no sean redirigidos
-    RewriteCond %{REQUEST_FILENAME} !-f
-    RewriteCond %{REQUEST_FILENAME} !-d
-
-    # Redirigir todas las demás solicitudes a index.php
-    RewriteRule . /EQX-PortalProveedores_V2/public/index.php [QSA,L]
-</IfModule>
+# -----Redirigir todo el tráfico a index.php --En Productivo
+RewriteEngine On
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ index.php?url=$1 [QSA,L]

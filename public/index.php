@@ -2,6 +2,7 @@
 // Habilitar la visualización de errores (para desarrollo; asegúrate de deshabilitar en producción)
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
+#echo "Ya entramos.<br><br>";
 
 // Autoload de clases
 require_once '../app/init.php'; // Cargamos la configuración inicial y el autoload

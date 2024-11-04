@@ -1,0 +1,65 @@
+**********************   VISTAS EN Bases de Datos   **********************
+1.- Nombres de Vistas, Funciones y Procedimientos { 
+    Problemas: 
+        -Voy a comenzar a crear vistas para simplificar procesos y detecto un problema con los nombres por que no se para que es cada una.
+
+    Solución:
+        - Nombres de Vistas, Funciones y Procedimientos Almacenados en la base de datos van a llevar la siguiente nomenclatura:
+        **SIEMPRE USAR NOTACION CAMELLO.
+        TipoFuncion_FormaUso_TipoProceso_DetalleCorto
+        
+        TipoFuncion:
+            VALOR       DESCRIPCION     
+            vw          View - Vista
+            fn          Function - Funcion
+            sp          StoreProcedure - Procedimiento Almacenado
+        
+        FormaUso:
+            VALOR       DESCRIPCION     
+            proc        Proceso: Se usa cuando cumple una funciónalidad en el sistema como retorno de valores operados 'Se debe usar siempre en lugar de tabla por tabla'.
+            data        Datos: Esta se utilizara para reportes y/o ayuda para no concatenar tantas tablas en la query. Uso solo dentro del sistema.
+            ext         Externa: Se crea para compartir con otros sistemas.
+            oper        Operacion: Si almacena datos en alguna tabla.
+            limp        Limpieza: Si se usa para eliminar registros o tablas con el objetivo de no dejar basura en la BD.         
+
+        TipoProceso:
+            Definición de maximo 10 caracteres de el proceso en que se va a utilizar. Ejemplos: Ventas, Creditos, Empleados.
+        
+        DetalleCorto:
+            Definición de maximo 15 caracteres de en lo que realiza. Ejemplos: ListaVentas, ListaCreditos, PrecioProductos, VtaProdLotes.
+}
+
+2.- Evitar perdida de Consultas que crean Vista, Funciones y Procedimientos { 
+    Problemas: 
+        -Al pasar migrar de servidores no se tienen las Querys para crear los procedimientos o funciones y hay que examinar en versiones anteriores para ver que hacen y el 
+        pase a produccion es mas tardado.
+
+    Solución:
+        - Siempre en el ambiente de desarrollo se documentaran las querys en un archivo de texto con el nombre de la Vista, Funcion o Procedimiento y debajo su query:
+        **SI SE ACTUALIZA ALGUNO HAY QUE MODIFICARLO EN EL DOCUMENTO.
+        **LA CARPETA NUNCA SE DEBERA PONER EN LOS AMBIENTES DE PRODUCCION.
+        **TRATAR DE MANTENER ORDEN ALFABETICO DEL 'NombreDeProcedimiento'
+        
+        RUTA:  CambiosInBD/LibrodeBaseDeDatos.texto
+        ESTRUCTURA: 
+            NombreDeProcedimiento {
+                Query que genera el procedimiento.
+            }
+}
+
+3.- Documentacion de Campos en Tablas { 
+    Problemas: 
+        -Hay campos que se usan como banderas o estatus y para un programador nuevo no entiende para que es cada valor de esos campos.
+
+    Solución:
+        - Siempre al crear un campo que se use como estatus o como bandera en los comentarios de la tabla poner los posibles valores que pueda tener y a que se refiere cada valor.
+        EJEMPLO:
+        ventas.estatus: 
+            0 Cancelada, 
+            1 Iniciada, 
+            2 Finalizada, 
+            3 Pendiente x autorizar ,
+            4 Rechazada,
+            5 Cancelación de proceso de Venta x usuario
+}
+
