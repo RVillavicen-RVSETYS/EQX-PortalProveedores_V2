@@ -7,7 +7,7 @@ if (DEBUG_MODE) {
     ini_set('display_startup_errors', 1);
     error_reporting(E_ALL);
 } else {
-    ini_set('display_errors', 0);
+    ini_set('display_errors', 1);
 }
 
 // Cargar constantes y configuración de la base de datos

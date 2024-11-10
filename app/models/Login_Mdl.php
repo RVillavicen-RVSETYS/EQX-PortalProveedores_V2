@@ -30,7 +30,7 @@ class Login_Mdl
         try {
 
             $sql = "SELECT pv.id, pv.nombre, pv.pais, pv.poblacion, if(pv.pais = 'MX', 2, 3) AS idNivel, pv.grupo, pv.rfc, pv.cpag,
-                    pv.moneda, pv.pass, pv.correo, pv.estatus, if(pv.pais = 'MX', 'Proveedor', 'Provider') AS nivel_nombre
+                    pv.moneda, pv.pass, pv.correo, pv.estatus, if(pv.pais = 'MX', 'Proveedor', 'Supplier') AS nivel_nombre, pv.idioma
                     FROM vw_data__Proveedores_AccesoProveedores pv
                     WHERE pv.id = :usuario "; // Usa un marcador de posición
 
@@ -147,23 +147,39 @@ class Login_Mdl
 
     public function verificarEstatusUsuario($userId)
     {
+        if (self::$debug) {
+            echo "Id de Usuario: $userId <br>";
+        }
+
         $sql = "SELECT estatus FROM vw_data__Proveedores_AccesoProveedores WHERE id = :userId";
         if (self::$debug) {
             $params = [':userId' => $userId];
             $this->db->imprimirConsulta($sql, $params, 'Verifica si el usuario sigue Activo.');
         }
-        $stmt = $this->db->prepare($sql);
-        $stmt->bindParam(':userId', $userId);
-        $stmt->execute();
 
-        $result = $stmt->fetch(PDO::FETCH_ASSOC);
-        if (self::$debug) {
-            echo '<br>Resultado de Query:';
-            var_dump($result);
-            echo '<br><br>';
+        try {
+            $stmt = $this->db->prepare($sql);
+            $stmt->bindParam(':userId', $userId);
+            $stmt->execute();
+
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+            if (self::$debug) {
+                echo '<br>Resultado de Query:';
+                var_dump($result);
+                echo '<br><br>';
+            }
+            return [
+                'active' => $result['estatus'] == 1 // Verifica que el usuario esté activo
+            ];
+        } catch (\PDOException $e) {
+            // Registro del error
+            $timestamp = date("Y-m-d H:i:s");
+            error_log("[$timestamp] Error en verificarEstatusUsuario (id: $userId): " . $e->getMessage(), 3, LOG_FILE_BD);
+    
+            return [
+                'success' => false,
+                'message' => 'Error al verificar el estatus del usuario. Notifica a tu Administrador'
+            ];
         }
-        return [
-            'active' => $result['estatus'] == 1 // Verifica que el usuario esté activo
-        ];
     }
 }

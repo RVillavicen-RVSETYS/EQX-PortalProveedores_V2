@@ -1,0 +1,135 @@
+/****** ALL VARIABLES BUSINESS ******/
+
+:root {
+    --var-menu-bg-header-desktop: #008000;
+    --var-menu-bg-header-mobile: #fff;
+    --var-menu-primary: #eef2ed;
+    --var-menu-secondary: #fff;
+    --var-menu-hover: #008000;
+    --var-menu-active: #008000;
+    --var-menu-icon-primary: #fff;
+    --var-menu-icon-hover: #fff;
+    --var-menu-icon-active: #fff;
+    --var-submenu-primary: #fff;
+    --var-submenu-hover: #008000;
+    --var-submenu-active: #008000;
+    --var-submenu-font-primary: #666666;
+    --var-submenu-font-hover: #fff;
+    --var-submenu-font-active: #fff;
+
+    --var-light-primary: #fff;
+    --var-light-secondary: #e7e7e7;
+    --var-light-terceary: #dbdbdb;
+    --var-light-forth: #f5f5f5;
+    --var-light-fifth: #f3f3f3;
+    --var-grey-primary: #eeeeee;
+    --var-grey-secondary: #adadad;
+    --var-smoke-primary: #424242;
+    --var-smoke-secondary: #666666;
+    --var-smoke-terceary: #b3b3b3;
+    --var-red-primary: #DA4B38;
+    --var-dark-primary: #000;
+    --var-dark-secondary: #383838;
+
+    --var-btn-primary-color: #fff;
+    --var-btn-primary-background-color: #008000;
+    --var-btn-primary-border-color: #008000;
+    --var-btn-primary-hover-color: #fff;
+    --var-btn-primary-hover-background-color: #42D3EA;
+    --var-btn-primary-hover-border-color: #38DCE9;
+    --var-btn-primary-focus-color: #fff;
+    --var-btn-primary-focus-background-color: #42D3EA;
+    --var-btn-primary-focus-border-color: #38DCE9;
+    --var-btn-primary-focus-box-shadow: 0 0 0 .2rem rgba(27, 150, 161, .5);
+    --var-btn-primary-disabled-color: #fff;
+    --var-btn-primary-disabled-background-color: #008000;
+    --var-btn-primary-disabled-border-color: #008000;
+    --var-btn-primary-not-disabled-active-color: #fff;
+    --var-btn-primary-not-disabled-active-background-color: #38DCE9;
+    --var-btn-primary-not-disabled-active-border-color: #24D0DE;
+    --var-btn-primary-not-disabled-focus-box-shadow: 0 0 0 .2rem rgba(27, 150, 161, .5);
+
+    --var-btn-secondary-color: #7460ee;
+    --var-btn-secondary-background-color: #7460ee;
+    --var-btn-secondary-border-color: #7460ee;
+    --var-btn-secondary-hover-color: #fff;
+    --var-btn-secondary-hover-background-color: #563dea;
+    --var-btn-secondary-hover-border-color: #4c32e9;
+    --var-btn-secondary-focus-color: #fff;
+    --var-btn-secondary-focus-background-color: #563dea;
+    --var-btn-secondary-focus-border-color: #4c32e9;
+    --var-btn-secondary-focus-box-shadow: 0 0 0 0.2rem rgba(137, 120, 241, 0.5);
+    --var-btn-secondary-disabled-color: #fff;
+    --var-btn-secondary-disabled-background-color: #7460ee;
+    --var-btn-secondary-disabled-border-color: #7460ee;
+    --var-btn-secondary-not-disabled-active-color: #fff;
+    --var-btn-secondary-not-disabled-active-background-color: #4c32e9;
+    --var-btn-secondary-not-disabled-active-border-color: #4226e8;
+    --var-btn-secondary-not-disabled-focus-box-shadow: 0 0 0 0.2rem rgba(137, 120, 241, 0.5);
+
+    --var-bg-primary-background-color: #008000 !important;
+    --var-bg-primary-hover: #38DCE9 !important;
+    --var-bg-primary-focus: #38DCE9 !important;
+
+    --var-bg-secondary-background-color: #6c757d !important;
+    --var-bg-secondary-hover: #545b62 !important;
+    --var-bg-secondary-focus: #545b62 !important;
+
+    --var-table-primary-background-color: #e3dffc;
+    --var-table-primary-border-color: #43A0A9;
+    --var-table-primary-hover-background-color: #cfc8fa;
+
+    --var-table-secondary-background-color: #e2e3e5;
+    --var-table-secondary-border-color: #b3b7bb;
+    --var-table-secondary-hover-background-color: #A6E5EA;
+
+    --var-btn-outline-primary-color: #008000;
+    --var-btn-outline-primary-border-color: #008000;
+    --var-btn-outline-primary-hover-color: #fff;
+    --var-btn-outline-primary-hover-background-color: #008000;
+    --var-btn-outline-primary-hover-border-color: #008000;
+    --var-btn-outline-primary-focus-box-shadow: 0 0 0 .2rem rgba(27, 150, 161, .5);
+    --var-btn-outline-primary-disabled-color: #008000;
+    --var-btn-outline-primary-disabled-background-color: transparent;
+    --var-btn-outline-primary-not-disabled-active-color: #fff;
+    --var-btn-outline-primary-not-disabled-active-background-color: #008000;
+    --var-btn-outline-primary-not-disabled-active-border-color: #008000;
+    --var-btn-outline-primary-not-disabled-focus-box-shadow: 0 0 0 .2rem rgba(27, 150, 161, .5);
+
+    --var-btn-outline-secondary-color: #008000;
+    --var-btn-outline-secondary-border-color: #008000;
+    --var-btn-outline-secondary-hover-color: #fff;
+    --var-btn-outline-secondary-hover-background-color: #008000;
+    --var-btn-outline-secondary-hover-border-color: #008000;
+    --var-btn-outline-secondary-focus-box-shadow: 0 0 0 .2rem rgba(27, 150, 161, .5);
+    --var-btn-outline-secondary-disabled-color: #008000;
+    --var-btn-outline-secondary-disabled-background-color: transparent;
+    --var-btn-outline-secondary-disabled-active-color: #fff;
+    --var-btn-outline-secondary-disabled-active-background-color: #008000;
+    --var-btn-outline-secondary-disabled-active-border-color: #008000;
+    --var-btn-outline-secondary-disabled-active-focus-box-shadow: 0 0 0 .2rem rgba(27, 150, 161, .5);
+
+    --var-badge-primary-color: #fff;
+    --var-badge-primary-background-color: #008000;
+    --var-badge-primary-hover-color: #fff;
+    --var-badge-primary-hover-background-color: #4c32e9;
+    --var-badge-primary-focus: #4c32e9;
+    --var-badge-primary-focus-box-shadow: 0 0 0 .2rem rgba(27, 150, 161, .5);
+
+    --var-border-primary-color: #008000 !important;
+
+    --var-text-color: #008000 !important;
+    --var-text-a-hover-color: #1AD9E7 !important;
+
+    --var-round-primary-background: #008000;
+
+    --var-label-primary-background-color: #008000;
+
+    --var-lobilists-primary-border-color: rgba(0, 0, 0, .1);
+    --var-lobilists-primary-border-color-header-footer-border-color: #008000;
+    --var-lobilists-primary-border-color-header-footer-background-color: #008000;
+
+    --timeline-badge-primary-background-color: #008000;
+
+    --var-padding-logo: 8px 0px 0px 0px;
+}

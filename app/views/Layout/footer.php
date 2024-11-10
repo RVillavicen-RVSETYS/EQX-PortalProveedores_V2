@@ -1,3 +1,3 @@
-    <footer>
-        <h4>PowerBy RVSETyS</h4>
-    </footer>
+            <footer class="footer text-center">
+                All Rights Reserved.
+            </footer>

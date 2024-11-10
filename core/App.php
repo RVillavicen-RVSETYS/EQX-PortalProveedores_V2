@@ -14,7 +14,7 @@ class App
         if ($this->debug == 1) {
             echo "<h2>Ya estamos dentro de core\App.</h2>";
         }
-        
+
         // Procesar la URL
         $url = $this->parseUrl();
         if ($this->debug == 1) {
@@ -42,9 +42,13 @@ class App
                     echo "Controlador en subcarpeta encontrado: '" . $this->controller . "'<br>";
                 }
             } else {
+                if ($this->debug == 1) {
+                    echo "Controlador no encontrado: $this->controller <br>Redirigiendo a 404.<br>";
+                    exit();
+                }
                 $this->logAndRedirect404("Controlador en subcarpeta no encontrado", $url[1] ?? 'N/A');
             }
-        } 
+        }
 
         // Verificar si el controlador solicitado existe en /app/controllers/
         elseif ($url && file_exists("../app/controllers/" . ucfirst($url[0]) . ".php")) {
@@ -56,7 +60,7 @@ class App
         } else {
             // Si el controlador no existe, redirigir a la página 404
             if ($this->debug == 1) {
-                echo "Controlador no encontrado, redirigiendo a 404.<br>";
+                echo "Controlador no encontrado: $this->controller <br>Redirigiendo a 404.<br>";
                 exit();
             }
             $this->logAndRedirect404("Controlador como archivo no encontrado", $url[0] ?? 'N/A');
@@ -78,7 +82,7 @@ class App
             } else {
                 // Redirigir a 404 si el método no existe
                 if ($this->debug == 1) {
-                    echo "Método no encontrado, redirigiendo a 404.<br>";
+                    echo "Método no encontrado: $this->method <br>, redirigiendo a 404.<br>";
                     exit();
                 }
                 $this->logAndRedirect404("Metodo no encontrado", $url[1] ?? 'N/A');
@@ -87,7 +91,7 @@ class App
 
         // Procesar cualquier parámetro adicional en la URL
         $this->params = $url ? array_values($url) : [];
-        
+
         if ($this->debug == 1) {
             echo 'Retorno de Parametros:';
             var_dump($this->params); // Imprime los parámetros procesados
@@ -105,8 +109,8 @@ class App
             if (empty($_GET['url'])) {
                 echo "No trae contenido la URL.";
             } else {
-                echo "Detalle de URL: ".$_GET['url'];
-            }            
+                echo "Detalle de URL: " . $_GET['url'];
+            }
         }
         // Asumimos que estamos en producción
         if (isset($_GET['url'])) {
@@ -128,11 +132,12 @@ class App
 }
 
 use App\Models\Login_Mdl;
+use App\Models\LoginAdmin_Mdl;
 
 // Clase base Controller 
 class Controller
 {
-    protected $debug = 0; 
+    protected $debug = 0;
 
     // Método para cargar vistas
     protected function view($view, $data = [])
@@ -140,7 +145,7 @@ class Controller
         // Generar la ruta de la vista
         $viewPath = "../app/views/" . rtrim($view, '/') . ".php";
         if ($this->debug == 1) {
-            echo '<br>Ruta de Vista:'.$viewPath.'<br>';
+            echo '<br>Ruta de Vista:' . $viewPath . '<br>';
         }
 
         if (file_exists($viewPath)) {
@@ -155,9 +160,26 @@ class Controller
 
     // Método para verificar la autenticación de sesión y el estatus del usuario
     protected function checkSession()
-    {        
+    {
         // Verificar si el usuario está autenticado y que no esté bloqueado
-        if (!isset($_SESSION['EQXident'])) {
+        if (isset($_SESSION['EQXident'])) {
+            // Verificar si el usuario sigue activo
+            $loginModel = new Login_Mdl();
+            $userStatus = $loginModel->verificarEstatusUsuario($_SESSION['EQXident']);
+
+            if (!$userStatus['active']) {
+                // Cerrar sesión y redirigir con un mensaje si el usuario está bloqueado
+                if ($this->debug == 1) {
+                    echo "Se detecto que tu usuario ya esta Bloqueado, te sacaremos del sistema. **Redirección a Index.<br>";
+                    exit();
+                } else {
+                    session_destroy();
+                    $_SESSION['error_message'] = 'El usuario ha sido bloqueado.';
+                    header('Location: ' . URL_BASE_PROYECT . '/login');
+                    exit();
+                }
+            }
+        } else {
             // Redirigir al login si no existe la sesión
             if ($this->debug == 1) {
                 echo "No se detecto un inicio de session por lo que seras redireccionado al Index, para que inicies session.<br>";
@@ -167,19 +189,35 @@ class Controller
                 exit();
             }
         }
+    }
+    
+    // Método para verificar la autenticación de sesión y el estatus del usuario
+    protected function checkSessionAdmin()
+    {
+        // Verificar si el usuario está autenticado y que no esté bloqueado
+        if (isset($_SESSION['EQXident'])) {
+            // Verificar si el usuario sigue activo
+            $loginAdminModel = new LoginAdmin_Mdl();
+            $userStatus = $loginAdminModel->verificarEstatusUsuarioAdmin($_SESSION['EQXident']);
 
-        // Verificar si el usuario sigue activo
-        $loginModel = new Login_Mdl();
-        $userStatus = $loginModel->verificarEstatusUsuario($_SESSION['EQXident']);
-        
-        if (!$userStatus['active']) {
-            // Cerrar sesión y redirigir con un mensaje si el usuario está bloqueado
+            if (!$userStatus['active']) {
+                // Cerrar sesión y redirigir con un mensaje si el usuario está bloqueado
+                if ($this->debug == 1) {
+                    echo "Se detecto que tu usuario ya esta Bloqueado, te sacaremos del sistema. **Redirección a Index.<br>";
+                    exit();
+                } else {
+                    session_destroy();
+                    $_SESSION['error_message'] = 'El usuario ha sido bloqueado.';
+                    header('Location: ' . URL_BASE_PROYECT . '/login');
+                    exit();
+                }
+            }
+        } else {
+            // Redirigir al login si no existe la sesión
             if ($this->debug == 1) {
-                echo "Se detecto que tu usuario ya Bloqueado, te sacaremos del sistema. **Redirección a Index.<br>";
+                echo "No se detecto un inicio de session por lo que seras redireccionado al Index, para que inicies session.<br>";
                 exit();
             } else {
-                session_destroy();
-                $_SESSION['error_message'] = 'El usuario ha sido bloqueado.';
                 header('Location: ' . URL_BASE_PROYECT . '/login');
                 exit();
             }

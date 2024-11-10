@@ -46,24 +46,33 @@ class Login
                 // Si se encontro un Area a la que tiene acceso preparamos la ruta
                 $urlAcceso = $verificaArea['data']['linkArea'].'/'. $verificaArea['data']['linkMenu'];
 
+                // Genera las variables de session.
+                if (session_status() === PHP_SESSION_NONE) {
+                    session_start();
+                }
+                $_SESSION['EQXident'] = $authResult['data']['id'];
+                $_SESSION['EQXidNivel'] = $authResult['data']['idNivel'];
+                $_SESSION['EQXnombreNivel'] = $authResult['data']['nivel_nombre'];
+                $_SESSION['EQXnombreUser'] = $authResult['data']['nombre'];
+                $_SESSION['EQXnombreUserCto'] = substr($authResult['data']['nombre'], 0, 20);
+                $_SESSION['EQXgenero'] = 'Masculino';
+                $_SESSION['EQXnoProveedor'] = $authResult['data']['id'];
+                $_SESSION['EQXrfc'] = $authResult['data']['rfc'];
+                $_SESSION['EQXcorreo'] = $authResult['data']['correo'];
+                $_SESSION['EQXpais'] = $authResult['data']['pais'];
+                $_SESSION['EQXmoneda'] = $authResult['data']['moneda'];
+                $_SESSION['EQXidioma'] = $authResult['data']['idioma'];
+                $_SESSION['EQXAdmin'] = false;               
+
                 if ($this->debug == 1) {
+                    echo '<br><br>Variables de Session cargadas:<br>';
+                    var_dump($_SESSION);
+                    echo '<br><br>';
                     echo '<br>Se encontro Autorización a: ' . $verificaArea['data']['nombre'] . '. <br>Sera dirigido a:'.$urlAcceso;
                 }
+
                 if ($this->debug == 0) {
-                    // Genera las variables de session.
-                    if (session_status() === PHP_SESSION_NONE) {
-                        session_start();
-                    }
-                    $_SESSION['EQXident'] = $authResult['data']['id'];
-                    $_SESSION['EQXnombre'] = $authResult['data']['nombre'];
-                    $_SESSION['EQXnoProveedor'] = $authResult['data']['id'];
-                    $_SESSION['EQXrfc'] = $authResult['data']['rfc'];
-                    $_SESSION['EQXcorreoCtto'] = $authResult['data']['correo'];
-                    $_SESSION['EQXnombreCtto'] = substr($authResult['data']['id'], 0, 20);
-                    $_SESSION['EQXidNivel'] = $authResult['data']['idNivel'];
-                    $_SESSION['EQXpais'] = $authResult['data']['pais'];
-                    $_SESSION['EQXmoneda'] = $authResult['data']['moneda'];
-                    $_SESSION['EQXnombreNivel'] = $authResult['data']['nivel_nombre'];
+                    
                                         
                     // Responde con JSON si es una solicitud AJAX
                     if ($this->isAjaxRequest()) {

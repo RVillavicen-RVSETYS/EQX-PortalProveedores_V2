@@ -8,6 +8,20 @@ Views (Vistas de BD)[
     vw_data__Proveedores_AccesoProveedores{
         SELECT * FROM proveedores
     }
+
+    vw_data_Usuarios_AccesoUsuarios{
+        SELECT su.id, su.usuario, su.pass, su.idNivel, su.idSucursal, su.idEmpleado, su.estatus, su.idioma,
+        emp.nombres AS empleado_nombre, emp.apellidoPat, emp.apellidoMat, emp.puesto, emp.estatus AS empleado_puesto, 
+        CONCAT(substring(CONCAT(emp.nombres,' ',emp.apellidoPat, ' ', emp.apellidoMat),1,15), '...') AS empleado_nombreCorto,
+        sn.nombre AS nivel_nombre, sn.orden AS nivel_orden, sn.estatus AS nivel_estatus, 
+        sc.nombre AS suc_nombre, sc.nameCorto AS suc_nombreCorto, sc.estatus AS suc_estatus, 
+        em.id AS emp_id, em.nombre AS emp_nombre, em.nameCto AS emp_nombreCorto, em.estatus AS emp_estatus
+        FROM segusuarios su
+        INNER JOIN empleados emp ON su.idEmpleado = emp.id
+        INNER JOIN segniveles sn ON su.idNivel = sn.id
+        INNER JOIN sucursales sc ON su.idSucursal = sc.id
+        INNER JOIN empresas em ON sc.idEmpresa = em.id
+    }
 ]
 
 Store Procedure (Procedimientos Almacenados de BD)[

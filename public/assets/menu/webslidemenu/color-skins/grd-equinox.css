@@ -23,7 +23,7 @@
 /* Mobile Header Color */
 
 .wsmobileheader {
-  background-color: var(--main-light-primary);
+  background-color: var(--equinox-menu-secondary);
 }
 
 .wsmenu>.wsmenu-list>li>a {

@@ -1,0 +1,33 @@
+/* ================== Estilos Personalizados ================== */
+.btn-circle-tablita {
+    width: 30px;
+    height: 30px;
+    text-align: center;
+    padding: 6px 0;
+    font-size: 12px;
+    line-height: 1.428571429;
+    border-radius: 15px;
+}
+
+.alinearCentro {
+    display: inline-block;
+    text-align: center;
+    vertical-align: middle;
+    line-height: 150%;
+    padding-top: 15%;
+}
+
+.muestraSombra {
+    box-shadow: 7px 10px 12px -4px rgba(0, 0, 0, 0.62);
+}
+
+.wsmenu.wsmenu-custom {
+    position: inherit;
+}
+
+.wsmenu.wsmenu-custom>.wsmenu-list>li>.wsshoptabing,
+.wsmenu.wsmenu-custom>.wsmenu-list>li>.wsshoptabing.wtsdepartmentmenu {
+    left: unset;
+    right: 0;
+    width: 65%;
+}

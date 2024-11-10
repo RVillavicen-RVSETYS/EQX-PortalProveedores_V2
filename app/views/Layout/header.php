@@ -1,10 +1,31 @@
-
+<?php
+?>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <!-- Tell the browser to be responsive to screen width -->
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="inicio">
-    <meta name="author" content="inicio">
+    <meta name="description" content="<?=$datosPagina['menu_descripcion'];?>">
+    <meta name="author" content="Ricardo Villavicencio">
+
     <!-- Favicon icon -->
-    <link rel="icon" type="image/ico" href="/assets/images/<?= $pyme ?>.ico">
-    <title>Inicio</title>
+    <link rel="icon" type="image/png" sizes="16x16" href="/assets/images/favicon.png">
+    <title><?=$datosPagina['menu_nombre'];?></title>
+
+    <!-- Vendor -->
+    <link rel="stylesheet" href="/assets/libs/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css">
+    <!-- Vendor -->
+
+    <!-- Custom CSS -->
+    <link href="/assets/libs/chartist/dist/chartist.min.css" rel="stylesheet">
+    <link href="/assets/extra-libs/c3/c3.min.css" rel="stylesheet">
+    <link href="/assets/extra-libs/jvector/jquery-jvectormap-2.0.2.css" rel="stylesheet" />
+
+    <!-- Custom CSS -->
+    <link href="/dist/css/style.min.css" rel="stylesheet">
+
+    <!--Main Menu File-->
+    <link id="effect" rel="stylesheet" type="text/css" media="all" href="/assets/menu/webslidemenu/dropdown-effects/fade-down.css" />
+    <link rel="stylesheet" type="text/css" media="all" href="/assets/menu/webslidemenu/webslidemenuCustom.css" />
+    <link id="theme" rel="stylesheet" type="text/css" media="all" href="/assets/menu/webslidemenu/color-skins/grd-custom.css" />
+    <link rel="stylesheet" href="/assets/menu/webslidemenu/all-variables-equinox.css">
