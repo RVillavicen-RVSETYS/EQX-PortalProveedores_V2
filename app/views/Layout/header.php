@@ -1,5 +1,4 @@
-<?php
-?>
+
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <!-- Tell the browser to be responsive to screen width -->
@@ -15,11 +14,6 @@
     <link rel="stylesheet" href="/assets/libs/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css">
     <!-- Vendor -->
-
-    <!-- Custom CSS -->
-    <link href="/assets/libs/chartist/dist/chartist.min.css" rel="stylesheet">
-    <link href="/assets/extra-libs/c3/c3.min.css" rel="stylesheet">
-    <link href="/assets/extra-libs/jvector/jquery-jvectormap-2.0.2.css" rel="stylesheet" />
 
     <!-- Custom CSS -->
     <link href="/dist/css/style.min.css" rel="stylesheet">

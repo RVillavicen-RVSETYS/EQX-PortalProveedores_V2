@@ -6,7 +6,10 @@ use PDO; // Asegúrate de importar PDO si es necesario
 use BD_Connect; // Asegúrate de que la conexión esté disponible
 
 // Incluye conección a la BD
-define('INCLUDE_CHECK', true);
+if (!defined('INCLUDE_CHECK')) {
+    define('INCLUDE_CHECK', true);
+    require_once '../config/BD_Connect.php';
+}
 require_once '../config/BD_Connect.php';
 
 class LoginAdmin_Mdl

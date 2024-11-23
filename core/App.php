@@ -34,22 +34,27 @@ class App
         // Verificar si la URL tiene un controlador en una subcarpeta
         $controllerPath = "../app/controllers/" . ucfirst($url[0]);
         if (is_dir($controllerPath) && isset($url[1])) {
+            if ($this->debug == 1) {
+                echo "Si encontro la Ruta del controlador: '" . $controllerPath . "'<br>";
+            }
             $controllerFile = $controllerPath . '/' . ucfirst($url[1]) . 'Controller.php';
             if (file_exists($controllerFile)) {
                 $this->controller = ucfirst($url[0]) . '\\' . ucfirst($url[1]) . 'Controller';
                 unset($url[0], $url[1]);
                 if ($this->debug == 1) {
+                    echo "Registramos en this->Controller y vaciamos url0 y url1.<br>";
+                }
+                if ($this->debug == 1) {
                     echo "Controlador en subcarpeta encontrado: '" . $this->controller . "'<br>";
                 }
             } else {
                 if ($this->debug == 1) {
-                    echo "Controlador no encontrado: $this->controller <br>Redirigiendo a 404.<br>";
+                    echo "Controlador no encontrado: $controllerFile <br>Redirigiendo a 404.<br>";
                     exit();
                 }
                 $this->logAndRedirect404("Controlador en subcarpeta no encontrado", $url[1] ?? 'N/A');
             }
         }
-
         // Verificar si el controlador solicitado existe en /app/controllers/
         elseif ($url && file_exists("../app/controllers/" . ucfirst($url[0]) . ".php")) {
             $this->controller = ucfirst($url[0]);
@@ -71,8 +76,15 @@ class App
         $controllerClass = "App\\Controllers\\" . $this->controller;
         $this->controller = new $controllerClass;
 
+        if ($this->debug == 1) {
+            echo "Se instancia el controlador: '" . $controllerClass . "'<br>";
+        }
+
         // Verificar si el método solicitado existe en el controlador
         if (isset($url[1])) {
+            if ($this->debug == 1) {
+                echo "Si existe: '" . $url[1] . "'<br>";
+            }
             if (method_exists($this->controller, $url[1])) {
                 $this->method = $url[1];
                 unset($url[1]);
@@ -86,6 +98,24 @@ class App
                     exit();
                 }
                 $this->logAndRedirect404("Metodo no encontrado", $url[1] ?? 'N/A');
+            }
+        } elseif (isset($url[2])) {
+            if ($this->debug == 1) {
+                echo "Si existe el Methodo: '" . $url[2] . "'<br>";
+            }
+            if (method_exists($this->controller, $url[2])) {
+                $this->method = $url[2];
+                unset($url[2]);
+                if ($this->debug == 1) {
+                    echo "Método encontrado: " . $this->method . "<br>";
+                }
+            } else {
+                // Redirigir a 404 si el método no existe
+                if ($this->debug == 1) {
+                    echo "Método no encontrado: $this->method <br>, redirigiendo a 404.<br>";
+                    exit();
+                }
+                $this->logAndRedirect404("Metodo no encontrado", $url[2] ?? 'N/A');
             }
         }
 
@@ -190,7 +220,7 @@ class Controller
             }
         }
     }
-    
+
     // Método para verificar la autenticación de sesión y el estatus del usuario
     protected function checkSessionAdmin()
     {

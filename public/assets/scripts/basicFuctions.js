@@ -100,10 +100,14 @@ function getCadenaLimpia(cadena) {
     return cadena;
 }
 
-function soloNumeros(cadena, id) {
+function soloNumerosID(cadena, id) {
     var newCadena = cadena.replace(/[^0-9]/g, '');
     //alert(newCadena);
     $("#" + id).val(newCadena);
+}
+function soloNumeros(str){
+    var newStr = str.replace(/[^0-9]/g, '');
+    return newStr;
 }
 
 function cambiaMayusculas(cadena, id) {

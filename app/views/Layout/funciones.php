@@ -1,6 +1,5 @@
 <?php
 
-
 function generarMenu($menuData, $linkActual)
 {
     $menuHtml = '';
@@ -211,7 +210,7 @@ function generaSeccionUserMenu($areaData, $areaLink)
             $menuModel = new Idiomas($piezasURL[1]);
 
             $textSoporte = $menuModel->txt('Centro_Ayuda', 1);
-            $textlogout = $menuModel->txt('Centro_Ayuda', 1);
+            $textlogout = $menuModel->txt('Cerrar_Session', 1);
             $textPerfil = $menuModel->txt('Ver_Perfil', 1);
             break;
     }
@@ -253,5 +252,44 @@ function generaSeccionUserMenu($areaData, $areaLink)
     <?php
 
 
+}
+
+function generaNotificacionStatica($tipoMensaje, $titulo, $mensaje){
+    switch ($tipoMensaje) {
+        case 'INFO':
+            $noti = '
+                <div class="col-12">
+                    <div class="alert alert-info">
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close"> <span aria-hidden="true">&times;</span> </button>
+                        <h3 class="text-info"><i class="fa fa-exclamation-circle"></i> '.$titulo.'</h3> '.$mensaje.'
+                    </div>
+                </div>
+                    ';
+            break;
+    
+        case 'WARNING':
+            $noti = '
+                <div class="col-12">
+                    <div class="alert alert-warning">
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close"> <span aria-hidden="true">&times;</span> </button>
+                        <h3 class="text-warning"><i class="fa fa-exclamation-triangle"></i> '.$titulo.'</h3> '.$mensaje.'
+                    </div>
+                </div>
+                    ';
+            break;
+        
+        case 'ERROR':
+            $noti = '
+                <div class="col-12">
+                    <div class="alert alert-danger">
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close"> <span aria-hidden="true">&times;</span> </button>
+                        <h3 class="text-danger"><i class="fas fa-ban"></i> '.$titulo.'</h3> '.$mensaje.'
+                    </div>
+                </div>
+                    ';
+            break;
+    }
+
+    return $noti;
 }
 ?>

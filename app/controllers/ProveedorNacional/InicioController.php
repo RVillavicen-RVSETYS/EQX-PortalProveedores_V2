@@ -3,6 +3,9 @@ namespace App\Controllers\ProveedorNacional;
 
 use Core\Controller; 
 use App\Models\Menu_Mdl;
+use App\Models\Configuraciones\CierrePortal_Mdl;
+use App\Models\Notificaciones\NotificaProveedores_Mdl;
+use App\Models\DatosCompra\OrdenCompra_Mdl;
 
 class InicioController extends Controller {
     protected $debug = 0; 
@@ -24,8 +27,8 @@ class InicioController extends Controller {
         $namespaceParts = explode('\\', __NAMESPACE__);
         $areaLink = end($namespaceParts); // Obtiene el ultimo parametro del NameSpace
 
-        $menuModel = new Menu_Mdl();
-        $resultIdArea = $menuModel->obtenerIdAreaPorLink($areaLink);
+        $MDL_menuModel = new Menu_Mdl();
+        $resultIdArea = $MDL_menuModel->obtenerIdAreaPorLink($areaLink);
 
         if ($resultIdArea['success']) {
             $idArea = $resultIdArea['data'];
@@ -36,8 +39,14 @@ class InicioController extends Controller {
             exit(0);
         }
         
-        $menuData = $menuModel->obtenerEstructuraMenu($_SESSION['EQXidNivel'], $idArea);
-        $areaData = $menuModel->listarAreasDisponibles($_SESSION['EQXidNivel']);
+        $menuData = $MDL_menuModel->obtenerEstructuraMenu($_SESSION['EQXidNivel'], $idArea);
+        $areaData = $MDL_menuModel->listarAreasDisponibles($_SESSION['EQXidNivel']);
+
+        $MDL_cierrePortal = new CierrePortal_Mdl();
+        $bloqueoCargaFactura = $MDL_cierrePortal->verificaCierreDePortal($_SESSION['EQXnoProveedor']);
+
+        $MDL_notificaProveedor = new NotificaProveedores_Mdl();
+        $notificaciones = $MDL_notificaProveedor->NotificacionesProveedor($_SESSION['EQXpais']);
 
         if ($menuData['success']) {
             if ($areaData['success']) {
@@ -45,6 +54,8 @@ class InicioController extends Controller {
                 $data['menuData'] =  $menuData;
                 $data['areaData'] =  $areaData;
                 $data['areaLink'] =  $areaLink;
+                $data['bloqueoCargaFactura'] =  $bloqueoCargaFactura;
+                $data['notificaciones'] =  $notificaciones;
                 
             // Cargar la vista correspondiente
             $this->view('ProveedorNacional/Inicio/index', $data);
@@ -64,5 +75,38 @@ class InicioController extends Controller {
         }
         
         
+    }
+
+    public function validaOrdenCompra(){
+        // Lógica para la vista de inicio
+        $data = []; // Aquí puedes pasar datos a la vista si es necesario
+        $ordenCompra = $_POST['ordenCompra'] ?? '';
+        $noProveedor = $_SESSION['EQXnoProveedor'] ?? '';
+        
+        if ($this->debug == 1) {
+            echo "<br>Contenido de data:<br>";
+            var_dump($data);
+            echo "<br>Contenido de ordenCompra: $ordenCompra<br>";
+            echo "<br>Contenido de noProveedor: $noProveedor<br>";
+        }
+
+        $MDL_ordenCompra = new OrdenCompra_Mdl();
+        $validOrdenCompra = $MDL_ordenCompra->verificaOrdenCompra($ordenCompra, $noProveedor);
+
+        if ($validOrdenCompra['success']) {
+            $Message = $validOrdenCompra['data']['cantHES'];
+            echo json_encode([
+                'success' => true,
+                'message' => $Message
+            ]);
+        } else {
+            $errorMessage = $validOrdenCompra['message'];
+            echo json_encode([
+                'success' => false,
+                'message' => $errorMessage
+            ]);
+        }
+        
+
     }
 }

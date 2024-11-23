@@ -21,14 +21,22 @@ class Idiomas {
     
     private static $textosGenerales = [
         'AllPages' => [
-            'Ver_Perfil' => "Ver_Perfil",
-            'Centro_Ayuda' => "Centro_Ayuda",
-            'Fin' => "Fin"
+            'Ver_Perfil' => "Ver Perfil",
+            'Centro_Ayuda' => "Centro de Ayuda",
+            'Cerrar_Session' => "Cerrar Sessión"
         ],
     ];
     
     private static $textosEspecificos = [
         'Inicio' => [
+            'Ultimas_Facturas' => "Ultimas 50 Facturas cargadas",
+            'Carga_Factura' => "Carga Factura",
+            'Carga_Factura_por_anticipo' => "Carga Factura por Anticipo",
+            'Carga_Factura_por_consignacion' => "Carga Factura por Consignación",
+            'No_Proveedor' => "No. Proveedor",
+            'OC' => "Orden Compra",
+            'HES' => "Numeros Recepción",
+            'Limpiar' => "Limpiar"
             
         ],
         'Historico' => [

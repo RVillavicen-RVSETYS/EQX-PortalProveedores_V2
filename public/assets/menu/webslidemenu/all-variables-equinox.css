@@ -133,3 +133,7 @@
 
     --var-padding-logo: 16px 0px 0px 0px;
 }
+
+.bg-Equinoxgold {
+    background-color: var(--var-menu-bg-header-desktop);
+}
