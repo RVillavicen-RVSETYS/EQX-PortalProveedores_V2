@@ -15,6 +15,9 @@
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css">
     <!-- Vendor -->
 
+    <link rel="stylesheet" type="text/css" href="/assets/libs/select2/dist/css/select2.min.css">
+    <link href="/assets/extra-libs/datatables.net-bs4/css/dataTables.bootstrap4.css" rel="stylesheet">
+
     <!-- Custom CSS -->
     <link href="/dist/css/style.min.css" rel="stylesheet">
 
@@ -23,3 +26,5 @@
     <link rel="stylesheet" type="text/css" media="all" href="/assets/menu/webslidemenu/webslidemenuCustom.css" />
     <link id="theme" rel="stylesheet" type="text/css" media="all" href="/assets/menu/webslidemenu/color-skins/grd-custom.css" />
     <link rel="stylesheet" href="/assets/menu/webslidemenu/all-variables-equinox.css">
+
+    <link href="/assets/libs/toastr/build/toastr.min.css" rel="stylesheet">
