@@ -21,6 +21,7 @@ class Proveedores_Mdl
         $this->db = new BD_Connect(); // Instancia de la conexión a la base de datos
     }
 
+    /* CONSULTAS DE SELECT */
     public function obtenerProveedores()
     {
         if (self::$debug) {
@@ -64,7 +65,6 @@ class Proveedores_Mdl
         }
     }
 
-    /* CONSULTAS DE SELECT */
     public function obtenerDatosProveedor($idProveedor)
     {
         try {
@@ -84,7 +84,7 @@ class Proveedores_Mdl
                 $params = [
                     ':idProveedor' => $idProveedor
                 ];
-                $this->db->imprimirConsulta($sql, $params, 'Busca Bloqueo de Facturas.');
+                $this->db->imprimirConsulta($sql, $params, 'Obtiene Los Datos De Un Proveedor.');
             }
             $stmt = $this->db->prepare($sql);
             $stmt->bindParam(':idProveedor', $idProveedor, PDO::PARAM_INT);
@@ -115,8 +115,41 @@ class Proveedores_Mdl
         }
     }
 
-    public function obtenerRecepcionesProveedor($idProveedor){
+    public function obtenerMonedasProveedores()
+    {
+        try {
+            $sql = "SELECT DISTINCT(idCatTipoMoneda) AS 'Moneda' FROM compras";
 
+            if (self::$debug) {
+                $params = [];
+                $this->db->imprimirConsulta($sql, $params, 'Busca Los Tipos De Monedas En Las Compras.');
+            }
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute();
+            $dataProveedor = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            if (self::$debug) {
+                echo '<br>Resultado de Query:';
+                var_dump($dataProveedor);
+                echo '<br><br>';
+            }
+
+            if ($dataProveedor) {
+                return ['success' => true, 'data' => $dataProveedor]; // Retornar datos si tiene permisos a algun Area
+            } else {
+                if (self::$debug) {
+                    echo "No Se Encontró Ningún Tipo De Moneda.<br>"; // Mostrar error en modo depuración
+                }
+                return ['success' => false, 'message' => 'No Se Encontró Ningún Tipo De Moneda..'];
+            }
+        } catch (\Exception $e) {
+            $timestamp = date("Y-m-d H:i:s");
+            error_log("[$timestamp] app/models/Proveedores_Mdl.php ->Error Al Obtener Tipos De Monedas: " . $e->getMessage(), 3, LOG_FILE_BD); // Manejo del error
+            if (self::$debug) {
+                echo "Error Al Obtener Tipos De Monedas: " . $e->getMessage(); // Mostrar error en modo depuración
+            }
+            return ['success' => false, 'message' => 'Problemas Al Obtener Monedas, Notifica a tu administrador.'];
+        }
     }
 
     /* CONSULTAS DE UPDATE */
