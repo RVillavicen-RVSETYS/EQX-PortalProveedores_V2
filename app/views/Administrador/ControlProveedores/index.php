@@ -45,10 +45,6 @@ if ($debug == 1) {
 
 <![endif]-->
 
-    <link rel="stylesheet" type="text/css" href="/assets/extra-libs/prism/prism.css">
-    <link href="/assets/libs/toastr/build/toastr.min.css" rel="stylesheet">
-    <link rel="stylesheet" type="text/css" href="/assets/libs/select2/dist/css/select2.min.css">
-
 </head>
 
 <body>
@@ -203,26 +199,7 @@ if ($debug == 1) {
     <script src="/dist/js/pages/forms/select2/select2.init.js"></script>
 
     <?php include 'index_js.php'; ?>
-    <script>
-        $(document).ready(function() {
-            $('.select2').select2();
 
-            $("#consultarProveedor").submit(function(e) {
-                e.preventDefault();
-                $.ajax({
-                    type: 'POST',
-                    url: 'ControlProveedores/infoProveedor',
-                    data: $(this).serialize(),
-                    success: function(response) {
-                        $('#tarjetaProveedor').html(response);
-                    },
-                    error: function(jqXHR, textStatus, errorThrown) {
-                        $('#tarjetaProveedor').html('Error en el inicio de sesión.Consulta a tu administrador');
-                    }
-                });
-            });
-        });
-    </script>
 </body>
 
 </html>

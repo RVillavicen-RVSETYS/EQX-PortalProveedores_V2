@@ -57,7 +57,22 @@
         });
     }
 
-    $('#nuevoCorreo').on('submit', function(event) {
+    $(document).on('submit', '#consultarProveedor', function(event) {
+        event.preventDefault();
+        $.ajax({
+            type: 'POST',
+            url: 'ControlProveedores/infoProveedor',
+            data: $(this).serialize(),
+            success: function(response) {
+                $('#tarjetaProveedor').html(response);
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+                $('#tarjetaProveedor').html('Error en el inicio de sesión.Consulta a tu administrador');
+            }
+        });
+    });
+
+    $(document).on('submit', '#nuevoCorreo', function(event) {
         event.preventDefault();
 
         const idProveedor = document.getElementById('idProveedor').value;
@@ -88,7 +103,8 @@
         });
     });
 
-    $('#nuevoRFC').on('submit', function(event) {
+    $(document).on('submit', '#nuevoRFC', function(event) {
+
         event.preventDefault();
 
         const idProveedor = document.getElementById('idProveedor').value;
@@ -115,6 +131,37 @@
             },
             beforeSend: function() {
                 bloqueoBtn('bloquear-btnNevoRFC', 1);
+            }
+        });
+    });
+
+    $(document).on('submit', '#formNewPass', function(event) {
+        event.preventDefault();
+
+        const idProveedor = document.getElementById('idProveedor').value;
+        const nuevaPass = document.getElementById('newPass').value;
+
+        $.ajax({
+            url: 'ControlProveedores/actualizarPassword',
+            type: 'POST',
+            data: {
+                idProveedor: idProveedor,
+                nuevaPass: nuevaPass
+            },
+            success: function(response) {
+                const respuesta = JSON.parse(response);
+                if (respuesta.success) {
+                    notificaSuc(respuesta.message);
+                    bloqueoBtn('bloquear-btnNuevaPass', 2);
+                    $('#modalNuevaPass').modal('hide');
+                    datosGenerales(idProveedor)
+                } else {
+                    notificaBad(respuesta.message);
+                    bloqueoBtn('bloquear-btnNuevaPass', 2);
+                }
+            },
+            beforeSend: function() {
+                bloqueoBtn('bloquear-btnNuevaPass', 1);
             }
         });
     });

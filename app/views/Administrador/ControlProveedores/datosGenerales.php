@@ -27,8 +27,8 @@ $cPag = ($datosProveedor['data']['CPag'] == '') ? 'Sin C. Pago' : $datosProveedo
 ?>
 <div class="row">
     <!-- Column -->
-    <input type="hidden" name="idProveedor" id="idProveedor" value="<?= $idProveedor; ?>">
     <div class="col-lg-12 ">
+        <input type="hidden" name="idProveedor" id="idProveedor" value="<?= $idProveedor; ?>">
         <div class="card">
             <div class="card-body">
                 <div class="d-flex no-block align-items-center m-b-15">
@@ -90,7 +90,7 @@ $cPag = ($datosProveedor['data']['CPag'] == '') ? 'Sin C. Pago' : $datosProveedo
                     </button>
                 </div>
                 <div id="desbloquear-btnNevoRFC">
-                    <button form="nuevoRFC" id="btnNevoRFC" onclick="" class="btn btn-md btn-outline-primary mx-2 mt-3">Guardar</button>
+                    <button form="nuevoRFC" id="btnNevoRFC" class="btn btn-md btn-outline-primary mx-2 mt-3">Guardar</button>
                 </div>
             </div>
         </div>
@@ -138,7 +138,7 @@ $cPag = ($datosProveedor['data']['CPag'] == '') ? 'Sin C. Pago' : $datosProveedo
                     </button>
                 </div>
                 <div id="desbloquear-btnNevoCorreo">
-                    <button form="nuevoCorreo" id="btnNevoCorreo" onclick="" class="btn btn-md btn-outline-primary mx-2 mt-3">Guardar</button>
+                    <button form="nuevoCorreo" id="btnNevoCorreo" class="btn btn-md btn-outline-primary mx-2 mt-3">Guardar</button>
                 </div>
             </div>
         </div>
@@ -163,7 +163,7 @@ $cPag = ($datosProveedor['data']['CPag'] == '') ? 'Sin C. Pago' : $datosProveedo
                             <div class="form-group">
                                 <label for="newPass">Ingrese La Nueva Contraseña:</label>
                                 <div class="input-group">
-                                    <input type="password" required autocomplete="off" class="form-control" name="newPass" id="newPass">
+                                    <input type="password" autocomplete="off" class="form-control" name="newPass" id="newPass">
                                 </div>
                             </div>
                         </div>
@@ -186,42 +186,9 @@ $cPag = ($datosProveedor['data']['CPag'] == '') ? 'Sin C. Pago' : $datosProveedo
                     </button>
                 </div>
                 <div id="desbloquear-btnNuevaPass">
-                    <button form="formNewPass" id="btnNuevaPass" onclick="" class="btn btn-md btn-outline-primary mx-2 mt-3">Guardar</button>
+                    <button form="formNewPass" id="btnNuevaPass" class="btn btn-md btn-outline-primary mx-2 mt-3">Guardar</button>
                 </div>
             </div>
         </div>
     </div>
 </div>
-
-<script>
-    $('#formNewPass').on('submit', function(event) {
-        event.preventDefault();
-
-        const idProveedor = document.getElementById('idProveedor').value;
-        const nuevaPass = document.getElementById('newPass').value;
-        
-        $.ajax({
-            url: 'ControlProveedores/actualizarPassword',
-            type: 'POST',
-            data: {
-                idProveedor: idProveedor,
-                nuevaPass: nuevaPass
-            },
-            success: function(response) {
-                const respuesta = JSON.parse(response);
-                if (respuesta.success) {
-                    notificaSuc(respuesta.message);
-                    bloqueoBtn('bloquear-btnNuevaPass', 2);
-                    $('#modalNuevaPass').modal('hide');
-                    datosGenerales(idProveedor)
-                } else {
-                    notificaBad(respuesta.message);
-                    bloqueoBtn('bloquear-btnNuevaPass', 2);
-                }
-            },
-            beforeSend: function() {
-                bloqueoBtn('bloquear-btnNuevaPass', 1);
-            }
-        });
-    });
-</script>
