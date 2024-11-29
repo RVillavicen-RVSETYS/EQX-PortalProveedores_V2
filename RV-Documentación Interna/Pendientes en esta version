@@ -1,0 +1,6 @@
+ ** Anticipos (Se contempla funcion unicamente regresando FALSE en la validación de Anticipos)
+    - Validacion de la OC para que solicite la carga de la nota de credito si requier anticipo.
+    - Cambio de OC para anticipos para que descuenten de otra compra.
+    - Query para la validación del Anticipo
+
+**

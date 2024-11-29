@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<cfdi:Comprobante xsi:schemaLocation="http://www.sat.gob.mx/cfd/4 http://www.sat.gob.mx/sitio_internet/cfd/4/cfdv40.xsd" Version="4.0" Folio="209" Fecha="2023-02-27T18:47:34" Sello="iM+yX9jXJzAgEaaFTuYJsFyXzwdyj6ySrZVx9xOw1PO6eZQ522wJXGansR2voQDjcOsEAxoHDGTG8iNy+1X/Ladsaqw5eMTWmp+EMdGPVDR93oyFNLjLEz/A7WaSvp9jG5AyLYfsLboLT58Dx3yk/BdeUhBrPzMw1HgxfEiPMYGm63c0ibn/4EhnEPoix1MIyTSdj1MtrQYgX6dlYX8sVDjOMuv3y08gQmd5GWpLn9b/Lw+aEv3QBoIzvXsohD0FZKvRApf7mZ9grT9C499MKwWn++JJ4G9OKEMdIpYx4N1dHT+VGm1+qSU4CepMAQTDrvO/0rnu5Tth6pYB8BidWA==" FormaPago="99" NoCertificado="00001000000505163146" Certificado="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" CondicionesDePago="0 días /OC 4550053068" SubTotal="139716.61" Moneda="MXN" Total="160324.82" TipoDeComprobante="I" Exportacion="01" MetodoPago="PPD" LugarExpedicion="54725" xmlns:cfdi="http://www.sat.gob.mx/cfd/4" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <cfdi:Emisor Rfc="MEEC910220H52" Nombre="CINTHYA MEDINA ESTRADA" RegimenFiscal="626" />
+  <cfdi:Receptor Rfc="DMS050731LX7" Nombre="DESARROLLOS MINEROS SAN LUIS" DomicilioFiscalReceptor="11000" RegimenFiscalReceptor="601" UsoCFDI="G03" />
+  <cfdi:Conceptos>
+    <cfdi:Concepto ClaveProdServ="41113100" NoIdentificacion="0632-3340" Cantidad="1.00" ClaveUnidad="H87" Unidad="Pieza" Descripcion="Analizador de gases 340 Marca Testo 0632-3340 NS: 63862152 0393-0000 NS:02.45385720112 0393-0100 NS: 03.00183284122 Cargador para analizador impresora Testo NS: 47299216 Papel térmico de repuesto para impresora infrarroja (caja) bolsa de filtros c/10 piezas Sonda de gases combustión de motores industriales 0600-7555 Celda de actualización NO p/340 Maletin de transporte para Testo 340" ValorUnitario="129629.86" Importe="129629.86" ObjetoImp="02">
+      <cfdi:Impuestos>
+        <cfdi:Traslados>
+          <cfdi:Traslado Base="129629.86" Impuesto="002" TipoFactor="Tasa" TasaOCuota="0.160000" Importe="20740.78" />
+        </cfdi:Traslados>
+        <cfdi:Retenciones>
+          <cfdi:Retencion Base="129629.86" Impuesto="001" TipoFactor="Tasa" TasaOCuota="0.012500" Importe="1620.37" />
+        </cfdi:Retenciones>
+      </cfdi:Impuestos>
+      <cfdi:InformacionAduanera NumeroPedimento="23  47  1693  3000028" />
+    </cfdi:Concepto>
+    <cfdi:Concepto ClaveProdServ="81141500" NoIdentificacion="0520-5009" Cantidad="1.00" ClaveUnidad="E48" Unidad="Unidad de servicio" Descripcion="Calibración Analizador de gases testo 340 4 ptos O2 CO y NO NS: 63862152" ValorUnitario="10086.75" Importe="10086.75" ObjetoImp="02">
+      <cfdi:Impuestos>
+        <cfdi:Traslados>
+          <cfdi:Traslado Base="10086.75" Impuesto="002" TipoFactor="Tasa" TasaOCuota="0.160000" Importe="1613.88" />
+        </cfdi:Traslados>
+        <cfdi:Retenciones>
+          <cfdi:Retencion Base="10086.15" Impuesto="001" TipoFactor="Tasa" TasaOCuota="0.012500" Importe="126.08" />
+        </cfdi:Retenciones>
+      </cfdi:Impuestos>
+    </cfdi:Concepto>
+  </cfdi:Conceptos>
+  <cfdi:Impuestos TotalImpuestosTrasladados="22354.66" TotalImpuestosRetenidos="1746.45">
+    <cfdi:Retenciones>
+      <cfdi:Retencion Impuesto="001" Importe="1746.45" />
+    </cfdi:Retenciones>
+    <cfdi:Traslados>
+      <cfdi:Traslado Base="139716.61" Impuesto="002" TipoFactor="Tasa" TasaOCuota="0.160000" Importe="22354.66" />
+    </cfdi:Traslados>
+  </cfdi:Impuestos>
+  <cfdi:Complemento>
+    <tfd:TimbreFiscalDigital xmlns:tfd="http://www.sat.gob.mx/TimbreFiscalDigital" xsi:schemaLocation="http://www.sat.gob.mx/TimbreFiscalDigital http://www.sat.gob.mx/sitio_internet/cfd/TimbreFiscalDigital/TimbreFiscalDigitalv11.xsd" Version="1.1" UUID="02409E54-330E-4EAD-82FF-568DA7595CD5" FechaTimbrado="2023-02-27T18:50:06" RfcProvCertif="SAT970701NN3" SelloCFD="iM+yX9jXJzAgEaaFTuYJsFyXzwdyj6ySrZVx9xOw1PO6eZQ522wJXGansR2voQDjcOsEAxoHDGTG8iNy+1X/Ladsaqw5eMTWmp+EMdGPVDR93oyFNLjLEz/A7WaSvp9jG5AyLYfsLboLT58Dx3yk/BdeUhBrPzMw1HgxfEiPMYGm63c0ibn/4EhnEPoix1MIyTSdj1MtrQYgX6dlYX8sVDjOMuv3y08gQmd5GWpLn9b/Lw+aEv3QBoIzvXsohD0FZKvRApf7mZ9grT9C499MKwWn++JJ4G9OKEMdIpYx4N1dHT+VGm1+qSU4CepMAQTDrvO/0rnu5Tth6pYB8BidWA==" NoCertificadoSAT="00001000000504465028" SelloSAT="KIV6gOln7gH45BJC1jtOzNjJ2ZaCRgrHT6pIdsdDbfUn89Cq98C7jOAeNShgA8FpoMiWSH9dB9a+C3xaIjOtLrM7Bmwe57aSDqNhiZC8K3PQOdNR2toz+1+32s1so82nKsKljDnldwo5B2Rqxma8/FJCrhrkz6LnJ1ROVFyhs5J4CGUhmMr6CJJmIwz06bgQ1yhCtHbjYdTLcPpDis8vQow1vJ83LFqM9MdL10YBGbMODtBihQjRSO/gNpX8TA9wWTZP7jy+gwKJRWV8q/tmlc3lkDwkkcRyBNnddM8QF1wbJNeZyRPI468xmKpz4jSAT9rCf1H3S+KnmCgxn72u4g==" />
+  </cfdi:Complemento>
+</cfdi:Comprobante>

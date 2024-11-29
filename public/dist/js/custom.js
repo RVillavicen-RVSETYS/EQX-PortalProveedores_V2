@@ -29,11 +29,18 @@ $(function() {
     // ==============================================================
     $(function() {
         $(".service-panel-toggle").on('click', function() {
-            $(".customizer").toggleClass('show-service-panel');
-
+          $(".customizer").removeClass('show-service-panel');
+          $(".service-panel-toggle").toggle();
         });
-        $('.page-wrapper').on('click', function() {
-            $(".customizer").removeClass('show-service-panel');
+
+        $(".hide-panel-toggle").on('click', function() {
+          $(".customizer").removeClass('show-service-panel');
+          $(".service-panel-toggle").toggle();
+        });
+
+        $(".show-panel-toggle").on('click', function() {
+            $(".customizer").toggleClass('show-service-panel');
+            $(".service-panel-toggle").toggle();
         });
     });
     // ==============================================================

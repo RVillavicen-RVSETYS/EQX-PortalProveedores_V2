@@ -12,11 +12,11 @@
 
     <!-- Vendor -->
     <link rel="stylesheet" href="/assets/libs/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css">
+    <link rel="stylesheet" href="/dist/css/all.css">
     <!-- Vendor -->
 
     <!-- Custom CSS -->
-    <link href="/dist/css/style.min.css" rel="stylesheet">
+    <link href="/dist/css/style.css" rel="stylesheet">
 
     <!--Main Menu File-->
     <link id="effect" rel="stylesheet" type="text/css" media="all" href="/assets/menu/webslidemenu/dropdown-effects/fade-down.css" />

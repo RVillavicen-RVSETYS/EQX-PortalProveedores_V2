@@ -37,7 +37,7 @@ class OrdenCompra_Mdl
                     ':ordenCompra' => $ordenCompra,
                     ':noProveedor' => $noProveedor
                 ];
-                $this->dbHES->imprimirConsulta($sql, $params, 'Busca Bloqueo de Facturas.');
+                $this->dbHES->imprimirConsulta($sql, $params, 'Busca Orden de Compra.');
             }
             $stmt = $this->dbHES->prepare($sql);
             $stmt->bindParam(':ordenCompra', $ordenCompra, PDO::PARAM_STR);
