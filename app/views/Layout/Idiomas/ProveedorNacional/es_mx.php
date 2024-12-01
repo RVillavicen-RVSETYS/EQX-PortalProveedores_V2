@@ -23,7 +23,8 @@ class Idiomas {
         'AllPages' => [
             'Ver_Perfil' => "Ver Perfil",
             'Centro_Ayuda' => "Centro de Ayuda",
-            'Cerrar_Session' => "Cerrar Sessión"
+            'Cerrar_Session' => "Cerrar Sessión",
+            'No_Vacio' => "No puede ir Vacio."
         ],
     ];
     
@@ -36,7 +37,11 @@ class Idiomas {
             'No_Proveedor' => "No. Proveedor",
             'OC' => "Orden Compra",
             'HES' => "Numeros Recepción",
-            'Limpiar' => "Limpiar"
+            'Facturas' => "Facturas",
+            'Limpiar' => "Limpiar",
+            'CodigoAnticipo' => "Código Anticipo",
+            'CodigoAnticipo' => "Código Anticipo",
+            'Complementos_Pendientes' => "Complementos Pendientes"
             
         ],
         'Historico' => [

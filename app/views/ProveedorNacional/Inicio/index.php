@@ -55,6 +55,17 @@ if ($notificaciones['success'] && !empty($notificaciones['data'])) {
     <?php include '../app/views/Layout/header.php'; ?>
     <!-- Custom CSS -->
 
+    <!-- Vendor -->
+    <link href="../assets/extra-libs/datatables.net-bs4/css/dataTables.bootstrap4.css" rel="stylesheet">
+
+    <style>
+        .custom-file-input~.custom-file-label::after {
+            content: "Buscar";
+            /* Cambia el texto "Browse" por "Buscar" */
+        }
+    </style>
+
+
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
     <!--[if lt IE 9]>
@@ -97,107 +108,36 @@ if ($notificaciones['success'] && !empty($notificaciones['data'])) {
             <!-- ============================================================== -->
             <div class="container-fluid">
                 <!-- Inicia Grupo de Tarjetas -->
-                <div class="card-group">
-                    <div class="card">
-                        <div class="card-body">
-                            <div class="row">
-                                <div class="col-md-12">
-                                    <div class="d-flex no-block align-items-center">
-                                        <div>
-                                            <i class="mdi mdi-emoticon font-20 text-muted"></i>
-                                            <p class="font-16 m-b-5">New Clients</p>
-                                        </div>
-                                        <div class="ml-auto">
-                                            <h1 class="font-light text-right">23</h1>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-12">
-                                    <div class="progress">
-                                        <div class="progress-bar bg-info" role="progressbar" style="width: 75%; height: 6px;" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
-                                    </div>
-                                </div>
-                            </div>
+                <div class="row">
+                    <div class="col-lg-9 col-md-9">
+                        <div class="card">
+                            <h3 class="card-title m-t-10 m-l-15"><?= $_SESSION['EQXnombreUser']; ?></h3>
+                            <p class="card-text m-l-15"><b><?= $_SESSION['EQXrfc']; ?></b>.<br>
+                                <?= $_SESSION['EQXcorreo']; ?></p>
                         </div>
                     </div>
-                    <!-- Column -->
-                    <!-- Column -->
-                    <div class="card">
-                        <div class="card-body">
-                            <div class="row">
-                                <div class="col-md-12">
-                                    <div class="d-flex no-block align-items-center">
-                                        <div>
-                                            <i class="mdi mdi-image font-20  text-muted"></i>
-                                            <p class="font-16 m-b-5">New Projects</p>
-                                        </div>
-                                        <div class="ml-auto">
-                                            <h1 class="font-light text-right">169</h1>
-                                        </div>
+                    <div class="col-lg-3 col-md-3">
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="row align-items-center">
+                                    <div class="col-7">
+                                        <i class="fas fa-file-alt font-20 text-danger"></i>
+                                        <p class="font-16 m-b-5"><?= $menuModel->txt('Complementos_Pendientes'); ?></p>
                                     </div>
-                                </div>
-                                <div class="col-12">
-                                    <div class="progress">
-                                        <div class="progress-bar bg-success" role="progressbar" style="width: 60%; height: 6px;" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Column -->
-                    <!-- Column -->
-                    <div class="card">
-                        <div class="card-body">
-                            <div class="row">
-                                <div class="col-md-12">
-                                    <div class="d-flex no-block align-items-center">
-                                        <div>
-                                            <i class="mdi mdi-currency-eur font-20 text-muted"></i>
-                                            <p class="font-16 m-b-5">New Invoices</p>
-                                        </div>
-                                        <div class="ml-auto">
-                                            <h1 class="font-light text-right">157</h1>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-12">
-                                    <div class="progress">
-                                        <div class="progress-bar bg-purple" role="progressbar" style="width: 65%; height: 6px;" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Column -->
-                    <!-- Column -->
-                    <div class="card">
-                        <div class="card-body">
-                            <div class="row">
-                                <div class="col-md-12">
-                                    <div class="d-flex no-block align-items-center">
-                                        <div>
-                                            <i class="mdi mdi-poll font-20 text-muted"></i>
-                                            <p class="font-16 m-b-5">New Sales</p>
-                                        </div>
-                                        <div class="ml-auto">
-                                            <h1 class="font-light text-right">236</h1>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-12">
-                                    <div class="progress">
-                                        <div class="progress-bar bg-danger" role="progressbar" style="width: 70%; height: 6px;" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
+                                    <div class="col-5">
+                                        <h1 class="font-light text-right mb-0">236</h1>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
+
                 <!-- Termina Grupo de Tarjetas -->
                 <!-- ============================================================== -->
 
                 <!-- Inicia Espacio para Notificaciones a Proveedores -->
-                <div class="card-group">
+                <div>
                     <?= $noti; ?>
                 </div>
                 <!-- Termina Espacio para Notificaciones a Proveedores -->
@@ -214,13 +154,9 @@ if ($notificaciones['success'] && !empty($notificaciones['data'])) {
                                         <h4 class="m-b-0 text-white"><?= $menuModel->txt('Ultimas_Facturas'); ?></h4>
                                     </div>
                                 </div>
-
                             </div>
                             <div class="card-body">
-
-
-                                <div id="validation" class="m-t-40 jsgrid" style="position: relative; height: auto; width: 100%;">
-                                    <div class="table-responsive" id="divAspectos"></div>
+                                <div id="cajaResultados" class="jsgrid" style="position: relative; height: auto; width: 100%;">
                                 </div>
                             </div>
                         </div>
@@ -254,36 +190,42 @@ if ($notificaciones['success'] && !empty($notificaciones['data'])) {
                                                         <div class="form-group row">
                                                             <label for="ordenCompra" class="col-3 col-form-label"><?= $menuModel->txt('OC'); ?></label>
                                                             <div class="col-9">
-                                                                <input class="form-control" type="search" value="" id="ordenCompra" maxlength="14" onchange="validaOrdCompra(this.value);" required>
-                                                                <div class="invalid-feedback" id="invalid_ordenCompra"></div>
+                                                                <input class="form-control" type="search" value="" id="ordenCompra" name="ordenCompra" maxlength="14" onchange="validaOrdCompra(this.value);" required>
+                                                                <div class="invalid-feedback" id="invalid_ordenCompra">
+                                                                    <img src="../assets/images/barLoadign.gif" alt="" />
+                                                                </div>
                                                             </div>
                                                         </div>
                                                         <div class="form-group row">
-                                                            <label for="listaHES" class="col-12 col-form-label" required><?= $menuModel->txt('HES'); ?></label>
+                                                            <label for="listaHES" class="col-12 col-form-label"><?= $menuModel->txt('HES'); ?></label>
                                                             <div class="col-12">
-                                                                <textarea class="form-control" id="listaHES" rows="3"></textarea>
+                                                                <textarea class="form-control" id="listaHES" name="listaHES" rows="3" onblur="validaHojaEntrada(this.value);" required></textarea>
                                                                 <div class="invalid-feedback" id="invalid_listaHES"></div>
                                                             </div>
                                                         </div>
+
+                                                        <div id="contentNotaCredito">
+                                                        </div>
+
                                                         <div class="form-group">
-                                                            <label>Facturas</label>
+                                                            <label for="facturaPDF"><?= $menuModel->txt('Facturas'); ?></label>
                                                             <div class="input-group">
                                                                 <div class="input-group-prepend">
-                                                                    <span class="input-group-text"><i class="far fa-file-pdf"></i> PDF</span>
+                                                                    <span class="input-group-text"><i class="far fa-file-pdf text-danger"> </i> &nbsp;PDF</span>
                                                                 </div>
                                                                 <div class="custom-file">
-                                                                    <input type="file" class="custom-file-input" id="facturaPDF" required>
-                                                                    <label class="custom-file-label" for="facturaPDF">Elegir PDF de Factura..</label>
+                                                                    <input type="file" class="custom-file-input" id="facturaPDF" name="facturaPDF" accept=".pdf" required>
+                                                                    <label class="custom-file-label" for="facturaPDF"> Elegir PDF de Factura..</label>
                                                                 </div>
                                                             </div>
                                                         </div>
                                                         <div class="form-group">
                                                             <div class="input-group">
                                                                 <div class="input-group-prepend">
-                                                                    <span class="input-group-text"><i class="far fa-file-code"></i> XML</span>
+                                                                    <span class="input-group-text"><i class="far fa-file-code text-info"></i> &nbsp;XML</span>
                                                                 </div>
                                                                 <div class="custom-file">
-                                                                    <input type="file" class="custom-file-input" id="facturaXML" required>
+                                                                    <input type="file" class="custom-file-input" id="facturaXML" name="facturaXML" accept=".xml" required>
                                                                     <label class="custom-file-label" for="facturaXML">Elegir XML de Factura..</label>
                                                                 </div>
                                                             </div>
@@ -321,47 +263,61 @@ if ($notificaciones['success'] && !empty($notificaciones['data'])) {
 
                                     </div>
                                     <div class="card-body">
-                                        <form id="formAddAspecto">
-                                            <div class="row">
-                                                <div class="col-md-12">
-                                                    <label for="descripcion">Aspecto:</label>
-                                                    <textarea class="form-control mayusculas" name="descripcion" id="descripcion" rows="5"></textarea>
-
-                                                    <hr>
-                                                    <div class="row">
-                                                        <div class="col-md-6 text-right"></div>
-                                                        <div class="col-md-6 text-right">
-
-                                                            <div id="bloquear-btn1" style="display:none;">
-                                                                <button class="btn btn-<?= $pyme ?> float-left" type="button" disabled>
-
-                                                                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                                                                    <span class="sr-only">Loading...</span>
-                                                                </button>
-                                                                <button class="btn btn-<?= $pyme ?> float-left" type="button" disabled>
-                                                                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                                                                    <span class="sr-only">Loading...</span>
-                                                                </button>
-                                                                <button class="btn btn-<?= $pyme ?> float-left" type="button" disabled>
-                                                                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                                                                    Loading...
-                                                                </button>
-                                                            </div>
-                                                            <div id="desbloquear-btn1">
-                                                                <button type="reset" class="btn btn-danger waves-effect" onclick="resetForm()"><i class="far fa-trash-alt text-white"></i> Limpiar</button>
-
-                                                                <button type="submit" class="btn btn-success waves-effect waves-light">Guardar</button>
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <?php
+                                                if ($bloqueoCargaFactura['success']) {
+                                                    echo '<h4>' . $bloqueoCargaFactura['data']['mensajeCierre'] . '</h4><hr>';
+                                                } else {
+                                                ?>
+                                                    <form class="form">
+                                                        <div class="form-group row">
+                                                            <label for="codAnticipo" class="col-3 col-form-label"><?= $menuModel->txt('CodigoAnticipo'); ?></label>
+                                                            <div class="col-9">
+                                                                <input class="form-control" type="search" value="" id="codAnticipo" name="codAnticipo" maxlength="14" onchange="validaAnticipo(this.value);" required>
+                                                                <div class="invalid-feedback" id="invalid_codAnticipo"></div>
                                                             </div>
                                                         </div>
 
-                                                    </div>
+                                                        <div class="form-group">
+                                                            <label for="anticipoPDF"><?= $menuModel->txt('Facturas'); ?></label>
+                                                            <div class="input-group">
+                                                                <div class="input-group-prepend">
+                                                                    <span class="input-group-text"><i class="far fa-file-pdf text-danger"> </i> &nbsp;PDF</span>
+                                                                </div>
+                                                                <div class="custom-file">
+                                                                    <input type="file" class="custom-file-input" id="anticipoPDF" name="anticipoPDF" accept=".pdf" required>
+                                                                    <label class="custom-file-label" for="anticipoPDF"> Elegir PDF de Factura..</label>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="form-group">
+                                                            <div class="input-group">
+                                                                <div class="input-group-prepend">
+                                                                    <span class="input-group-text"><i class="far fa-file-code text-info"></i> &nbsp;XML</span>
+                                                                </div>
+                                                                <div class="custom-file">
+                                                                    <input type="file" class="custom-file-input" id="anticipoXML" name="anticipoXML" accept=".xml" required>
+                                                                    <label class="custom-file-label" for="anticipoXML">Elegir XML de Factura..</label>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <hr>
+                                                        <div class="row">
+                                                            <div class="col-md-6 text-right"></div>
 
-                                                </div>
+                                                            <div id="desbloquear-btn1">
+                                                                <button type="reset" class="btn btn-danger waves-effect" onclick="resetForm()"><i class="far fa-trash-alt text-white"></i> <?= $menuModel->txt('Limpiar'); ?></button>
+
+                                                                <button type="submit" class="btn btn-success waves-effect waves-light"><?= $menuModel->txt('Carga_Factura'); ?></button>
+                                                            </div>
+                                                        </div>
+                                                    </form>
+                                                <?php
+                                                }
+                                                ?>
                                             </div>
-
-                                        </form>
-
-
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -397,15 +353,17 @@ if ($notificaciones['success'] && !empty($notificaciones['data'])) {
     <!-- customizer Panel -->
     <!-- ============================================================== -->
     <aside class="customizer">
-        <a href="javascript:void(0)" class="service-panel-toggle">
-            <i class="fa fa-spin fa-cog"></i>
-        </a>
+
+        <div class="customizer-body" id="customizer_body">
+
+        </div>
     </aside>
-    <div class="chat-windows"></div>
     <!-- ============================================================== -->
     <!-- All Jquery -->
     <!-- ============================================================== -->
-    <script src="/assets/libs/jquery/dist/jquery.min.js"></script>
+
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+
     <!-- Bootstrap tether Core JavaScript -->
     <script src="/assets/libs/popper.js/dist/umd/popper.min.js"></script>
     <script src="/assets/libs/bootstrap/dist/js/bootstrap.min.js"></script>
@@ -425,12 +383,37 @@ if ($notificaciones['success'] && !empty($notificaciones['data'])) {
     <!--Custom JavaScript -->
     <script src="/dist/js/custom.js"></script>
     <script src="/assets/scripts/basicFuctions.js"></script>
+    <script src="/assets/libs/toastr/build/toastr.min.js"></script>
+    <script src="/assets/libs/moment/moment.js"></script>
+    <script src="/assets/extra-libs/datatables.net/js/jquery.dataTables.min-ESP.js"></script>
+    <script src="/dist/js/pages/datatable/datatable-basic.init.js"></script>
+
+    <script src="/assets/extra-libs/datatables.net/js/jszip.min.js"></script>
+    <script src="/assets/extra-libs/datatables.net/js/vfs_fonts.js"></script>
+
+    <script src="/assets/extra-libs/datatables.net/js/dataTables.buttons.min.js"></script>
+    <script src="/assets/extra-libs/datatables.net/js/buttons.flash.min.js"></script>
+    <script src="/assets/extra-libs/datatables.net/js/buttons.html5.min.js"></script>
+    <script src="/assets/extra-libs/datatables.net/js/buttons.print.min.js"></script>
     <!--This page JavaScript -->
     <!--chartis chart-->
     <script src="/assets/libs/chartist/dist/chartist.min.js"></script>
     <script src="/assets/libs/chartist-plugin-tooltips/dist/chartist-plugin-tooltip.min.js"></script>
+    <script src="/assets/extra-libs/datatables.net/js/pdfmake.min.js"></script>
+    <script src="/assets/extra-libs/datatables.net/js/vfs_fonts.js"></script>
     <script>
-        $(document).ready(function() {});
+        $(document).ready(function() {
+            let validOC = false;
+            let validHES = false;
+            let reqAnticipo = false;
+
+            cargaTablaUltimasFacturas();
+        });
+
+        function cargaTablaUltimasFacturas() {
+            $('#cajaResultados').html('<div class="loading text-center"><img src="../assets/images/loading.gif" alt="loading" /><br/>Un momento, por favor...</div>');
+            $('#cajaResultados').load('Inicio/tablaUltimas50Facturas');
+        }
 
         function validaOrdCompra(ordenCompra) {
             $("#ordenCompra").removeClass("is-invalid is-valid");
@@ -451,19 +434,122 @@ if ($notificaciones['success'] && !empty($notificaciones['data'])) {
                     dataType: 'json',
                     success: function(response) {
                         if (response.success) {
+                            validOC = true;
                             $("#ordenCompra").addClass("is-valid");
+
+                            if (response.anticipo) {
+                                $("#contentNotaCredito").html(response.solicitaNotaCredito);
+                            }
                         } else {
+                            validOC = false;
                             $("#ordenCompra").addClass("is-invalid");
                             $("#invalid_ordenCompra").html(response.message);
                         }
                     },
                     error: function() {
-                        $('#loginMessage').html('Error al validar la Orden de Compra. Consulta a tu administrador');
+                        notificaBad('Error al validar la Orden de Compra. Consulta a tu administrador');
+                        validOC = false;
                     }
                 });
             } else {
                 $("#ordenCompra").addClass("is-invalid");
                 $("#invalid_ordenCompra").html("Estructura: COM-XXX-######");
+                validOC = false;
+            }
+        }
+
+        function validaHojaEntrada(hojaEntrada) {
+            $("#listaHES").removeClass("is-invalid is-valid");
+            $("#invalid_listaHES").html("");
+
+            if (hojaEntrada.length === 0) {
+                $("#listaHES").addClass("is-invalid");
+                $("#invalid_listaHES").html("<?= $menuModel->txt('No_Vacio', 1); ?>");
+            } else {
+                var estructura = validarEstructuraHES(hojaEntrada);
+                console.log(estructura);
+                if (estructura.cantidadValidas == 0 && estructura.cantidadInvalidas == 0) {
+                    $("#listaHES").addClass("is-invalid");
+                    $("#invalid_listaHES").html("Estructura incorrecta, coloca una o mas entradas separadas por comas: HES-XXX-######");
+                    validHES = false;
+                } else if (estructura.cantidadInvalidas > 0) {
+                    $("#listaHES").addClass("is-invalid");
+                    $("#invalid_listaHES").html(estructura.cantidadInvalidas + " incorrectas: " + estructura.invalidas);
+                    validHES = false;
+                } else if (estructura.cantidadValidas > 0) {
+                    if (validOC) {
+                        var oc = $("#ordenCompra").val();
+                        $.ajax({
+                            type: 'POST',
+                            url: 'Inicio/validaHojaEntrada',
+                            data: {
+                                ordenCompra: oc,
+                                hojaEntrada: hojaEntrada
+                            },
+                            dataType: 'json',
+                            success: function(response) {
+                                if (response.success) {
+                                    validHES = true;
+                                    $("#listaHES").addClass("is-valid");
+                                } else {
+                                    validHES = false;
+                                    $("#listaHES").addClass("is-invalid");
+                                    $("#invalid_ordenCompra").html(response.message);
+                                }
+                            },
+                            error: function() {
+                                notificaBad('Problemas al consultar la Hoja de Entrada. Notifica a tu administrador');
+                                validaOC = false;
+                            }
+                        });
+                    } else {
+                        $("#listaHES").addClass("is-invalid");
+                        $("#invalid_listaHES").html("Coloca primero una Orden de Compra Valida.");
+                        validHES = false;
+                    }
+
+                }
+            }
+
+
+        }
+
+        function validaAnticipo(ordenCompra) {
+            $("#codAnticipo").removeClass("is-invalid is-valid");
+            $("#invalid_codAnticipo").html("");
+
+            ant = validarEstructuraANT(ordenCompra);
+            console.log(validarEstructuraANT(ordenCompra));
+            console.log(ant.valor);
+
+            $("#codAnticipo").val(ant.valor);
+            if (ant.valido) {
+                $.ajax({
+                    type: 'POST',
+                    url: 'Inicio/validaCodigoAnticipo',
+                    data: {
+                        anticipo: ant.valor
+                    },
+                    dataType: 'json',
+                    success: function(response) {
+                        if (response.success) {
+                            validAnt = true;
+                            $("#codAnticipo").addClass("is-valid");
+                        } else {
+                            validOC = false;
+                            $("#codAnticipo").addClass("is-invalid");
+                            $("#invalid_codAnticipo").html(response.message);
+                        }
+                    },
+                    error: function() {
+                        notificaBad('Problemas al consultar el Anticipo. Notifica a tu administrador');
+                        validOC = false;
+                    }
+                });
+            } else {
+                $("#codAnticipo").addClass("is-invalid");
+                $("#invalid_codAnticipo").html("Estructura: ANT-XXX-######");
+                validOC = false;
             }
         }
 
@@ -480,6 +566,51 @@ if ($notificaciones['success'] && !empty($notificaciones['data'])) {
             return {
                 valido: esValido, // true si es válido, false si no
                 valor: textoTransformado // el texto transformado en mayúsculas
+            };
+        }
+
+        function validarEstructuraANT(str) {
+            // Expresión regular para validar COM-XXX-######
+            var pattern = /^ANT-[A-Z]{3}-\d{6}$/;
+
+            // Convertir a mayúsculas
+            var textoTransformado = str.toUpperCase();
+
+            // Validar el texto transformado contra el patrón
+            var esValido = pattern.test(textoTransformado);
+
+            return {
+                valido: esValido, // true si es válido, false si no
+                valor: textoTransformado // el texto transformado en mayúsculas
+            };
+        }
+
+        function validarEstructuraHES(textareaValue) {
+            // Expresión regular para validar el formato HES-XXX-######
+            const pattern = /^HES-[A-Z]{3}-\d{6}$/;
+
+            // Dividir las entradas separadas por coma, eliminar espacios extra y convertir a mayúsculas
+            const entradas = textareaValue.split(",").map(item => item.trim().toUpperCase());
+
+            // Inicializar resultados
+            const validas = [];
+            const invalidas = [];
+
+            // Validar cada entrada
+            entradas.forEach(entrada => {
+                if (pattern.test(entrada)) {
+                    validas.push(entrada); // Si es válida, agregar a válidas
+                } else {
+                    invalidas.push(entrada + ' '); // Si no es válida, agregar a inválidas
+                }
+            });
+
+            // Retornar resultados con cantidades y valores
+            return {
+                cantidadValidas: validas.length,
+                cantidadInvalidas: invalidas.length,
+                validas: validas,
+                invalidas: invalidas
             };
         }
     </script>

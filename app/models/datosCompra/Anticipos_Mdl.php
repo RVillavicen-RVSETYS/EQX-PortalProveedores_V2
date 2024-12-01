@@ -47,4 +47,48 @@ class Anticipos_Mdl
             return ['success' => false, 'message' => 'Problemas al buscar Anticipos, Notifica a tu administrador.'];
         }
     }
+
+    public function verificaAnticipo($Anticipo, $noProveedor)
+    {
+        try {
+            $sql = "SELECT COUNT(id_OC) AS cantAnticipos
+              FROM vw_ext_PortalProveedores_HESporPagar
+              WHERE idProveedor = :noProveedor AND OrdenCompra = :anticipo";
+
+            if (self::$debug) {
+                $params = [
+                    ':anticipo' => $Anticipo,
+                    ':noProveedor' => $noProveedor
+                ];
+                $this->dbHES->imprimirConsulta($sql, $params, 'Busca Anticipo.');
+            }
+            $stmt = $this->dbHES->prepare($sql);
+            $stmt->bindParam(':anticipo', $Anticipo, PDO::PARAM_STR);
+            $stmt->bindParam(':noProveedor', $noProveedor, PDO::PARAM_INT);
+            $stmt->execute();
+            $cantAnticipos = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if (self::$debug) {
+                echo '<br>Resultado de Query:';
+                var_dump($cantAnticipos);
+                echo '<br><br>';
+            }
+
+            if ($cantAnticipos["cantAnticipos"] > 0) {
+                return ['success' => true, 'data' => $cantAnticipos]; 
+            } else {
+                if (self::$debug) {
+                    echo "No hay ningun Anticipo.<br>"; // Mostrar error en modo depuración
+                }
+                return ['success' => false, 'message' => 'No existe ese Codigo de Anticipo.'];
+            }
+        } catch (\Exception $e) {
+            $timestamp = date("Y-m-d H:i:s");
+            error_log("[$timestamp] app/models/datosCompra/Anticipos_Mdl.php ->Error contar HES de la OC: " . $e->getMessage(), 3, LOG_FILE_BD); // Manejo del error
+            if (self::$debug) {
+                echo "Error al buscar Anticipo: " . $e->getMessage(); // Mostrar error en modo depuración
+            }
+            return ['success' => false, 'message' => 'Problemas con tu Anticipo, Notifica a tu administrador.'];
+        }
+    }
 }
