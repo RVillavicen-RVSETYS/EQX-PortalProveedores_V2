@@ -38,8 +38,8 @@ $cPag = ($datosProveedor['data']['CPag'] == '') ? 'Sin C. Pago' : $datosProveedo
                 </div>
                 <h3 class="font-30"><i class="fas fa-key text-success"></i> <?= htmlentities($idProveedor)  ?> - <?= htmlentities($proveedor); ?></h3>
                 <div class="ml-5">
-                    <h4 class="mt-2"><span class="text-dark">RFC: </span><a onclick="$('#modalNuevoRFC').modal('show');"> <?= htmlentities($rfc); ?></a></h4>
-                    <h4 class="mt-2"><span class="text-dark">Correo: </span><a onclick="$('#modalNuevoCorreo').modal('show');"><?= htmlentities($correo); ?></a></h4>
+                    <h4 class="mt-2"><span class="text-dark">RFC: </span> <?= htmlentities($rfc); ?></h4>
+                    <h4 class="mt-2"><span class="text-dark">Correo: </span><?= htmlentities($correo); ?> <button type="button" class="btn btn-sm btn-outline-primary" onclick="$('#modalNuevoCorreo').modal('show');"><i class="fas fa-pencil-alt"></i></button></h4>
                     <h4 class="mt-2"><span class="text-dark">País: </span><?= htmlentities($pais); ?> </h4>
                     <h4 class="mt-2"><span class="text-dark">C. Pago: </span><?= htmlentities($cPag); ?> </h4>
                 </div>

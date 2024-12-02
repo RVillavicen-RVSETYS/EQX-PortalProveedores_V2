@@ -230,6 +230,38 @@ class ControlProveedoresController extends Controller
         }
     }
 
+    public function actualizarProveedores()
+    {
+        $data = []; // Aquí puedes pasar datos a la vista si es necesario
+
+        //echo 'Id Del Proveedor: ' . $idProveedor . " Nuevo Correo: " . $nuevoCorreo;
+        if ($this->debug == 1) {
+            echo "<br>Contenido de data:<br>";
+            var_dump($data);
+        }
+
+        $proveedoresModel = new Proveedores_Mdl();
+        $resultProveedores = $proveedoresModel->actualizaProveedoresTemp();
+
+        if ($resultProveedores['success']) {
+            $resultProveedores = $proveedoresModel->actualizaProveedores();
+
+            if ($resultProveedores['success']) {
+                $Message = $resultProveedores['data'];
+                echo json_encode([
+                    'success' => true,
+                    'message' => $Message
+                ]);
+            } else {
+                $errorMessage = $resultProveedores['message'];
+                echo json_encode([
+                    'success' => false,
+                    'message' => $errorMessage
+                ]);
+            }
+        }
+    }
+
     public function actualizarPassword()
     {
         $data = []; // Aquí puedes pasar datos a la vista si es necesario
@@ -237,7 +269,7 @@ class ControlProveedoresController extends Controller
         $nuevaPass = $_POST['nuevaPass'] ?? '';
 
         $passEncript = password_hash($nuevaPass, PASSWORD_DEFAULT);
-        
+
         if ($this->debug == 1) {
             echo "<br>Contenido de data:<br>";
             var_dump($data);

@@ -165,4 +165,33 @@
             }
         });
     });
+
+    $(document).on('click', '#btnActualizaProveedores', function(event) {
+        event.preventDefault();
+
+        $.ajax({
+            url: 'ControlProveedores/actualizarProveedores',
+            type: 'POST',
+            data: {},
+            success: function(response) {
+                const respuesta = JSON.parse(response);
+                if (respuesta.success) {
+                    notificaSuc(respuesta.message);
+                    window.location.reload();
+                } else {
+                    notificaBad(respuesta.message);
+
+                }
+            },
+            beforeSend: function() {
+                $('#loadingOverlay').fadeIn();
+            },
+            complete: function() {
+                $('#loadingOverlay').fadeOut();
+            },
+            error: function() {
+                $('#loadingOverlay').fadeOut();
+            }
+        });
+    });
 </script>

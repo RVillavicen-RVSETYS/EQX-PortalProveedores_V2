@@ -101,7 +101,7 @@ if ($debug == 1) {
                                         <div class="col-md-3">
                                             <label for="proveedor">Lista De Proveedores</label>
                                             <div class="input-group mb-3">
-                                                
+
                                                 <select name="proveedor" id="proveedor" class="select2 form-control custom-select" style="width: 100%;height: 36px;">
                                                     <option value="">Selecciona Un Proveedor</option>
                                                     <?php
@@ -116,6 +116,11 @@ if ($debug == 1) {
                                         </div>
                                         <div class="col-md-3 align-self-center">
                                             <button type="submit" class="btn btn-success mt-3" name="btnBuscarProveedor" id="btnBuscarProveedor">Consultar</button>
+                                        </div>
+                                        <div class="col-md-5">
+                                        </div>
+                                        <div class="col-md-1 justify-content-end mt-3">
+                                            <button type="button" class="btn btn-outline-warning btn-rounded mt-2" name="btnActualizaProveedores" id="btnActualizaProveedores">Actualizar Proveedores</button>
                                         </div>
                                     </div>
                                 </form>
@@ -163,11 +168,12 @@ if ($debug == 1) {
     <!-- ============================================================== -->
     <!-- customizer Panel -->
     <!-- ============================================================== -->
-    <aside class="customizer">
-        <a href="javascript:void(0)" class="service-panel-toggle">
-            <i class="fa fa-spin fa-cog"></i>
-        </a>
-    </aside>
+    <div id="loadingOverlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); z-index: 9999;">
+        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: white; font-size: 20px;">
+            <div class="loading text-center"><img src="/assets/images/loading.gif" alt="loading" /><br />Actualizando Proveedores, Esto Puede Tardar Unos Minutos</div>
+
+        </div>
+    </div>
     <div class="chat-windows"></div>
     <!-- ============================================================== -->
     <!-- All Jquery -->
@@ -197,6 +203,8 @@ if ($debug == 1) {
     <script src="/assets/libs/select2/dist/js/select2.full.min.js"></script>
     <script src="/assets/libs/select2/dist/js/select2.min.js"></script>
     <script src="/dist/js/pages/forms/select2/select2.init.js"></script>
+    <script src="/assets/libs/block-ui/jquery.blockUI.js"></script>
+    <script src="/assets/extra-libs/block-ui/block-ui.js"></script>
 
     <?php include 'index_js.php'; ?>
 
