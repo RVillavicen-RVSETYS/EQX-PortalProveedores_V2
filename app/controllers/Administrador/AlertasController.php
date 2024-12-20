@@ -218,4 +218,46 @@ class AlertasController extends Controller
             ]);
         }
     }
+
+    public function editaAlerta()
+    {
+        $data = []; // Aquí puedes pasar datos a la vista si es necesario
+        $idNotificacion = $_POST['editIdNotificacion'] ?? '';
+        $titulo = $_POST['editTitulo'] ?? '';
+        $descripcion = $_POST['editDescripcion'] ?? '';
+        $tipoMensaje = $_POST['editTipoMensaje'] ?? '';
+        $tipoProveedor = $_POST['editTipoProveedor'] ?? '';
+        $tipoPeriodo = $_POST['editTipoPeriodo'] ?? '';
+        $fechaInicio = $_POST['editFechaInicio'] ?? '';
+        $fechaFin = $_POST['editFechaFin'] ?? '';
+
+        if ($this->debug == 1) {
+            echo "<br>Contenido de data:<br>";
+            var_dump($data);
+            echo "<br>Contenido de titulo: $titulo <br>";
+            echo "<br>Contenido de descripcion: $descripcion <br>";
+            echo "<br>Contenido de tipoMensaje: $tipoMensaje <br>";
+            echo "<br>Contenido de tipoProveedor: $tipoProveedor <br>";
+            echo "<br>Contenido de tipoPeriodo: $tipoPeriodo <br>";
+            echo "<br>Contenido de fechaInicio: $fechaInicio <br>";
+            echo "<br>Contenido de fechaFin: $fechaFin <br>";
+        }
+
+        $alertasModel = new Alertas_Mdl();
+        $resultAlertas = $alertasModel->editarAlertas($idNotificacion,$titulo, $descripcion, $tipoMensaje, $tipoProveedor, $tipoPeriodo, $fechaInicio, $fechaFin);
+
+        if ($resultAlertas['success']) {
+            $Message = $resultAlertas['data'];
+            echo json_encode([
+                'success' => true,
+                'message' => $Message
+            ]);
+        } else {
+            $errorMessage = $resultAlertas['message'];
+            echo json_encode([
+                'success' => false,
+                'message' => $errorMessage
+            ]);
+        }
+    }
 }

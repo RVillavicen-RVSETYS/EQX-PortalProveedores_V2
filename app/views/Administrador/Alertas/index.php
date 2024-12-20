@@ -127,11 +127,7 @@ if ($debug == 1) {
     <!-- ============================================================== -->
     <!-- customizer Panel -->
     <!-- ============================================================== -->
-    <aside class="customizer">
-        <a href="javascript:void(0)" class="service-panel-toggle">
-            <i class="fa fa-spin fa-cog"></i>
-        </a>
-    </aside>
+
     <div class="chat-windows"></div>
     <!-- ============================================================== -->
     <!-- All Jquery -->

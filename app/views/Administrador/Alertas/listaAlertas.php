@@ -173,7 +173,7 @@ if ($debug == 1) {
                         <div class="col-md-12">
                             <label for="tipoPeriodo">Periodo</label>
                             <div class="input-group mb-3">
-                                <select required onchange="mostrarFechas(this.value)" name="tipoPeriodo" id="tipoPeriodo" class="select2 form-control custom-select" style="width: 100%;height: 36px;">
+                                <select required onchange="mostrarFechas(this.value,1)" name="tipoPeriodo" id="tipoPeriodo" class="select2 form-control custom-select" style="width: 100%;height: 36px;">
                                     <option value="">Selecciona Un Tipo De Periodo</option>
                                     <option value="1">Indefinido</option>
                                     <option value="2">Rango De Fechas</option>
@@ -230,8 +230,8 @@ if ($debug == 1) {
     <div class="modal-dialog modal-md modalEditaAlerta" role="document">
         <div class="modal-content">
             <div class="modal-header" style="background-color:#11334b;">
-                <h5 class="modal-title text-white" id="modalEditaAlertaLabel">Crear Nueva Alerta</h5>
-                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close" onclick="$('#modalEditaAlerta').modal('hide');">
+                <h5 class="modal-title text-white" id="modalEditaAlertaLabel">Editar Alerta</h5>
+                <button type="button" class="close text-white" aria-label="Close" onclick="$('#modalEditaAlerta').modal('hide');">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
@@ -291,7 +291,7 @@ if ($debug == 1) {
                         <div class="col-md-12">
                             <label for="editTipoPeriodo">Periodo</label>
                             <div class="input-group mb-3">
-                                <select required onchange="mostrarFechas(this.value)" name="editTipoPeriodo" id="editTipoPeriodo" class="select2 form-control custom-select" style="width: 100%;height: 36px;">
+                                <select required onchange="mostrarFechas(this.value,2)" name="editTipoPeriodo" id="editTipoPeriodo" class="select2 form-control custom-select" style="width: 100%;height: 36px;">
                                     <option value="">Selecciona Un Tipo De Periodo</option>
                                     <option value="1">Indefinido</option>
                                     <option value="2">Rango De Fechas</option>
@@ -342,69 +342,3 @@ if ($debug == 1) {
         </div>
     </div>
 </div>
-
-<script>
-    $(document).on('submit', '#formEditaAlerta', function(event) {
-
-        event.preventDefault();
-
-        $.ajax({
-            url: 'Alertas/editaAlerta',
-            type: 'POST',
-            data: $(this).serialize(),
-            success: function(response) {
-                const respuesta = JSON.parse(response);
-                if (respuesta.success) {
-                    notificaSuc(respuesta.message);
-                    bloqueoBtn('bloquear-btnEditaAlerta', 2);
-                    $('#modalEditaAlerta').modal('hide');
-                    listaAlertas();
-                } else {
-                    notificaBad(respuesta.message);
-                    bloqueoBtn('bloquear-btnEditaAlerta', 2);
-                }
-            },
-            beforeSend: function() {
-                bloqueoBtn('bloquear-btnEditaAlerta', 1);
-            }
-        });
-    });
-
-    function cargarDatos(idNotificacion) {
-        $.ajax({
-            url: 'Alertas/cargarDatos',
-            type: 'POST',
-            data: {
-                idNotificacion: idNotificacion
-            },
-            success: function(response) {
-                const respuesta = JSON.parse(response);
-                if (respuesta.success) {
-                    const data = respuesta.message[0];
-                    
-                    $('#editIdNotificacion').val(data.IdNotificacion);
-                    $('#editTitulo').val(data.Titulo);
-                    $('#editDescripcion').val(data.Mensaje);
-                    $('#editTipoMensaje').val(data.TipoMsj).trigger('change');
-                    $('#editTipoProveedor').val(data.TipoProveedor).trigger('change');
-                    $('#editTipoPeriodo').val(data.TipoPeriodo).trigger('change');
-
-                    if (data.TipoPeriodo == '2') {
-                        const fechas = document.getElementById('editFechas');
-                        fechas.style.setProperty('display', 'block', 'important');
-                        $('#editFechaInicio').val(data.Inicio);
-                        $('#editFechaFin').val(data.Fin);
-                    } else {
-                        $('#editFechas').hide();
-                    }
-
-                } else {
-                    notificaBad(respuesta.message);
-                }
-            },
-            beforeSend: function() {
-
-            }
-        });
-    }
-</script>

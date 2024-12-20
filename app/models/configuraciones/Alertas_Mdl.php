@@ -242,4 +242,80 @@ class Alertas_Mdl
             return ['success' => false, 'message' => 'Problemas Con Las Alertas, Notifica a tu administrador.'];
         }
     }
+
+    public function editarAlertas($idNotificacion, $titulo, $descripcion, $tipoMensaje, $tipoProveedor, $tipoPeriodo, $fechaInicio, $fechaFin)
+    {
+        try {
+
+            $sql = "UPDATE conf_notificaProveedor 
+                    SET tipoProveedor = :tipoProveedor,
+                    titulo = :titulo,
+                    mensaje = :mensaje,
+                    tipoMensaje = :tipoMensaje,
+                    periodo = :periodo,
+                    fechaInicio = :fechaInicio,
+                    fechaFin = :fechaFin,
+                    estatus = :estatus,
+                    idUserReg = :idUserReg,
+                    fechaReg = NOW()
+                    WHERE id = :idNotificacion";
+
+            $estatus = 1;
+            if ($tipoPeriodo == 1) {
+                $fechaInicio = NULL;
+                $fechaFin = NULL;
+            }
+
+            if (self::$debug) {
+                $params = [
+                    ':tipoProveedor' => $tipoProveedor,
+                    ':titulo' => $titulo,
+                    ':mensaje' => $descripcion,
+                    ':tipoMensaje' => $tipoMensaje,
+                    ':periodo' => $tipoPeriodo,
+                    ':fechaInicio' => $fechaInicio,
+                    ':fechaFin' => $fechaFin,
+                    ':estatus' => $estatus,
+                    ':idUserReg' => $_SESSION['EQXident'],
+                    ':idNotificacion' => $idNotificacion
+                ];
+                $this->db->imprimirConsulta($sql, $params, 'Editar Una Alerta.<br>');
+            }
+            $stmt = $this->db->prepare($sql);
+            $stmt->bindParam(':tipoProveedor', $tipoProveedor, PDO::PARAM_STR);
+            $stmt->bindParam(':titulo', $titulo, PDO::PARAM_STR);
+            $stmt->bindParam(':mensaje', $descripcion, PDO::PARAM_STR);
+            $stmt->bindParam(':tipoMensaje', $tipoMensaje, PDO::PARAM_STR);
+            $stmt->bindParam(':periodo', $tipoPeriodo, PDO::PARAM_INT);
+            $stmt->bindParam(':fechaInicio', $fechaInicio, PDO::PARAM_STR);
+            $stmt->bindParam(':fechaFin', $fechaFin, PDO::PARAM_STR);
+            $stmt->bindParam(':estatus', $estatus, PDO::PARAM_INT);
+            $stmt->bindParam(':idUserReg', $_SESSION['EQXident'], PDO::PARAM_INT);
+            $stmt->bindParam(':idNotificacion', $idNotificacion, PDO::PARAM_INT);
+            $stmt->execute();
+            $filasAfectadas = $stmt->rowCount();
+
+            if (self::$debug) {
+                echo '<br>Resultado de Query:';
+                var_dump($filasAfectadas);
+                echo '<br><br>';
+            }
+
+            if ($filasAfectadas == 1) {
+                return ['success' => true, 'data' => 'Alerta Actualizada Correctamente.'];
+            } else {
+                if (self::$debug) {
+                    echo "Error Al Actualizar Alerta.<br>";
+                }
+                return ['success' => false, 'message' => 'Error Al Actualizar Alerta.'];
+            }
+        } catch (\Exception $e) {
+            $timestamp = date("Y-m-d H:i:s");
+            error_log("[$timestamp] app/models/Alertas_Mdl.php ->Error Al Actualizar Alerta: " . $e->getMessage(), 3, LOG_FILE_BD);
+            if (self::$debug) {
+                echo "Error Al Actualizar Alerta: " . $e->getMessage() . PHP_EOL;
+            }
+            return ['success' => false, 'message' => 'Problemas Con La Actualización De Alertas, Notifica a tu administrador.'];
+        }
+    }
 }

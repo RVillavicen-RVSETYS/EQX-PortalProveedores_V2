@@ -162,21 +162,18 @@ class Proveedores_Mdl
             $sql = "SELECT
                     prov.id AS 'IdProveedor',
                     prov.nombre AS 'Proveedor',
-                    prov.correoPagos AS 'Correo',
-                    prov.rfc AS 'RFC',
-                    prov.telEmpresa AS 'telEmpresa',
-                    prov.idUserReg AS 'IdUserReg',
-                    prov.tieneCredito AS 'TieneCredito',
-                    prov.idSAT_pais AS 'Pais',
-                    prov.idSAT_moneda AS 'Moneda',
-                    prov.estatus AS 'Estatus',
                     prov.direccion AS 'Direccion',
+                    prov.pais AS 'Pais',
                     prov.cp AS 'CP',
-                    prov.idCatEstado AS 'Estado',
-                    prov.idCatMunicipio AS 'Municipio',
-                    prov.tipoLimite AS 'CPag'
+                    prov.grupo AS 'Grupo',
+                    prov.rfc AS 'RFC',
+                    prov.cpag AS 'CPag',
+                    prov.idSAT_moneda AS 'Moneda',
+                    prov.correoPagos AS 'Correo',
+                    prov.estatus AS 'Estatus',
+                    prov.idioma AS 'Idioma'
                 FROM
-                    proveedores prov";
+                    vw_ext_PortalProveedores_Proveedores prov";
 
             if (self::$debug) {
                 $params = [];
@@ -351,18 +348,22 @@ class Proveedores_Mdl
 
             if ($dataProveedorSilme['success']) {
 
-                $sql = "INSERT INTO tmpproveedores ( id, nombre, direccion, pais, cp, rfc, cpag, moneda, correo, estatus)
-                VALUES ( :idProveedor, :nombre, :direccion, :pais, :cp, :rfc, :cpag, :moneda, :correo, :estatus)
+                $pass = '$2y$10$t0KYcBv5n04.VRhkuVOCr.p8VbfkSjnZtQFWyBXVjZqhLoAXxZMFe';
+
+                $sql = "INSERT INTO tmpproveedores ( id, nombre, direccion, pais, cp, grupo, rfc, cpag, moneda, correo, estatus, idioma)
+                VALUES ( :idProveedor, :nombre, :direccion, :pais, :cp, :grupo, :rfc, :cpag, :moneda, :correo, :estatus, :idioma)
                 ON DUPLICATE KEY UPDATE
                     nombre = VALUES(nombre),
                     direccion = VALUES(direccion),
                     pais = VALUES(pais),
                     cp = VALUES(cp),
+                    grupo = VALUES(grupo),
                     rfc = VALUES(rfc),
                     cpag = VALUES(cpag),
                     moneda = VALUES(moneda),
                     correo = VALUES(correo),
-                    estatus = VALUES(estatus);";
+                    estatus = VALUES(estatus),
+                    idioma = VALUES(idioma);";
 
                 if (self::$debug) {
                     foreach ($dataProveedorSilme['data'] as $proveedor) {
@@ -372,11 +373,13 @@ class Proveedores_Mdl
                             ':direccion' => $proveedor['Direccion'],
                             ':pais' => $proveedor['Pais'],
                             ':cp' => $proveedor['CP'],
+                            ':grupo' => $proveedor['Grupo'],
                             ':rfc' => $proveedor['RFC'],
                             ':cpag' => $proveedor['CPag'],
                             ':moneda' => $proveedor['Moneda'],
                             ':correo' => $proveedor['Correo'],
-                            ':estatus' => $proveedor['Estatus']
+                            ':estatus' => $proveedor['Estatus'],
+                            ':idioma' => $proveedor['Idioma']
                         ];
                         $this->db->imprimirConsulta($sql, $params, 'Actualiza La Lista De Proveedores.<br>');
                     }
@@ -390,11 +393,13 @@ class Proveedores_Mdl
                     $stmt->bindParam(':direccion', $proveedor['Direccion'], PDO::PARAM_STR);
                     $stmt->bindParam(':pais', $proveedor['Pais'], PDO::PARAM_INT);
                     $stmt->bindParam(':cp', $proveedor['CP'], PDO::PARAM_STR);
+                    $stmt->bindParam(':grupo', $proveedor['Grupo'], PDO::PARAM_INT);
                     $stmt->bindParam(':rfc', $proveedor['RFC'], PDO::PARAM_STR);
                     $stmt->bindParam(':cpag', $proveedor['CPag'], PDO::PARAM_STR);
                     $stmt->bindParam(':moneda', $proveedor['Moneda'], PDO::PARAM_STR);
                     $stmt->bindParam(':correo', $proveedor['Correo'], PDO::PARAM_STR);
                     $stmt->bindParam(':estatus', $proveedor['Estatus'], PDO::PARAM_INT);
+                    $stmt->bindParam(':idioma', $proveedor['Idioma'], PDO::PARAM_STR);
                     $stmt->execute();
 
                     $cant++;
@@ -430,18 +435,20 @@ class Proveedores_Mdl
     public function actualizaProveedores()
     {
         try {
-            $sql = "INSERT INTO proveedores ( id, nombre, direccion, pais, cp, rfc, cpag, moneda, correo, estatus)
-                    SELECT id, nombre, direccion, pais, cp, rfc, cpag, moneda, correo, estatus FROM tmpproveedores
+            $sql = "INSERT INTO proveedores ( id, nombre, direccion, pais, cp, rfc, grupo, cpag, moneda, correo, estatus, idioma)
+                    SELECT id, nombre, direccion, pais, cp, rfc, grupo, cpag, moneda, correo, estatus, idioma FROM tmpproveedores
                     ON DUPLICATE KEY UPDATE
                     nombre = VALUES(nombre),
                     direccion = VALUES(direccion),
                     pais = VALUES(pais),
                     cp = VALUES(cp),
                     rfc = VALUES(rfc),
+                    grupo = VALUES(grupo),
                     cpag = VALUES(cpag),
                     moneda = VALUES(moneda),
                     correo = VALUES(correo),
-                    estatus = VALUES(estatus);";
+                    estatus = VALUES(estatus),
+                    idioma = VALUES(idioma);";
 
             if (self::$debug) {
                 $params = [];
@@ -455,6 +462,10 @@ class Proveedores_Mdl
                 echo '<br>Resultado de Query:';
                 var_dump($filasAfectadas);
                 echo '<br><br>';
+            }
+
+            if ($filasAfectadas == 0) {
+                return ['success' => true, 'data' => 'La Lista Esta Actualizada, No Se Realizaron Cambios.'];
             }
 
             if ($filasAfectadas >= 1) {
