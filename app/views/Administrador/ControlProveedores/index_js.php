@@ -11,6 +11,9 @@
             },
             error: function(jqXHR, textStatus, errorThrown) {
                 $('#list-Proveedor').html('Error en el inicio de sesión.Consulta a tu administrador');
+            },
+            beforeSend: function() {
+                $('#list-Proveedor').html('<div class="loading text-center"><img src="../assets/images/loading.gif" alt="loading" /><br/>Un momento, por favor...</div>');
             }
         });
     }
@@ -25,6 +28,9 @@
             },
             error: function(jqXHR, textStatus, errorThrown) {
                 $('#list-Recepciones').html('Error en el inicio de sesión.Consulta a tu administrador');
+            },
+            beforeSend: function() {
+                $('#list-Recepciones').html('<div class="loading text-center"><img src="../assets/images/loading.gif" alt="loading" /><br/>Un momento, por favor...</div>');
             }
         });
     }
@@ -39,6 +45,9 @@
             },
             error: function(jqXHR, textStatus, errorThrown) {
                 $('#list-SinFecha').html('Error en el inicio de sesión.Consulta a tu administrador');
+            },
+            beforeSend: function() {
+                $('#list-SinFecha').html('<div class="loading text-center"><img src="../assets/images/loading.gif" alt="loading" /><br/>Un momento, por favor...</div>');
             }
         });
     }
@@ -53,6 +62,9 @@
             },
             error: function(jqXHR, textStatus, errorThrown) {
                 $('#list-Historico').html('Error en el inicio de sesión.Consulta a tu administrador');
+            },
+            beforeSend: function() {
+                $('#list-Historico').html('<div class="loading text-center"><img src="../assets/images/loading.gif" alt="loading" /><br/>Un momento, por favor...</div>');
             }
         });
     }
@@ -68,6 +80,9 @@
             },
             error: function(jqXHR, textStatus, errorThrown) {
                 $('#tarjetaProveedor').html('Error en el inicio de sesión.Consulta a tu administrador');
+            },
+            beforeSend: function() {
+                $('#tarjetaProveedor').html('<div class="loading text-center"><img src="../assets/images/loading.gif" alt="loading" /><br/>Un momento, por favor...</div>');
             }
         });
     });

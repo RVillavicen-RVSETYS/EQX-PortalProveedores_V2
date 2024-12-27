@@ -26,6 +26,63 @@ class Proveedores_Mdl
     }
 
     /* CONSULTAS DE SELECT */
+
+    public function obtenerProveedoresBloqueados()
+    {
+        if (self::$debug) {
+            echo "Ya entro a la función para obtener la lista de proveedores bloqueados <br>";
+        }
+        try {
+
+            $sql = "SELECT
+                        prov.id AS 'IdProveedor',
+                        prov.nombre AS 'Proveedor',
+                        provFact.id AS 'IdBloqueo',
+                        provFact.estatus AS 'EstatusBloqueo',
+                        provFact.grupo AS 'GrupoBloqueo',
+                        provFact.idUserReg AS 'IdUserRegBloqueo',
+                        provFact.fechaReg AS 'FechaRegBloqueo',
+                        prov.correo AS 'Correo'
+                    FROM
+                        vw_data__Proveedores_AccesoProveedores prov
+                        LEFT JOIN conf_provFactSiempre provFact ON prov.id = provFact.idProveedor 
+                    WHERE
+                        prov.estatus = 1";
+
+            // Modo debug para imprimir consulta con parámetros
+            if (self::$debug) {
+                $params = [];
+                $this->db->imprimirConsulta($sql, $params, 'Obtener Lista De Proveedores Bloqueados:');
+            }
+
+            $stmt = $this->db->prepare($sql);
+            //$stmt->bindParam('', $nivel, \PDO::PARAM_INT);
+            $stmt->execute();
+
+            $dataResul = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            if (self::$debug) {
+                echo '<br>Resultado de Query:';
+                var_dump($dataResul);
+                echo '<br><br>';
+            }
+
+            if ($dataResul) {
+                return ['success' => true, 'data' => $dataResul];
+            } else {
+                if (self::$debug) {
+                    echo "Error Al Obtener Proveedores Activos.<br>";
+                }
+                return ['success' => false, 'message' => 'No Se Obtuvieron Los Proveedores.'];
+            }
+        } catch (\PDOException $e) {
+            // Captura de errores y almacenamiento en el log
+            $timestamp = date("Y-m-d H:i:s");
+            error_log("[$timestamp] app/models/ControlProveedores_Mdl.php -> Error al listar las Areas de acceso: " . $e->getMessage(), 3, LOG_FILE_BD);
+            return ['success' => false, 'message' => 'Error Al Obtener Proveedores. Notifica a tu administrador'];
+        }
+    }
+
     public function obtenerProveedores()
     {
         if (self::$debug) {
