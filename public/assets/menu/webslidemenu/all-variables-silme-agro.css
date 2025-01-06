@@ -132,4 +132,8 @@
     --timeline-badge-primary-background-color: #008000;
 
     --var-padding-logo: 8px 0px 0px 0px;
+
+    .bg-Equinoxgold {
+        background-color:  #008000;
+    }
 }

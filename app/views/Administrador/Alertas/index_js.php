@@ -17,6 +17,8 @@
                     notificaSuc(respuesta.message);
                     bloqueoBtn('bloquear-btnNuevaAlerta', 2);
                     $('#modalNuevaAlerta').modal('hide');
+                    $('.modal-backdrop').remove();
+                    $('body').removeClass('modal-open');
                     listaAlertas();
                 } else {
                     notificaBad(respuesta.message);

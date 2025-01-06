@@ -6,8 +6,9 @@
     <meta name="description" content="<?=$datosPagina['menu_descripcion'];?>">
     <meta name="author" content="Ricardo Villavicencio">
 
-    <!-- Favicon icon -->
-    <link rel="icon" type="image/png" sizes="16x16" href="/assets/images/favicon.png">
+    <!-- Favicon icon 
+    <link rel="icon" type="image/png" sizes="16x16" href="/assets/images/favicon.png">-->
+    <link rel="icon" type="image/ico" sizes="16x16" href="/assets/images/SilmeAgro.ico">
     <title><?=$datosPagina['menu_nombre'];?></title>
 
     <!-- Vendor -->
@@ -25,6 +26,6 @@
     <link id="effect" rel="stylesheet" type="text/css" media="all" href="/assets/menu/webslidemenu/dropdown-effects/fade-down.css" />
     <link rel="stylesheet" type="text/css" media="all" href="/assets/menu/webslidemenu/webslidemenuCustom.css" />
     <link id="theme" rel="stylesheet" type="text/css" media="all" href="/assets/menu/webslidemenu/color-skins/grd-custom.css" />
-    <link rel="stylesheet" href="/assets/menu/webslidemenu/all-variables-equinox.css">
+    <link rel="stylesheet" href="/assets/menu/webslidemenu/all-variables-silme-agro.css">
 
     <link href="/assets/libs/toastr/build/toastr.min.css" rel="stylesheet">
