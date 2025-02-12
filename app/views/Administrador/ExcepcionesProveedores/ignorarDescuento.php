@@ -83,7 +83,7 @@ if ($debug == 1) {
     <div class="col-md-4">
 
         <div class="card">
-            <div class="card-header bg-primary text-white">
+            <div class="card-header bg-Equinoxgold text-white">
                 <h4 class="card-title">Lista De Proveedores</h4>
             </div>
             <div class="card-body border">

@@ -97,7 +97,7 @@ $fechaFinal = date("Y-m-t");
                 <div class="row">
                     <div class="col-md-12">
                         <div class="card">
-                            <div class="card-header bg-secondary text-white">
+                            <div class="card-header bg-Equinoxgold text-white">
                                 <h4 class="card-title">Filtros De Búsqueda</h4>
                             </div>
                             <div class="card-body">
@@ -162,7 +162,7 @@ $fechaFinal = date("Y-m-t");
                 <div class="row">
                     <div class="col-md-12">
                         <div class="card">
-                            <div class="card-header bg-secondary text-white">
+                            <div class="card-header bg-Equinoxgold text-white">
                                 <h4 class="card-title">Lista De Aprobaciones</h4>
                             </div>
                             <div id="tarjetaListaAprob" class="card-body">

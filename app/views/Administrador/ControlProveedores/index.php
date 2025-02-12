@@ -92,7 +92,7 @@ if ($debug == 1) {
                 <div class="row">
                     <div class="col-md-12">
                         <div class="card">
-                            <div class="card-header bg-secondary text-white">
+                            <div class="card-header bg-Equinoxgold text-white">
                                 <h4 class="card-title">Selecciona Un Proveedor</h4>
                             </div>
                             <div class="card-body">
@@ -132,7 +132,7 @@ if ($debug == 1) {
                 <div class="row">
                     <div class="col-md-12">
                         <div class="card">
-                            <div class="card-header bg-secondary text-white">
+                            <div class="card-header bg-Equinoxgold text-white">
                                 <h4 class="card-title">Detalle Del Proveedor</h4>
                             </div>
                             <div id="tarjetaProveedor" class="card-body">

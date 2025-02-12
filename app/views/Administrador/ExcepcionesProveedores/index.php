@@ -91,7 +91,7 @@ if ($debug == 1) {
                 <div class="row">
                     <div class="col-sm-12 col-md-12 col-lg-12">
                         <div class="card">
-                            <div class="card-header bg-primary text-white">
+                            <div class="card-header bg-Equinoxgold text-white">
                                 <h4 class="card-title">Tipos De Excepciones</h4>
                             </div>
                             <div class="card-body">
