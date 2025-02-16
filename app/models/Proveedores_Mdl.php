@@ -228,7 +228,9 @@ class Proveedores_Mdl
                     prov.idSAT_moneda AS 'Moneda',
                     prov.correoPagos AS 'Correo',
                     prov.estatus AS 'Estatus',
-                    prov.idioma AS 'Idioma'
+                    prov.idioma AS 'Idioma',
+                    prov.razonSocial AS 'RazonSocial',
+                    prov.regimenFiscal AS 'RegimenFiscal'
                 FROM
                     vw_ext_PortalProveedores_Proveedores prov";
 
@@ -407,8 +409,8 @@ class Proveedores_Mdl
 
                 $pass = '$2y$10$t0KYcBv5n04.VRhkuVOCr.p8VbfkSjnZtQFWyBXVjZqhLoAXxZMFe';
 
-                $sql = "INSERT INTO tmpproveedores ( id, nombre, direccion, pais, cp, grupo, rfc, cpag, moneda, correo, estatus, idioma)
-                VALUES ( :idProveedor, :nombre, :direccion, :pais, :cp, :grupo, :rfc, :cpag, :moneda, :correo, :estatus, :idioma)
+                $sql = "INSERT INTO tmpproveedores ( id, nombre, direccion, pais, cp, grupo, rfc, razonSocial, regimenFiscal, cpag, moneda, correo, estatus, idioma)
+                VALUES ( :idProveedor, :nombre, :direccion, :pais, :cp, :grupo, :rfc, :razonSocial, :regimenFiscal, :cpag, :moneda, :correo, :estatus, :idioma)
                 ON DUPLICATE KEY UPDATE
                     nombre = VALUES(nombre),
                     direccion = VALUES(direccion),
@@ -416,7 +418,9 @@ class Proveedores_Mdl
                     cp = VALUES(cp),
                     grupo = VALUES(grupo),
                     rfc = VALUES(rfc),
-                    cpag = VALUES(cpag),
+                    razonSocial = VALUES(razonSocial),
+                    regimenFiscal = VALUES(regimenFiscal),
+                    cpag = VALUES(cpag),RegimenFiscal
                     moneda = VALUES(moneda),
                     correo = VALUES(correo),
                     estatus = VALUES(estatus),
@@ -432,6 +436,8 @@ class Proveedores_Mdl
                             ':cp' => $proveedor['CP'],
                             ':grupo' => $proveedor['Grupo'],
                             ':rfc' => $proveedor['RFC'],
+                            ':razonSocial' => $proveedor['RazonSocial'],
+                            ':regimenFiscal' => $proveedor['RegimenFiscal'],
                             ':cpag' => $proveedor['CPag'],
                             ':moneda' => $proveedor['Moneda'],
                             ':correo' => $proveedor['Correo'],
@@ -452,6 +458,8 @@ class Proveedores_Mdl
                     $stmt->bindParam(':cp', $proveedor['CP'], PDO::PARAM_STR);
                     $stmt->bindParam(':grupo', $proveedor['Grupo'], PDO::PARAM_INT);
                     $stmt->bindParam(':rfc', $proveedor['RFC'], PDO::PARAM_STR);
+                    $stmt->bindParam(':razonSocial', $proveedor['RazonSocial'], PDO::PARAM_STR);
+                    $stmt->bindParam(':regimenFiscal', $proveedor['RegimenFiscal'], PDO::PARAM_INT);
                     $stmt->bindParam(':cpag', $proveedor['CPag'], PDO::PARAM_STR);
                     $stmt->bindParam(':moneda', $proveedor['Moneda'], PDO::PARAM_STR);
                     $stmt->bindParam(':correo', $proveedor['Correo'], PDO::PARAM_STR);
@@ -492,14 +500,16 @@ class Proveedores_Mdl
     public function actualizaProveedores()
     {
         try {
-            $sql = "INSERT INTO proveedores ( id, nombre, direccion, pais, cp, rfc, grupo, cpag, moneda, correo, estatus, idioma)
-                    SELECT id, nombre, direccion, pais, cp, rfc, grupo, cpag, moneda, correo, estatus, idioma FROM tmpproveedores
+            $sql = "INSERT INTO proveedores ( id, nombre, direccion, pais, cp, rfc, razonSocial, regimenFiscal, grupo, cpag, moneda, correo, estatus, idioma)
+                    SELECT id, nombre, direccion, pais, cp, rfc, razonSocial, regimenFiscal, grupo, cpag, moneda, correo, estatus, idioma FROM tmpproveedores
                     ON DUPLICATE KEY UPDATE
                     nombre = VALUES(nombre),
                     direccion = VALUES(direccion),
                     pais = VALUES(pais),
                     cp = VALUES(cp),
                     rfc = VALUES(rfc),
+                    razonSocial = VALUES(razonSocial),
+                    regimenFiscal = VALUES(regimenFiscal),
                     grupo = VALUES(grupo),
                     cpag = VALUES(cpag),
                     moneda = VALUES(moneda),
