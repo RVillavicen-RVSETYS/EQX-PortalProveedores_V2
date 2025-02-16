@@ -420,7 +420,7 @@ class Proveedores_Mdl
                     rfc = VALUES(rfc),
                     razonSocial = VALUES(razonSocial),
                     regimenFiscal = VALUES(regimenFiscal),
-                    cpag = VALUES(cpag),RegimenFiscal
+                    cpag = VALUES(cpag),
                     moneda = VALUES(moneda),
                     correo = VALUES(correo),
                     estatus = VALUES(estatus),
