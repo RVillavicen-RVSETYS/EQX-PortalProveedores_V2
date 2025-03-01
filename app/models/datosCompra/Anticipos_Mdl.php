@@ -29,14 +29,15 @@ class Anticipos_Mdl
     {
         try {
             $cantAnticipos = 0;
+            $data =[];
 
             if ($cantAnticipos > 0) {
-                return ['success' => true, 'data' => $cantAnticipos]; // Retornar datos si tiene permisos a algun Area
+                return ['success' => true, 'cantAnticipos' => $cantAnticipos, 'data' => $data]; // Retornar datos si tiene permisos a algun Area
             } else {
                 if (self::$debug) {
                     echo "No hay ninguna Anticipo para esta OC.<br>"; // Mostrar error en modo depuración
                 }
-                return ['success' => false, 'message' => 'No hay Anticipo para esta OC.'];
+                return ['success' => true, 'cantAnticipos' => $cantAnticipos, 'message' => 'No hay Anticipo para esta OC.'];
             }
         } catch (\Exception $e) {
             $timestamp = date("Y-m-d H:i:s");

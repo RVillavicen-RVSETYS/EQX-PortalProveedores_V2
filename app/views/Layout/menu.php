@@ -12,7 +12,7 @@
         <div class="wsmainwp wsmain clearfix">
 
 
-            <div class="desktoplogo"><a href="#"><img src="/assets/menu/images/logo-equinox-gold-Desktop.png" width="80%" alt=""></a></div>
+            <div class="desktoplogo"><a href="#"><img src="/assets/menu/images/logo-SilmeAgro.png" width="80%" alt=""></a></div>
             <!--Main Menu HTML Code-->
             <nav class="wsmenu clearfix">
                 <ul class="wsmenu-list">

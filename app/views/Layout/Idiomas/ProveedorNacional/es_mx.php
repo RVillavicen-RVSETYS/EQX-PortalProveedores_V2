@@ -24,7 +24,7 @@ class Idiomas {
             'Ver_Perfil' => "Ver Perfil",
             'Centro_Ayuda' => "Centro de Ayuda",
             'Cerrar_Session' => "Cerrar Sessión",
-            'No_Vacio' => "No puede ir Vacio."
+            'No_Vacio' => "Campo requerido, no puede ser Vacio."
         ],
     ];
     
