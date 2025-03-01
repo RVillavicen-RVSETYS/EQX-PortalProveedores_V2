@@ -33,7 +33,7 @@ class Compras_Mdl
                     GROUP_CONCAT(DISTINCT dc.noRecepcion ORDER BY dc.noRecepcion SEPARATOR ', ') AS noRecepcion,
                     c.fechaReg, c.referencia, cf.urlPDF, cf.urlXML 
                     FROM compras c
-                    INNER JOIN detcompra dc ON c.id = dc.idCompra
+                    INNER JOIN detcompras dc ON c.id = dc.idCompra
                     LEFT JOIN cfdi_facturas cf ON cf.idCompra = c.id
                     WHERE c.idProveedor = :noProveedor
                     GROUP BY c.id, c.claseDocto, dc.ordenCompra, c.fechaReg, c.referencia, cf.urlPDF, cf.urlXML 
@@ -81,7 +81,7 @@ class Compras_Mdl
                         c.fechaReg, c.referencia, cf.urlPDF, cf.urlXML, cf.monto, cf.idCatMetodoPago, cf.idCatFormaPago, cf.usoCfdi, cf.uuid,
                         cf.fechaFac, cf.serie, cf.folio, cf.razonSocialEm
                         FROM compras c
-                        INNER JOIN detcompra dc ON c.id = dc.idCompra
+                        INNER JOIN detcompras dc ON c.id = dc.idCompra
                         LEFT JOIN cfdi_facturas cf ON cf.idCompra = c.id
                         WHERE c.id = :acuse AND c.idProveedor = :noProveedor
                         GROUP BY c.id, c.claseDocto, dc.ordenCompra, c.fechaReg, c.referencia, cf.urlPDF, cf.urlXML"; 

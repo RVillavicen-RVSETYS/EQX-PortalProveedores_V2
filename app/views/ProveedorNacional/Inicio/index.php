@@ -182,7 +182,7 @@ if ($notificaciones['success'] && !empty($notificaciones['data'])) {
                                                     echo '<h4>' . $bloqueoCargaFactura['data']['mensajeCierre'] . '</h4><hr>';
                                                 } else {
                                                 ?>
-                                                    <form class="form">
+                                                    <form class="form" method="post" enctype="multipart/form-data" action="Inicio/registraNuevaFactura">
                                                         <div class="form-group row">
                                                             <span class="col-3 col-form-label"><b><?= $menuModel->txt('No_Proveedor'); ?></b></span>
                                                             <span class="col-3 col-form-label text-success"><b><?= $_SESSION['EQXnoProveedor']; ?></b></span>
@@ -254,7 +254,7 @@ if ($notificaciones['success'] && !empty($notificaciones['data'])) {
                         <div class="row">
                             <div class="col-md-12 col-lg-12">
                                 <div class="card border">
-                                    <div class="card-header bg-Equinoxgold">
+                                    <div class="card-header bg-Silmeagro">
                                         <div class="row">
                                             <div class="col-md-10">
                                                 <h4 class="m-b-0 text-white"><?= $menuModel->txt('Carga_Factura_por_anticipo'); ?></h4>
@@ -484,7 +484,7 @@ if ($notificaciones['success'] && !empty($notificaciones['data'])) {
                             url: 'Inicio/validaHojaEntrada',
                             data: {
                                 ordenCompra: oc,
-                                hojaEntrada: hojaEntrada
+                                listaHES: hojaEntrada
                             },
                             dataType: 'json',
                             success: function(response) {
@@ -494,7 +494,7 @@ if ($notificaciones['success'] && !empty($notificaciones['data'])) {
                                 } else {
                                     validHES = false;
                                     $("#listaHES").addClass("is-invalid");
-                                    $("#invalid_ordenCompra").html(response.message);
+                                    $("#invalid_listaHES").html(response.message);
                                 }
                             },
                             error: function() {
