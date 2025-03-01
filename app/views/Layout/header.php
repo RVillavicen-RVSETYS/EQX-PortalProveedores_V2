@@ -29,3 +29,4 @@
     <link rel="stylesheet" href="/assets/menu/webslidemenu/all-variables-silme-agro.css">
 
     <link href="/assets/libs/toastr/build/toastr.min.css" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="/assets/extra-libs/prism/prism.css">
