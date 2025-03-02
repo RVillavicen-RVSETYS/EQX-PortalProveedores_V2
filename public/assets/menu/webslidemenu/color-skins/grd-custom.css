@@ -26,17 +26,30 @@
     background-color: var(--var-menu-bg-header-mobile);
 }
 
+/*Color De Las Letras Del Menu 1*/
 .wsmenu>.wsmenu-list>li>a {
-    color: var(--var-light-primary);
+    color: var(--var-menu-primary);
     border-bottom-color: rgba(0, 0, 0, 0);
 }
 
+/*Color De Las Flechitas Del Menu 1*/
 .wsmenu>.wsmenu-list>li>a .wsarrow:after {
-    border-top-color: var(--var-light-primary);
+    border-top-color: var(--var-menu-primary);
 }
 
 .wsmenu>.wsmenu-list>li>a:hover .wsarrow:after {
     border-top-color: var(--var-light-primary);
+}
+
+/*Color De Los Iconos Del Menu 1*/
+.wsmenu>.wsmenu-list>li>a>i {
+    color: var(--var-menu-icon-primary);
+}
+
+/*Color Del Hover Del Menu 1*/
+.wsmenu>.wsmenu-list>li:hover>a {
+    background-color: var(--var-menu-hover);
+    color: var(--var-light-primary);
 }
 
 .wsmenu>.wsmenu-list>li>a.active .wsarrow:after {
@@ -45,10 +58,6 @@
 
 .wsmenu>.wsmenu-list>li:hover>a .wsarrow:after {
     border-top-color: var(--var-light-primary);
-}
-
-.wsmenu>.wsmenu-list>li>a>i {
-    color: var(--var-light-primary);
 }
 
 .wsmenu>.wsmenu-list>li>a.active i {
@@ -90,10 +99,6 @@
     color: var(--var-light-primary);
 }
 
-.wsmenu>.wsmenu-list>li:hover>a {
-    background-color: rgba(182, 129, 47, 1);
-    color: var(--var-light-primary);
-}
 
 .wsmenu>.wsmenu-list>li>ul.sub-menu>li:hover>a {
     background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(var(--var-menu-primary)), to(var(--var-menu-primary)));
@@ -102,7 +107,7 @@
     background: -o-linear-gradient(left, var(--var-menu-primary), var(--var-menu-primary));
     background: -ms-linear-gradient(left, var(--var-menu-primary), var(--var-menu-primary));
     background: linear-gradient(left, var(--var-menu-primary), var(--var-menu-primary));
-    background-color: var(--var-menu-primary);
+    background-color: var(--var-submenu-hover);
     color: var(--var-light-primary);
 }
 

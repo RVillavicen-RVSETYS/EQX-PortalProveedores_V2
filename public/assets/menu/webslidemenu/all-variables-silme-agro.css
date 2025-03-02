@@ -1,19 +1,24 @@
 /****** ALL VARIABLES BUSINESS ******/
 
 :root {
-    --var-menu-bg-header-desktop: #008000;
-    --var-menu-bg-header-mobile: #fff;
-    --var-menu-primary: #eef2ed;
+    /*BG Del Menu*/
+    --var-menu-bg-header-desktop: #eef2ed;
+    --var-menu-bg-header-mobile: #eef2ed;
+
+    /*Variables Del Menu 1*/
+    --var-menu-primary: #000;   /*Color De Las Letras Del Menu 1*/
     --var-menu-secondary: #fff;
-    --var-menu-hover: #008000;
-    --var-menu-active: #008000;
-    --var-menu-icon-primary: #fff;
+    --var-menu-hover: #008000; /*Color Del Hover Del Menu 1*/
+    --var-menu-active: #008000; /*Color Del Menu 1 Activo*/
+    --var-menu-icon-primary: #000; /*Color De Los Iconos Del Menu 1*/
     --var-menu-icon-hover: #fff;
     --var-menu-icon-active: #fff;
+
+    /*Variables Del Menu 2*/
     --var-submenu-primary: #fff;
     --var-submenu-hover: #008000;
     --var-submenu-active: #008000;
-    --var-submenu-font-primary: #666666;
+    --var-submenu-font-primary: #000;
     --var-submenu-font-hover: #fff;
     --var-submenu-font-active: #fff;
 

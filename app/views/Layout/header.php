@@ -28,3 +28,4 @@
     <link id="theme" rel="stylesheet" type="text/css" media="all" href="/assets/menu/webslidemenu/color-skins/grd-custom.css" />
     <link rel="stylesheet" type="text/css" href="/assets/libs/toastr/build/toastr.min.css">
     <link rel="stylesheet" type="text/css" href="/assets/menu/webslidemenu/all-variables-silme-agro.css">
+    <link rel="stylesheet" type="text/css" href="/assets/extra-libs/prism/prism.css">
