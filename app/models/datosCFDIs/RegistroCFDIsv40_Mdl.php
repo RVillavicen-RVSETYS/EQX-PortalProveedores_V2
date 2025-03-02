@@ -4,6 +4,7 @@ namespace App\Models\DatosCFDIs;
 
 use PDO;
 use BD_Connect;
+use App\Globals\Controllers\DocumentosController;
 
 // Incluye conección a la BD
 if (!defined('INCLUDE_CHECK')) {
@@ -73,8 +74,50 @@ class RegistroCFDIsv40_Mdl
             }
 
             if (self::$debug) {
+                echo "<br> * Compra registrada con ID: $idCompra <br>";
                 $response["debug"] .= "\nCompra registrada con ID: $idCompra";
             }
+
+            // Almacenar Facturas
+            $almacenaDoctos = new DocumentosController();
+            //$almacenaDoctos = new \App\Globals\Controllers\DocumentosController();
+            if (class_exists('DocumentosController')) {
+                if (self::$debug) {
+                    echo "<br> * Clase DocumentosController cargada correctamente. <br>";
+                }
+            } else {
+                if (self::$debug) {
+                    echo "<br> * Error al cargar la clase DocumentosController. <br>";
+                }
+            }
+
+            if (method_exists($almacenaDoctos, 'almacenaCFDI')) {
+                if (self::$debug) {
+                    echo "<br> * Método almacenaCFDI() encontrado. <br>";
+                }   
+            }
+
+            $idProveedor = $dataDeValidacion["dataMontosHES"]["idProveedor"];
+            $sociedad = $dataDeValidacion["dataMontosHES"]["sociedad"];
+            $almacenaPDF = $almacenaDoctos->almacenaCFDI($_FILES['facturaPDF']['tmp_name'], 'FACT', $idProveedor, $idCompra, $sociedad,'PDF');
+            $almacenaXML = $almacenaDoctos->almacenaCFDI($_FILES['facturaXML']['tmp_name'], 'FACT', $idProveedor, $idCompra, $sociedad,'XML');
+            if (self::$debug) {
+                echo "<br> * PDF de Factura Registrado: <br>";
+                var_dump($almacenaPDF);
+                echo "<br><br> * XML de Factura Registrado: <br>";
+                var_dump($almacenaXML);
+            }
+
+            if (!$almacenaPDF["success"] || !$almacenaXML["success"]) {
+                throw new \Exception("Problemas al Almacenar la Factura, Notifica a tu Administrador.");
+            } else {
+                if (self::$debug) {
+                    echo "<br> * Factura almacenada correctamente. <br>";
+                }
+            }
+
+            $urlFacturaPDF = $almacenaPDF["url"];
+            $urlFacturaXML = $almacenaXML["url"];
             
             // Insertar en detCompras
             $valuesInsert = '';
@@ -95,17 +138,19 @@ class RegistroCFDIsv40_Mdl
 
             // Insertar en cfdi_facturas
             $sqlFactura = "INSERT INTO cfdi_facturas (uuid, idCompra, rfcEmisor, rfcReceptor, razonSocialEm, monto, subtotal, descuento, idCatTipoMoneda, 
-            idCatMetodoPago, idCatFormaPago, fechaFac, usoCfdi, folio, serie, noCertificadoSAT, estatus, idUserReg, fechaReg, reglasNegocio, 
+            idCatMetodoPago, idCatFormaPago, fechaFac, usoCfdi, folio, serie, noCertificadoSAT, urlXML, urlPDF, estatus, idUserReg, fechaReg, reglasNegocio, 
             validada, codigoEstatusSAT, estadoValidaSAT, estadoEFO, serializado, totalImpuestosTrasladados, totalImpuestosRetenidos, regimenFiscEmisor,
             razonSocialRec, regimenFiscRec, exportacion, tipoCambio, version, tipoComprobante)
                             VALUES (:uuid, :idCompra, :rfcEmisor, :rfcReceptor, :razonSocialEm, :monto, :subtotal, :descuento, :idCatTipoMoneda, 
-            :idCatMetodoPago, :idCatFormaPago, :fechaFac, :usoCfdi, :folio, :serie, :noCertificadoSAT, :estatus, :idUserReg, NOW(), '1', 
+            :idCatMetodoPago, :idCatFormaPago, :fechaFac, :usoCfdi, :folio, :serie, :noCertificadoSAT, :urlXML, :urlPDF, :estatus, :idUserReg, NOW(), '1', 
             :validada, :codigoEstatusSAT, :estadoValidaSAT, :estadoEFO, :serializado, :totalImpuestosTrasladados, :totalImpuestosRetenidos, :regimenFiscEmisor,
             :razonSocialRec, :regimenFiscRec, :exportacion, :tipoCambio, :version, :tipoComprobante)";
             
             
             $params = [
                 ":estatus" => '2',
+                ":urlXML" => isset($urlFacturaXML) ? $urlFacturaXML : NULL,
+                ":urlPDF" => isset($urlFacturaPDF) ? $urlFacturaPDF : NULL,
                 ":uuid" => $dataDeValidacion["dataFactXML"]["TimbreFiscal"]["UUID"],
                 ":idCompra" => $idCompra,
                 ":rfcEmisor" => $dataDeValidacion["dataFactXML"]["Emisor"]["Rfc"],

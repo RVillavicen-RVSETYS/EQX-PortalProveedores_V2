@@ -37,6 +37,121 @@ class DocumentosController extends Controller
         }
     }
 
+    public function almacenaCFDI($tmpName, $tipoDocto, $idProveedor, $identDocto, $empresa, $extension)
+    {
+        $response = [
+            'success' => false,
+            'message' => '',
+            'data' => []
+        ];
+        $this->debug = 1;
+
+        if ($this->debug == 1) {
+            echo "<br>Temporal Name Recibido: {$tmpName}<br>";
+            echo "Empresa: {$empresa}<br>";
+            echo "Tipo de Documento: {$tipoDocto}<br>";
+            echo "Extensión de Documento: {$extension}<br>";
+            echo "Ident de Documento y de User: {$identDocto} -- {$idProveedor}<br>";
+            echo "Valor de basePathTemp: {$this->basePathTemp}<br>";
+        }
+
+
+
+        // Validar que la ruta base existe
+        if (empty($this->basePath) || !is_dir($this->basePath)) {
+            $response['message'] = 'La ruta base temporal no está configurada correctamente.';
+            if ($this->debug == 1) {
+                echo "Ruta basePath inválida o inexistente: {$this->basePath}<br>";
+            }
+            return $response;
+        }
+
+        // Validar que todos los datos requeridos estén presentes
+        if (empty($tmpName) || empty($tipoDocto) || empty($idProveedor) || empty($identDocto) || empty($empresa) || empty($extension)) {
+            $response['message'] = 'Todos los parámetros son obligatorios: tmp_name, tipoDocto, idProveedor, identDocto, empresa, extension.';
+            return $response;
+        }
+
+        // Mapeo de tipos de documento a nombres de carpetas
+        $tipoDoctoMap = [
+            'FACT' => 'Facturas',
+            'COMPPAG' => 'ComplementosPagos',
+            'ANTIC' => 'Anticipos',
+            'COMP' => 'Compensaciones',
+            'NOTACRED' => 'NotasCreditos'
+        ];
+
+        // Validar si el tipo de documento está en el mapeo
+        if (!isset($tipoDoctoMap[$tipoDocto])) {
+            $response['message'] = 'El Tipo de Documento no está Definido, Notifica a tu Administrador.';
+            return $response;
+        }
+
+        // Obtener el nombre del tipo de documento
+        $tipoDoctoNombre = $tipoDoctoMap[$tipoDocto];
+
+        // Validar que el archivo temporal exista
+        if (!file_exists($tmpName)) {
+            $response['message'] = 'El archivo temporal especificado no existe.';
+            return $response;
+        }
+
+        // Preparar la ruta base
+        $currentYear = date('Y'); // Año actual
+        $currentYearMonth = date('Y-m'); // Mes actual
+        $destinationDir = $this->basePath . DIRECTORY_SEPARATOR . $empresa . DIRECTORY_SEPARATOR . $tipoDoctoNombre . DIRECTORY_SEPARATOR . $currentYear . DIRECTORY_SEPARATOR . $idProveedor . DIRECTORY_SEPARATOR . $currentYearMonth;
+
+        if ($this->debug == 1) {
+            echo "Directorio de Destino: {$destinationDir}<br>";
+        }
+
+        // Crear directorio si no existe
+        if (!is_dir($destinationDir)) {
+            if (!mkdir($destinationDir, 0755, true)) {
+                $response['message'] = 'No se pudo crear el directorio temporal: ' . $destinationDir;
+                return $response;
+            }
+        }
+
+        // Generar el nombre único del archivo usando tipoDocto directamente
+        $dateTime = date('YmdHis'); // Timestamp único
+        $fileName = "{$idProveedor}_{$tipoDocto}_{$identDocto}_{$dateTime}.{$extension}";
+
+        if ($this->debug == 1) {
+            echo "Nombre del Archivo: {$fileName}<br>";
+        }
+
+        // Ruta absoluta y relativa
+        $destinationPath = $destinationDir . DIRECTORY_SEPARATOR . $fileName; // Ruta absoluta
+        $relativePath = str_replace(realpath(__DIR__ . '/../../../'), '', $destinationPath); // Ruta relativa basada en __DIR__
+
+        if ($this->debug == 1) {
+            echo "Ruta Relativa: {$relativePath}<br>";
+            echo "Ruta Destino final: {$destinationPath}<br>";
+        }
+
+        // Mover el archivo temporal a la ubicación final
+        if (!move_uploaded_file($tmpName, $destinationPath)) {
+            $response['message'] = 'No se pudo mover el archivo temporal a la ubicación final.';
+            return $response;
+        }
+
+        // Preparar la respuesta
+        $response['success'] = true;
+        $response['message'] = 'El archivo se almacenó temporalmente con éxito.';
+        $response['data'] = [
+            'absolutePath' => $destinationPath,
+            'relativePath' => $relativePath,
+            'fileName' => $fileName,
+            'directory' => $destinationDir,
+            'idProveedor' => $idProveedor,
+            'tipoDocto' => $tipoDocto,
+            'identDocto' => $identDocto
+        ];
+
+        return $response;
+    }
+
     /**
      * Maneja errores críticos al inicializar la clase, deteniendo la ejecución con un mensaje claro.
      */
