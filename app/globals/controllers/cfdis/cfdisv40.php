@@ -2,7 +2,7 @@
 
 class cfdisv40
 {
-    protected $debug = 1;
+    protected $debug = 0;
 
     public function leerCfdi_Ingreso($xmlPath, $version)
     {

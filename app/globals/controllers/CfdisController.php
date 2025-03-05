@@ -7,7 +7,7 @@ use App\Models\DatosCFDIs\CatalogosCFDIs_Mdl;
 
 class CfdisController extends Controller
 {
-    protected $debug = 1;
+    protected $debug = 0;
 
     public function leerCfdiXML($xmlPath, $tipoCfdi)
     {

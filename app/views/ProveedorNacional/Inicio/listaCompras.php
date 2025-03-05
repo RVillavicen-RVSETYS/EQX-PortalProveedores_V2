@@ -118,8 +118,8 @@ if ($debug == 1) {
         fixedHeader: true,
         scrollCollapse: true,
         autoWidth: true,
-        scrollCollapse: true,
         bSort: true,
+        order: [[0, "desc"]],
         dom: 'Blfrtip',
         lengthMenu: [
             [10, 25, 50, -1],

@@ -44,7 +44,7 @@ class DocumentosController extends Controller
             'message' => '',
             'data' => []
         ];
-        $this->debug = 1;
+        $this->debug = 0;
 
         if ($this->debug == 1) {
             echo "<br>Temporal Name Recibido: {$tmpName}<br>";
@@ -172,6 +172,11 @@ class DocumentosController extends Controller
     public function mostrarDocumento($rutaRelativa, $fileExtension)
     {
         $rutaRelativa = base64_decode($rutaRelativa);
+        $this->debug =1;
+        if ($this->debug) {
+            echo '<br> Ruta Relativa Codificada: ' . $rutaRelativa . PHP_EOL;
+            echo '<br> Extensión del Archivo: ' . $fileExtension . PHP_EOL;
+        }
 
         // Tipos MIME aceptados
         $tiposAceptados = [
@@ -185,10 +190,10 @@ class DocumentosController extends Controller
         $fileExtension = strtolower($fileExtension); // Normalizar la extensión esperada a minúsculas
         if (!array_key_exists($fileExtension, $tiposAceptados)) {
             http_response_code(400); // Bad Request
-            echo 'Error: La extensión no está permitida.' . PHP_EOL;
+            echo '<br> Error: La extensión no está permitida.' . PHP_EOL;
             if ($this->debug) {
-                echo 'Extensión recibida: ' . $fileExtension . PHP_EOL;
-                echo 'Extensiones permitidas: ' . implode(', ', array_keys($tiposAceptados)) . PHP_EOL;
+                echo '<br> Extensión recibida: ' . $fileExtension . PHP_EOL;
+                echo '<br> Extensiones permitidas: ' . implode(', ', array_keys($tiposAceptados)) . PHP_EOL;
             }
 
             $timestamp = date("Y-m-d H:i:s");
@@ -198,21 +203,22 @@ class DocumentosController extends Controller
 
         // Sanitizar la ruta para evitar accesos indebidos
         $rutaSanitizada = str_replace(['..', './', '../'], '', $rutaRelativa);
+        $rutaSanitizada = str_replace("\Documentos\\", "", $rutaSanitizada);
         if ($this->debug) {
-            echo 'Ruta Sanitizada:' . $rutaSanitizada . PHP_EOL;
+            echo '<br> Ruta Sanitizada:' . $rutaSanitizada . PHP_EOL;
         }
 
         $rutaAbsoluta = $this->basePath . DIRECTORY_SEPARATOR . $rutaSanitizada;
         if ($this->debug) {
-            echo 'Ruta Absoluta:' . $rutaAbsoluta . PHP_EOL;
+            echo '<br> Ruta Absoluta:' . $rutaAbsoluta . PHP_EOL;
         }
-
+        
         // Verificar si el archivo existe
         if (!file_exists($rutaAbsoluta)) {
             http_response_code(404);
-            echo 'Error: El archivo solicitado no existe.' . PHP_EOL;
+            echo '<br> Error: El archivo solicitado no existe.' . PHP_EOL;
             if ($this->debug) {
-                echo 'Ruta probada: ' . $rutaAbsoluta . PHP_EOL;
+                echo '<br> Ruta probada: ' . $rutaAbsoluta . PHP_EOL;
             }
             exit;
         }
@@ -222,9 +228,9 @@ class DocumentosController extends Controller
 
         if ($extensionReal !== $fileExtension) {
             http_response_code(400); // Bad Request
-            echo 'Error: La extensión del archivo no coincide.' . PHP_EOL;
+            echo '<br> Error: La extensión del archivo no coincide.' . PHP_EOL;
             if ($this->debug) {
-                echo 'Extensión esperada: ' . $fileExtension . ', Extensión actual: ' . $extensionReal . PHP_EOL;
+                echo '<br> Extensión esperada: ' . $fileExtension . ', Extensión actual: ' . $extensionReal . PHP_EOL;
             }
             exit;
         }
@@ -235,17 +241,17 @@ class DocumentosController extends Controller
             (!is_array($tiposAceptados[$fileExtension]) && $mimeActual !== $tiposAceptados[$fileExtension])
         ) {
             http_response_code(400); // Bad Request
-            echo 'Error: El tipo MIME del archivo no es válido.' . PHP_EOL;
+            echo '<br> Error: El tipo MIME del archivo no es válido.' . PHP_EOL;
             if ($this->debug) {
-                echo 'Tipos MIME aceptados para .' . $fileExtension . ': ' . (is_array($tiposAceptados[$fileExtension]) ? implode(', ', $tiposAceptados[$fileExtension]) : $tiposAceptados[$fileExtension]) . PHP_EOL;
-                echo 'Tipo MIME actual: ' . $mimeActual . PHP_EOL;
+                echo '<br> Tipos MIME aceptados para .' . $fileExtension . ': ' . (is_array($tiposAceptados[$fileExtension]) ? implode(', ', $tiposAceptados[$fileExtension]) : $tiposAceptados[$fileExtension]) . PHP_EOL;
+                echo '<br> Tipo MIME actual: ' . $mimeActual . PHP_EOL;
             }
             exit;
         }
 
         // Todo está OK, devolver el archivo
         if ($this->debug) {
-            echo 'Todo está OK, el documento existe, la extensión coincide, y el tipo MIME es válido.' . PHP_EOL;
+            echo '<br><br> Todo está OK, el documento existe, la extensión coincide, y el tipo MIME es válido.' . PHP_EOL;
         } else {
             // Enviar cabeceras para la respuesta
             header('Content-Type: ' . $mimeActual);
@@ -339,95 +345,4 @@ class DocumentosController extends Controller
         return $response;
     }
 
-    public function almacenaDoctoTemporal($tmpName, $tipoDocto, $identUser, $identDocto)
-    {
-        $response = [
-            'success' => false,
-            'message' => '',
-            'data' => []
-        ];
-        $this->debug = 1;
-
-        if ($this->debug == 1) {
-            echo "<br>Temporal Name Recibido: {$tmpName}<br>";
-            echo "Tipo de Documento: {$tipoDocto}<br>";
-            echo "Ident de Documento y de User: {$identDocto} -- {$identUser}<br>";
-            echo "Valor de basePathTemp: {$this->basePathTemp}<br>";
-        }
-
-        // Validar que la ruta base temporal existe
-        if (empty($this->basePathTemp) || !is_dir($this->basePathTemp)) {
-            $response['message'] = 'La ruta base temporal no está configurada correctamente.';
-            if ($this->debug == 1) {
-                echo "Ruta basePathTemp inválida o inexistente: {$this->basePathTemp}<br>";
-            }
-            return $response;
-        }
-
-        // Validar que todos los datos requeridos estén presentes
-        if (empty($tmpName) || empty($tipoDocto) || empty($identUser) || empty($identDocto)) {
-            $response['message'] = 'Todos los parámetros son obligatorios: tmp_name, tipoDocto, identUser, identDocto.';
-            return $response;
-        }
-
-        // Validar que el archivo temporal exista
-        if (!file_exists($tmpName)) {
-            $response['message'] = 'El archivo temporal especificado no existe.';
-            return $response;
-        }
-
-        // Preparar la ruta base
-        $currentYear = date('Y'); // Año actual
-        $destinationDir = $this->basePathTemp . DIRECTORY_SEPARATOR . $identUser . DIRECTORY_SEPARATOR . $currentYear;
-
-        if ($this->debug == 1) {
-            echo "Directorio de Destino: {$destinationDir}<br>";
-        }
-
-        // Crear directorio si no existe
-        if (!is_dir($destinationDir)) {
-            if (!mkdir($destinationDir, 0755, true)) {
-                $response['message'] = 'No se pudo crear el directorio temporal: ' . $destinationDir;
-                return $response;
-            }
-        }
-
-        // Generar el nombre único del archivo usando tipoDocto directamente
-        $dateTime = date('YmdHis'); // Timestamp único
-        $fileName = "{$identUser}_{$tipoDocto}_{$identDocto}_{$dateTime}.{$tipoDocto}";
-
-        if ($this->debug == 1) {
-            echo "Nombre del Archivo: {$fileName}<br>";
-        }
-
-        // Ruta absoluta y relativa
-        $destinationPath = $destinationDir . DIRECTORY_SEPARATOR . $fileName; // Ruta absoluta
-        $relativePath = str_replace(realpath(__DIR__ . '/../../../'), '', $destinationPath); // Ruta relativa basada en __DIR__
-
-        if ($this->debug == 1) {
-            echo "Ruta Relativa: {$relativePath}<br>";
-            echo "Ruta Destino final: {$destinationPath}<br>";
-        }
-
-        // Mover el archivo temporal a la ubicación final
-        if (!move_uploaded_file($tmpName, $destinationPath)) {
-            $response['message'] = 'No se pudo mover el archivo temporal a la ubicación final.';
-            return $response;
-        }
-
-        // Preparar la respuesta
-        $response['success'] = true;
-        $response['message'] = 'El archivo se almacenó temporalmente con éxito.';
-        $response['data'] = [
-            'absolutePath' => $destinationPath,
-            'relativePath' => $relativePath,
-            'fileName' => $fileName,
-            'directory' => $destinationDir,
-            'identUser' => $identUser,
-            'tipoDocto' => $tipoDocto,
-            'identDocto' => $identDocto
-        ];
-
-        return $response;
-    }
 }

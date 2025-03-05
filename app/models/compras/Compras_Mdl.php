@@ -25,7 +25,7 @@ class Compras_Mdl
         $this->db = new BD_Connect(); // Instancia de la conexión a la base de datos
     }
 
-    public function listaComprasFacturadas(INT $idProveedor, INT $cantMaxRes = 0)
+    public function listaComprasFacturadas(INT $idProveedor, INT $cantMaxRes = 0, $orden = 'DESC')
     {
         $limiteResult = ($cantMaxRes == 0) ? '' : 'LIMIT '.$cantMaxRes;
         try {
@@ -37,7 +37,7 @@ class Compras_Mdl
                     LEFT JOIN cfdi_facturas cf ON cf.idCompra = c.id
                     WHERE c.idProveedor = :noProveedor
                     GROUP BY c.id, c.claseDocto, dc.ordenCompra, c.fechaReg, c.referencia, cf.urlPDF, cf.urlXML 
-                    ORDER BY c.id DESC
+                    ORDER BY c.id $orden
                     $limiteResult"; 
 
             if (self::$debug) {

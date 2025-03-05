@@ -18,7 +18,7 @@ class Proveedores_Mdl
 {
     private $db;
     private $dbHes;
-    private static $debug = 1; // Cambiar a 0 para desactivar mensajes de depuración
+    private static $debug = 0; // Cambiar a 0 para desactivar mensajes de depuración
 
     public function __construct()
     {

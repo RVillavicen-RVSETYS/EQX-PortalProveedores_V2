@@ -232,7 +232,6 @@ class HojaEntrada_Mdl
 
     public function dataMontosHES($hojasEntrada, $ordenCompra)
     {
-        self::$debug = 1;
         $hesList = implode(', ', array_map(function ($item) {
             return "'" . addslashes($item) . "'";
         }, $hojasEntrada));

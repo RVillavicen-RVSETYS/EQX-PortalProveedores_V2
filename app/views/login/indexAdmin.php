@@ -75,7 +75,7 @@ if (isset($_SESSION['error_message'])) {
                             <p class="text-danger"><?php echo htmlspecialchars($error_message); ?></p>
                         </div>
                         <div class="col-12">
-                            <form class="form-horizontal m-t-20" id="loginForm" action="../loginAdmin/authenticate" method="post">
+                            <form class="form-horizontal m-t-20" id="loginFormulario" action="../loginAdmin/authenticate" method="post">
                                 <div class="input-group mb-3">
                                     <div class="input-group-prepend">
                                         <span class="input-group-text" id="basic-addon1"><i class="ti-user"></i></span>
@@ -167,7 +167,7 @@ if (isset($_SESSION['error_message'])) {
     <!-- ============================================================== -->
     <script>
         $(document).ready(function() {
-            $("#loginFormXX").submit(function(e) {
+            $("#loginFormulario").submit(function(e) {
                 e.preventDefault();
                 $.ajax({
                     type: 'POST',

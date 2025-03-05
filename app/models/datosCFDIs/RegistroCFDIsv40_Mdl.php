@@ -15,7 +15,7 @@ require_once __DIR__ . '/../../../config/BD_Connect.php';
 class RegistroCFDIsv40_Mdl
 {
     private $db;
-    private static $debug = 1;
+    private static $debug = 0;
 
     public function __construct()
     {
@@ -34,7 +34,7 @@ class RegistroCFDIsv40_Mdl
             BD_Connect::beginTransaction();
             
             if (self::$debug) {
-                $response["debug"] .= "\nIniciando transacción...";
+                $response["debug"] .= "\n* Iniciando transacción...<br>";
             }
             // Calcular fecha de vencimiento
             $dias = intval(str_replace(["DAY-", "MONTH-"], "", $dataDeValidacion["dataMontosHES"]["CPago"]));
@@ -45,23 +45,24 @@ class RegistroCFDIsv40_Mdl
             $sqlCompras = "INSERT INTO compras (idProveedor, subTotal, total, idCatTipoMoneda, sociedad, cPago, estatus, idUserReg, tipoUserReg, fechaReg, fechaVence, claseDocto, referencia, descuento, notaCredito)
                             VALUES (:idProveedor, :subTotal, :total, :idCatTipoMoneda, :sociedad, :cPago, :estatus, :idUserReg, :tipoUserReg, NOW(), :fechaVence, :claseDocto, :referencia, :descuento, :notaCredito)";
             
-            if (self::$debug) {
-                $params = [
-                    ":idProveedor" => $dataDeValidacion["dataMontosHES"]["idProveedor"],
-                    ":subTotal" => $dataDeValidacion["dataFactXML"]["Comprobante"]["SubTotal"],
-                    ":total" => $dataDeValidacion["dataFactXML"]["Comprobante"]["Total"],
-                    ":idCatTipoMoneda" => $dataDeValidacion["dataMontosHES"]["idMoneda"],
-                    ":sociedad" => $dataDeValidacion["dataMontosHES"]["sociedad"],
-                    ":cPago" => $dataDeValidacion["dataMontosHES"]["CPago"],
-                    ":estatus" => 1,
-                    ":idUserReg" => $_SESSION['EQXident'],
-                    ":tipoUserReg" => ($dataDeValidacion["isAdmin"] == 0) ? "PROV" : "ADMIN",
-                    ":fechaVence" => $fechaVence,
-                    ":claseDocto" => $dataDeValidacion["dataMontosHES"]["resultQuery"][0]["TipoDocumento"],
-                    ":referencia" => empty($dataDeValidacion["dataFactXML"]["serializado"]),
-                    ":descuento" => ($dataDeValidacion["dataFactXML"]["Comprobante"]["SubTotal"] > $dataDeValidacion["dataFactXML"]["Comprobante"]["Total"]) ? 1 : 0,
-                    ":notaCredito" => ($dataDeValidacion["anticipo"] > 0) ? 1 : 0
-                ];
+            $params = [
+                ":idProveedor" => $dataDeValidacion["dataMontosHES"]["idProveedor"],
+                ":subTotal" => $dataDeValidacion["dataFactXML"]["Comprobante"]["SubTotal"],
+                ":total" => $dataDeValidacion["dataFactXML"]["Comprobante"]["Total"],
+                ":idCatTipoMoneda" => $dataDeValidacion["dataMontosHES"]["idMoneda"],
+                ":sociedad" => $dataDeValidacion["dataMontosHES"]["sociedad"],
+                ":cPago" => $dataDeValidacion["dataMontosHES"]["CPago"],
+                ":estatus" => 1,
+                ":idUserReg" => $_SESSION['EQXident'],
+                ":tipoUserReg" => ($dataDeValidacion["isAdmin"] == 0) ? "PROV" : "ADMIN",
+                ":fechaVence" => $fechaVence,
+                ":claseDocto" => $dataDeValidacion["dataMontosHES"]["resultQuery"][0]["TipoDocumento"],
+                ":referencia" => empty($dataDeValidacion["dataFactXML"]["serializado"]),
+                ":descuento" => ($dataDeValidacion["dataFactXML"]["Comprobante"]["SubTotal"] > $dataDeValidacion["dataFactXML"]["Comprobante"]["Total"]) ? 1 : 0,
+                ":notaCredito" => ($dataDeValidacion["anticipo"] > 0) ? 1 : 0
+            ];
+
+            if (self::$debug) {                
                 $this->db->imprimirConsulta($sqlCompras, $params, "Registro de compra");
             }
             
@@ -75,7 +76,7 @@ class RegistroCFDIsv40_Mdl
 
             if (self::$debug) {
                 echo "<br> * Compra registrada con ID: $idCompra <br>";
-                $response["debug"] .= "\nCompra registrada con ID: $idCompra";
+                $response["debug"] .= "\n* Compra registrada con ID: $idCompra<br>";
             }
 
             // Almacenar Facturas
@@ -111,13 +112,15 @@ class RegistroCFDIsv40_Mdl
             if (!$almacenaPDF["success"] || !$almacenaXML["success"]) {
                 throw new \Exception("Problemas al Almacenar la Factura, Notifica a tu Administrador.");
             } else {
+                $urlFacturaPDF = $almacenaPDF["data"]["relativePath"];
+                $urlFacturaXML = $almacenaPDF["data"]["relativePath"];
+
                 if (self::$debug) {
                     echo "<br> * Factura almacenada correctamente. <br>";
+                    $response["debug"] .= "\n* Fact PDF Almacenada: $urlFacturaPDF<br>";
+                    $response["debug"] .= "\n* Fact XML Almacenada: $urlFacturaXML<br>";
                 }
             }
-
-            $urlFacturaPDF = $almacenaPDF["url"];
-            $urlFacturaXML = $almacenaXML["url"];
             
             // Insertar en detCompras
             $valuesInsert = '';
@@ -127,6 +130,7 @@ class RegistroCFDIsv40_Mdl
             $valuesInsert = rtrim($valuesInsert, ',');
             if (self::$debug) {
                 echo '<br><br> Insert para detCompras: '.$valuesInsert;
+                $response["debug"] .= "\n* Detalle de Entrada Registrada correctamente.<br>";
             }
 
             $sqlDetCompras = "INSERT INTO detcompras (idCompra, sociedad, identifMovimiento, ordenCompra, noRecepcion, monto, idCatTipoMoneda, estatus, cPag, claseDocto, fechaDocto, noHes) VALUES $valuesInsert";
@@ -195,10 +199,38 @@ class RegistroCFDIsv40_Mdl
             if (!$idCFDI) {
                 throw new \Exception("No se pudo registrar la Factura.");
             }
+
+            if (self::$debug) {
+                echo "<br> * Factura registrada con ID: $idCFDI <br>";
+                $response["debug"] .= "\n* Factura registrada con ID: $idCFDI <br>";
+            }
+
+            // Insertar impuestos trasladados y retenidos
+            $sqlImpuestos = "INSERT INTO cfdi_facturasImpuestos (idFactura, idCompra, tipo, impuesto, TipoFactor, TasaOCuota, Base, Importe) VALUES ";
+            $valuesImpuestos = [];
+            
+            foreach ($dataDeValidacion["dataFactXML"]["Impuestos"]["Traslados"] as $impuesto) {
+                if (self::$debug) {
+                    echo '<br> * Impuesto Traslado: '. $impuesto["Impuesto"] . '--'. $impuesto["TipoFactor"] . '--'. $impuesto["TasaOCuota"] . '--'. $impuesto["Base"] . '--'. $impuesto["Importe"];
+                }
+                $valuesImpuestos[] = "($idCFDI, '$idCompra', 'Traslado', '{$impuesto["Impuesto"]}', '{$impuesto["TipoFactor"]}', '{$impuesto["TasaOCuota"]}', '{$impuesto["Base"]}', '{$impuesto["Importe"]}')";
+            }
+            
+            foreach ($dataDeValidacion["dataFactXML"]["Impuestos"]["Retenciones"] as $impuesto) {
+                echo '<br> * Impuesto Retencion: '. $impuesto["Impuesto"] . '--'. $impuesto["TipoFactor"] . '--'. $impuesto["TasaOCuota"] . '--'. $impuesto["Base"] . '--'. $impuesto["Importe"];
+                $valuesImpuestos[] = "($idCFDI, '$idCompra', 'Retencion', '{$impuesto["Impuesto"]}', '{$impuesto["TipoFactor"]}', '{$impuesto["TasaOCuota"]}', '{$impuesto["Base"]}', '{$impuesto["Importe"]}')";
+            }
+            
+            if (!empty($valuesImpuestos)) {
+                $sqlImpuestos .= implode(",", $valuesImpuestos);
+                $stmt = $this->db->prepare($sqlImpuestos);
+                $stmt->execute();
+            }
             
             // Commit final si todo salió bien
             BD_Connect::commit();
-            $response["message"] = "La Factura se ha agregado correctamente con el Acuse: $idCompra. - .$idCFDI";
+            $response["message"] = "La Factura se ha agregado correctamente con el Acuse: $idCompra.";
+            $response["debug"] .= "\n* Impuestos Registrados correctamente.";
         } catch (\Exception $e) {
             BD_Connect::rollBack();
             $timestamp = date("Y-m-d H:i:s");

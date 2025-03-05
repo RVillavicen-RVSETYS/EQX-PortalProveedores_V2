@@ -182,7 +182,7 @@ if ($notificaciones['success'] && !empty($notificaciones['data'])) {
                                                     echo '<h4>' . $bloqueoCargaFactura['data']['mensajeCierre'] . '</h4><hr>';
                                                 } else {
                                                 ?>
-                                                    <form class="form" method="post" enctype="multipart/form-data" action="Inicio/registraNuevaFactura">
+                                                    <form class="form" id="Form_CargaFactura" method="post" enctype="multipart/form-data" action="Inicio/registraNuevaFactura">
                                                         <div class="form-group row">
                                                             <span class="col-3 col-form-label"><b><?= $menuModel->txt('No_Proveedor'); ?></b></span>
                                                             <span class="col-3 col-form-label text-success"><b><?= $_SESSION['EQXnoProveedor']; ?></b></span>
@@ -407,6 +407,41 @@ if ($notificaciones['success'] && !empty($notificaciones['data'])) {
             let validHES = false;
             let reqAnticipo = false;
 
+            $("#Form_CargaFactura").submit(function(e) {
+                e.preventDefault();
+                var formData = new FormData(this);
+                $('button[type="submit"]').prop('disabled', true);
+                $.ajax({
+                    type: 'POST',
+                    url: 'Inicio/registraNuevaFactura',
+                    data: formData,
+                    dataType: 'json',
+                    processData: false,
+                    contentType: false,
+                    success: function(response) {
+                        if (response.success) {
+                            $('#Form_CargaFactura')[0].reset();
+                            resetFileInputs();
+                            notificaSuc(response.message); // Muestra el mensaje OK
+                        } else {
+                            notificaBad(response.message); // Muestra el mensaje de error
+                        }
+                    },
+                    error: function() {
+                        notificaBad('Error al querer cargar factura. Consulta a tu administrador');
+                    },
+                    complete: function() {
+                        // Rehabilitar el botón
+                        $('button[type="submit"]').prop('disabled', false);
+
+                        // Limpiar los campos Inputs
+                        $('#Form_CargaFactura')[0].reset();
+                        resetFileInputs();
+                        cargaTablaUltimasFacturas();
+                    }
+                });
+            });
+
             cargaTablaUltimasFacturas();
         });
 
@@ -612,6 +647,13 @@ if ($notificaciones['success'] && !empty($notificaciones['data'])) {
                 validas: validas,
                 invalidas: invalidas
             };
+        }
+
+        function resetFileInputs() {
+            $(".custom-file-input").each(function() {
+                $(this).val(''); // Restablece el input
+                $(this).next('.custom-file-label').text('Elegir archivo...'); // Restablece el label
+            });
         }
     </script>
 

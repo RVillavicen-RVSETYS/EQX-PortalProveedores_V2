@@ -11,7 +11,7 @@ use App\Models\DatosCFDIs\RegistroCFDIsv40_Mdl;
 
 class FacturasNacionalesController extends Controller
 {
-    protected $debug = 1;
+    protected $debug = 0;
 
     public function __construct()
     {
@@ -201,7 +201,9 @@ class FacturasNacionalesController extends Controller
                 var_dump($reglasNegocio);
             }
             if ($reglasNegocio['success'] && $reglasNegocio['isValid']) {
+                if ($this->debug == 1) {
                 echo '<br><br> ****** PASAMOS LAS REGLAS DE NEGOCIO <br>';
+                }
 
                 //13. Ejecutar las Validaciones Fiscales del CFDI
                 $claseFuncionFiscal = 'cfdis' . $versionDocto;
@@ -260,6 +262,8 @@ class FacturasNacionalesController extends Controller
             echo '<br><br>Resultado de registroCFDI: ' . PHP_EOL;
             var_dump($respRegistro);
         }
+
+        return $respRegistro;
 
     }
 

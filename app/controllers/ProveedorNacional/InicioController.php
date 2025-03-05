@@ -86,7 +86,7 @@ class InicioController extends Controller
     public function verDocumento()
     {
         $data = []; // Aquí puedes pasar datos a la vista si es necesario
-
+        $this->debug = 1;
         //Obtener Parametros
         $params = func_get_args();
 
@@ -110,7 +110,7 @@ class InicioController extends Controller
 
         $noProveedor = $_SESSION['EQXnoProveedor'];
         $MDL_compras = new Compras_Mdl();
-        $listaCompras = $MDL_compras->listaComprasFacturadas($noProveedor, 50);
+        $listaCompras = $MDL_compras->listaComprasFacturadas($noProveedor, 50, 'DESC');
 
         $data['listaCompras'] =  $listaCompras['data'];
 
@@ -311,7 +311,6 @@ class InicioController extends Controller
     public function registraNuevaFactura()
     {
         $data = []; // Aquí puedes pasar datos a la vista si es necesario
-        $this->debug = 1;
 
         if ($this->debug == 1) {
             echo '<br>----SESSION<br>';
@@ -386,7 +385,7 @@ class InicioController extends Controller
                                 echo '<br><br>Resultado de verificadorDeDocumentoARecibir NotaCreditoXML: ' . PHP_EOL;
                                 var_dump($notaCredXML);
                             }
-                            if ($notaCredXML['success']){
+                            if ($notaCredXML['success']) {
                                 $doctos['NotaCreditoXML'] = $notaCredXML['data'];
                             }
                         } else {
@@ -437,28 +436,58 @@ class InicioController extends Controller
                                     var_dump($facturaRegistrada);
                                 }
 
-
-
-
-
-
+                                if ($facturaRegistrada['success']) {
+                                    if ($this->debug == 1) {
+                                        echo '<br><h1>Factura Registrada correctamente</h1>Mensaje:' . $facturaRegistrada['message'] . '<br>Debug:' . $facturaRegistrada['debug'] . '<br>';
+                                    } else {
+                                        echo json_encode([
+                                            'success' => true,
+                                            'message' => $facturaRegistrada['message'],
+                                            'debug' => $facturaRegistrada['debug']
+                                        ]);
+                                    }
+                                } else {
+                                    echo json_encode([
+                                        'success' => false,
+                                        'message' => 'Problemas al Registrar la Factura: ' . $facturaRegistrada['message'],
+                                        'debug' => $facturaRegistrada['debug']
+                                    ]);
+                                }
                             } else {
-                                echo 'Horror: Problemas al Validar el XML: ' . $facturaProcesada['message'];
-                            }                                                        
+                                echo json_encode([
+                                    'success' => false,
+                                    'message' => 'Problemas al Validar el XML: ' . $facturaProcesada['message']
+                                ]);
+                            }
                         } else {
-                            echo 'Horror: El XML de la Factura tiene problemas: ' . $factXML['message'];
+                            echo json_encode([
+                                'success' => false,
+                                'message' => 'El XML de la Factura tiene problemas: ' . $factXML['message']
+                            ]);
                         }
                     } else {
-                        echo 'Horror: El PDF de la Factura tiene problemas: ' . $factPDF['message'];
+                        echo json_encode([
+                            'success' => false,
+                            'message' => 'El PDF de la Factura tiene problemas: ' . $factPDF['message']
+                        ]);
                     }
                 } else {
-                    echo 'Horror: Una o mas HES no son validas: ' . $validHES['message'];
+                    echo json_encode([
+                        'success' => false,
+                        'message' => 'Una o mas HES no son validas: ' . $validHES['message']
+                    ]);
                 }
             } else {
-                echo 'Horror: No pudimos verificar si debe Anticipo para exigir la Nota de Credito: ' . $verificaDebeAnticipo['message'];
+                echo json_encode([
+                    'success' => false,
+                    'message' => 'No pudimos verificar si debe Anticipo para exigir la Nota de Credito: ' . $verificaDebeAnticipo['message']
+                ]);
             }
         } else {
-            echo 'Horror: La Orden de Compra no es Valida: ' . $validOrdenCompra['message'];
+            echo json_encode([
+                'success' => false,
+                'message' => 'La Orden de Compra no es Valida: ' . $validOrdenCompra['message']
+            ]);
         }
     }
 }
