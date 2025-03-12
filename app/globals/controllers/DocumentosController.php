@@ -172,7 +172,7 @@ class DocumentosController extends Controller
     public function mostrarDocumento($rutaRelativa, $fileExtension)
     {
         $rutaRelativa = base64_decode($rutaRelativa);
-        $this->debug =1;
+        
         if ($this->debug) {
             echo '<br> Ruta Relativa Codificada: ' . $rutaRelativa . PHP_EOL;
             echo '<br> Extensión del Archivo: ' . $fileExtension . PHP_EOL;

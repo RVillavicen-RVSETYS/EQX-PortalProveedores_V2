@@ -11,7 +11,7 @@ $funcionMenu = generarMenu($menuData['data'], $paginaLink);
 $datosPagina = $funcionMenu['datosPagina'];
 $rutaMenu = $funcionMenu['rutaMenu'];
 
-if ($debug == 1) {
+if ($debug == 0) {
     echo 'Contenido de menuData:';
     var_dump($menuData);
     echo '<br><br>Contenido de areaData:';
@@ -20,10 +20,12 @@ if ($debug == 1) {
     var_dump($areaLink);
     echo '<br><br>Contenido de _SESSION:';
     var_dump($_SESSION);
-    echo '<br><br>Request-URI: '.$_SERVER['REQUEST_URI'].'<br>Contenido de piezasURL:';
+    echo '<br><br>Request-URI: ' . $_SERVER['REQUEST_URI'] . '<br>Contenido de piezasURL:';
     var_dump($piezasURL);
-    echo '<br><br>Ruta del MenuActual: '.$rutaMenu.'<br><br>Contenido de datosPagina:';
+    echo '<br><br>Ruta del MenuActual: ' . $rutaMenu . '<br><br>Contenido de datosPagina:';
     var_dump($datosPagina);
+    echo '<br><br>Valores pasados del Controller Data:';
+    var_dump($data['datosIniciales']);
 }
 
 
@@ -66,7 +68,7 @@ if ($debug == 1) {
         <!-- ============================================================== -->
         <!-- End Topbar header -->
         <!-- ============================================================== -->
-  
+
 
         <!-- ============================================================== -->
         <!-- Page wrapper  -->
@@ -88,77 +90,6 @@ if ($debug == 1) {
                 <!-- Sales chart -->
                 <!-- ============================================================== -->
                 <div class="card-group">
-                    <div class="card">
-                        <div class="card-body">
-                            <div class="row">
-                                <div class="col-md-12">
-                                    <div class="d-flex no-block align-items-center">
-                                        <div>
-                                            <i class="mdi mdi-emoticon font-20 text-muted"></i>
-                                            <p class="font-16 m-b-5">New Clients</p>
-                                        </div>
-                                        <div class="ml-auto">
-                                            <h1 class="font-light text-right">23</h1>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-12">
-                                    <div class="progress">
-                                        <div class="progress-bar bg-info" role="progressbar" style="width: 75%; height: 6px;" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Column -->
-                    <!-- Column -->
-                    <div class="card">
-                        <div class="card-body">
-                            <div class="row">
-                                <div class="col-md-12">
-                                    <div class="d-flex no-block align-items-center">
-                                        <div>
-                                            <i class="mdi mdi-image font-20  text-muted"></i>
-                                            <p class="font-16 m-b-5">New Projects</p>
-                                        </div>
-                                        <div class="ml-auto">
-                                            <h1 class="font-light text-right">169</h1>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-12">
-                                    <div class="progress">
-                                        <div class="progress-bar bg-success" role="progressbar" style="width: 60%; height: 6px;" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Column -->
-                    <!-- Column -->
-                    <div class="card">
-                        <div class="card-body">
-                            <div class="row">
-                                <div class="col-md-12">
-                                    <div class="d-flex no-block align-items-center">
-                                        <div>
-                                            <i class="mdi mdi-currency-eur font-20 text-muted"></i>
-                                            <p class="font-16 m-b-5">New Invoices</p>
-                                        </div>
-                                        <div class="ml-auto">
-                                            <h1 class="font-light text-right">157</h1>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-12">
-                                    <div class="progress">
-                                        <div class="progress-bar bg-purple" role="progressbar" style="width: 65%; height: 6px;" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Column -->
                     <!-- Column -->
                     <div class="card">
                         <div class="card-body">
@@ -167,7 +98,7 @@ if ($debug == 1) {
                                     <div class="d-flex no-block align-items-center">
                                         <div>
                                             <i class="mdi mdi-poll font-20 text-muted"></i>
-                                            <p class="font-16 m-b-5">New Sales</p>
+                                            <p class="font-16 m-b-5">Complementos de Pago Pendientes</p>
                                         </div>
                                         <div class="ml-auto">
                                             <h1 class="font-light text-right">236</h1>
@@ -178,6 +109,141 @@ if ($debug == 1) {
                                     <div class="progress">
                                         <div class="progress-bar bg-danger" role="progressbar" style="width: 70%; height: 6px;" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
                                     </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Column -->
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="d-flex no-block align-items-center">
+                                        <div>
+                                            <i class="mdi mdi-image font-20  text-muted"></i>
+                                            <p class="font-16 m-b-5">Limite de Complementos</p>
+                                        </div>
+                                        <div class="ml-auto">
+                                            <h1 class="font-light text-right">169</h1>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <div class="progress">
+                                        <div class="progress-bar bg-info" role="progressbar" style="width: 100%; height: 6px;" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Column -->
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="d-flex no-block align-items-center">
+                                        <div>
+                                            <i class="mdi mdi-emoticon font-20 text-muted"></i>
+                                            <p class="font-16 m-b-5">Facturas en <?= date('Y'); ?></p>
+                                        </div>
+                                        <div class="ml-auto">
+                                            <h1 class="font-light text-right">0</h1>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <div class="progress">
+                                        <div class="progress-bar bg-success" role="progressbar" style="width: <?= (intval(date('m')) * 100 / 12) ?>%; height: 6px;" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!--Tarjeta Listado de Filtro-->
+                <div class="row">
+                    <div class="col-md-12 col-lg-12">
+                        <div class="card">
+                            <div class="card-header bg-pyme-primary headerFiltros">
+                                <h4 class="m-b-0 text-white">Filtros de búsqueda</h4>
+                                <!-- <button class="btn btn-sm btn-pyme px-0" onclick="actualizarFiltros();"><i class="fas fa-undo text-white"></i> -->
+                                </button>
+                            </div>
+                            <div class="card-body">
+                                <form id="filtrado" method="POST" role="form" autocomplete="off">
+                                    <div class="container-fluid">
+                                        <div class="row ">
+                                            <div class="col-12 col-sm-12 col-md-2 col-lg-3">
+                                                <label class="col-form-label">Rango de Fechas de Ventas</label>
+                                                <div class="input-group input-daterange mb-3" id="date-range">
+                                                    <div class="input-group-addon">
+                                                        <span class="input-group-text pyme b-0 text-white bg-pyme-primary"> Desde </span>
+                                                    </div>
+                                                    <input type="text" class="form-control" name="fechaInicial" id="fechaInicial" />
+                                                    <div class="input-group-addon">
+                                                        <span class="input-group-text pyme b-0 text-white bg-pyme-primary"> Hasta </span>
+                                                    </div>
+                                                    <input type="text" class="form-control " name="fechaFinal" id="fechaFinal" />
+                                                </div>
+                                            </div>
+
+                                            <div class="col-sm-12 col-md-3 col-lg-3">
+                                                <label for="estatusFactura" class="col-form-label">Estado de Factura</label>
+                                                <select class="form-control" name="estatusFactura" id="estatusFactura">
+                                                    <option value="">Todos las Facturas</option>
+                                                    <option value="1">En Proceso</option>
+                                                    <option value="2">Rechazadas</option>
+                                                    <option value="3">Pagadas</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-sm-12 col-md-3 col-lg-3">
+                                                <label for="estatusComplemento" class="col-form-label">Estado del Complemento</label>
+                                                <select class="form-control" name="estatusComplemento" id="estatusComplemento">
+                                                    <option value="">Todos los estatus</option>
+                                                    <option value="1">Pendientes</option>
+                                                    <option value="2">Cargados</option>
+                                                    <option value="3">No requerido</option>
+                                                </select>
+                                            </div>
+
+                                            <div class="col-sm-2 col-md-2 col-lg-2 mt-2 pt-4">
+                                                <button type="submit" class="btn bg-pyme-primary waves-effect waves-light">Filtrar</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!--Tarjeta Listado de Tabla-->
+                <div class="row">
+                    <div class="col-md-12 col-lg-12">
+                        <div class="card border">
+                            <div class="card-header bg-pyme-primary">
+                                <div class="row">
+                                    <div class="col-md-10">
+                                        <h4 class="m-b-0 text-white" id="titleProd">Listado de Facturas</h4>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div id="validation" class="jsgrid" style="position: relative; height: auto; width: 100%;">
+                                    <div class="col-md-12" id="verificaComplementosPago">
+                                        <div class="row">
+                                            <div class="col">
+                                                <h4 class="text-info"><i class="fa fa-exclamation-circle"></i> ¡Atención!</h4>
+                                                <p>Se han detectado facturas pendientes de complemento de pago, por favor carguelos a la brevedad.</p>
+
+                                            </div>
+                                            <div class="col text-right" id="cargaComplementoPago">
+                                                <button class="btn bg-pyme-primary btn-md" id="btnCargaComplementoPago">Cargar Complemento de Pago</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="table-responsive" id="divTablePro"></div>
                                 </div>
                             </div>
                         </div>
@@ -211,11 +277,9 @@ if ($debug == 1) {
     <!-- customizer Panel -->
     <!-- ============================================================== -->
     <aside class="customizer">
-        <a href="javascript:void(0)" class="service-panel-toggle">
-            <i class="fa fa-spin fa-cog"></i>
-        </a>
+        <div class="customizer-body" id="customizer_body">
+        </div>
     </aside>
-    <div class="chat-windows"></div>
     <!-- ============================================================== -->
     <!-- All Jquery -->
     <!-- ============================================================== -->
@@ -227,8 +291,9 @@ if ($debug == 1) {
     <script type="text/javascript" src="/assets/menu/webslidemenu/webslidemenu.js"></script>
     <!-- apps -->
     <script src="/dist/js/app.min.js"></script>
-    <script src="/dist/js/app.init.horizontalEquinox.js"></script>
+    <script src="/dist/js/app.init.horizontalSilme.js"></script>
     <script src="/dist/js/app-style-switcher.horizontal.js"></script>
+    <script src="/dist/js/app-style-switcher.js"></script>
     <!-- slimscrollbar scrollbar JavaScript -->
     <script src="/assets/libs/perfect-scrollbar/dist/perfect-scrollbar.jquery.min.js"></script>
     <script src="/assets/extra-libs/sparkline/sparkline.js"></script>
@@ -238,17 +303,63 @@ if ($debug == 1) {
     <script src="/dist/js/sidebarmenu.js"></script>
     <!--Custom JavaScript -->
     <script src="/dist/js/custom.js"></script>
+    <script src="/assets/libs/toastr/build/toastr.min.js"></script>
     <!--This page JavaScript -->
     <!--chartis chart-->
     <script src="/assets/libs/chartist/dist/chartist.min.js"></script>
-    <script src="/assets/libs/chartist-plugin-tooltips/dist/chartist-plugin-tooltip.min.js"></script>
+    <script src="/assets/libs/chartist-plugin-tooltips/dist/chartist-plugin-tooltip.js"></script>
     <!--c3 charts -->
-    <script src="/assets/extra-libs/c3/d3.min.js"></script>
-    <script src="/assets/extra-libs/c3/c3.min.js"></script>
-    <script src="/assets/extra-libs/jvector/jquery-jvectormap-2.0.2.min.js"></script>
-    <script src="/assets/extra-libs/jvector/jquery-jvectormap-world-mill-en.js"></script>
-    <script src="/dist/js/pages/dashboards/dashboard1.js"></script>
+    <script src="/assets/extra-libs/datatables.net/js/jquery.dataTables.min-ESP.js"></script>
+    <script src="/dist/js/pages/datatable/datatable-basic.init.js"></script>
+    <script src="/assets/libs/select2/dist/js/select2.min.js"></script>
+    <script src="/assets/libs/moment/moment.js"></script>
+    <script src="/assets/libs/bootstrap-datepicker/dist/js/bootstrap-datepicker.js"></script>
+    <script src="/assets/libs/bootstrap-datepicker/dist/locales/bootstrap-datepicker.es.min.js"></script>
+
+    <script>
+        $(document).ready(function() {
+            $('.select2').select2();
+            $("#fechaInicial").val(moment().format('01/MM/YYYY'));
+            $("#fechaFinal").val(moment().format('DD/MM/YYYY'));
+            jQuery('.mydatepicker, #datepicker, .input-group.date').datepicker();
+            jQuery('#date-range').datepicker({
+                toggleActive: true,
+                orientation: "bottom",
+                language: 'es'
+            });
+        });
+
+        $("#filtrado").submit(function(e) {
+            e.preventDefault();
+            var formData = $("#filtrado").serialize();
+            $.ajax({
+                type: 'POST',
+                url: '../templates/creditos/historialCreditos.php',
+                data: formData,
+                success: function(respuesta) {
+                    $('#divTablePro').html(respuesta);
+                },
+                error: function() {
+                    notificaBad('Problemas al consultar tus Facturas. Notifica a tu administrador');
+                },
+                beforeSend: function() {
+                    $('#divTablePro').html('<div class="loading text-center"><img src="../assets/images/loading.gif" alt="loading" /><br/>Un momento, por favor...</div>');
+                }
+            });
+        });
+
+        function detalleCompra(acuse) {
+            $('#customizer_body').html('<div class="loading text-center"><img src="../assets/images/loading.gif" alt="loading" /><br/>Un momento, por favor...</div>');
+            $(".customizer").toggleClass('show-service-panel');
+            $(".service-panel-toggle").toggle();
+            $.post("Inicio/detalladoDeCompra", {
+                    acuse: acuse
+                },
+                function(respuesta) {
+                    $("#customizer_body").html(respuesta);
+                });
+        }
+    </script>
 </body>
 
 </html>
-       

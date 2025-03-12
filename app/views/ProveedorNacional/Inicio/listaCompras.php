@@ -84,7 +84,7 @@ if ($debug == 1) {
                 }
 
                 echo '<tr class="' . $txtColor . ' ' . $bgColor . '" >
-                    <td>' . $row['acuse'] . '</td>
+                    <td class="text-center">' . $row['acuse'] . '</td>
                     <td>' . $claseDocto . '</td>
                     <td>' . $row['ordenCompra'] . '</td>
                     <td>' . $recepciones . '</td>

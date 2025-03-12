@@ -1,4 +1,4 @@
-/****** ALL VARIABLES BUSINESS ******/
+/****** ALL VARIABLES Pyme ******/
 
 :root {
     /*BG Del Menu*/
@@ -138,7 +138,20 @@
 
     --var-padding-logo: 8px 0px 0px 0px;
 
-    .bg-Equinoxgold {
+    .bg-pyme-primary {
         background-color:  #008000;
+        color: #fff !important;
     }
+
+    .bg-pyme-secundary {
+        background-color:  #041c4c;
+    }
+    
+    .card-header h4, .card-header button{
+        display: inline-block;
+    }
+    .card-header button{
+        float: right;
+    }
+
 }

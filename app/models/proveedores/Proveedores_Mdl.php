@@ -48,7 +48,7 @@ class Proveedores_Mdl
                         provFact.fechaReg AS 'FechaRegBloqueo',
                         prov.correo AS 'Correo'
                     FROM
-                        vw_data__Proveedores_AccesoProveedores prov
+                        vw_data_Proveedores_AccesoProveedores prov
                         LEFT JOIN conf_provFactSiempre provFact ON prov.id = provFact.idProveedor 
                     WHERE
                         prov.estatus = 1";
@@ -94,7 +94,7 @@ class Proveedores_Mdl
         }
         try {
 
-            $sql = "SELECT prov.id AS 'IdProveedor', prov.nombre AS 'Proveedor' FROM vw_data__Proveedores_AccesoProveedores prov WHERE prov.estatus = 1";
+            $sql = "SELECT prov.id AS 'IdProveedor', prov.nombre AS 'Proveedor' FROM vw_data_Proveedores_AccesoProveedores prov WHERE prov.estatus = 1";
 
             // Modo debug para imprimir consulta con parámetros
             if (self::$debug) {
@@ -381,7 +381,6 @@ class Proveedores_Mdl
             ];
 
             return ['success' => true, 'message' => 'Todo OK', 'data' => $responseData];
-
         } catch (\Exception $e) {
             // Registrar error
             $timestamp = date("Y-m-d H:i:s");
@@ -629,6 +628,67 @@ class Proveedores_Mdl
                 echo "Error Al Actualizar La Lista De Proveedores: " . $e->getMessage();
             }
             return ['success' => false, 'message' => 'Problemas Con La Conexión, Notifica a tu administrador.'];
+        }
+    }
+
+    public function complementosPagoPendientesPorProveedor($idProveedor)
+    {
+        try {
+            $sql = "SELECT 
+                        fc.uuid, 
+                        fc.monto, 
+                        fc.idCatTipoMoneda, 
+                        fc.serie, 
+                        fc.folio, 
+                        fc.fechaReg
+                    FROM 
+                        compras cp
+                        INNER JOIN cfdi_facturas fc ON cp.id = fc.idCompra
+                        LEFT JOIN cfdi_complementoPagoDet cpd ON fc.uuid = cpd.uuidFact
+                    WHERE 
+                        cp.idProveedor = :idProveedor 
+                        AND cp.idPago >= 1 
+                        AND fc.idCatMetodoPago = 'PPD' 
+                        AND ISNULL(cpd.id)";
+
+            if (self::$debug) {
+                $params = [':idProveedor' => $idProveedor];
+                $this->db->imprimirConsulta($sql, $params, 'Obtener Complementos Pendientes:');
+            }
+
+            $stmt = $this->db->prepare($sql);
+            $stmt->bindParam(':idProveedor', $idProveedor, PDO::PARAM_INT);
+            $stmt->execute();
+            $dataResul = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            $cantData = count($dataResul);
+
+
+            if (self::$debug) {
+                echo '<br>Resultado de Query:';
+                var_dump($dataResul);
+                echo '<br><br>';
+            }
+
+            if ($dataResul) {
+                $fechaMasVieja = null;
+                foreach ($dataResul as $row) {
+                    $fecha = new \DateTime($row['fechaReg']);
+                    if ($fechaMasVieja === null || $fecha < $fechaMasVieja) {
+                        $fechaMasVieja = $fecha;
+                    }
+                }
+
+                return ['success' => true, 'data' => $dataResul, 'cantData' => $cantData, 'oldData' => $fechaMasVieja->format('Y-m-d H:i:s')];
+            } else {
+                if (self::$debug) {
+                    echo "No Se Encontraron Complementos Pendientes.<br>";
+                }
+                return ['success' => true, 'message' => 'No Se Encontraron Complementos Pendientes.', 'cantData' => 0];
+            }
+        } catch (\PDOException $e) {
+            $timestamp = date("Y-m-d H:i:s");
+            error_log("[$timestamp] app/models/Proveedores_Mdl.php -> Error al obtener complementos pendientes: " . $e->getMessage(), 3, LOG_FILE_BD);
+            return ['success' => false, 'message' => 'Error Al Obtener Complementos Pendientes. Notifica a tu administrador', 'cantData' => 0];
         }
     }
 }

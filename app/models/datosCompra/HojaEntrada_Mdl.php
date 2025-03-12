@@ -31,6 +31,7 @@ class HojaEntrada_Mdl
 
     public function verificaHojaEntrada($ordenCompra, $hojaEntrada)
     {
+        //self::$debug = 1;
         if (self::$debug) {
             echo "<br>verificaHojaEntrada ordenCompra: $ordenCompra";
             echo "<br>verificaHojaEntrada HojaEntrada: $hojaEntrada<br><br>";
@@ -156,6 +157,7 @@ class HojaEntrada_Mdl
 
     public function verificaYaFacturadaHES($hojaEntrada)
     {
+        //self::$debug = 1;
         if (self::$debug) {
             echo "<br>Valor de Hoja de entrada: " . $hojaEntrada . PHP_EOL;
         }

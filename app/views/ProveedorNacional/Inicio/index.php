@@ -111,7 +111,7 @@ if ($notificaciones['success'] && !empty($notificaciones['data'])) {
                 <div class="row">
                     <div class="col-lg-9 col-md-9">
                         <div class="card">
-                            <h3 class="card-title m-t-10 m-l-15"><?= $_SESSION['EQXnombreUser']; ?></h3>
+                            <h3 class="card-title m-t-10 m-l-15"><?= $_SESSION['EQXrazonSocial']; ?></h3>
                             <p class="card-text m-l-15"><b><?= $_SESSION['EQXrfc']; ?></b>.<br>
                                 <?= $_SESSION['EQXcorreo']; ?></p>
                         </div>
@@ -125,7 +125,13 @@ if ($notificaciones['success'] && !empty($notificaciones['data'])) {
                                         <p class="font-16 m-b-5"><?= $menuModel->txt('Complementos_Pendientes'); ?></p>
                                     </div>
                                     <div class="col-5">
-                                        <h1 class="font-light text-right mb-0">236</h1>
+                                        <h1 class="font-light text-right mb-0" id="complementosPendientes">
+                                            <div class="loader">
+                                                <span class="bar"></span>
+                                                <span class="bar"></span>
+                                                <span class="bar"></span>
+                                            </div>
+                                        </h1>
                                     </div>
                                 </div>
                             </div>
@@ -148,7 +154,7 @@ if ($notificaciones['success'] && !empty($notificaciones['data'])) {
                     <!--Tarjeta Listado de Ultimas Facturas-->
                     <div class="col-md-8 col-lg-8">
                         <div class="card border">
-                            <div class="card-header bg-Equinoxgold">
+                            <div class="card-header bg-pyme-primary">
                                 <div class="row">
                                     <div class="col-md-10">
                                         <h4 class="m-b-0 text-white"><?= $menuModel->txt('Ultimas_Facturas'); ?></h4>
@@ -167,7 +173,7 @@ if ($notificaciones['success'] && !empty($notificaciones['data'])) {
                         <div class="row">
                             <div class="col-md-12 col-lg-12">
                                 <div class="card border">
-                                    <div class="card-header bg-Equinoxgold">
+                                    <div class="card-header bg-pyme-primary">
                                         <div class="row">
                                             <div class="col-md-10">
                                                 <h4 class="m-b-0 text-white"><?= $menuModel->txt('Carga_Factura'); ?></h4>
@@ -236,8 +242,10 @@ if ($notificaciones['success'] && !empty($notificaciones['data'])) {
 
                                                             <div id="desbloquear-btn1">
                                                                 <button type="reset" class="btn btn-danger waves-effect" onclick="resetForm()"><i class="far fa-trash-alt text-white"></i> <?= $menuModel->txt('Limpiar'); ?></button>
-
                                                                 <button type="submit" class="btn btn-success waves-effect waves-light"><?= $menuModel->txt('Carga_Factura'); ?></button>
+                                                            </div>
+                                                            <div id="bloquear-btn1" style="display: none;">
+                                                            <div class="loading text-center"><img src="../assets/images/loadingHorizontal.gif" alt="loading..."/></div>
                                                             </div>
                                                         </div>
                                                     </form>
@@ -254,7 +262,7 @@ if ($notificaciones['success'] && !empty($notificaciones['data'])) {
                         <div class="row">
                             <div class="col-md-12 col-lg-12">
                                 <div class="card border">
-                                    <div class="card-header bg-Silmeagro">
+                                    <div class="card-header bg-pyme-primary">
                                         <div class="row">
                                             <div class="col-md-10">
                                                 <h4 class="m-b-0 text-white"><?= $menuModel->txt('Carga_Factura_por_anticipo'); ?></h4>
@@ -410,7 +418,7 @@ if ($notificaciones['success'] && !empty($notificaciones['data'])) {
             $("#Form_CargaFactura").submit(function(e) {
                 e.preventDefault();
                 var formData = new FormData(this);
-                $('button[type="submit"]').prop('disabled', true);
+                bloquearBtn('btn1');
                 $.ajax({
                     type: 'POST',
                     url: 'Inicio/registraNuevaFactura',
@@ -419,31 +427,52 @@ if ($notificaciones['success'] && !empty($notificaciones['data'])) {
                     processData: false,
                     contentType: false,
                     success: function(response) {
-                        if (response.success) {
-                            $('#Form_CargaFactura')[0].reset();
-                            resetFileInputs();
+                        if (response.success) {                            
+                            resetFormulario("Form_CargaFactura");
                             notificaSuc(response.message); // Muestra el mensaje OK
                         } else {
                             notificaBad(response.message); // Muestra el mensaje de error
                         }
+                        desbloquearBtn('btn1');
                     },
                     error: function() {
                         notificaBad('Error al querer cargar factura. Consulta a tu administrador');
+                        desbloquearBtn('btn1');
                     },
                     complete: function() {
                         // Rehabilitar el botón
-                        $('button[type="submit"]').prop('disabled', false);
+                        desbloquearBtn('btn1');
 
                         // Limpiar los campos Inputs
-                        $('#Form_CargaFactura')[0].reset();
-                        resetFileInputs();
+                        resetFormulario("Form_CargaFactura");
                         cargaTablaUltimasFacturas();
                     }
                 });
             });
 
+            // Traere datos iniciales
+            cargarDatosIniciales();
             cargaTablaUltimasFacturas();
         });
+
+        function cargarDatosIniciales() {
+            $.ajax({
+                type: 'POST',
+                url: 'Inicio/datosIniciales',
+                dataType: 'json',
+                success: function(response) {
+                    if (response.success) {
+                        $('#complementosPendientes').html(response.cantComplementos);
+                    } else {
+                        $('#complementosPendientes').html('ND');
+                        notificaBad(response.message);
+                    }
+                },
+                error: function() {
+                    console.log('Error al cargar los datos iniciales. Consulta a tu administrador');
+                }
+            });
+        }
 
         function cargaTablaUltimasFacturas() {
             $('#cajaResultados').html('<div class="loading text-center"><img src="../assets/images/loading.gif" alt="loading" /><br/>Un momento, por favor...</div>');
@@ -649,7 +678,20 @@ if ($notificaciones['success'] && !empty($notificaciones['data'])) {
             };
         }
 
-        function resetFileInputs() {
+        function bloquearBtn(btn) {
+            $('button[type="submit"]').prop('disabled', true);
+            $('#desbloquear-' + btn).hide();
+            $('#bloquear-' + btn).show();
+        }
+
+        function desbloquearBtn(btn) {
+            $('button[type="submit"]').prop('disabled', false);
+            $('#desbloquear-' + btn).show();
+            $('#bloquear-' + btn).hide();
+        }
+
+        function resetFormulario(idForm) {
+            $('#'+idForm)[0].reset();
             $(".custom-file-input").each(function() {
                 $(this).val(''); // Restablece el input
                 $(this).next('.custom-file-label').text('Elegir archivo...'); // Restablece el label

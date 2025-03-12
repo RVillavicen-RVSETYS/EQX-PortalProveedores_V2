@@ -11,10 +11,11 @@ use App\Models\DatosCompra\OrdenCompra_Mdl;
 use App\Models\DatosCompra\Anticipos_Mdl;
 use App\Models\DatosCompra\HojaEntrada_Mdl;
 use App\Models\DatosCompra\Configuraciones_Mdl;
+use App\Models\Proveedores\Proveedores_Mdl;
+
 use App\Globals\Controllers\DocumentosController;
 use App\Globals\Controllers\FacturasNacionalesController;
 use App\Globals\Controllers\CfdisController;
-
 
 class InicioController extends Controller
 {
@@ -86,7 +87,7 @@ class InicioController extends Controller
     public function verDocumento()
     {
         $data = []; // Aquí puedes pasar datos a la vista si es necesario
-        $this->debug = 1;
+        
         //Obtener Parametros
         $params = func_get_args();
 
@@ -102,6 +103,34 @@ class InicioController extends Controller
 
         $Ctrl_Documentos = new DocumentosController();
         return $Ctrl_Documentos->mostrarDocumento($rutaDocumento, $tipoDocumeto);
+    }
+
+    public function datosIniciales()
+    {
+        $data = []; // Aquí puedes pasar datos a la vista si es necesario
+
+        $noProveedor = $_SESSION['EQXnoProveedor'];
+        $MDL_proveedores = new Proveedores_Mdl();
+        $complementosPendientes = $MDL_proveedores->complementosPagoPendientesPorProveedor($noProveedor);
+        if ($this->debug == 1) {
+            echo '<br><br>Resultado de Complemento de Pago Pendientes: ' . PHP_EOL;
+            var_dump($complementosPendientes);
+        }
+
+        if ($complementosPendientes['success']) {
+            $Message = 'El proveedor tiene complementos Pendientes.';
+            echo json_encode([
+                'success' => true,
+                'cantComplementos' => $complementosPendientes['cantData'],
+                'message' => $Message
+            ]);
+        } else {
+            $errorMessage = $complementosPendientes['message'];
+            echo json_encode([
+                'success' => false,
+                'message' => $errorMessage
+            ]);
+        }     
     }
 
     public function tablaUltimas50Facturas()
@@ -225,6 +254,8 @@ class InicioController extends Controller
         $data = []; // Aquí puedes pasar datos a la vista si es necesario
         $ordenCompra = $_POST['ordenCompra'] ?? '';
         $hojaEntrada = $_POST['listaHES'] ?? '';
+
+        //$this->debug = 1;
 
         if ($this->debug == 1) {
             echo "<br>Contenido de data:<br>";

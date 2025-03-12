@@ -195,7 +195,7 @@ class ExcepcionesProveedores_Mdl
                     FROM
                         conf_provUsoCfdiDistinto ucd
                         INNER JOIN proveedores prov ON ucd.idProveedor = prov.id
-                        INNER JOIN cat_satUsoCfdi uc ON ucd.usoCFDI = uc.id";
+                        INNER JOIN sat_catUsoCfdi uc ON ucd.usoCFDI = uc.id";
 
             // Modo debug para imprimir consulta con parámetros
             if (self::$debug) {
@@ -292,7 +292,7 @@ class ExcepcionesProveedores_Mdl
                         uc.id AS 'IdUsoCfdi',
                         uc.descripcion AS 'UsoCfdi' 
                     FROM
-                        cat_satUsoCfdi uc 
+                        sat_catUsoCfdi uc 
                     WHERE
                         uc.estatus = 1";
 

@@ -113,7 +113,7 @@ class RegistroCFDIsv40_Mdl
                 throw new \Exception("Problemas al Almacenar la Factura, Notifica a tu Administrador.");
             } else {
                 $urlFacturaPDF = $almacenaPDF["data"]["relativePath"];
-                $urlFacturaXML = $almacenaPDF["data"]["relativePath"];
+                $urlFacturaXML = $almacenaXML["data"]["relativePath"];
 
                 if (self::$debug) {
                     echo "<br> * Factura almacenada correctamente. <br>";

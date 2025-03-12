@@ -31,9 +31,9 @@ class Login_Mdl
         }
         try {
 
-            $sql = "SELECT pv.id, pv.nombre, pv.pais, pv.poblacion, if(pv.pais = 'MX', 2, 3) AS idNivel, pv.grupo, pv.rfc, pv.cpag,
+            $sql = "SELECT pv.id, pv.nombre, pv.razonSocial, pv.pais, pv.poblacion, if(pv.pais = 'MX', 2, 3) AS idNivel, pv.grupo, pv.rfc, pv.cpag,
                     pv.moneda, pv.pass, pv.correo, pv.estatus, if(pv.pais = 'MX', 'Proveedor', 'Supplier') AS nivel_nombre, pv.idioma
-                    FROM vw_data__Proveedores_AccesoProveedores pv
+                    FROM vw_data_Proveedores_AccesoProveedores pv
                     WHERE pv.id = :usuario "; // Usa un marcador de posición
 
             if (self::$debug) {
@@ -60,12 +60,20 @@ class Login_Mdl
                     return ['success' => false, 'message' => 'Usuario deshabilitado'];
                 }
 
-                // Verificar si el usuario tiene asignado algun Nivel
+                // Verificar si el usuario tiene RFC
                 if ($usuarioData['pais'] == 'MX' && empty($usuarioData['rfc'])) {
                     if (self::$debug) {
                         echo "El Proveedor no tiene RFC registrado.<br>"; // Mostrar error en modo depuración
                     }
                     return ['success' => false, 'message' => 'El Proveedor no tiene RFC registrado.'];
+                }
+
+                // Verificar si el usuario tiene RazonSocial
+                if ($usuarioData['pais'] == 'MX' && empty($usuarioData['razonSocial'])) {
+                    if (self::$debug) {
+                        echo "El Proveedor no tiene Razon Social registrada.<br>"; // Mostrar error en modo depuración
+                    }
+                    return ['success' => false, 'message' => 'El Proveedor no tiene Razon Social Registrada.'];
                 }
 
                 // Verificar si la contraseña es correcta
@@ -153,7 +161,7 @@ class Login_Mdl
             echo "Id de Usuario: $userId <br>";
         }
 
-        $sql = "SELECT estatus FROM vw_data__Proveedores_AccesoProveedores WHERE id = :userId";
+        $sql = "SELECT estatus FROM vw_data_Proveedores_AccesoProveedores WHERE id = :userId";
         if (self::$debug) {
             $params = [':userId' => $userId];
             $this->db->imprimirConsulta($sql, $params, 'Verifica si el usuario sigue Activo.');

@@ -196,8 +196,8 @@ function generaSeccionUserMenu($areaData, $areaLink)
             break;
 
         default:
-            $linkPerfil = '/MiPerfil';
-            $linkSoporte = URL_BASE_PROYECT . '/soporteProveedor';
+            $linkPerfil = 'MiPerfil';
+            $linkSoporte = 'soporteProveedor';
             $linkLogout = URL_BASE_PROYECT . '/logout.php';
             $nameUser = $_SESSION['EQXnombreUserCto'];
             $subText = $_SESSION['EQXcorreo'];
@@ -228,16 +228,12 @@ function generaSeccionUserMenu($areaData, $areaLink)
     <li aria-haspopup="true"><a href="#"><i class="fas fa-user-tie"></i><?= $nameUser; ?><span class="wsarrow"></span>
         </a>
         <ul class="sub-menu sub-session">
-
-            <span class="with-arrow">
-                <span class="bg-primary"></span>
-            </span>
-            <div class="d-flex no-block align-items-center p-15 bg-primary text-white m-b-10">
+            <div class="d-flex no-block align-items-center p-15 bg-pyme-secundary text-white m-b-5">
                 <div class="">
-                    <img src="/assets/images/users/2.jpg" alt="user" class="rounded-circle" width="60">
+                    <img src="/assets/images/users/avatar.jpg" alt="user" class="rounded-circle" width="60">
                 </div>
                 <div class="m-l-10">
-                    <h4 class="m-b-0"><?= $_SESSION['EQXnombreNivel']; ?></h4>
+                    <h4 class="m-b-0"><b><?= $_SESSION['EQXnombreNivel']; ?></b></h4>
                     <p class=" m-b-0"><?= $subText; ?></p>
                 </div>
             </div>

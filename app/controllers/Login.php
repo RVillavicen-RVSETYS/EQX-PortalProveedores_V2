@@ -58,6 +58,7 @@ class Login
                 $_SESSION['EQXgenero'] = 'Masculino';
                 $_SESSION['EQXnoProveedor'] = $authResult['data']['id'];
                 $_SESSION['EQXrfc'] = $authResult['data']['rfc'];
+                $_SESSION['EQXrazonSocial'] = $authResult['data']['razonSocial'];
                 $_SESSION['EQXcorreo'] = $authResult['data']['correo'];
                 $_SESSION['EQXpais'] = $authResult['data']['pais'];
                 $_SESSION['EQXmoneda'] = $authResult['data']['moneda'];
