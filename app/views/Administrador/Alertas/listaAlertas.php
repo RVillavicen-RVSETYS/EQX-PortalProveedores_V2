@@ -19,11 +19,11 @@ if ($debug == 1) {
 }
 
 ?>
-<div class="mb-3">
+<div class="mb-3 d-flex justify-content-end">
     <button type="button" class="btn ink-reaction btn-primary" data-toggle="modal" data-target="#modalNuevaAlerta"><i class="fa fa-plus"></i> Crear Alerta</button>
 </div>
 
-<table class="table table-sm">
+<table class="table table-sm" id="tableAlertas">
     <thead>
         <tr>
             <th>#</th>
@@ -112,7 +112,7 @@ if ($debug == 1) {
 <div class="modal fade" id="modalNuevaAlerta" role="dialog" aria-labelledby="modalNuevaAlertaLabel" aria-hidden="true">
     <div class="modal-dialog modal-md modalNuevaAlerta" role="document">
         <div class="modal-content">
-            <div class="modal-header" style="background-color:#11334b;">
+            <div class="modal-header bg-Equinoxgold text-white">
                 <h5 class="modal-title text-white" id="modalNuevaAlertaLabel">Crear Nueva Alerta</h5>
                 <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close" onclick="$('#modalNuevaAlerta').modal('hide');">
                     <span aria-hidden="true">&times;</span>
@@ -342,3 +342,56 @@ if ($debug == 1) {
         </div>
     </div>
 </div>
+
+<script>
+    /*Este Se Queda Aquí*/
+    $('#tableAlertas').DataTable({
+        iDisplayLength: 10,
+        responsive: false,
+        fixedColumns: true,
+        fixedHeader: true,
+        scrollCollapse: true,
+        autoWidth: true,
+        scrollCollapse: true,
+        bSort: true,
+        dom: 'Blfrtip',
+        lengthMenu: [
+            [10, 25, 50, -1],
+            [10, 25, 50, "Todo"]
+        ],
+        info: true,
+        buttons: [{
+                extend: 'pdfHtml5',
+                className: 'btn btn-pdf bg-Equinoxgold text-white',
+                orientation: 'landscape',
+                pageSize: 'LEGAL',
+                text: "Pdf",
+            },
+
+            {
+                extend: 'csvHtml5',
+                className: 'btn btn-pdf bg-Equinoxgold text-white',
+                text: "Csv",
+                exportOptions: {
+                    columns: ":not(.no-exportar)"
+                }
+            },
+            {
+                extend: 'excelHtml5',
+                className: 'btn btn-pdf bg-Equinoxgold text-white',
+                text: "Excel",
+                exportOptions: {
+                    columns: ":not(.no-exportar)"
+                }
+            },
+            {
+                extend: 'copy',
+                className: 'btn btn-pdf bg-Equinoxgold text-white',
+                text: "Copiar",
+                exportOptions: {
+                    columns: ":not(.no-exportar)"
+                }
+            }
+        ]
+    });
+</script>
