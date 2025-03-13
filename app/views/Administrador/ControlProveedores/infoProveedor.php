@@ -23,7 +23,7 @@ if ($debug == 1) {
 <div class="row">
     <div class="col-2">
         <div class="list-group d-flex text-center" id="list-tab" role="tablist">
-            <a class="list-group-item list-group-item-action font-18" id="list-Proveedor-list" data-toggle="list" href="#list-Proveedor" onclick="datosGenerales(<?= $idProveedor; ?>);" role="tab" aria-controls="Proveedor"><i class="fas fa-address-card"></i><br>PROVEEDOR<br><small>Datos Generales.</small></a>
+            <a class="list-group-item list-group-item-action font-18 active" id="list-Proveedor-list" data-toggle="list" href="#list-Proveedor" onclick="datosGenerales(<?= $idProveedor; ?>);" role="tab" aria-controls="Proveedor"><i class="fas fa-address-card"></i><br>PROVEEDOR<br><small>Datos Generales.</small></a>
             <a class="list-group-item list-group-item-action font-18" id="list-Recepciones-list" data-toggle="list" href="#list-Recepciones" onclick="recepciones(<?= $idProveedor; ?>);" role="tab" aria-controls="Recepciones"><i class="mdi mdi-email"></i><br>RECEPCIONES<br><small>Sin Facturas Del Prov.</small></a>
             <a class="list-group-item list-group-item-action font-18" id="list-SinFecha-list" data-toggle="list" href="#list-SinFecha" onclick="sinFecha(<?= $idProveedor; ?>);" role="tab" aria-controls="SinFecha"><i class="fas fa-calendar-alt"></i><br>SIN FECHA<br><small>Fac. Sin Fecha Pago.</small></a>
             <a class="list-group-item list-group-item-action font-18" id="list-Historico-list" data-toggle="list" href="#list-Historico" onclick="historico(<?= $idProveedor; ?>);" role="tab" aria-controls="Historico"><i class="fas fa-file-pdf"></i><br>HISTORICO<br><small>Historial De Facturas.</small></a>
@@ -31,7 +31,7 @@ if ($debug == 1) {
     </div>
     <div class="col-10 border">
         <div class="tab-content" id="nav-tabContent">
-            <div class="tab-pane fade" id="list-Proveedor" role="tabpanel" aria-labelledby="list-Proveedor-list">
+            <div class="tab-pane fade active show" id="list-Proveedor" role="tabpanel" aria-labelledby="list-Proveedor-list">
 
             </div>
             <div class="tab-pane fade" id="list-Recepciones" role="tabpanel" aria-labelledby="list-Recepciones-list">
@@ -46,3 +46,9 @@ if ($debug == 1) {
         </div>
     </div>
 </div>
+
+<script>
+    setTimeout(function() {
+        datosGenerales(<?= $idProveedor; ?>);
+    }, 100); // Retraso de 100ms (ajustable)
+</script>

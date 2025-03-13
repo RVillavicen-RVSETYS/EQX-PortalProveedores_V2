@@ -4,7 +4,7 @@ namespace App\Controllers\Administrador;
 
 use Core\Controller;
 use App\Models\Menu_Mdl;
-use App\Models\Proveedores_Mdl;
+use App\Models\Proveedores\Proveedores_Mdl;
 
 class ControlProveedoresController extends Controller
 {
@@ -154,6 +154,153 @@ class ControlProveedoresController extends Controller
 
                 // Cargar la vista correspondiente
                 $this->view('Administrador/ControlProveedores/datosGenerales', $data);
+            } else {
+                $timestamp = date("Y-m-d H:i:s");
+                error_log("[$timestamp] app\controllers\Administrador\ControlProveedoresController ->Error al listar las Areas: " . PHP_EOL, 3, LOG_FILE);
+                echo 'Problemas con las Areas de Acceso:' . $resultIdArea['message'];
+                exit(0);
+            }
+        } else {
+            $timestamp = date("Y-m-d H:i:s");
+            error_log("[$timestamp] app\controllers\Administrador\ControlProveedoresController ->Error al buscar Id del Area (nombre: $areaLink): " . PHP_EOL, 3, LOG_FILE);
+            echo 'No pudimos traer el detallado del Menu:' . $resultIdArea['message'];
+            exit(0);
+        }
+    }
+
+    public function recepcionesSinFactura()
+    {
+        $data = []; // Aquí puedes pasar datos a la vista si es necesario
+        $idProveedor = $_POST['idProveedor'] ?? '';
+
+        $namespaceParts = explode('\\', __NAMESPACE__);
+        $areaLink = end($namespaceParts); // Obtiene el ultimo parametro del NameSpace
+
+        $menuModel = new Menu_Mdl();
+        $resultIdArea = $menuModel->obtenerIdAreaPorLink($areaLink);
+
+        $proveedoresModel = new Proveedores_Mdl();
+        $resultProveedores = $proveedoresModel->obtenerRecepcionesSinFactura($idProveedor);
+
+        if ($resultIdArea['success']) {
+            $idArea = $resultIdArea['data'];
+        } else {
+            $timestamp = date("Y-m-d H:i:s");
+            error_log("[$timestamp] app\controllers\Administrador\ControlProveedoresController ->Error al buscar Id del Area (nombre: $areaLink): " . PHP_EOL, 3, LOG_FILE);
+            echo 'No pudimos traer el id del Area:' . $resultIdArea['message'];
+            exit(0);
+        }
+
+        $menuData = $menuModel->obtenerEstructuraMenu($_SESSION['EQXidNivel'], $idArea);
+        $areaData = $menuModel->listarAreasDisponibles($_SESSION['EQXidNivel']);
+
+        if ($menuData['success']) {
+            if ($areaData['success']) {
+                // Enviar datos a la Vista
+                $data['menuData'] =  $menuData;
+                $data['areaData'] =  $areaData;
+                $data['areaLink'] =  $areaLink;
+                $data['datosRecepcionesSinFactura'] = $resultProveedores;
+
+                // Cargar la vista correspondiente
+                $this->view('Administrador/ControlProveedores/recepcionesSinFactura', $data);
+            } else {
+                $timestamp = date("Y-m-d H:i:s");
+                error_log("[$timestamp] app\controllers\Administrador\ControlProveedoresController ->Error al listar las Areas: " . PHP_EOL, 3, LOG_FILE);
+                echo 'Problemas con las Areas de Acceso:' . $resultIdArea['message'];
+                exit(0);
+            }
+        } else {
+            $timestamp = date("Y-m-d H:i:s");
+            error_log("[$timestamp] app\controllers\Administrador\ControlProveedoresController ->Error al buscar Id del Area (nombre: $areaLink): " . PHP_EOL, 3, LOG_FILE);
+            echo 'No pudimos traer el detallado del Menu:' . $resultIdArea['message'];
+            exit(0);
+        }
+    }
+
+    public function sinFechaPago()
+    {
+        $data = []; // Aquí puedes pasar datos a la vista si es necesario
+        $idProveedor = $_POST['idProveedor'] ?? '';
+
+        $namespaceParts = explode('\\', __NAMESPACE__);
+        $areaLink = end($namespaceParts); // Obtiene el ultimo parametro del NameSpace
+
+        $menuModel = new Menu_Mdl();
+        $resultIdArea = $menuModel->obtenerIdAreaPorLink($areaLink);
+
+        //$proveedoresModel = new Proveedores_Mdl();
+        //$resultProveedores = $proveedoresModel->obtenerFacturasSinFechaPago($idProveedor);
+
+        if ($resultIdArea['success']) {
+            $idArea = $resultIdArea['data'];
+        } else {
+            $timestamp = date("Y-m-d H:i:s");
+            error_log("[$timestamp] app\controllers\Administrador\ControlProveedoresController ->Error al buscar Id del Area (nombre: $areaLink): " . PHP_EOL, 3, LOG_FILE);
+            echo 'No pudimos traer el id del Area:' . $resultIdArea['message'];
+            exit(0);
+        }
+
+        $menuData = $menuModel->obtenerEstructuraMenu($_SESSION['EQXidNivel'], $idArea);
+        $areaData = $menuModel->listarAreasDisponibles($_SESSION['EQXidNivel']);
+
+        if ($menuData['success']) {
+            if ($areaData['success']) {
+                // Enviar datos a la Vista
+                $data['menuData'] =  $menuData;
+                $data['areaData'] =  $areaData;
+                $data['areaLink'] =  $areaLink;
+                //$data['facturasSinFechaPago'] = $resultProveedores;
+
+                // Cargar la vista correspondiente
+                $this->view('Administrador/ControlProveedores/facSinFechaPago', $data);
+            } else {
+                $timestamp = date("Y-m-d H:i:s");
+                error_log("[$timestamp] app\controllers\Administrador\ControlProveedoresController ->Error al listar las Areas: " . PHP_EOL, 3, LOG_FILE);
+                echo 'Problemas con las Areas de Acceso:' . $resultIdArea['message'];
+                exit(0);
+            }
+        } else {
+            $timestamp = date("Y-m-d H:i:s");
+            error_log("[$timestamp] app\controllers\Administrador\ControlProveedoresController ->Error al buscar Id del Area (nombre: $areaLink): " . PHP_EOL, 3, LOG_FILE);
+            echo 'No pudimos traer el detallado del Menu:' . $resultIdArea['message'];
+            exit(0);
+        }
+    }
+
+    public function historico()
+    {
+        $data = []; // Aquí puedes pasar datos a la vista si es necesario
+        $idProveedor = $_POST['idProveedor'] ?? '';
+
+        $namespaceParts = explode('\\', __NAMESPACE__);
+        $areaLink = end($namespaceParts); // Obtiene el ultimo parametro del NameSpace
+
+        $menuModel = new Menu_Mdl();
+        $resultIdArea = $menuModel->obtenerIdAreaPorLink($areaLink);
+
+        if ($resultIdArea['success']) {
+            $idArea = $resultIdArea['data'];
+        } else {
+            $timestamp = date("Y-m-d H:i:s");
+            error_log("[$timestamp] app\controllers\Administrador\ControlProveedoresController ->Error al buscar Id del Area (nombre: $areaLink): " . PHP_EOL, 3, LOG_FILE);
+            echo 'No pudimos traer el id del Area:' . $resultIdArea['message'];
+            exit(0);
+        }
+
+        $menuData = $menuModel->obtenerEstructuraMenu($_SESSION['EQXidNivel'], $idArea);
+        $areaData = $menuModel->listarAreasDisponibles($_SESSION['EQXidNivel']);
+
+        if ($menuData['success']) {
+            if ($areaData['success']) {
+                // Enviar datos a la Vista
+                $data['menuData'] =  $menuData;
+                $data['areaData'] =  $areaData;
+                $data['areaLink'] =  $areaLink;
+                $data['idProveedor'] = $idProveedor;
+
+                // Cargar la vista correspondiente
+                $this->view('Administrador/ControlProveedores/historialFacturas', $data);
             } else {
                 $timestamp = date("Y-m-d H:i:s");
                 error_log("[$timestamp] app\controllers\Administrador\ControlProveedoresController ->Error al listar las Areas: " . PHP_EOL, 3, LOG_FILE);

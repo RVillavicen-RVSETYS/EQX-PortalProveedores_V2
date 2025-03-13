@@ -21,8 +21,10 @@
     function recepciones(idProveedor) {
         $.ajax({
             type: 'POST',
-            url: 'ControlProveedores/recepciones',
-            data: $(this).serialize(),
+            url: 'ControlProveedores/recepcionesSinFactura',
+            data: {
+                idProveedor: idProveedor
+            },
             success: function(response) {
                 $('#list-Recepciones').html(response);
             },
@@ -38,8 +40,10 @@
     function sinFecha(idProveedor) {
         $.ajax({
             type: 'POST',
-            url: 'ControlProveedores/sinFecha',
-            data: $(this).serialize(),
+            url: 'ControlProveedores/sinFechaPago',
+            data: {
+                idProveedor: idProveedor
+            },
             success: function(response) {
                 $('#list-SinFecha').html(response);
             },
@@ -106,6 +110,8 @@
                     notificaSuc(respuesta.message);
                     bloqueoBtn('bloquear-btnNevoCorreo', 2);
                     $('#modalNuevoCorreo').modal('hide');
+                    $('.modal-backdrop').remove();
+                    $('body').removeClass('modal-open');
                     datosGenerales(idProveedor)
                 } else {
                     notificaBad(respuesta.message);
@@ -169,6 +175,8 @@
                     notificaSuc(respuesta.message);
                     bloqueoBtn('bloquear-btnNuevaPass', 2);
                     $('#modalNuevaPass').modal('hide');
+                    $('.modal-backdrop').remove();
+                    $('body').removeClass('modal-open');
                     datosGenerales(idProveedor)
                 } else {
                     notificaBad(respuesta.message);
