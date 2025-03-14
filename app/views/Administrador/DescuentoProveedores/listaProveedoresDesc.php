@@ -86,3 +86,56 @@ if ($listaProveedoresDesc['success'] == false) {
 <?php
 }
 ?>
+
+<script>
+    /*Este Se Queda Aquí*/
+    $('#tableProvDesc').DataTable({
+        iDisplayLength: 10,
+        responsive: false,
+        fixedColumns: true,
+        fixedHeader: true,
+        scrollCollapse: true,
+        autoWidth: true,
+        scrollCollapse: true,
+        bSort: true,
+        dom: 'Blfrtip',
+        lengthMenu: [
+            [10, 25, 50, -1],
+            [10, 25, 50, "Todo"]
+        ],
+        info: true,
+        buttons: [{
+                extend: 'pdfHtml5',
+                className: 'btn btn-pdf bg-Equinoxgold text-white',
+                orientation: 'landscape',
+                pageSize: 'LEGAL',
+                text: "Pdf",
+            },
+
+            {
+                extend: 'csvHtml5',
+                className: 'btn btn-pdf bg-Equinoxgold text-white',
+                text: "Csv",
+                exportOptions: {
+                    columns: ":not(.no-exportar)"
+                }
+            },
+            {
+                extend: 'excelHtml5',
+                className: 'btn btn-pdf bg-Equinoxgold text-white',
+                text: "Excel",
+                exportOptions: {
+                    columns: ":not(.no-exportar)"
+                }
+            },
+            {
+                extend: 'copy',
+                className: 'btn btn-pdf bg-Equinoxgold text-white',
+                text: "Copiar",
+                exportOptions: {
+                    columns: ":not(.no-exportar)"
+                }
+            }
+        ]
+    });
+</script>
