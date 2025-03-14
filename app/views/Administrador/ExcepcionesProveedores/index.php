@@ -43,6 +43,69 @@ if ($debug == 1) {
 
 <![endif]-->
 
+    <style>
+        .tooltip-container {
+            position: relative;
+            display: inline-block;
+            cursor: pointer;
+        }
+
+        .tooltip-text {
+            visibility: hidden;
+            width: 220px;
+            background: linear-gradient(135deg, #f2e9e6, rgb(244, 244, 244));
+            color: #fff;
+            text-align: left;
+            border-radius: 8px;
+            padding: 10px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 0;
+            transition: opacity 0.3s, transform 0.3s;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .tooltip-text strong {
+            display: block;
+            font-size: 14px;
+            color: rgb(0, 0, 0);
+            /* Amarillo dorado para destacar el título */
+            margin-bottom: 8px;
+            padding-bottom: 6px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.3);
+            /* Línea divisoria */
+        }
+
+        .tooltip-text p {
+            font-size: 13px;
+            margin: 0;
+            line-height: 1.4;
+            color: rgb(0, 0, 0);
+            /* Cambia este color */
+        }
+
+        /* Flecha del tooltip */
+        .tooltip-text::after {
+            content: "";
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border-width: 8px;
+            border-style: solid;
+            border-color: #222 transparent transparent transparent;
+        }
+
+        .tooltip-container:hover .tooltip-text {
+            visibility: visible;
+            opacity: 1;
+            transform: translateX(-50%) translateY(-5px);
+        }
+    </style>
+
 </head>
 
 <body>
@@ -97,10 +160,67 @@ if ($debug == 1) {
                             <div class="card-body">
                                 <!-- Nav tabs -->
                                 <ul class="nav nav-tabs customtab" role="tablist">
-                                    <li class="nav-item"> <a class="nav-link active" data-toggle="tab" href="#ignoraDesc" role="tab" onclick="cargarIgnoraDescuento();"><span class="hidden-sm-up"><i class=""></i></span> <span class="hidden-xs-down">Ignorar Descuento</span></a> </li>
-                                    <li class="nav-item"> <a class="nav-link" data-toggle="tab" href="#añoFisc" role="tab" onclick="cargarExento();"><span class="hidden-sm-up"><i class=""></i></span> <span class="hidden-xs-down">Exento Año Fiscal</span></a> </li>
-                                    <li class="nav-item"> <a class="nav-link" data-toggle="tab" href="#fechaEm" role="tab" onclick="cargarFechaEmision();"><span class="hidden-sm-up"><i class=""></i></span> <span class="hidden-xs-down">Exento Fecha De Emisión</span></a> </li>
-                                    <li class="nav-item"> <a class="nav-link" data-toggle="tab" href="#usoCFDI" role="tab" onclick="cargarCfdiDistinto();"><span class="hidden-sm-up"><i class=""></i></span> <span class="hidden-xs-down">Uso CFDI Distinto</span></a> </li>
+
+                                    <li class="nav-item">
+                                        <a class="nav-link active" data-toggle="tab" href="#ignoraDesc" role="tab" onclick="cargarIgnoraDescuento();">
+                                            <span class="hidden-xs-down">Ignorar Descuento</span>
+                                            <span class="hidden-sm-up">
+                                                <div class="tooltip-container">
+                                                    <span><i class="fas fa-info-circle font-12"></i></span>
+                                                    <div class="tooltip-text">
+                                                        <strong>Ignorar Descuento</strong>
+                                                        <p></p>
+                                                    </div>
+                                                </div>
+                                            </span>
+                                        </a>
+                                    </li>
+
+                                    <li class="nav-item">
+                                        <a class="nav-link" data-toggle="tab" href="#añoFisc" role="tab" onclick="cargarExento();">
+                                            <span class="hidden-xs-down">Exento Año Fiscal</span>
+                                            <span class="hidden-sm-up">
+                                                <div class="tooltip-container">
+                                                    <span><i class="fas fa-info-circle font-12"></i></span>
+                                                    <div class="tooltip-text">
+                                                        <strong>Exento Año Fiscal</strong>
+                                                        <p></p>
+                                                    </div>
+                                                </div>
+                                            </span>
+                                        </a>
+                                    </li>
+
+                                    <li class="nav-item">
+                                        <a class="nav-link" data-toggle="tab" href="#fechaEm" role="tab" onclick="cargarFechaEmision();">
+                                            <span class="hidden-xs-down">Exento Tiempo Emisión</span>
+                                            <span class="hidden-sm-up">
+                                                <div class="tooltip-container">
+                                                    <span><i class="fas fa-info-circle font-12"></i></span>
+                                                    <div class="tooltip-text">
+                                                        <strong>Exento Tiempo Emisión</strong>
+                                                        <p></p>
+                                                    </div>
+                                                </div>
+                                            </span>
+                                        </a>
+                                    </li>
+
+                                    <li class="nav-item">
+                                        <a class="nav-link" data-toggle="tab" href="#usoCFDI" role="tab" onclick="cargarCfdiDistinto();">
+                                            <span class="hidden-xs-down">Uso CFDI Distinto</span>
+                                            <span class="hidden-sm-up">
+                                                <div class="tooltip-container">
+                                                    <span><i class="fas fa-info-circle font-12"></i></span>
+                                                    <div class="tooltip-text">
+                                                        <strong>Uso CFDI Distinto</strong>
+                                                        <p></p>
+                                                    </div>
+                                                </div>
+                                            </span>
+                                        </a>
+                                    </li>
+
                                 </ul>
                                 <!-- Tab panes -->
                                 <div class="tab-content">
