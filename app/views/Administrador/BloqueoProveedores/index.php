@@ -43,6 +43,42 @@ if ($debug == 1) {
 
 <![endif]-->
 
+    <style>
+        .btnAcciones {
+            display: inline-block;
+            padding: 8px 15px;
+            border: 2px solid white;
+            border-radius: 10px;
+            text-decoration: none;
+            transition: 0.3s;
+            color: white;
+        }
+
+        #btnTodosFacturan:hover {
+            background-color: white;
+            color: green;
+            border-color: #ddd;
+        }
+
+        #btnNadieFactura:hover {
+            background-color: white;
+            color: red;
+            border-color: #ddd;
+        }
+
+        #btnActualizarLista:hover {
+            background-color: white;
+            color: blue;
+            border-color: #ddd;
+        }
+
+        #btnNuevoCierre:hover {
+            background-color: white;
+            color: black;
+            border-color: #ddd;
+        }
+    </style>
+
 </head>
 
 <body>
@@ -94,9 +130,9 @@ if ($debug == 1) {
                             <div class="card-header bg-Equinoxgold text-white d-flex justify-content-between align-items-center">
                                 <h4 class="card-title">Listado De Proveedores</h4>
                                 <div>
-                                    <a id="btnTodosFacturan" class="btn text-success" data-toggle="tooltip" data-placement="top" title="Todos Facturar"><i class="fas fa-user-plus"></i></a>
-                                    <a id="btnNadieFactura" class="btn text-danger" data-toggle="tooltip" data-placement="top" title="Nadie Factura"><i class="fas fa-user-times"></i></a>
-                                    <a id="btnActualizarLista" class="btn text-info" data-toggle="tooltip" data-placement="top" title="Actualizar Lista"><i class="fas fa-redo"></i></a>
+                                    <a id="btnTodosFacturan" class="btn btnAcciones" data-toggle="tooltip" data-placement="top" title="Todos Facturar"><i class="fas fa-user-plus"></i></a>
+                                    <a id="btnNadieFactura" class="btn btnAcciones" data-toggle="tooltip" data-placement="top" title="Nadie Factura"><i class="fas fa-user-times"></i></a>
+                                    <a id="btnActualizarLista" class="btn btnAcciones" data-toggle="tooltip" data-placement="top" title="Actualizar Lista"><i class="fas fa-redo"></i></a>
                                 </div>
                             </div>
                             <div id="tarjetaListaProveedor" class="card-body">
@@ -109,7 +145,7 @@ if ($debug == 1) {
                         <div class="card">
                             <div class="card-header bg-Equinoxgold text-white d-flex justify-content-between align-items-center">
                                 <h4 class="card-title mb-0">Periodo De Cierre</h4>
-                                <button type="button" class="btn btn-info btn-sm" data-toggle="modal" data-target="#modalRegistraCierre"><i class="fas fa-lock"></i> Nuevo Cierre</button>
+                                <a id="btnNuevoCierre" href="#" class="btnAcciones" data-toggle="modal" data-target="#modalRegistraCierre"><i class="fas fa-lock"></i> Nuevo Cierre</a>
                             </div>
                             <div id="tarjetaPeriodo" class="card-body">
 

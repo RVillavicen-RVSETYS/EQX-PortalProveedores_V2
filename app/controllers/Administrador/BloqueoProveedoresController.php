@@ -4,7 +4,7 @@ namespace App\Controllers\Administrador;
 
 use Core\Controller;
 use App\Models\Menu_Mdl;
-use App\Models\Proveedores_Mdl;
+use App\Models\Proveedores\Proveedores_Mdl;
 use App\Models\Configuraciones\BloqueoProveedores_Mdl;
 
 class BloqueoProveedoresController extends Controller
