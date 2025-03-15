@@ -280,12 +280,65 @@ class ExcepcionesProveedoresController extends Controller
         }
     }
 
+    public function listaBloqueoDiferencias()
+    {
+        $data = []; // Aquí puedes pasar datos a la vista si es necesario
+        $tabla = "conf_provBloqDiferencias";
+        // Obtener el nombre del namespace para identificar el área
+        $namespaceParts = explode('\\', __NAMESPACE__);
+        $areaLink = end($namespaceParts); // Obtiene el ultimo parametro del NameSpace
+
+        $menuModel = new Menu_Mdl();
+        $resultIdArea = $menuModel->obtenerIdAreaPorLink($areaLink);
+
+        $excepcionesModel = new ExcepcionesProveedores_Mdl();
+        $resultExcepciones = $excepcionesModel->obtenerBloqueoDiferencias();
+        $obetenerProveedores = $excepcionesModel->getProveedores($tabla);
+
+        if ($resultIdArea['success']) {
+            $idArea = $resultIdArea['data'];
+        } else {
+            $timestamp = date("Y-m-d H:i:s");
+            error_log("[$timestamp] app\controllers\Administrador\ExcepcionesProveedoresController ->Error al buscar Id del Area (nombre: $areaLink): " . PHP_EOL, 3, LOG_FILE);
+            echo 'No pudimos traer el id del Area:' . $resultIdArea['message'];
+            exit(0);
+        }
+
+        $menuData = $menuModel->obtenerEstructuraMenu($_SESSION['EQXidNivel'], $idArea);
+        $areaData = $menuModel->listarAreasDisponibles($_SESSION['EQXidNivel']);
+
+        if ($menuData['success']) {
+            if ($areaData['success']) {
+                // Enviar datos a la Vista
+                $data['menuData'] =  $menuData;
+                $data['areaData'] =  $areaData;
+                $data['areaLink'] =  $areaLink;
+                $data['bloqueoDeDiferencias'] =  $resultExcepciones;
+                $data['listaProveedores'] = $obetenerProveedores;
+
+                // Cargar la vista correspondiente
+                $this->view('Administrador/ExcepcionesProveedores/bloqueoDiferencias', $data);
+            } else {
+                $timestamp = date("Y-m-d H:i:s");
+                error_log("[$timestamp] app\controllers\Administrador\ExcepcionesProveedoresController ->Error al listar las Areas: " . PHP_EOL, 3, LOG_FILE);
+                echo 'Problemas con las Areas de Acceso:' . $resultIdArea['message'];
+                exit(0);
+            }
+        } else {
+            $timestamp = date("Y-m-d H:i:s");
+            error_log("[$timestamp] app\controllers\Administrador\ExcepcionesProveedoresController ->Error al buscar Id del Area (nombre: $areaLink): " . PHP_EOL, 3, LOG_FILE);
+            echo 'No pudimos traer el detallado del Menu:' . $resultIdArea['message'];
+            exit(0);
+        }
+    }
+
     public function cambiarEstatus()
     {
         $data = []; // Aquí puedes pasar datos a la vista si es necesario
         $estatus = $_POST['estatus'] ?? '';
         $identificador = $_POST['ident'] ?? '';
         $tabla = $_POST['tabla'] ?? '';
+        $idProveedor = $_POST['idProveedor'] ?? '';
 
         if ($this->debug == 1) {
             echo "<br>Contenido de data:<br>";
@@ -293,11 +346,42 @@ class ExcepcionesProveedoresController extends Controller
             echo "<br>Contenido de Estatus: $estatus <br>";
             echo "<br>Contenido de Identificador: $identificador <br>";
             echo "<br>Contenido de Tabla: $tabla <br>";
+            echo "<br>Contenido de IdProveedor: $idProveedor <br>";
         }
 
         $nuevoEstatus = ($estatus == 1) ? 0 : 1;
         $excepcionesModel = new ExcepcionesProveedores_Mdl();
-        $resultExcepciones = $excepcionesModel->cambiarEstatus($tabla, $identificador, $nuevoEstatus);
+        $resultExcepciones = $excepcionesModel->cambiarEstatus($tabla, $identificador, $nuevoEstatus, $idProveedor);
+
+        if ($resultExcepciones['success']) {
+            $Message = $resultExcepciones['data'];
+            echo json_encode([
+                'success' => true,
+                'message' => $Message
+            ]);
+        } else {
+            $errorMessage = $resultExcepciones['message'];
+            echo json_encode([
+                'success' => false,
+                'message' => $errorMessage
+            ]);
+        }
+    }
+
+    public function eliminar()
+    {
+        $data = []; // Aquí puedes pasar datos a la vista si es necesario
+
+        $identificador = $_POST['ident'] ?? '';
+
+        if ($this->debug == 1) {
+            echo "<br>Contenido de data:<br>";
+            var_dump($data);
+            echo "<br>Contenido de Identificador: $identificador <br>";
+        }
+
+        $excepcionesModel = new ExcepcionesProveedores_Mdl();
+        $resultExcepciones = $excepcionesModel->eliminarReg($identificador);
 
         if ($resultExcepciones['success']) {
             $Message = $resultExcepciones['data'];
@@ -420,6 +504,37 @@ class ExcepcionesProveedoresController extends Controller
 
         $excepcionesModel = new ExcepcionesProveedores_Mdl();
         $resultExcepciones = $excepcionesModel->registraProveedorUC($idProveedor, $idUsoCfdi);
+
+        if ($resultExcepciones['success']) {
+            $Message = $resultExcepciones['data'];
+            echo json_encode([
+                'success' => true,
+                'message' => $Message
+            ]);
+        } else {
+            $errorMessage = $resultExcepciones['message'];
+            echo json_encode([
+                'success' => false,
+                'message' => $errorMessage
+            ]);
+        }
+    }
+
+    public function agregarProveedorBD()
+    {
+        $data = []; // Aquí puedes pasar datos a la vista si es necesario
+        $idProveedor = $_POST['idProveedor'] ?? '';
+        $motivo = $_POST['motivo'] ?? '';
+
+        if ($this->debug == 1) {
+            echo "<br>Contenido de data:<br>";
+            var_dump($data);
+            echo "<br>Contenido de IdProveedor: $idProveedor <br>";
+            echo "<br>Contenido de motivo: $motivo <br>";
+        }
+
+        $excepcionesModel = new ExcepcionesProveedores_Mdl();
+        $resultExcepciones = $excepcionesModel->registraProveedorBD($idProveedor, $motivo);
 
         if ($resultExcepciones['success']) {
             $Message = $resultExcepciones['data'];

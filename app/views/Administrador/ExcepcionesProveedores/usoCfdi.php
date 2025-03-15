@@ -28,15 +28,15 @@ if ($debug == 1) {
     <div class="col-md-4">
 
         <div class="card">
-            <div class="card-header bg-Equinoxgold text-white">
+            <div class="card-header bg-pyme-primary text-white">
                 <h4 class="card-title">Lista De Proveedores</h4>
             </div>
             <div class="card-body border">
                 <form id="agregarProveedorUC">
                     <div class="row">
-                        <label for="idProveedor">Proveedores</label>
+                        <label for="idProveedorUC">Proveedores</label>
                         <div class="input-group mb-3">
-                            <select name="idProveedor" id="idProveedor" class="select2 form-control custom-select" style="width: 100%;">
+                            <select name="idProveedor" id="idProveedorUC" class="select2 form-control custom-select" style="width: 100%;">
                                 <option value="">Selecciona Un Proveedor</option>
                                 <?php
                                 foreach ($listaProveedores['data'] as $proveedor) {
@@ -122,7 +122,7 @@ if ($debug == 1) {
                                     </button>
                                 </div>
                                 <div id="desbloquear-btnEstatus4<?= $proveedor['IdConf']; ?>">
-                                    <button id="btnEstatus4<?= $proveedor['IdConf']; ?>" onclick="cambiarEstatus(<?= $proveedor['Estatus']; ?>, <?= $proveedor['IdConf']; ?>, <?= 4 ?>)" type="button" class="btn btn-xs btn-rounded <?= $color; ?>"><i class="<?= $icono; ?>"></i></button>
+                                    <button id="btnEstatus4<?= $proveedor['IdConf']; ?>" onclick="cambiarEstatus(<?= $proveedor['Estatus']; ?>, <?= $proveedor['IdConf']; ?>, <?= 4 ?>,<?= $proveedor['IdProveedor']; ?>)" type="button" class="btn btn-xs btn-rounded <?= $color; ?>"><i class="<?= $icono; ?>"></i></button>
                                 </div>
                             </td>
                         </tr>

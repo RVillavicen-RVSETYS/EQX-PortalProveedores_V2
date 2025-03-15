@@ -75,7 +75,24 @@
         });
     }
 
-    function cambiarEstatus(estatus, ident, tabla) {
+    function cargarBloqueoDiferencias() {
+        $.ajax({
+            type: 'POST',
+            url: 'ExcepcionesProveedores/listaBloqueoDiferencias',
+            data: {},
+            success: function(response) {
+                $('#bloqueoDif').html(response);
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+                $('#bloqueoDif').html('Error en el inicio de sesión.Consulta a tu administrador');
+            },
+            beforeSend: function() {
+                $('#bloqueoDif').html('<div class="loading text-center"><img src="../assets/images/loading.gif" alt="loading" /><br/>Un momento, por favor...</div>');
+            }
+        });
+    }
+
+    function cambiarEstatus(estatus, ident, tabla, idProveedor) {
 
         $.ajax({
             url: 'ExcepcionesProveedores/cambiarEstatus',
@@ -83,7 +100,8 @@
             data: {
                 estatus: estatus,
                 ident: ident,
-                tabla: tabla
+                tabla: tabla,
+                idProveedor: idProveedor
             },
             success: function(response) {
                 const respuesta = JSON.parse(response);
@@ -112,6 +130,30 @@
             },
             beforeSend: function() {
                 bloqueoBtn('bloquear-btnEstatus' + tabla + ident, 1);
+            }
+        });
+    }
+
+    function eliminar(ident) {
+        $.ajax({
+            url: 'ExcepcionesProveedores/eliminar',
+            type: 'POST',
+            data: {
+                ident: ident,
+            },
+            success: function(response) {
+                const respuesta = JSON.parse(response);
+                if (respuesta.success) {
+                    notificaSuc(respuesta.message);
+                    bloqueoBtn('bloquear-btnEstatus5' + ident, 2);
+                    cargarBloqueoDiferencias();
+                } else {
+                    notificaBad(respuesta.message);
+                    bloqueoBtn('bloquear-btnEstatus5' + ident, 2);
+                }
+            },
+            beforeSend: function() {
+                bloqueoBtn('bloquear-btnEstatus5' + ident, 1);
             }
         });
     }
@@ -208,6 +250,30 @@
             },
             beforeSend: function() {
                 bloqueoBtn('bloquear-btnAgregaProveedorUC', 1);
+            }
+        });
+    });
+
+    $(document).on('submit', '#agregarProveedorBD', function(event) {
+
+        event.preventDefault();
+
+        $.ajax({
+            url: 'ExcepcionesProveedores/agregarProveedorBD',
+            type: 'POST',
+            data: $(this).serialize(),
+            success: function(response) {
+                const respuesta = JSON.parse(response);
+                if (respuesta.success) {
+                    notificaSuc(respuesta.message);
+                    cargarBloqueoDiferencias();
+                } else {
+                    notificaBad(respuesta.message);
+                    bloqueoBtn('bloquear-btnAgregaProveedorBD', 2);
+                }
+            },
+            beforeSend: function() {
+                bloqueoBtn('bloquear-btnAgregaProveedorBD', 1);
             }
         });
     });

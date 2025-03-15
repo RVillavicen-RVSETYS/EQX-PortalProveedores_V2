@@ -66,7 +66,7 @@ $regimenFiscal = ($datosProveedor['data']['RegimenFiscal'] == '') ? 'Sin Regimen
 <div class="modal fade" id="modalNuevoRFC" role="dialog" aria-labelledby="modalNuevoRFCLabel" aria-hidden="true">
     <div class="modal-dialog modal-md modalNuevoRFC" role="document">
         <div class="modal-content">
-            <div class="modal-header bg-Equinoxgold">
+            <div class="modal-header bg-pyme-primary">
                 <h5 class="modal-title text-white" id="modalNuevoRFCLabel">Nuevo RFC</h5>
                 <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close" onclick="$('#modalNuevoRFC').modal('hide');">
                     <span aria-hidden="true">&times;</span>
@@ -114,7 +114,7 @@ $regimenFiscal = ($datosProveedor['data']['RegimenFiscal'] == '') ? 'Sin Regimen
 <div class="modal fade" id="modalNuevoCorreo" role="dialog" aria-labelledby="modalNuevoCorreoLabel" aria-hidden="true">
     <div class="modal-dialog modal-md modalNuevoCorreo" role="document">
         <div class="modal-content">
-            <div class="modal-header bg-Equinoxgold" >
+            <div class="modal-header bg-pyme-primary" >
                 <h5 class="modal-title text-white" id="modalNuevoCorreoLabel">Nuevo Correo</h5>
                 <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close" onclick="$('#modalNuevoCorreo').modal('hide');">
                     <span aria-hidden="true">&times;</span>
@@ -162,7 +162,7 @@ $regimenFiscal = ($datosProveedor['data']['RegimenFiscal'] == '') ? 'Sin Regimen
 <div class="modal fade" id="modalNuevaPass" role="dialog" aria-labelledby="modalNuevaPassLabel" aria-hidden="true">
     <div class="modal-dialog modal-md modalNuevaPass" role="document">
         <div class="modal-content">
-            <div class="modal-header bg-Equinoxgold">
+            <div class="modal-header bg-pyme-primary">
                 <h5 class="modal-title text-white" id="modalNuevaPassLabel">Nueva Contraseña</h5>
                 <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close" onclick="$('#modalNuevaPass').modal('hide');">
                     <span aria-hidden="true">&times;</span>

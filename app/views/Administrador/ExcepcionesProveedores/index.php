@@ -154,7 +154,7 @@ if ($debug == 1) {
                 <div class="row">
                     <div class="col-sm-12 col-md-12 col-lg-12">
                         <div class="card">
-                            <div class="card-header bg-Equinoxgold text-white">
+                            <div class="card-header bg-pyme-primary text-white">
                                 <h4 class="card-title">Tipos De Excepciones</h4>
                             </div>
                             <div class="card-body">
@@ -221,6 +221,21 @@ if ($debug == 1) {
                                         </a>
                                     </li>
 
+                                    <li class="nav-item">
+                                        <a class="nav-link" data-toggle="tab" href="#bloqueoDif" role="tab" onclick="cargarBloqueoDiferencias();">
+                                            <span class="hidden-xs-down">Bloquear Diferencias</span>
+                                            <span class="hidden-sm-up">
+                                                <div class="tooltip-container">
+                                                    <span><i class="fas fa-info-circle font-12"></i></span>
+                                                    <div class="tooltip-text">
+                                                        <strong>Bloquear Diferencias</strong>
+                                                        <p></p>
+                                                    </div>
+                                                </div>
+                                            </span>
+                                        </a>
+                                    </li>
+
                                 </ul>
                                 <!-- Tab panes -->
                                 <div class="tab-content">
@@ -228,6 +243,7 @@ if ($debug == 1) {
                                     <div class="tab-pane p-20" id="añoFisc" role="tabpanel"></div>
                                     <div class="tab-pane p-20" id="fechaEm" role="tabpanel"></div>
                                     <div class="tab-pane p-20" id="usoCFDI" role="tabpanel"></div>
+                                    <div class="tab-pane p-20" id="bloqueoDif" role="tabpanel"></div>
                                 </div>
                             </div>
                         </div>

@@ -27,9 +27,7 @@ if ($debug == 1) {
             <th>No. Proveedor</th>
             <th>Nombre</th>
             <th>Correo</th>
-            <th>Grupo</th>
-            <th>Factura</th>
-            <th>Acciones</th>
+            <th>Activado</th>
         </tr>
     </thead>
     <tbody>
@@ -38,14 +36,14 @@ if ($debug == 1) {
         foreach ($listaProveedores['data'] as $proveedor) {
 
             $correo = (is_null($proveedor['Correo'])) ? '-' : $proveedor['Correo'];
-            $bloque = (is_null($proveedor['GrupoBloqueo']) OR empty($proveedor['GrupoBloqueo'])) ? '-' : $proveedor['GrupoBloqueo'];
+            //$bloque = (is_null($proveedor['GrupoBloqueo']) or empty($proveedor['GrupoBloqueo'])) ? '-' : $proveedor['GrupoBloqueo'];
 
             if ($proveedor['EstatusBloqueo'] == 1) {
-                $factura = 'Si';
-                $color = 'text-success';
+                $icono = 'fas fa-check';
+                $color = 'success';
             } else {
-                $factura = 'No';
-                $color = 'text-danger';
+                $icono = 'fas fa-times';
+                $color = 'danger';
             }
         ?>
             <tr>
@@ -53,9 +51,16 @@ if ($debug == 1) {
                 <th><?= $proveedor['IdProveedor']; ?></th>
                 <th><?= $proveedor['Proveedor']; ?></th>
                 <th><?= $correo; ?></th>
-                <th class="text-center"><?= $bloque; ?></th>
-                <th class="text-center <?= $color; ?>"><?= $factura; ?></th>
-                <th class="text-center"><button class="btn btn-sm btn-outline-info waves-effect waves-light" type="button" data-id="<?= $proveedor['IdProveedor']; ?>" data-toggle="modal" data-target="#modalEditaProv"><i class="fas fa-pencil-alt"></i></button></th>
+                <th class="text-center">
+                    <div id="bloquear-btnEstatus<?= $proveedor['IdProveedor'] ?>" style="display:none;">
+                        <button class="btn btn-primary btn-md" type="button" disabled="" style="height: 100%;">
+                            <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
+                        </button>
+                    </div>
+                    <div id="desbloquear-btnEstatus<?= $proveedor['IdProveedor'] ?>">
+                        <button id="btnEstatus<?= $proveedor['IdProveedor'] ?>" class="btn btn-sm btn-md btn-outline-<?= $color; ?> mx-2 "><i class="<?= $icono ?>"></i></button>
+                    </div>
+                </th>
             </tr>
         <?php
         }
@@ -63,12 +68,12 @@ if ($debug == 1) {
     </tbody>
 </table>
 
-<!-- MODAL PARA ASIGNAR BLOQUE Y EDITAR ESTATUS-->
+<!-- MODAL PARA ASIGNAR BLOQUE Y EDITAR ESTATUS
 <div class="modal fade" id="modalEditaProv" role="dialog" aria-labelledby="modalEditaProvLabel" aria-hidden="true">
     <div class="modal-dialog modal-md modalEditaProv" role="document">
         <div class="modal-content">
             <div class="modal-header" style="background-color:#11334b;">
-                <h5 class="modal-title text-white" id="modalEditaProvLabel">Crear Nueva Alerta</h5>
+                <h5 class="modal-title text-white" id="modalEditaProvLabel">Editar Proveedor</h5>
                 <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close" onclick="$('#modalEditaProv').modal('hide');">
                     <span aria-hidden="true">&times;</span>
                 </button>
@@ -128,6 +133,7 @@ if ($debug == 1) {
         </div>
     </div>
 </div>
+-->
 
 <script>
     /*Este Se Queda Aquí*/

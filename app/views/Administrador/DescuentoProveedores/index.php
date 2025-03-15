@@ -93,7 +93,7 @@ if ($debug == 1) {
                 <div class="row">
                     <div class="col-sm-12 col-md-12 col-lg-12">
                         <div class="card">
-                            <div class="card-header bg-Equinoxgold text-white">
+                            <div class="card-header bg-pyme-primary text-white">
                                 <h4 class="card-title">Agregar Proveedor</h4>
                             </div>
                             <div id="tarjetaProveedores" class="card-body">
@@ -138,7 +138,7 @@ if ($debug == 1) {
                 <div class="row">
                     <div class="col-sm-12 col-md-12 col-lg-12">
                         <div class="card">
-                            <div class="card-header bg-Equinoxgold text-white">
+                            <div class="card-header bg-pyme-primary text-white">
                                 <h4 class="card-title">Lista De Proveedores Con Descuento</h4>
                             </div>
                             <div id="tarjetaProveedoresDescuento" class="card-body">
