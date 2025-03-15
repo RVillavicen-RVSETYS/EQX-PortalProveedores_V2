@@ -316,7 +316,7 @@ class BloqueoProveedores_Mdl
         }
     }
 
-    public function actualizarTodosFacturan()
+    /*public function actualizarTodosFacturan()
     {
         try {
 
@@ -352,9 +352,9 @@ class BloqueoProveedores_Mdl
             }
             return ['success' => false, 'message' => 'Problemas Con El Cambio De Estatus, Notifica a tu administrador.'];
         }
-    }
+    }*/
 
-    public function actualizarNadieFactura()
+    /*public function actualizarNadieFactura()
     {
         try {
 
@@ -390,9 +390,9 @@ class BloqueoProveedores_Mdl
             }
             return ['success' => false, 'message' => 'Problemas Con El Cambio De Estatus, Notifica a tu administrador.'];
         }
-    }
+    }*/
 
-    public function actualizarListaProv()
+    /*public function actualizarListaProv()
     {
         try {
 
@@ -444,7 +444,7 @@ class BloqueoProveedores_Mdl
             }
             return ['success' => false, 'message' => 'Problemas Con La Actualización De La Lista De Proveedores, Notifica a tu administrador.'];
         }
-    }
+    }*/
 
     public function agregaProveedor($idProveedor)
     {
