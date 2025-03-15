@@ -21,31 +21,83 @@ class Compras_Mdl
         if (self::$debug) {
             echo "<h2>Ya estamos dentro de la Clase Compras_Mdl.</h2>";
         }
-        
+
         $this->db = new BD_Connect(); // Instancia de la conexión a la base de datos
     }
 
-    public function listaComprasFacturadas(INT $idProveedor, INT $cantMaxRes = 0, $orden = 'DESC')
+    public function listaComprasFacturadas($filtros = [], INT $cantMaxRes = 0, $orden = 'DESC')
     {
-        $limiteResult = ($cantMaxRes == 0) ? '' : 'LIMIT '.$cantMaxRes;
+        if (self::$debug) {
+            echo '<br><br>Filtros Recibidos: ';
+            var_dump($filtros);
+        }
+        $filtrosDisponibles = [
+            'idProveedor' => ['tipoDato' => 'INT', 'sqlFiltro' => 'c.idProveedor = :idProveedor'],
+            'estatusFactura' => ['tipoDato' => 'INT', 'sqlFiltro' => 'c.estatus = :estatusFactura'],
+            'entreFechas' => ['tipoDato' => 'STRING', 'sqlFiltro' => '(c.fechaReg BETWEEN :fechaInicial AND :fechaFinal)']
+        ];
+
+        $filtrosSQL = '';
+        $params = [];
+
         try {
+            if (!is_int($cantMaxRes)) {
+                throw new \Exception('El valor de $cantMaxRes debe ser un entero.');
+            }
+            $limiteResult = ($cantMaxRes == 0) ? '' : 'LIMIT ' . $cantMaxRes;
+
+            if (!in_array($orden, ['DESC', 'ASC'])) {
+                throw new \Exception('El orden debe ser DESC o ASC.');
+            } else {
+                $orden = strtoupper($orden);
+            }
+
+            foreach ($filtros as $nombreFiltro => $valorFiltro) {
+                if (isset($filtrosDisponibles[$nombreFiltro]) && $valorFiltro !== null) {
+                    if ($nombreFiltro == 'entreFechas') {
+                        list($fechaInicial, $fechaFinal) = explode(',', $valorFiltro);
+                        if (!strtotime($fechaInicial) || !strtotime($fechaFinal)) {
+                            throw new \Exception('Las fechas proporcionadas no son válidas.');
+                        }
+                        $filtrosSQL .= ' AND ' . $filtrosDisponibles[$nombreFiltro]['sqlFiltro'];
+                        $params[':fechaInicial'] = $fechaInicial;
+                        $params[':fechaFinal'] = $fechaFinal;
+                    } else {
+                        $filtrosSQL .= ' AND ' . $filtrosDisponibles[$nombreFiltro]['sqlFiltro'];
+                        $params[':' . $nombreFiltro] = $valorFiltro;
+                    }
+                }
+            }
+            
+            if (empty($filtrosSQL)) {
+                throw new \Exception('No se encontró ningún parámetro válido.');
+            }
+            $filtrosSQL = ltrim($filtrosSQL, ' AND');
+
+            if (self::$debug) {
+                echo '<br><br>Parametros: ';
+                var_dump($params);
+                echo '<br><br>';
+            }
+
             $sql = "SELECT c.id AS acuse, c.claseDocto, dc.ordenCompra, c.estatus,
                     GROUP_CONCAT(DISTINCT dc.noRecepcion ORDER BY dc.noRecepcion SEPARATOR ', ') AS noRecepcion,
                     c.fechaReg, c.referencia, cf.urlPDF, cf.urlXML 
                     FROM compras c
                     INNER JOIN detcompras dc ON c.id = dc.idCompra
                     LEFT JOIN cfdi_facturas cf ON cf.idCompra = c.id
-                    WHERE c.idProveedor = :noProveedor
+                    WHERE $filtrosSQL
                     GROUP BY c.id, c.claseDocto, dc.ordenCompra, c.fechaReg, c.referencia, cf.urlPDF, cf.urlXML 
                     ORDER BY c.id $orden
-                    $limiteResult"; 
+                    $limiteResult";
 
             if (self::$debug) {
-                $params = [':noProveedor' => $idProveedor];
                 $this->db->imprimirConsulta($sql, $params, 'Lista ultimas Compras');
             }
             $stmt = $this->db->prepare($sql);
-            $stmt->bindParam(':noProveedor', $idProveedor, PDO::PARAM_INT);
+            foreach ($params as $param => $value) {
+                $stmt->bindValue($param, $value, is_int($value) ? PDO::PARAM_INT : PDO::PARAM_STR);
+            }
             $stmt->execute();
             $comprasresult = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -58,60 +110,122 @@ class Compras_Mdl
                 echo '<br><br>';
             }
 
-            return ['success' => true, 'cantRes' => $cantCompras, 'data' => $comprasresult]; 
-            
+            return ['success' => true, 'cantRes' => $cantCompras, 'data' => $comprasresult];
         } catch (\Exception $e) {
             $timestamp = date("Y-m-d H:i:s");
-            error_log("[$timestamp] app/models/compras/Compras_Mdl.php ->Error buscar Compras por Proveedor: " . $e->getMessage(), 3, LOG_FILE_BD); 
+            error_log("[$timestamp] app/models/compras/Compras_Mdl.php ->Error buscar Compras por Proveedor: " . $e->getMessage(), 3, LOG_FILE_BD);
             if (self::$debug) {
-                echo "Error al listar Compras: " . $e->getMessage(); // Mostrar error en modo depuración
+                echo "<br>Error al listar Compras Facturadas: " . $e->getMessage(); // Mostrar error en modo depuración
             }
-            return ['success' => false, 'message' => 'Problemas al listar las Compras, Notifica a tu administrador.'];
+            return ['success' => false, 'message' => 'Problemas al listar las Facturas Cargadas, Notifica a tu administrador.'];
         }
     }
 
-    public function dataCompraPorAcuse(INT $idProveedor, INT $acuse)
+    public function dataCompraPorAcuse(INT $idUser, INT $acuse)
     {
-        if (empty($idProveedor) || empty($acuse)) {
+        if (empty($idUser) || empty($acuse)) {
             return ['success' => false, 'message' => 'Se requiere No. de Acuse.'];
         } else {
             try {
-                $sql = "SELECT c.id AS acuse, c.claseDocto, dc.ordenCompra, c.estatus, c.fechaVal, c.comentRegresa, c.subTotal, c.idCatTipoMoneda,
-                        c.idProveedor, GROUP_CONCAT(DISTINCT dc.noRecepcion ORDER BY dc.noRecepcion SEPARATOR ', ') AS noRecepcion,
-                        c.fechaReg, c.referencia, cf.urlPDF, cf.urlXML, cf.monto, cf.idCatMetodoPago, cf.idCatFormaPago, cf.usoCfdi, cf.uuid,
-                        cf.fechaFac, cf.serie, cf.folio, cf.razonSocialEm
+                if ($_SESSION['EQXAdmin']) {
+                    $validaUsuario = '';
+                } else {
+                    $validaUsuario = "AND c.idProveedor = $idUser";
+                }
+
+                $sql = "SELECT c.id AS acuse, c.claseDocto, c.estatus AS CpaEstatus, c.fechaVal, c.comentRegresa, c.subTotal, c.idCatTipoMoneda AS CpaTipoMoneda,
+                            c.idProveedor, c.notaCredito,	c.idPago, c.fechaReg, c.referencia, 
+                            dcp.ordenCompra, dcp.noRecepcion,
+                            cf.urlPDF AS FacUrlPDF, cf.urlXML AS FacUrlXML, cf.subtotal AS FacSubtotal, cf.monto AS FacMonto, cf.idCatTipoMoneda AS FacTipoMoneda, 
+                            cf.idCatMetodoPago AS FacMetodoPago, cf.idCatFormaPago AS FacFormaPago, cf.usoCfdi AS FacUsoCfdi,cuc.descripcion AS nameUsoCfdi, 
+                            cf.uuid AS FacUUID, cf.fechaFac, cf.serie AS FacSerie, cf.folio AS FacFolio, cf.razonSocialEm, cf.version AS FacVersion,
+                            dfi.*,
+                            nc.uuid AS NCredUUID, nc.serie AS NCredSerie, nc.folio AS NCredFolio, nc.urlPDF AS NCredUrlPDF, nc.urlXML AS NCredUrlXML, 
+                            cpg.uuid AS CPagUUID, cpg.serie AS CPagSerie, cpg.folio AS CPagFolio, cpg.urlPDF AS CPagUrlPDF, cpg.urlXML AS CPagUrlXML,
+                            cpd.*												
                         FROM compras c
-                        INNER JOIN detcompras dc ON c.id = dc.idCompra
-                        LEFT JOIN cfdi_facturas cf ON cf.idCompra = c.id
-                        WHERE c.id = :acuse AND c.idProveedor = :noProveedor
-                        GROUP BY c.id, c.claseDocto, dc.ordenCompra, c.fechaReg, c.referencia, cf.urlPDF, cf.urlXML"; 
-    
+                        INNER JOIN (
+                            SELECT  dc.idCompra, dc.ordenCompra, GROUP_CONCAT(DISTINCT dc.noRecepcion ORDER BY dc.noRecepcion SEPARATOR ', ') AS noRecepcion, SUM(dc.monto) AS subTotal
+                            FROM detcompras dc
+                            GROUP BY dc.idCompra)dcp ON c.id = dcp.idCompra
+                        INNER JOIN cfdi_facturas cf ON c.id = cf.idCompra
+                        INNER JOIN (
+                            SELECT fi.idFactura,
+                                GROUP_CONCAT(DISTINCT CASE WHEN fi.tipo = 'Traslado' THEN CONCAT(fi.impuesto, ' = ', fi.Importe) END ORDER BY fi.impuesto SEPARATOR ', ') AS impuestosTrasMontos,
+                                GROUP_CONCAT(DISTINCT CASE WHEN fi.tipo = 'Retencion' THEN CONCAT(fi.impuesto, ' = ', fi.Importe) END ORDER BY fi.impuesto SEPARATOR ', ') AS impuestosRetMontos,
+                                GROUP_CONCAT(DISTINCT CASE WHEN fi.tipo = 'Traslado' THEN fi.impuesto END ORDER BY fi.impuesto SEPARATOR ', ') AS impuestosTrasladados,
+                                GROUP_CONCAT(DISTINCT CASE WHEN fi.tipo = 'Retencion' THEN fi.impuesto END ORDER BY fi.impuesto SEPARATOR ', ') AS impuestosRetenidos
+                            FROM cfdi_facturasImpuestos fi
+                            GROUP BY fi.idFactura
+                        )dfi ON cf.id = dfi.idFactura
+                        LEFT JOIN cfdi_notasCreditos nc ON c.id = nc.idCompra
+                        LEFT JOIN cfdi_complementoPagoDet cpd ON cf.uuid = cpd.uuidFact
+                        LEFT JOIN cfdi_complementoPago cpg ON cpd.idComplementoPago = cpg.id
+                        LEFT JOIN sat_catUsoCFDI cuc ON cf.usoCfdi = cuc.id
+                        WHERE c.id = :acuse $validaUsuario
+                        LIMIT 1";
+
                 if (self::$debug) {
-                    $params = [':noProveedor' => $idProveedor, ':acuse' => $acuse];
-                    $this->db->imprimirConsulta($sql, $params, 'Lista ultimas Compras');
+                    $params = [':acuse' => $acuse];
+                    $this->db->imprimirConsulta($sql, $params, 'Datos de compra y Facturas por Acuse');
                 }
                 $stmt = $this->db->prepare($sql);
-                $stmt->bindParam(':noProveedor', $idProveedor, PDO::PARAM_INT);
                 $stmt->bindParam(':acuse', $acuse, PDO::PARAM_INT);
                 $stmt->execute();
                 $comprasresult = $stmt->fetch(PDO::FETCH_ASSOC);
-        
+
                 if (self::$debug) {
                     echo '<br>Resultado de Query:';
                     var_dump($comprasresult);
                     echo '<br><br>';
                 }
-    
-                return ['success' => true, 'data' => $comprasresult]; 
-                
+
+                return ['success' => true, 'data' => $comprasresult];
             } catch (\Exception $e) {
                 $timestamp = date("Y-m-d H:i:s");
-                error_log("[$timestamp] app/models/compras/Compras_Mdl.php ->Error buscar Compras por Proveedor: " . $e->getMessage(), 3, LOG_FILE_BD); 
+                error_log("[$timestamp] app/models/compras/Compras_Mdl.php ->Error buscar Compras por Proveedor: " . $e->getMessage(), 3, LOG_FILE_BD);
                 if (self::$debug) {
                     echo "Error al listar Compras: " . $e->getMessage(); // Mostrar error en modo depuración
                 }
                 return ['success' => false, 'message' => 'Problemas al buscar este Documento, Notifica a tu administrador.'];
             }
-        }        
+        }
+    }
+
+    public function cantComprasPorProveedor(INT $idProveedor)
+    {
+        if (empty($idProveedor)) {
+            return ['success' => false, 'message' => 'Se requiere No. de Proveedor.'];
+        } else {
+            try {
+                $sql = "SELECT COUNT(c.id) AS cantCompras
+                        FROM compras c
+                        WHERE c.idProveedor = :noProveedor";
+
+                if (self::$debug) {
+                    $params = [':noProveedor' => $idProveedor];
+                    $this->db->imprimirConsulta($sql, $params, 'Cantidad de Compras por Proveedor');
+                }
+                $stmt = $this->db->prepare($sql);
+                $stmt->bindParam(':noProveedor', $idProveedor, PDO::PARAM_INT);
+                $stmt->execute();
+                $comprasresult = $stmt->fetch(PDO::FETCH_ASSOC);
+
+                if (self::$debug) {
+                    echo '<br>Resultado de Query:';
+                    var_dump($comprasresult);
+                    echo '<br><br>';
+                }
+
+                return ['success' => true, 'data' => $comprasresult];
+            } catch (\Exception $e) {
+                $timestamp = date("Y-m-d H:i:s");
+                error_log("[$timestamp] app/models/compras/Compras_Mdl.php ->Error buscar Compras por Proveedor: " . $e->getMessage(), 3, LOG_FILE_BD);
+                if (self::$debug) {
+                    echo "Error al listar Compras: " . $e->getMessage(); // Mostrar error en modo depuración
+                }
+                return ['success' => false, 'message' => 'Problemas al buscar este Documento, Notifica a tu administrador.'];
+            }
+        }
     }
 }

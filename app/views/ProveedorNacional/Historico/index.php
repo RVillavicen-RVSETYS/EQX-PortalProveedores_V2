@@ -11,7 +11,7 @@ $funcionMenu = generarMenu($menuData['data'], $paginaLink);
 $datosPagina = $funcionMenu['datosPagina'];
 $rutaMenu = $funcionMenu['rutaMenu'];
 
-if ($debug == 0) {
+if ($debug == 1) {
     echo 'Contenido de menuData:';
     var_dump($menuData);
     echo '<br><br>Contenido de areaData:';
@@ -27,7 +27,10 @@ if ($debug == 0) {
     echo '<br><br>Valores pasados del Controller Data:';
     var_dump($data['datosIniciales']);
 }
-
+$cantComplementos = $data['datosIniciales']['cantComplementos'];
+$oldComplementos = $data['datosIniciales']['oldComplementos'];
+$maxComplementosPendientes = $data['datosIniciales']['maxComplementosPendientes'];
+$cantCompras = $data['datosIniciales']['cantCompras'];
 
 ?>
 
@@ -37,6 +40,15 @@ if ($debug == 0) {
 <head>
     <?php include '../app/views/Layout/header.php'; ?>
     <!-- Custom CSS -->
+
+    <!-- Vendor -->
+    <link href="/assets/extra-libs/datatables.net-bs4/css/dataTables.bootstrap4.css" rel="stylesheet">
+    <link href="/assets/libs/fancybox/fancybox.css" rel="stylesheet">
+    <link href="/assets/libs/fancybox/dist/carousel/carousel.css" rel="stylesheet">
+    <link href="/assets/libs/fancybox/dist/carousel/carousel.thumbs.css" rel="stylesheet">
+    <link href="/assets/libs/fancybox/dist/panzoom/panzoom.css" rel="stylesheet">
+    <link href="/assets/libs/fancybox/dist/panzoom/panzoom.toolbar.css" rel="stylesheet">
+    <link href="/assets/libs/fancybox/dist/panzoom/panzoom.pins.css" rel="stylesheet">
 
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -101,13 +113,13 @@ if ($debug == 0) {
                                             <p class="font-16 m-b-5">Complementos de Pago Pendientes</p>
                                         </div>
                                         <div class="ml-auto">
-                                            <h1 class="font-light text-right">236</h1>
+                                            <h1 class="font-light text-right"><?= $cantComplementos; ?></h1>
                                         </div>
                                     </div>
                                 </div>
                                 <div class="col-12">
                                     <div class="progress">
-                                        <div class="progress-bar bg-danger" role="progressbar" style="width: 70%; height: 6px;" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
+                                        <div class="progress-bar bg-danger" role="progressbar" style="width: <?= ($cantComplementos > 0) ? ($cantComplementos * 100 / $maxComplementosPendientes) : 0; ?>%; height: 6px;" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
                                     </div>
                                 </div>
                             </div>
@@ -124,7 +136,7 @@ if ($debug == 0) {
                                             <p class="font-16 m-b-5">Limite de Complementos</p>
                                         </div>
                                         <div class="ml-auto">
-                                            <h1 class="font-light text-right">169</h1>
+                                            <h1 class="font-light text-right"><?= $maxComplementosPendientes ?></h1>
                                         </div>
                                     </div>
                                 </div>
@@ -147,7 +159,7 @@ if ($debug == 0) {
                                             <p class="font-16 m-b-5">Facturas en <?= date('Y'); ?></p>
                                         </div>
                                         <div class="ml-auto">
-                                            <h1 class="font-light text-right">0</h1>
+                                            <h1 class="font-light text-right"><?= $cantCompras; ?></h1>
                                         </div>
                                     </div>
                                 </div>
@@ -233,14 +245,14 @@ if ($debug == 0) {
                                 <div id="validation" class="jsgrid" style="position: relative; height: auto; width: 100%;">
                                     <div class="col-md-12" id="verificaComplementosPago">
                                         <div class="row">
+                                            <?= ($cantComplementos > 0) ? '
                                             <div class="col">
                                                 <h4 class="text-info"><i class="fa fa-exclamation-circle"></i> ¡Atención!</h4>
-                                                <p>Se han detectado facturas pendientes de complemento de pago, por favor carguelos a la brevedad.</p>
-
+                                                <p>Se han detectado <b>' . $cantComplementos . '</b> facturas pendientes de complemento de pago desde ' . $oldComplementos . ', por favor carguelos a la brevedad.</p>
                                             </div>
                                             <div class="col text-right" id="cargaComplementoPago">
                                                 <button class="btn bg-pyme-primary btn-md" id="btnCargaComplementoPago">Cargar Complemento de Pago</button>
-                                            </div>
+                                            </div>' : ''; ?>
                                         </div>
                                     </div>
                                     <div class="table-responsive" id="divTablePro"></div>
@@ -249,7 +261,17 @@ if ($debug == 0) {
                         </div>
                     </div>
                 </div>
-                <!-- ============================================================== -->
+
+                
+                <!-- ============================================================== 
+                <button
+                    class="btn btn-success btn-lg mrb50"
+                    data-iframe="true"
+                    id="open-pdf"
+                    data-src="/ProveedorNacional/Inicio/verDocumento/PDF/XERvY3VtZW50b3NcMVxGYWN0dXJhc1wyMDI1XDEwMDAxMVwyMDI1LTAzXDEwMDAxMV9GQUNUXzFfMjAyNTAzMTIwMjM4MDMuUERG/#toolbar=0">
+                    Open PDF file
+                </button> 
+                -->
                 <!-- Sales chart -->
                 <!-- ============================================================== -->
             </div>
@@ -277,13 +299,24 @@ if ($debug == 0) {
     <!-- customizer Panel -->
     <!-- ============================================================== -->
     <aside class="customizer">
-        <div class="customizer-body" id="customizer_body">
+        <div class="customizer-body" id="customizer_body" aria-hidden="true">
         </div>
     </aside>
     <!-- ============================================================== -->
     <!-- All Jquery -->
     <!-- ============================================================== -->
     <script src="/assets/libs/jquery/dist/jquery.min.js"></script>
+    <script src="/assets/libs/fancybox/dist/fancybox/fancybox.umd.js"></script>
+    <script src="/assets/libs/fancybox/dist/carousel/carousel.umd.js"></script>
+    <script src="/assets/libs/fancybox/dist/carousel/carousel.autoplay.umd.js"></script>
+    <script src="/assets/libs/fancybox/dist/carousel/carousel.thumbs.umd.js"></script>
+    <script src="/assets/libs/fancybox/dist/panzoom/panzoom.umd.js"></script>
+    <script src="/assets/libs/fancybox/dist/panzoom/panzoom.toolbar.umd.js"></script>
+    <script src="/assets/libs/fancybox/dist/panzoom/panzoom.pins.umd.js"></script>
+    <script src="/assets/libs/fancybox/l10n/es.umd.js"></script>
+    <script src="/assets/libs/fancybox/dist/panzoom/l10n/es.umd.js"></script>   
+    <script src="/assets/libs/fancybox/dist/carousel/l10n/es.umd.js"></script>   
+
     <!-- Bootstrap tether Core JavaScript -->
     <script src="/assets/libs/popper.js/dist/umd/popper.min.js"></script>
     <script src="/assets/libs/bootstrap/dist/js/bootstrap.min.js"></script>
@@ -294,6 +327,7 @@ if ($debug == 0) {
     <script src="/dist/js/app.init.horizontalSilme.js"></script>
     <script src="/dist/js/app-style-switcher.horizontal.js"></script>
     <script src="/dist/js/app-style-switcher.js"></script>
+
     <!-- slimscrollbar scrollbar JavaScript -->
     <script src="/assets/libs/perfect-scrollbar/dist/perfect-scrollbar.jquery.min.js"></script>
     <script src="/assets/extra-libs/sparkline/sparkline.js"></script>
@@ -304,13 +338,22 @@ if ($debug == 0) {
     <!--Custom JavaScript -->
     <script src="/dist/js/custom.js"></script>
     <script src="/assets/libs/toastr/build/toastr.min.js"></script>
+
+    <script src="/assets/extra-libs/datatables.net/js/jquery.dataTables.min-ESP.js"></script>
+    <script src="/dist/js/pages/datatable/datatable-basic.init.js"></script>
+
+    <script src="/assets/extra-libs/datatables.net/js/jszip.min.js"></script>
+    <script src="/assets/extra-libs/datatables.net/js/vfs_fonts.js"></script>
+
+    <script src="/assets/extra-libs/datatables.net/js/dataTables.buttons.min.js"></script>
+    <script src="/assets/extra-libs/datatables.net/js/buttons.flash.min.js"></script>
+    <script src="/assets/extra-libs/datatables.net/js/buttons.html5.min.js"></script>
+    <script src="/assets/extra-libs/datatables.net/js/buttons.print.min.js"></script>
     <!--This page JavaScript -->
     <!--chartis chart-->
     <script src="/assets/libs/chartist/dist/chartist.min.js"></script>
     <script src="/assets/libs/chartist-plugin-tooltips/dist/chartist-plugin-tooltip.js"></script>
     <!--c3 charts -->
-    <script src="/assets/extra-libs/datatables.net/js/jquery.dataTables.min-ESP.js"></script>
-    <script src="/dist/js/pages/datatable/datatable-basic.init.js"></script>
     <script src="/assets/libs/select2/dist/js/select2.min.js"></script>
     <script src="/assets/libs/moment/moment.js"></script>
     <script src="/assets/libs/bootstrap-datepicker/dist/js/bootstrap-datepicker.js"></script>
@@ -328,13 +371,13 @@ if ($debug == 0) {
                 language: 'es'
             });
         });
-
+      
         $("#filtrado").submit(function(e) {
             e.preventDefault();
             var formData = $("#filtrado").serialize();
             $.ajax({
                 type: 'POST',
-                url: '../templates/creditos/historialCreditos.php',
+                url: 'Historico/HistorialFacturasRecibidas',
                 data: formData,
                 success: function(respuesta) {
                     $('#divTablePro').html(respuesta);
@@ -352,7 +395,7 @@ if ($debug == 0) {
             $('#customizer_body').html('<div class="loading text-center"><img src="../assets/images/loading.gif" alt="loading" /><br/>Un momento, por favor...</div>');
             $(".customizer").toggleClass('show-service-panel');
             $(".service-panel-toggle").toggle();
-            $.post("Inicio/detalladoDeCompra", {
+            $.post("Historico/detalladoDeCompra", {
                     acuse: acuse
                 },
                 function(respuesta) {
