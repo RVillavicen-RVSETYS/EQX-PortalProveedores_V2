@@ -24,6 +24,8 @@ if ($debug == 1) {
     var_dump($piezasURL);
     echo '<br><br>Ruta del MenuActual: ' . $rutaMenu . '<br><br>Contenido de datosPagina:';
     var_dump($datosPagina);
+    echo '<br><br>Lista De Proveedores: <br><br>Contenido de Proveedores_Mdl.php:';
+    var_dump($todosProveedores['data']);
 }
 
 ?>
@@ -42,6 +44,42 @@ if ($debug == 1) {
     <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
 
 <![endif]-->
+
+    <style>
+        .btnAcciones {
+            display: inline-block;
+            padding: 8px 15px;
+            border: 2px solid white;
+            border-radius: 10px;
+            text-decoration: none;
+            transition: 0.3s;
+            color: white;
+        }
+
+        #btnTodosFacturan:hover {
+            background-color: white;
+            color: green;
+            border-color: #ddd;
+        }
+
+        #btnNadieFactura:hover {
+            background-color: white;
+            color: red;
+            border-color: #ddd;
+        }
+
+        #btnActualizarLista:hover {
+            background-color: white;
+            color: blue;
+            border-color: #ddd;
+        }
+
+        #btnNuevoCierre:hover {
+            background-color: white;
+            color: black;
+            border-color: #ddd;
+        }
+    </style>
 
 </head>
 
@@ -93,12 +131,29 @@ if ($debug == 1) {
                         <div class="card">
                             <div class="card-header bg-Equinoxgold text-white d-flex justify-content-between align-items-center">
                                 <h4 class="card-title">Listado De Proveedores</h4>
-                                <div>
-                                    <a id="btnTodosFacturan" class="btn text-success" data-toggle="tooltip" data-placement="top" title="Todos Facturar"><i class="fas fa-user-plus"></i></a>
-                                    <a id="btnNadieFactura" class="btn text-danger" data-toggle="tooltip" data-placement="top" title="Nadie Factura"><i class="fas fa-user-times"></i></a>
-                                    <a id="btnActualizarLista" class="btn text-info" data-toggle="tooltip" data-placement="top" title="Actualizar Lista"><i class="fas fa-redo"></i></a>
+                            </div>
+
+                            <div class="row mt-3 ml-2">
+                                <div class="col-sm-12 col-md-6 col-lg-6">
+                                    <label for="nuevoGrupo">Agregar Proveedor:</label>
+                                    <div class="input-group mb-3">
+                                        <select required name="bloque" id="bloque" class="select2 form-control custom-select" style="width: 100%;">
+                                            <option value="">Selecciona Un Proveedor</option>
+                                            <?php
+                                            foreach ($todosProveedores['data'] as $proveedor) {
+                                            ?>
+                                                <option value="<?= $proveedor['IdProveedor']; ?>"> <?= $proveedor['IdProveedor']; ?> - <?= $proveedor['RazonSocial']; ?> (<?= $proveedor['Proveedor']; ?>) </option>
+                                            <?php
+                                            }
+                                            ?>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-sm-2 col-md-2 col-lg-2 mt-4 pt-2">
+                                    <button class="btn btn-success" type="button">Agregar</button>
                                 </div>
                             </div>
+
                             <div id="tarjetaListaProveedor" class="card-body">
 
                             </div>
@@ -109,7 +164,7 @@ if ($debug == 1) {
                         <div class="card">
                             <div class="card-header bg-Equinoxgold text-white d-flex justify-content-between align-items-center">
                                 <h4 class="card-title mb-0">Periodo De Cierre</h4>
-                                <button type="button" class="btn btn-info btn-sm" data-toggle="modal" data-target="#modalRegistraCierre"><i class="fas fa-lock"></i> Nuevo Cierre</button>
+                                <a id="btnNuevoCierre" href="#" class="btnAcciones" data-toggle="modal" data-target="#modalRegistraCierre"><i class="fas fa-lock"></i> Nuevo Cierre</a>
                             </div>
                             <div id="tarjetaPeriodo" class="card-body">
 
@@ -195,6 +250,10 @@ if ($debug == 1) {
     <script src="/assets/libs/chartist-plugin-tooltips/dist/chartist-plugin-tooltip.min.js"></script>
     <script src="/assets/extra-libs/datatables.net/js/pdfmake.min.js"></script>
     <script src="/assets/extra-libs/datatables.net/js/vfs_fonts.js"></script>
+
+    <script src="/assets/libs/select2/dist/js/select2.full.min.js"></script>
+    <script src="/assets/libs/select2/dist/js/select2.min.js"></script>
+    <script src="/dist/js/pages/forms/select2/select2.init.js"></script>
 
     <?php include 'index_js.php'; ?>
 

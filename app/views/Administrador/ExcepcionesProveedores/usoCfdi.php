@@ -25,75 +25,18 @@ if ($debug == 1) {
 ?>
 
 <div class="row">
-    <div class="col-8">
-        <?php
-        if ($exentosCfdiDistinto['success'] != true) {
-        ?>
-            <div class="alert alert-info">
-                <button type="button" class="close" data-dismiss="alert" aria-label="Close"> <span aria-hidden="true">×</span> </button>
-                <h3 class="text-info"><i class="fa fa-exclamation-circle"></i> Atención</h3> No Se Tiene Un Cierre Anual Programado.
-            </div>
-        <?php
-        } else {
-        ?>
-            <table class="table table-sm" id="tableUsoCdfi">
-                <thead>
-                    <tr>
-                        <th>No. Proveedor</th>
-                        <th>Proveedor</th>
-                        <th>Uso De CFDI</th>
-                        <th>Estatus</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php
-                    foreach ($exentosCfdiDistinto['data'] as $proveedor) {
-                        if ($proveedor['Estatus'] == 1) {
-                            $color = 'btn-outline-success';
-                            $icono = 'fas fa-check';
-                        } else {
-                            $color = 'btn-outline-danger';
-                            $icono = 'fas fa-times';
-                        }
-                    ?>
-                        <tr>
-                            <td class="text-right"><?= $proveedor['IdProveedor']; ?></td>
-                            <td><?= $proveedor['Proveedor']; ?></td>
-                            <td><?= $proveedor['Codigo']; ?> - <?= $proveedor['UsoCfdi']; ?></td>
-                            <td class="text-center">
-                                <div id="bloquear-btnEstatus4<?= $proveedor['IdConf']; ?>" style="display:none;">
-                                    <button class="btn btn-xs btn-rounded <?= $color; ?> " type="button" disabled="" style="height: 100%;">
-                                        <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
-                                    </button>
-                                </div>
-                                <div id="desbloquear-btnEstatus4<?= $proveedor['IdConf']; ?>">
-                                    <button id="btnEstatus4<?= $proveedor['IdConf']; ?>" onclick="cambiarEstatus(<?= $proveedor['Estatus']; ?>, <?= $proveedor['IdConf']; ?>, <?= 4 ?>)" type="button" class="btn btn-xs btn-rounded <?= $color; ?>"><i class="<?= $icono; ?>"></i></button>
-                                </div>
-                            </td>
-                        </tr>
-                    <?php
-                    }
-                    ?>
-                </tbody>
-            </table>
-        <?php
-        }
-        ?>
-
-    </div>
-
     <div class="col-md-4">
 
         <div class="card">
-            <div class="card-header bg-Equinoxgold text-white">
+            <div class="card-header bg-pyme-primary text-white">
                 <h4 class="card-title">Lista De Proveedores</h4>
             </div>
             <div class="card-body border">
                 <form id="agregarProveedorUC">
                     <div class="row">
-                        <label for="idProveedor">Proveedores</label>
+                        <label for="idProveedorUC">Proveedores</label>
                         <div class="input-group mb-3">
-                            <select name="idProveedor" id="idProveedor" class="select2 form-control custom-select" style="width: 100%;">
+                            <select name="idProveedor" id="idProveedorUC" class="select2 form-control custom-select" style="width: 100%;">
                                 <option value="">Selecciona Un Proveedor</option>
                                 <?php
                                 foreach ($listaProveedores['data'] as $proveedor) {
@@ -138,6 +81,60 @@ if ($debug == 1) {
                 </form>
             </div>
         </div>
+    </div>
+
+    <div class="col-8">
+        <?php
+        if ($exentosCfdiDistinto['success'] != true) {
+        ?>
+            <div class="alert alert-info">Aún no se registran proveedores para un uso de cfdi distinto al registrado. </div>
+        <?php
+        } else {
+        ?>
+            <table class="table table-sm" id="tableUsoCdfi">
+                <thead>
+                    <tr>
+                        <th>No. Proveedor</th>
+                        <th>Proveedor</th>
+                        <th>Uso De CFDI</th>
+                        <th>Estatus</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php
+                    foreach ($exentosCfdiDistinto['data'] as $proveedor) {
+                        if ($proveedor['Estatus'] == 1) {
+                            $color = 'btn-outline-success';
+                            $icono = 'fas fa-check';
+                        } else {
+                            $color = 'btn-outline-danger';
+                            $icono = 'fas fa-times';
+                        }
+                    ?>
+                        <tr>
+                            <td class="text-right"><?= $proveedor['IdProveedor']; ?></td>
+                            <td><?= $proveedor['Proveedor']; ?></td>
+                            <td><?= $proveedor['Codigo']; ?> - <?= $proveedor['UsoCfdi']; ?></td>
+                            <td class="text-center">
+                                <div id="bloquear-btnEstatus4<?= $proveedor['IdConf']; ?>" style="display:none;">
+                                    <button class="btn btn-xs btn-rounded <?= $color; ?> " type="button" disabled="" style="height: 100%;">
+                                        <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
+                                    </button>
+                                </div>
+                                <div id="desbloquear-btnEstatus4<?= $proveedor['IdConf']; ?>">
+                                    <button id="btnEstatus4<?= $proveedor['IdConf']; ?>" onclick="cambiarEstatus(<?= $proveedor['Estatus']; ?>, <?= $proveedor['IdConf']; ?>, <?= 4 ?>,<?= $proveedor['IdProveedor']; ?>)" type="button" class="btn btn-xs btn-rounded <?= $color; ?>"><i class="<?= $icono; ?>"></i></button>
+                                </div>
+                            </td>
+                        </tr>
+                    <?php
+                    }
+                    ?>
+                </tbody>
+            </table>
+        <?php
+        }
+        ?>
+
     </div>
 
 </div>

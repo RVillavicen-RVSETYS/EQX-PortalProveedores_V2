@@ -4,7 +4,7 @@ namespace App\Controllers\Administrador;
 
 use Core\Controller;
 use App\Models\Menu_Mdl;
-use App\Models\Proveedores_Mdl;
+use App\Models\Proveedores\Proveedores_Mdl;
 use App\Models\Configuraciones\BloqueoProveedores_Mdl;
 
 class BloqueoProveedoresController extends Controller
@@ -32,6 +32,9 @@ class BloqueoProveedoresController extends Controller
         $menuModel = new Menu_Mdl();
         $resultIdArea = $menuModel->obtenerIdAreaPorLink($areaLink);
 
+        $proveedoresModel = new Proveedores_Mdl();
+        $listaProveedores = $proveedoresModel->obtenerProveedores();
+
         if ($resultIdArea['success']) {
             $idArea = $resultIdArea['data'];
         } else {
@@ -50,6 +53,7 @@ class BloqueoProveedoresController extends Controller
                 $data['menuData'] =  $menuData;
                 $data['areaData'] =  $areaData;
                 $data['areaLink'] =  $areaLink;
+                $data['todosProveedores'] = $listaProveedores;
 
                 // Cargar la vista correspondiente
                 $this->view('Administrador/BloqueoProveedores/index', $data);

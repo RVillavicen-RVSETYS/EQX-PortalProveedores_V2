@@ -195,12 +195,63 @@ class ExcepcionesProveedores_Mdl
                     FROM
                         conf_provUsoCfdiDistinto ucd
                         INNER JOIN proveedores prov ON ucd.idProveedor = prov.id
-                        INNER JOIN sat_catUsoCfdi uc ON ucd.usoCFDI = uc.id";
+                        INNER JOIN sat_catUsoCFDI uc ON ucd.usoCFDI = uc.id";
 
             // Modo debug para imprimir consulta con parámetros
             if (self::$debug) {
                 $params = [];
                 $this->db->imprimirConsulta($sql, $params, 'Obtener Lista De Proveedores con Uso De CFDI Distinto:');
+            }
+
+            $stmt = $this->db->prepare($sql);
+            //$stmt->bindParam('', $nivel, \PDO::PARAM_INT);
+            $stmt->execute();
+
+            $dataResul = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            if (self::$debug) {
+                echo '<br>Resultado de Query:';
+                var_dump($dataResul);
+                echo '<br><br>';
+            }
+
+            if ($dataResul) {
+                return ['success' => true, 'data' => $dataResul];
+            } else {
+                if (self::$debug) {
+                    echo "Error Al Obtener Proveedores con Uso De CFDI Distinto.<br>";
+                }
+                return ['success' => false, 'message' => 'No Se Obtuvieron Proveedores con Uso De CFDI Distinto.'];
+            }
+        } catch (\PDOException $e) {
+            // Captura de errores y almacenamiento en el log
+            $timestamp = date("Y-m-d H:i:s");
+            error_log("[$timestamp] app/models/ExcepcionesProveedores_Mdl.php -> Error Al Obtener Proveedores con Uso De CFDI Distinto: " . $e->getMessage(), 3, LOG_FILE_BD);
+            return ['success' => false, 'message' => 'Error Al Obtener Proveedores con Uso De CFDI Distinto. Notifica a tu administrador'];
+        }
+    }
+
+    public function obtenerBloqueoDiferencias()
+    {
+        if (self::$debug) {
+            echo "Ya entro a la función para obtener la lista de proveedores que tienen bloqueo de diferencias en montos.<br>";
+        }
+        try {
+
+            $sql = "SELECT
+                        bf.id AS 'IdBloq',
+                        prov.id AS 'IdProveedor',
+                        prov.nombre AS 'Proveedor',
+                        prov.razonSocial AS 'RazonSocial',
+                        bf.motivo AS 'Motivo'
+                    FROM
+                        conf_provBloqDiferencias bf
+                        INNER JOIN proveedores prov ON bf.idProveedor = prov.id";
+
+            // Modo debug para imprimir consulta con parámetros
+            if (self::$debug) {
+                $params = [];
+                $this->db->imprimirConsulta($sql, $params, 'Obtener Lista De Proveedores con Bloqueo De Diferencias En Montos:');
             }
 
             $stmt = $this->db->prepare($sql);
@@ -292,7 +343,7 @@ class ExcepcionesProveedores_Mdl
                         uc.id AS 'IdUsoCfdi',
                         uc.descripcion AS 'UsoCfdi' 
                     FROM
-                        sat_catUsoCfdi uc 
+                        sat_catUsoCFDI uc 
                     WHERE
                         uc.estatus = 1";
 
@@ -331,27 +382,38 @@ class ExcepcionesProveedores_Mdl
     }
 
     /* CONSULTAS DE UPDATE */
-    public function cambiarEstatus($tabla, $identificador, $nuevoEstatus)
+    public function cambiarEstatus($tabla, $identificador, $nuevoEstatus, $idProveedor)
     {
         try {
+            $timestamp = date("Y-m-d H:i:s");
+            $year = date("Y");
+            $logDir = LOG_SYSTEM . 'excepciones/' . $year;
+            $estatus = ($nuevoEstatus == 1) ? 'Activó' : 'Desactivó';
 
             switch ($tabla) {
                 case '1':
                     $tabla = "conf_provIgnoraDescuento";
+                    $logFile = $logDir . '/ignoraDescuento.log';
                     break;
                 case '2':
                     $tabla = "conf_provExentoAnoFisc";
+                    $logFile = $logDir . '/exentoAnioFiscal.log';
                     break;
                 case '3':
                     $tabla = "conf_provExentoFechaEmision";
+                    $logFile = $logDir . '/exentoFechaEmision.log';
                     break;
                 case '4':
                     $tabla = "conf_provUsoCfdiDistinto";
+                    $logFile = $logDir . '/usoCfdiDistinto.log';
+                    break;
+                case '5':
+                    $tabla = "conf_provBloqDiferencias";
+                    $logFile = $logDir . '/bloqueoDiferencias.log';
                     break;
             }
 
             $sql = "UPDATE $tabla SET estatus = :nuevoEstatus WHERE id = :identificador";
-
 
             if (self::$debug) {
                 $params = [
@@ -373,6 +435,13 @@ class ExcepcionesProveedores_Mdl
             }
 
             if ($filasAfectadas == 1) {
+
+                if (!file_exists($logDir)) {
+                    mkdir($logDir, 0777, true);
+                }
+
+                error_log("[$timestamp] app/models/ExcepcionesProveedores_Mdl.php -> Se " . $estatus . " El Proveedor: " . $idProveedor . ", IdUserReg: " . $_SESSION['EQXident'] . PHP_EOL, 3, $logFile);
+
                 return ['success' => true, 'data' => 'Estatus Cambiado Correctamente.'];
             } else {
                 if (self::$debug) {
@@ -385,6 +454,48 @@ class ExcepcionesProveedores_Mdl
             error_log("[$timestamp] app/models/ExcepcionesProveedores_Mdl.php ->Error Al Cambiar Estatus: " . $e->getMessage(), 3, LOG_FILE_BD);
             if (self::$debug) {
                 echo "Error Al Cambiar Estatus: " . $e->getMessage();
+            }
+            return ['success' => false, 'message' => 'Problemas Con Las Excepciones, Notifica a tu administrador.'];
+        }
+    }
+
+    public function eliminarReg($identificador)
+    {
+        try {
+
+            $sql = "DELETE FROM conf_provBloqDiferencias WHERE id = :identificador";
+
+            if (self::$debug) {
+                $params = [
+                    ':identificador' => $identificador,
+
+                ];
+                $this->db->imprimirConsulta($sql, $params, 'Eliminar Proveedor De Bloqueo Diferencias.<br>');
+            }
+            $stmt = $this->db->prepare($sql);
+            $stmt->bindParam(':identificador', $identificador, PDO::PARAM_INT);
+            $stmt->execute();
+            $filasAfectadas = $stmt->rowCount();
+
+            if (self::$debug) {
+                echo '<br>Resultado de Query:';
+                var_dump($filasAfectadas);
+                echo '<br><br>';
+            }
+
+            if ($filasAfectadas == 1) {
+                return ['success' => true, 'data' => 'Proveedor Eliminado Correctamente.'];
+            } else {
+                if (self::$debug) {
+                    echo "Error Al Eliminar Proveedor.<br>";
+                }
+                return ['success' => false, 'message' => 'Error Al Eliminar Proveedor.'];
+            }
+        } catch (\Exception $e) {
+            $timestamp = date("Y-m-d H:i:s");
+            error_log("[$timestamp] app/models/ExcepcionesProveedores_Mdl.php ->Error Al Eliminar Proveedor: " . $e->getMessage(), 3, LOG_FILE_BD);
+            if (self::$debug) {
+                echo "Error Al Eliminar Proveedor: " . $e->getMessage();
             }
             return ['success' => false, 'message' => 'Problemas Con Las Excepciones, Notifica a tu administrador.'];
         }
@@ -418,6 +529,15 @@ class ExcepcionesProveedores_Mdl
             }
 
             if ($filasAfectadas == 1) {
+                $timestamp = date("Y-m-d H:i:s");
+                $year = date("Y");
+                $logDir = LOG_SYSTEM . 'excepciones/' . $year;
+                if (!file_exists($logDir)) {
+                    mkdir($logDir, 0777, true);
+                }
+                $logFile = $logDir . '/ignoraDescuento.log';
+                error_log("[$timestamp] app/models/ExcepcionesProveedores_Mdl.php -> Se Agregó El Proveedor: " . $idProveedor . " Con Motivo: '$motivo', IdUserReg: " . $_SESSION['EQXident'] . PHP_EOL, 3, $logFile);
+
                 return ['success' => true, 'data' => 'Proveedor Agregado Correctamente.'];
             } else {
                 if (self::$debug) {
@@ -461,6 +581,16 @@ class ExcepcionesProveedores_Mdl
             }
 
             if ($filasAfectadas == 1) {
+
+                $timestamp = date("Y-m-d H:i:s");
+                $year = date("Y");
+                $logDir = LOG_SYSTEM . 'excepciones/' . $year;
+                if (!file_exists($logDir)) {
+                    mkdir($logDir, 0777, true);
+                }
+                $logFile = $logDir . '/exentoAnioFiscal.log';
+                error_log("[$timestamp] app/models/ExcepcionesProveedores_Mdl.php -> Se Agregó El Proveedor: " . $idProveedor . ", IdUserReg: " . $_SESSION['EQXident'] . PHP_EOL, 3, $logFile);
+
                 return ['success' => true, 'data' => 'Proveedor Agregado Correctamente.'];
             } else {
                 if (self::$debug) {
@@ -504,6 +634,16 @@ class ExcepcionesProveedores_Mdl
             }
 
             if ($filasAfectadas == 1) {
+
+                $timestamp = date("Y-m-d H:i:s");
+                $year = date("Y");
+                $logDir = LOG_SYSTEM . 'excepciones/' . $year;
+                if (!file_exists($logDir)) {
+                    mkdir($logDir, 0777, true);
+                }
+                $logFile = $logDir . '/exentoTiempoEmision.log';
+                error_log("[$timestamp] app/models/ExcepcionesProveedores_Mdl.php -> Se Agregó El Proveedor: " . $idProveedor . ", IdUserReg: " . $_SESSION['EQXident'] . PHP_EOL, 3, $logFile);
+
                 return ['success' => true, 'data' => 'Proveedor Agregado Correctamente.'];
             } else {
                 if (self::$debug) {
@@ -549,6 +689,71 @@ class ExcepcionesProveedores_Mdl
             }
 
             if ($filasAfectadas == 1) {
+
+                $timestamp = date("Y-m-d H:i:s");
+                $year = date("Y");
+                $logDir = LOG_SYSTEM . 'excepciones/' . $year;
+                if (!file_exists($logDir)) {
+                    mkdir($logDir, 0777, true);
+                }
+                $logFile = $logDir . '/usoCfdiDistinto.log';
+                error_log("[$timestamp] app/models/ExcepcionesProveedores_Mdl.php -> Se Agregó El Proveedor: " . $idProveedor . ", IdUserReg: " . $_SESSION['EQXident'] . PHP_EOL, 3, $logFile);
+
+                return ['success' => true, 'data' => 'Proveedor Agregado Correctamente.'];
+            } else {
+                if (self::$debug) {
+                    echo "Error Al Agregar Proveedor.<br>";
+                }
+                return ['success' => false, 'message' => 'Error Al Agregar Proveedor.'];
+            }
+        } catch (\Exception $e) {
+            $timestamp = date("Y-m-d H:i:s");
+            error_log("[$timestamp] app/models/ExcepcionesProveedores_Mdl.php ->Error Al Agregar Proveedor: " . $e->getMessage(), 3, LOG_FILE_BD);
+            if (self::$debug) {
+                echo "Error Al Agregar Proveedor: " . $e->getMessage();
+            }
+            return ['success' => false, 'message' => 'Problemas Con Las Excepciones, Notifica a tu administrador.'];
+        }
+    }
+
+    public function registraProveedorBD($idProveedor, $motivo)
+    {
+        try {
+
+            $sql = "INSERT INTO conf_provBloqDiferencias (idProveedor, idUserReg, motivo, fechaReg) VALUES (:idProveedor, :idUserReg, :motivo, NOW());";
+
+            if (self::$debug) {
+                $params = [
+                    ':idProveedor' => $idProveedor,
+                    ':idUserReg' => $_SESSION['EQXident'],
+                    ':motivo' => $motivo,
+                ];
+                $this->db->imprimirConsulta($sql, $params, 'Registrar Proveedor Exento Fecha Emisión.<br>');
+            }
+            $stmt = $this->db->prepare($sql);
+            $stmt->bindParam(':idProveedor', $idProveedor, PDO::PARAM_INT);
+            $stmt->bindParam(':idUserReg', $_SESSION['EQXident'], PDO::PARAM_INT);
+            $stmt->bindParam(':motivo', $motivo, PDO::PARAM_STR);
+            $stmt->execute();
+            $filasAfectadas = $stmt->rowCount();
+
+            if (self::$debug) {
+                echo '<br>Resultado de Query:';
+                var_dump($filasAfectadas);
+                echo '<br><br>';
+            }
+
+            if ($filasAfectadas == 1) {
+
+                $timestamp = date("Y-m-d H:i:s");
+                $year = date("Y");
+                $logDir = LOG_SYSTEM . 'excepciones/' . $year;
+                if (!file_exists($logDir)) {
+                    mkdir($logDir, 0777, true);
+                }
+                $logFile = $logDir . '/bloqueoDeDiferencias.log';
+                error_log("[$timestamp] app/models/ExcepcionesProveedores_Mdl.php -> Se Agregó El Proveedor: " . $idProveedor . " Con Motivo: '$motivo', IdUserReg: " . $_SESSION['EQXident'] . PHP_EOL, 3, $logFile);
+
                 return ['success' => true, 'data' => 'Proveedor Agregado Correctamente.'];
             } else {
                 if (self::$debug) {

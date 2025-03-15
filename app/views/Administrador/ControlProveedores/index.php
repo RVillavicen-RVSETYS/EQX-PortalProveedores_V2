@@ -44,7 +44,39 @@ if ($debug == 1) {
     <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
 
 <![endif]-->
+    <style>
+        #btnActualizaProveedores {
+            display: inline-block;
+            padding: 8px 15px;
+            border: 2px solid white;
+            border-radius: 10px;
+            text-decoration: none;
+            transition: 0.3s;
+            color: white;
+        }
 
+        #btnActualizaProveedores:hover {
+            background-color: white;
+            color: black;
+            border-color: #ddd;
+        }
+
+        #resetPass {
+            display: inline-block;
+            padding: 8px 15px;
+            border: 2px solid rgb(69, 157, 52);
+            border-radius: 10px;
+            text-decoration: none;
+            transition: 0.3s;
+            color: rgb(69, 157, 52);
+        }
+
+        #resetPass:hover {
+            background-color: rgb(69, 157, 52);
+            color: white;
+            border-color: #ddd;
+        }
+    </style>
 </head>
 
 <body>
@@ -92,13 +124,14 @@ if ($debug == 1) {
                 <div class="row">
                     <div class="col-md-12">
                         <div class="card">
-                            <div class="card-header bg-Equinoxgold text-white">
+                            <div class="card-header bg-pyme-primary text-white d-flex justify-content-between align-items-center">
                                 <h4 class="card-title">Selecciona Un Proveedor</h4>
+                                <a href="#" id="btnActualizaProveedores">Actualizar Proveedores</a>
                             </div>
                             <div class="card-body">
                                 <form id="consultarProveedor">
                                     <div class="row">
-                                        <div class="col-md-3">
+                                        <div class="col-md-4">
                                             <label for="proveedor">Lista De Proveedores</label>
                                             <div class="input-group mb-3">
 
@@ -107,21 +140,17 @@ if ($debug == 1) {
                                                     <?php
                                                     foreach ($listaProveedores['data'] as $proveedor) {
                                                     ?>
-                                                        <option value="<?= $proveedor['IdProveedor']; ?>"><?= $proveedor['IdProveedor']; ?> - <?= $proveedor['Proveedor']; ?></option>
+                                                        <option value="<?= $proveedor['IdProveedor']; ?>"> <?= $proveedor['IdProveedor']; ?> - <?= $proveedor['RazonSocial']; ?> (<?= $proveedor['Proveedor']; ?>) </option>
                                                     <?php
                                                     }
                                                     ?>
                                                 </select>
                                             </div>
                                         </div>
-                                        <div class="col-md-3 align-self-center">
+                                        <div class="col-md-1 align-self-center">
                                             <button type="submit" class="btn btn-success mt-3" name="btnBuscarProveedor" id="btnBuscarProveedor">Consultar</button>
                                         </div>
-                                        <div class="col-md-5">
-                                        </div>
-                                        <div class="col-md-1 justify-content-end mt-3">
-                                            <button type="button" class="btn btn-outline-warning btn-rounded mt-2" name="btnActualizaProveedores" id="btnActualizaProveedores">Actualizar Proveedores</button>
-                                        </div>
+
                                     </div>
                                 </form>
                             </div>
@@ -132,7 +161,7 @@ if ($debug == 1) {
                 <div class="row">
                     <div class="col-md-12">
                         <div class="card">
-                            <div class="card-header bg-Equinoxgold text-white">
+                            <div class="card-header bg-pyme-primary text-white">
                                 <h4 class="card-title">Detalle Del Proveedor</h4>
                             </div>
                             <div id="tarjetaProveedor" class="card-body">
@@ -205,6 +234,24 @@ if ($debug == 1) {
     <script src="/dist/js/pages/forms/select2/select2.init.js"></script>
     <script src="/assets/libs/block-ui/jquery.blockUI.js"></script>
     <script src="/assets/extra-libs/block-ui/block-ui.js"></script>
+    <script src="/assets/libs/moment/moment.js"></script>
+    <script src="/assets/libs/bootstrap-datepicker/dist/js/bootstrap-datepicker.js"></script>
+    <script src="/assets/libs/bootstrap-datepicker/dist/locales/bootstrap-datepicker.es.min.js"></script>
+
+    <script src="/assets/extra-libs/datatables.net/js/jquery.dataTables.min-ESP.js"></script>
+    <script src="/dist/js/pages/datatable/datatable-basic.init.js"></script>
+
+    <script src="/assets/extra-libs/datatables.net/js/jszip.min.js"></script>
+    <script src="/assets/extra-libs/datatables.net/js/vfs_fonts.js"></script>
+
+    <script src="/assets/extra-libs/datatables.net/js/dataTables.buttons.min.js"></script>
+    <script src="/assets/extra-libs/datatables.net/js/buttons.flash.min.js"></script>
+    <script src="/assets/extra-libs/datatables.net/js/buttons.html5.min.js"></script>
+    <script src="/assets/extra-libs/datatables.net/js/buttons.print.min.js"></script>
+    <script src="/assets/libs/chartist/dist/chartist.min.js"></script>
+    <script src="/assets/libs/chartist-plugin-tooltips/dist/chartist-plugin-tooltip.min.js"></script>
+    <script src="/assets/extra-libs/datatables.net/js/pdfmake.min.js"></script>
+    <script src="/assets/extra-libs/datatables.net/js/vfs_fonts.js"></script>
 
     <?php include 'index_js.php'; ?>
 

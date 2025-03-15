@@ -1,4 +1,9 @@
 <?php
+
+use App\Globals\Controllers\FuncionesBasicas\FuncionesBasicasController;
+
+$funcionesBase = new FuncionesBasicasController();
+
 $debug = 0;
 
 if ($debug == 1) {
@@ -18,10 +23,7 @@ if ($debug == 1) {
     var_dump($historialFacturas['data']);
 }
 
-function calcularFechaPago($basePago, $fechaVence)
-{
-    return "Hola Mundo";
-}
+
 
 ?>
 
@@ -81,60 +83,38 @@ if ($historialFacturas['success'] == false) {
                 $estatusContable = $historial['EstatusContable'];
                 $basePago = $historial['BasePago'];
                 $fehcaVence = $historial['FechaVence'];
-                $msjContable = '';
+                $msjEstatusContable = '';
                 switch ($estatusContable) {
                     case '1':
-                        $msjContable = 'En Espera De Validación';
+                        $msjEstatusContable = 'En Espera De Validación';
 
-                        if ($val['fechaPosibleVencimiento'] != '') {
-                            $detContable = '<span>' . calcularFechaPago(json_encode($basePago), json_encode($fehcaVence)) . '</span>';
-                        } else {
-                            $detContable = '<center class="text-default-light"><i class="md md-query-builder"></i></center>';
-                        }
-                        $txtColor = '';
-                        $bgColor = '';
+
                         break;
                     case '2':
-                        if ($historial['BasePago'] == '' or $historial['FechaVence'] == '') {
-                            if ($historial['FechaPosibleVencimiento'] != '') {
-                                $detContable = '<span>' . calcularFechaPago(json_encode($historial['FechaRegistro']), json_encode($historial['FechaPosibleVencimiento'])) . '</span>';
-                            } else {
-                                $detContable = '<span class="text-success">En espera de Fecha de Pago</span>';
-                            }
-                        } else {
-                            $detContable = '<span>' . calcularFechaPago(json_encode($basePago), json_encode($fehcaVence)) . '</span>';
-                        }
-                        $msjContable = 'Se A Contabilizado';
-                        $txtColor = '';
-                        $bgColor = '';
+
+                        $msjEstatusContable = 'Se A Contabilizado';
+
                         break;
                     case '3':
-                        $msjContable = 'Esta Factura Fue Regresada';
-                        $msjRegresa = $historial['ComentRegresa'];
-                        $detContable = '<center class="text-danger"><a onclick="muestraMensaje(' . $historial['Acuse'] . ',\'' . $msjRegresa . '\');" ><i class="md md-reply"></i></a></center>';
-                        $txtColor = 'text-danger';
-                        $bgColor = 'danger';
+                        $msjEstatusContable = 'Esta Factura Fue Regresada';
+
                         break;
                     case '4':
-                        $msjContable = 'Factura Eliminada Por El Usuario';
-                        $detContable = '<center class="text-default-light"><i class="fa fa-close"></center>';
-                        $txtColor = '';
-                        $bgColor = '';
+                        $msjEstatusContable = 'Factura Eliminada Por El Usuario';
+
                         break;
                     default:
-                        $msjContable = 'Estatus Contable No Identificado';
+                        $msjEstatusContable = 'Estatus Contable No Identificado';
                         break;
                 }
-                $msjFinal = '<div class="tooltip-container">
-                                <span>' . $detContable . '</span>
-                                <div class="tooltip-text">
-                                    <strong>Meta</strong>
-                                    <p></p>
-                                </div>
-                            </div>';
+                
+                if ($historial['Pais'] == 'MX') {
+                   $pdfXml = '';
+                }
 
             ?>
                 <tr>
+                    <a target="_blank" href="../<?= $historial['FacXML'] ?>"></a>
                     <td><?= $historial['Acuse']; ?></td>
                     <td><?= $claseDocto; ?></td>
                     <td><?= $historial['FechaReg']; ?></td>
@@ -145,7 +125,7 @@ if ($historialFacturas['success'] == false) {
                     <td><?= $historial['RfcReceptor']; ?></td>
                     <td><?= $historial['MontoFactura']; ?></td>
                     <td class="text-center"><?= $estatusFiscal; ?></td>
-                    <td> <?= $msjFinal; ?></td>
+                    <td> <?= $msjEstatusContable; ?></td>
                     <td></td>
                     <td></td>
                     <td></td>
