@@ -55,7 +55,7 @@ if ($periodo['success'] == false) {
 <div class="modal fade" id="modalRegistraCierre" role="dialog" aria-labelledby="modalRegistraCierreLabel" aria-hidden="true">
     <div class="modal-dialog modal-md modalRegistraCierre" role="document">
         <div class="modal-content">
-            <div class="modal-header" style="background-color:#11334b;">
+            <div class="modal-header bg-pyme-primary">
                 <h5 class="modal-title text-white" id="modalRegistraCierreLabel">Programar Nuevo Cierre</h5>
                 <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close" onclick="$('#modalRegistraCierre').modal('hide');">
                     <span aria-hidden="true">&times;</span>
@@ -69,14 +69,14 @@ if ($periodo['success'] == false) {
                         <div class="col-md-6">
                             <label for="fechaInicio">Fecha Inicio:</label>
                             <div class="input-group mb-3">
-                                <input type="date" autocomplete="off" class="form-control" name="fechaInicio" id="fechaInicio">
+                                <input required type="date" autocomplete="off" class="form-control" name="fechaInicio" id="fechaInicio">
                             </div>
                         </div>
 
                         <div class="col-md-6">
                             <label for="fechaFin">Fecha Final:</label>
                             <div class="input-group mb-3">
-                                <input type="date" autocomplete="off" class="form-control" name="fechaFin" id="fechaFin">
+                                <input required type="date" autocomplete="off" class="form-control" name="fechaFin" id="fechaFin">
                             </div>
                         </div>
                     </div>
@@ -85,7 +85,7 @@ if ($periodo['success'] == false) {
                         <div class="col-md-12">
                             <label for="msjEsp">Mensaje En Español</label>
                             <div class="input-group mb-3">
-                                <textarea class="form-control" name="msjEsp" id="msjEsp" style="resize: none;"></textarea>
+                                <textarea required class="form-control" name="msjEsp" id="msjEsp" style="resize: none;"></textarea>
                             </div>
                         </div>
                     </div>
@@ -94,7 +94,7 @@ if ($periodo['success'] == false) {
                         <div class="col-md-12">
                             <label for="msjIng">Mensaje En Inglés</label>
                             <div class="input-group mb-3">
-                                <textarea class="form-control" name="msjIng" id="msjIng" style="resize: none;"></textarea>
+                                <textarea required class="form-control" name="msjIng" id="msjIng" style="resize: none;"></textarea>
                             </div>
                         </div>
                     </div>

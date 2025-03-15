@@ -249,7 +249,7 @@ class BloqueoProveedoresController extends Controller
         }
     }
 
-    public function todosFacturan()
+    /*public function todosFacturan()
     {
         $data = []; // Aquí puedes pasar datos a la vista si es necesario
 
@@ -275,9 +275,9 @@ class BloqueoProveedoresController extends Controller
                 'message' => $errorMessage
             ]);
         }
-    }
+    }*/
 
-    public function nadieFactura()
+    /*public function nadieFactura()
     {
         $data = []; // Aquí puedes pasar datos a la vista si es necesario
 
@@ -303,9 +303,9 @@ class BloqueoProveedoresController extends Controller
                 'message' => $errorMessage
             ]);
         }
-    }
+    }*/
 
-    public function actualizarLista()
+    /*public function actualizarLista()
     {
         $data = []; // Aquí puedes pasar datos a la vista si es necesario
 
@@ -317,6 +317,70 @@ class BloqueoProveedoresController extends Controller
         $bloqueoModel = new BloqueoProveedores_Mdl();
 
         $resultBloqueo = $bloqueoModel->actualizarListaProv();
+
+        if ($resultBloqueo['success']) {
+            $Message = $resultBloqueo['data'];
+            echo json_encode([
+                'success' => true,
+                'message' => $Message
+            ]);
+        } else {
+            $errorMessage = $resultBloqueo['message'];
+            echo json_encode([
+                'success' => false,
+                'message' => $errorMessage
+            ]);
+        }
+    }*/
+
+    public function agregarProveedor()
+    {
+        $data = []; // Aquí puedes pasar datos a la vista si es necesario
+        $idProveedor = $_POST['idProveedor'] ?? '';
+
+        if ($this->debug == 1) {
+            echo "<br>Contenido de data:<br>";
+            var_dump($data);
+
+            echo "<br>Contenido de idProveedor: $idProveedor <br>";
+        }
+
+        $bloqueoModel = new BloqueoProveedores_Mdl();
+
+        $resultBloqueo = $bloqueoModel->agregaProveedor($idProveedor);
+
+
+        if ($resultBloqueo['success']) {
+            $Message = $resultBloqueo['data'];
+            echo json_encode([
+                'success' => true,
+                'message' => $Message
+            ]);
+        } else {
+            $errorMessage = $resultBloqueo['message'];
+            echo json_encode([
+                'success' => false,
+                'message' => $errorMessage
+            ]);
+        }
+    }
+
+    public function cambiaEstatusBloqueo()
+    {
+        $data = []; // Aquí puedes pasar datos a la vista si es necesario
+        $idProveedor = $_POST['idProveedor'] ?? '';
+
+        if ($this->debug == 1) {
+            echo "<br>Contenido de data:<br>";
+            var_dump($data);
+
+            echo "<br>Contenido de idProveedor: $idProveedor <br>";
+        }
+
+        $bloqueoModel = new BloqueoProveedores_Mdl();
+
+        $resultBloqueo = $bloqueoModel->cambiaEstatus($idProveedor);
+
 
         if ($resultBloqueo['success']) {
             $Message = $resultBloqueo['data'];

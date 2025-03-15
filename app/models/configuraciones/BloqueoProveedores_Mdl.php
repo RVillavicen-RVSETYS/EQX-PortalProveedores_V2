@@ -445,4 +445,100 @@ class BloqueoProveedores_Mdl
             return ['success' => false, 'message' => 'Problemas Con La Actualización De La Lista De Proveedores, Notifica a tu administrador.'];
         }
     }
+
+    public function agregaProveedor($idProveedor)
+    {
+        try {
+
+            $estatus = 1;
+
+            $sql = "INSERT INTO conf_provFactSiempre (idProveedor, nombre, estatus, idUserReg, fechaReg)
+                    SELECT
+                        prov.id AS 'IdProveedor',
+                        prov.nombre AS 'Proveedor',
+                        :estatus,
+                        :idUserReg,
+                        NOW()
+                    FROM
+                        proveedores prov 
+                    WHERE
+                        id = :idProveedor";
+
+            if (self::$debug) {
+                $params = [
+                    ':estatus' => $estatus,
+                    ':idUserReg' => $_SESSION['EQXident'],
+                    ':idProveedor' => $idProveedor
+                ];
+                $this->db->imprimirConsulta($sql, $params, 'Agregar Proveedor A Factura Siempre.<br>');
+            }
+            $stmt = $this->db->prepare($sql);
+            $stmt->bindParam(':estatus', $estatus, PDO::PARAM_INT);
+            $stmt->bindParam(':idUserReg', $_SESSION['EQXident'], PDO::PARAM_INT);
+            $stmt->bindParam(':idProveedor', $idProveedor, PDO::PARAM_INT);
+            $resultado = $stmt->execute();
+
+            if (self::$debug) {
+                echo '<br>Resultado de Query:';
+                var_dump($resultado);
+                echo '<br><br>';
+            }
+
+            if ($resultado) {
+                return ['success' => true, 'data' => 'Proveedor Agregado Correctamente.'];
+            } else {
+                if (self::$debug) {
+                    echo "Error Al Agregar El Proveedor.<br>";
+                }
+                return ['success' => false, 'message' => 'Error Al Agregar El Proveedor.'];
+            }
+        } catch (\Exception $e) {
+            $timestamp = date("Y-m-d H:i:s");
+            error_log("[$timestamp] app/models/BloqueoProveedores_Mdl.php ->Error Al Agregar El Proveedor: " . $e->getMessage(), 3, LOG_FILE_BD);
+            if (self::$debug) {
+                echo "Error Al Agregar El Proveedor: " . $e->getMessage();
+            }
+            return ['success' => false, 'message' => 'Problemas Con Los Proveedores, Notifica a tu administrador.'];
+        }
+    }
+
+    public function cambiaEstatus($idProveedor)
+    {
+        try {
+
+            $sql = "UPDATE conf_provFactSiempre SET estatus = IF(estatus = 1,0,1) WHERE idProveedor = :idProveedor";
+
+            if (self::$debug) {
+                $params = [
+                    ':idProveedor' => $idProveedor
+                ];
+                $this->db->imprimirConsulta($sql, $params, 'Agregar Proveedor A Factura Siempre.<br>');
+            }
+            $stmt = $this->db->prepare($sql);
+            $stmt->bindParam(':idProveedor', $idProveedor, PDO::PARAM_INT);
+            $resultado = $stmt->execute();
+
+            if (self::$debug) {
+                echo '<br>Resultado de Query:';
+                var_dump($resultado);
+                echo '<br><br>';
+            }
+
+            if ($resultado) {
+                return ['success' => true, 'data' => 'Estatus Cambiado Correctamente.'];
+            } else {
+                if (self::$debug) {
+                    echo "Error Al Cambiar Estatus.<br>";
+                }
+                return ['success' => false, 'message' => 'Error Al Cambiar Estatus.'];
+            }
+        } catch (\Exception $e) {
+            $timestamp = date("Y-m-d H:i:s");
+            error_log("[$timestamp] app/models/BloqueoProveedores_Mdl.php ->Error Al Cambiar Estatus: " . $e->getMessage(), 3, LOG_FILE_BD);
+            if (self::$debug) {
+                echo "Error Al Cambiar Estatus: " . $e->getMessage();
+            }
+            return ['success' => false, 'message' => 'Problemas Con Los Proveedores, Notifica a tu administrador.'];
+        }
+    }
 }
