@@ -31,8 +31,8 @@ class CierrePortal_Mdl
                         DATE_FORMAT( fechaInicio, '%d-%m-%Y' ) AS fechaInicio,
                         DATE_FORMAT( fechaFin, '%d-%m-%Y' ) AS fechaFin,
                         mensajeCierre,
-                        mensajeCierre_EN 
-                    FROM conf_bloqueaFacturas 
+                        mensajeCierreIng
+                    FROM conf_cierreAnio 
                     WHERE estatus = '1' AND NOW() BETWEEN fechaInicio AND fechaFin
                     ORDER BY id DESC LIMIT 1";
 

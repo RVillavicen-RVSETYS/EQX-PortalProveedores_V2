@@ -56,7 +56,13 @@ if ($notificaciones['success'] && !empty($notificaciones['data'])) {
     <!-- Custom CSS -->
 
     <!-- Vendor -->
-    <link href="../assets/extra-libs/datatables.net-bs4/css/dataTables.bootstrap4.css" rel="stylesheet">
+    <link href="/assets/extra-libs/datatables.net-bs4/css/dataTables.bootstrap4.css" rel="stylesheet">
+    <link href="/assets/libs/fancybox/fancybox.css" rel="stylesheet">
+    <link href="/assets/libs/fancybox/dist/carousel/carousel.css" rel="stylesheet">
+    <link href="/assets/libs/fancybox/dist/carousel/carousel.thumbs.css" rel="stylesheet">
+    <link href="/assets/libs/fancybox/dist/panzoom/panzoom.css" rel="stylesheet">
+    <link href="/assets/libs/fancybox/dist/panzoom/panzoom.toolbar.css" rel="stylesheet">
+    <link href="/assets/libs/fancybox/dist/panzoom/panzoom.pins.css" rel="stylesheet">
 
     <style>
         .custom-file-input~.custom-file-label::after {
@@ -368,9 +374,18 @@ if ($notificaciones['success'] && !empty($notificaciones['data'])) {
     </aside>
     <!-- ============================================================== -->
     <!-- All Jquery -->
-    <!-- ============================================================== -->
-
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+    <!-- ============================================================== -->  
+    <script src="/assets/libs/jquery/dist/jquery.min.js"></script>
+    <script src="/assets/libs/fancybox/dist/fancybox/fancybox.umd.js"></script>
+    <script src="/assets/libs/fancybox/dist/carousel/carousel.umd.js"></script>
+    <script src="/assets/libs/fancybox/dist/carousel/carousel.autoplay.umd.js"></script>
+    <script src="/assets/libs/fancybox/dist/carousel/carousel.thumbs.umd.js"></script>
+    <script src="/assets/libs/fancybox/dist/panzoom/panzoom.umd.js"></script>
+    <script src="/assets/libs/fancybox/dist/panzoom/panzoom.toolbar.umd.js"></script>
+    <script src="/assets/libs/fancybox/dist/panzoom/panzoom.pins.umd.js"></script>
+    <script src="/assets/libs/fancybox/l10n/es.umd.js"></script>
+    <script src="/assets/libs/fancybox/dist/panzoom/l10n/es.umd.js"></script>   
+    <script src="/assets/libs/fancybox/dist/carousel/l10n/es.umd.js"></script>   
 
     <!-- Bootstrap tether Core JavaScript -->
     <script src="/assets/libs/popper.js/dist/umd/popper.min.js"></script>

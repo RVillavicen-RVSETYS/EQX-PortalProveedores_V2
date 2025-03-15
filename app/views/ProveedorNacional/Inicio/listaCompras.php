@@ -25,65 +25,66 @@ if ($debug == 1) {
         </thead>
         <tbody>
             <?php
-            foreach ($listaCompras as $row) {
-                switch ($row['claseDocto']) {
-                    case 'WE':
-                        $claseDocto = 'FACT';
-                        break;
+            if (!empty($listaCompras)) {
+                foreach ($listaCompras as $row) {
+                    switch ($row['claseDocto']) {
+                        case 'WE':
+                            $claseDocto = 'FACT';
+                            break;
 
-                    case 'KA':
-                        $claseDocto = '<b>ANT</b>';
-                        break;
+                        case 'KA':
+                            $claseDocto = '<b>ANT</b>';
+                            break;
 
-                    case 'RZ':
-                        $claseDocto = '<b>CONS</b>';
-                        break;
+                        case 'RZ':
+                            $claseDocto = '<b>CONS</b>';
+                            break;
 
-                    default:
-                        $claseDocto = '<span class="text-danger"> NO_DEF </span>';
-                        break;
-                }
+                        default:
+                            $claseDocto = '<span class="text-danger"> NO_DEF </span>';
+                            break;
+                    }
 
-                switch ($row['estatus']) {
-                    case '1':
-                        $statContable = '<center class="text-danger"><i class="md md-close"></i></center>';
-                        $txtColor = '';
-                        $bgColor = '';
-                        break;
+                    switch ($row['estatus']) {
+                        case '1':
+                            $statContable = '<center class="text-danger"><i class="md md-close"></i></center>';
+                            $txtColor = '';
+                            $bgColor = '';
+                            break;
 
-                    case '2':
-                        $statContable = '<center class="text-success"><i class="fas fa-check"></i></center>';
-                        $txtColor = '';
-                        $bgColor = '';
-                        break;
+                        case '2':
+                            $statContable = '<center class="text-success"><i class="fas fa-check"></i></center>';
+                            $txtColor = '';
+                            $bgColor = '';
+                            break;
 
-                    case '3':
-                        $statContable = '<center class="text-danger"><i class="md md-close"></i></center>';
-                        $txtColor = 'text-danger';
-                        $bgColor = 'danger';
-                        break;
+                        case '3':
+                            $statContable = '<center class="text-danger"><i class="md md-close"></i></center>';
+                            $txtColor = 'text-danger';
+                            $bgColor = 'danger';
+                            break;
 
-                    case '4':
-                        $statContable = '<center class="text-danger"><i class="md md-close"></i></center>';
-                        $txtColor = 'text-danger';
-                        $bgColor = 'danger';
-                        break;
+                        case '4':
+                            $statContable = '<center class="text-danger"><i class="md md-close"></i></center>';
+                            $txtColor = 'text-danger';
+                            $bgColor = 'danger';
+                            break;
 
-                    default:
-                        $txtColor = '';
-                        $bgColor = '';
-                        break;
-                }
+                        default:
+                            $txtColor = '';
+                            $bgColor = '';
+                            break;
+                    }
 
-                $valida = '<center class="text-success"><i class="fas fa-check"></i></center>';
-                $cantCharRecp = strlen($row['noRecepcion']);
-                if ($cantCharRecp > 25) {
-                    $recepciones = substr($row['noRecepcion'], 0, 25) . '...';
-                } else {
-                    $recepciones = $row['noRecepcion'];
-                }
+                    $valida = '<center class="text-success"><i class="fas fa-check"></i></center>';
+                    $cantCharRecp = strlen($row['noRecepcion']);
+                    if ($cantCharRecp > 25) {
+                        $recepciones = substr($row['noRecepcion'], 0, 25) . '...';
+                    } else {
+                        $recepciones = $row['noRecepcion'];
+                    }
 
-                echo '<tr class="' . $txtColor . ' ' . $bgColor . '" >
+                    echo '<tr class="' . $txtColor . ' ' . $bgColor . '" >
                     <td class="text-center">' . $row['acuse'] . '</td>
                     <td>' . $claseDocto . '</td>
                     <td>' . $row['ordenCompra'] . '</td>
@@ -93,6 +94,7 @@ if ($debug == 1) {
                     <td>' . $valida . ' </td>
                     <td>' . $statContable . '</td>
                     <td> <button class="btn btn-sm btn-success" onClick="detalleCompra(\'' . $row['acuse'] . '\');"><i class="text-white icon-doc"></i></button> </td>';
+                }
             }
             ?>
         </tbody>
@@ -119,7 +121,9 @@ if ($debug == 1) {
         scrollCollapse: true,
         autoWidth: true,
         bSort: true,
-        order: [[0, "desc"]],
+        order: [
+            [0, "desc"]
+        ],
         dom: 'Blfrtip',
         lengthMenu: [
             [10, 25, 50, -1],
@@ -128,7 +132,7 @@ if ($debug == 1) {
         info: true,
         buttons: [{
                 extend: 'pdfHtml5',
-                className: 'btn btn-pdf bg-Equinoxgold text-white',
+                className: 'btn btn-pdf bg-pyme-primary text-white',
                 orientation: 'landscape',
                 pageSize: 'LEGAL',
                 text: "Pdf",
@@ -136,7 +140,7 @@ if ($debug == 1) {
 
             {
                 extend: 'csvHtml5',
-                className: 'btn btn-pdf bg-Equinoxgold text-white',
+                className: 'btn btn-pdf bg-pyme-primary text-white',
                 text: "Csv",
                 exportOptions: {
                     columns: ":not(.no-exportar)"
@@ -144,7 +148,7 @@ if ($debug == 1) {
             },
             {
                 extend: 'excelHtml5',
-                className: 'btn btn-pdf bg-Equinoxgold text-white',
+                className: 'btn btn-pdf bg-pyme-primary text-white',
                 text: "Excel",
                 exportOptions: {
                     columns: ":not(.no-exportar)"
@@ -152,7 +156,7 @@ if ($debug == 1) {
             },
             {
                 extend: 'copy',
-                className: 'btn btn-pdf bg-Equinoxgold text-white',
+                className: 'btn btn-pdf bg-pyme-primary text-white',
                 text: "Copiar",
                 exportOptions: {
                     columns: ":not(.no-exportar)"

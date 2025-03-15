@@ -87,7 +87,7 @@ class InicioController extends Controller
     public function verDocumento()
     {
         $data = []; // Aquí puedes pasar datos a la vista si es necesario
-        
+
         //Obtener Parametros
         $params = func_get_args();
 
@@ -130,7 +130,7 @@ class InicioController extends Controller
                 'success' => false,
                 'message' => $errorMessage
             ]);
-        }     
+        }
     }
 
     public function tablaUltimas50Facturas()
@@ -139,9 +139,24 @@ class InicioController extends Controller
 
         $noProveedor = $_SESSION['EQXnoProveedor'];
         $MDL_compras = new Compras_Mdl();
-        $listaCompras = $MDL_compras->listaComprasFacturadas($noProveedor, 50, 'DESC');
+        $filtros = [
+            'idProveedor' => $noProveedor
+        ];
+        $listaCompras = $MDL_compras->listaComprasFacturadas($filtros, 50, 'DESC');
+        if ($this->debug == 1) {
+            echo '<br><br>Resultado de listaComprasFacturadas: ' . PHP_EOL;
+            var_dump($listaCompras);
+        }
 
-        $data['listaCompras'] =  $listaCompras['data'];
+        if ($listaCompras['success']) {
+            $data['listaCompras'] =  $listaCompras['data'];
+        } else {
+            echo '
+            <div class="alert alert-warning alert-rounded"> 
+                <i class="ti-user"></i> '.$listaCompras['message'].'.
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close"> <span aria-hidden="true">×</span> </button>
+            </div>';
+        }
 
         // Cargar la vista correspondiente
         $this->view('ProveedorNacional/Inicio/listaCompras', $data);
@@ -167,7 +182,7 @@ class InicioController extends Controller
         }
 
         // Cargar la vista correspondiente
-        $this->view('ProveedorNacional/Inicio/detalladoDeCompra', $data);
+        $this->view('ProveedorNacional/VistasCompartidas/detalladoDeCompra', $data);
     }
 
     public function validaOrdenCompra()
