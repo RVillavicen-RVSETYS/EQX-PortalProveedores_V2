@@ -108,10 +108,11 @@ class HistoricoController extends Controller
                 }
 
                 if ($comprasPorProveedor['success']) {
+                    $oldData = (empty($complementosPendientes['oldData'])) ? date('Y-m-d H:i:s') :$complementosPendientes['oldData'];
                     $response = [
                         'success' => true,
                         'cantComplementos' => $complementosPendientes['cantData'],
-                        'oldComplementos' => $complementosPendientes['oldData'],
+                        'oldComplementos' => $oldData,
                         'maxComplementosPendientes' => $configuracionGral['data']['maxComplementosPendientes'],
                         'cantCompras' => $comprasPorProveedor['data']['cantCompras']
                     ];
