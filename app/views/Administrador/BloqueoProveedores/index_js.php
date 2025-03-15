@@ -38,6 +38,65 @@
         });
     }
 
+    function cambiarEstatus(idProveedor) {
+        event.preventDefault();
+
+        $.ajax({
+            url: 'BloqueoProveedores/cambiaEstatusBloqueo',
+            type: 'POST',
+            data: {
+                idProveedor: idProveedor
+            },
+            success: function(response) {
+                const respuesta = JSON.parse(response);
+                if (respuesta.success) {
+                    notificaSuc(respuesta.message);
+                    bloqueoBtn('bloquear-btnEstatus' + idProveedor, 2);
+
+                    var btnProveedor = $('#btnEstatus' + idProveedor);
+                    var icono = btnProveedor.find('i');
+
+                    // Verificar si el icono tiene la clase de "fa-times" y cambiarlo a "fa-check"
+                    if (icono.hasClass('fa-times')) {
+                        icono.removeClass('fa-times').addClass('fa-check');
+                        btnProveedor.removeClass('btn-outline-danger').addClass('btn-outline-success');
+                    } else {
+                        icono.removeClass('fa-check').addClass('fa-times');
+                        btnProveedor.removeClass('btn-outline-success').addClass('btn-outline-danger');
+                    }
+
+                } else {
+                    notificaBad(respuesta.message);
+                    bloqueoBtn('bloquear-btnEstatus' + idProveedor, 2);
+                }
+            },
+            beforeSend: function() {
+                bloqueoBtn('bloquear-btnEstatus' + idProveedor, 1);
+            }
+        });
+    }
+
+    $(document).on('submit', '#formAgregarProveedor', function(event) {
+
+        event.preventDefault();
+
+        $.ajax({
+            url: 'BloqueoProveedores/agregarProveedor',
+            type: 'POST',
+            data: $(this).serialize(),
+            success: function(response) {
+                const respuesta = JSON.parse(response);
+                if (respuesta.success) {
+                    notificaSuc(respuesta.message);
+                    listaProveedores();
+                } else {
+                    notificaBad(respuesta.message);
+                }
+            },
+            beforeSend: function() {}
+        });
+    });
+
     $(document).on('click', '#btnTodosFacturan', function(event) {
         event.preventDefault();
 

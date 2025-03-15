@@ -20,53 +20,67 @@ if ($debug == 1) {
 
 ?>
 
-<table class="table table-sm" id="tableProveedoresBloq">
-    <thead>
-        <tr>
-            <th>#</th>
-            <th>No. Proveedor</th>
-            <th>Nombre</th>
-            <th>Correo</th>
-            <th>Activado</th>
-        </tr>
-    </thead>
-    <tbody>
-        <?php
-        $cout = 1;
-        foreach ($listaProveedores['data'] as $proveedor) {
+<?php
+if ($listaProveedores['success'] == false) {
+?>
+    <div class="alert alert-info">No hay proveedores registrados</div>
+<?php
+} else {
+?>
 
-            $correo = (is_null($proveedor['Correo'])) ? '-' : $proveedor['Correo'];
-            //$bloque = (is_null($proveedor['GrupoBloqueo']) or empty($proveedor['GrupoBloqueo'])) ? '-' : $proveedor['GrupoBloqueo'];
-
-            if ($proveedor['EstatusBloqueo'] == 1) {
-                $icono = 'fas fa-check';
-                $color = 'success';
-            } else {
-                $icono = 'fas fa-times';
-                $color = 'danger';
-            }
-        ?>
+    <table class="table table-sm" id="tableProveedoresBloq">
+        <thead>
             <tr>
-                <th><?= $cout++ ?></th>
-                <th><?= $proveedor['IdProveedor']; ?></th>
-                <th><?= $proveedor['Proveedor']; ?></th>
-                <th><?= $correo; ?></th>
-                <th class="text-center">
-                    <div id="bloquear-btnEstatus<?= $proveedor['IdProveedor'] ?>" style="display:none;">
-                        <button class="btn btn-primary btn-md" type="button" disabled="" style="height: 100%;">
-                            <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
-                        </button>
-                    </div>
-                    <div id="desbloquear-btnEstatus<?= $proveedor['IdProveedor'] ?>">
-                        <button id="btnEstatus<?= $proveedor['IdProveedor'] ?>" class="btn btn-sm btn-md btn-outline-<?= $color; ?> mx-2 "><i class="<?= $icono ?>"></i></button>
-                    </div>
-                </th>
+                <th>#</th>
+                <th>No. Proveedor</th>
+                <th>Nombre</th>
+                <th>Correo</th>
+                <th>Activado</th>
             </tr>
-        <?php
-        }
-        ?>
-    </tbody>
-</table>
+        </thead>
+        <tbody>
+            <?php
+            $cout = 1;
+            foreach ($listaProveedores['data'] as $proveedor) {
+
+                $correo = (is_null($proveedor['Correo'])) ? '-' : $proveedor['Correo'];
+                //$bloque = (is_null($proveedor['GrupoBloqueo']) or empty($proveedor['GrupoBloqueo'])) ? '-' : $proveedor['GrupoBloqueo'];
+
+                if ($proveedor['EstatusBloqueo'] == 1) {
+                    $icono = 'fas fa-check';
+                    $color = 'success';
+                } else {
+                    $icono = 'fas fa-times';
+                    $color = 'danger';
+                }
+            ?>
+                <tr>
+                    <th><?= $cout++ ?></th>
+                    <th><?= $proveedor['IdProveedor']; ?></th>
+                    <th><?= $proveedor['Proveedor']; ?></th>
+                    <th><?= $correo; ?></th>
+                    <th class="text-center">
+                        <div id="bloquear-btnEstatus<?= $proveedor['IdProveedor'] ?>" style="display:none;">
+                            <button class="btn btn-primary btn-md" type="button" disabled="" style="height: 100%;">
+                                <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
+                            </button>
+                        </div>
+                        <div id="desbloquear-btnEstatus<?= $proveedor['IdProveedor'] ?>">
+                            <button onclick="cambiarEstatus(<?= $proveedor['IdProveedor'] ?>)" id="btnEstatus<?= $proveedor['IdProveedor'] ?>" class="btn btn-sm btn-md btn-outline-<?= $color; ?> mx-2 "><i class="<?= $icono ?>"></i></button>
+                        </div>
+                    </th>
+                </tr>
+            <?php
+            }
+            ?>
+        </tbody>
+    </table>
+
+<?php
+}
+?>
+
+
 
 <!-- MODAL PARA ASIGNAR BLOQUE Y EDITAR ESTATUS
 <div class="modal fade" id="modalEditaProv" role="dialog" aria-labelledby="modalEditaProvLabel" aria-hidden="true">

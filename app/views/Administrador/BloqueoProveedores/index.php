@@ -133,26 +133,32 @@ if ($debug == 1) {
                                 <h4 class="card-title">Listado De Proveedores</h4>
                             </div>
 
+
                             <div class="row mt-3 ml-2">
+
                                 <div class="col-sm-12 col-md-6 col-lg-6">
-                                    <label for="nuevoGrupo">Agregar Proveedor:</label>
-                                    <div class="input-group mb-3">
-                                        <select required name="bloque" id="bloque" class="select2 form-control custom-select" style="width: 100%;">
-                                            <option value="">Selecciona Un Proveedor</option>
-                                            <?php
-                                            foreach ($todosProveedores['data'] as $proveedor) {
-                                            ?>
-                                                <option value="<?= $proveedor['IdProveedor']; ?>"> <?= $proveedor['IdProveedor']; ?> - <?= $proveedor['RazonSocial']; ?> (<?= $proveedor['Proveedor']; ?>) </option>
-                                            <?php
-                                            }
-                                            ?>
-                                        </select>
-                                    </div>
+                                    <form id="formAgregarProveedor">
+                                        <label for="idProveedor">Agregar Proveedor:</label>
+                                        <div class="input-group mb-3">
+                                            <select required name="idProveedor" id="idProveedor" class="select2 form-control custom-select" style="width: 100%;">
+                                                <option value="">Selecciona Un Proveedor</option>
+                                                <?php
+                                                foreach ($todosProveedores['data'] as $proveedor) {
+                                                ?>
+                                                    <option value="<?= $proveedor['IdProveedor']; ?>"> <?= $proveedor['IdProveedor']; ?> - <?= $proveedor['RazonSocial']; ?> (<?= $proveedor['Proveedor']; ?>) </option>
+                                                <?php
+                                                }
+                                                ?>
+                                            </select>
+                                        </div>
+                                    </form>
                                 </div>
+
                                 <div class="col-sm-2 col-md-2 col-lg-2 mt-4 pt-2">
-                                    <button class="btn btn-success" type="button">Agregar</button>
+                                    <button form="formAgregarProveedor" id="btnAgregarProveedor" class="btn btn-success">Agregar</button>
                                 </div>
                             </div>
+
 
                             <div id="tarjetaListaProveedor" class="card-body">
 

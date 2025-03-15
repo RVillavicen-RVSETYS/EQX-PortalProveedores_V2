@@ -39,19 +39,13 @@ class Proveedores_Mdl
         try {
 
             $sql = "SELECT
-                        prov.id AS 'IdProveedor',
-                        prov.nombre AS 'Proveedor',
-                        provFact.id AS 'IdBloqueo',
-                        provFact.estatus AS 'EstatusBloqueo',
-                        provFact.grupo AS 'GrupoBloqueo',
-                        provFact.idUserReg AS 'IdUserRegBloqueo',
-                        provFact.fechaReg AS 'FechaRegBloqueo',
+                        fprov.idProveedor AS 'IdProveedor',
+                        fprov.nombre AS 'Proveedor',
+                        fprov.estatus AS 'EstatusBloqueo',
                         prov.correo AS 'Correo'
                     FROM
-                        vw_data_Proveedores_AccesoProveedores prov
-                        LEFT JOIN conf_provFactSiempre provFact ON prov.id = provFact.idProveedor 
-                    WHERE
-                        prov.estatus = 1";
+                        conf_provFactSiempre fprov
+                        INNER JOIN proveedores prov ON fprov.idProveedor = prov.id";
 
             // Modo debug para imprimir consulta con parámetros
             if (self::$debug) {
