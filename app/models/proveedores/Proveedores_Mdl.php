@@ -797,7 +797,9 @@ class Proveedores_Mdl
                     }
                 }
 
-                return ['success' => true, 'data' => $dataResul, 'cantData' => $cantData, 'oldData' => $fechaMasVieja->format('Y-m-d H:i:s')];
+                $oldData = (empty($fechaMasVieja)) ? date('Y-m-d H:i:s') : $fechaMasVieja->format('Y-m-d H:i:s'); 
+
+                return ['success' => true, 'data' => $dataResul, 'cantData' => $cantData, 'oldData' => $oldData];
             } else {
                 if (self::$debug) {
                     echo "No Se Encontraron Complementos Pendientes.<br>";
