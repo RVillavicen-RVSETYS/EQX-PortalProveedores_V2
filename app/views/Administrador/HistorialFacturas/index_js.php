@@ -39,4 +39,35 @@
             }
         });
     });
+
+    $(document).on('submit', '#formRangoBuscaPago', function(event) {
+        event.preventDefault();
+
+        $.ajax({
+            url: 'HistorialFacturas/buscarPagos',
+            type: 'POST',
+            data: $(this).serialize(),
+            success: function(response) {
+                const respuesta = JSON.parse(response);
+                if (respuesta.success) {
+                    notificaSuc(respuesta.message);
+                    $('#modalFechasPagos').modal('hide');
+                    $('.modal-backdrop').remove();
+                    $('body').removeClass('modal-open');
+                    historialFact();
+                } else {
+                    notificaBad(respuesta.message);
+                }
+            },
+            beforeSend: function() {
+                $('#loadingOverlay').fadeIn();
+            },
+            complete: function() {
+                $('#loadingOverlay').fadeOut();
+            },
+            error: function() {
+                $('#loadingOverlay').fadeOut();
+            }
+        });
+    });
 </script>

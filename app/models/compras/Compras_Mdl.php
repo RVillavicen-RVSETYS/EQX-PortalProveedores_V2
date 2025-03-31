@@ -34,7 +34,9 @@ class Compras_Mdl
         $filtrosDisponibles = [
             'idProveedor' => ['tipoDato' => 'INT', 'sqlFiltro' => 'c.idProveedor = :idProveedor'],
             'estatusFactura' => ['tipoDato' => 'INT', 'sqlFiltro' => 'c.estatus = :estatusFactura'],
-            'entreFechas' => ['tipoDato' => 'STRING', 'sqlFiltro' => '(c.fechaReg BETWEEN :fechaInicial AND :fechaFinal)']
+            'entreFechas' => ['tipoDato' => 'STRING', 'sqlFiltro' => '(c.fechaReg BETWEEN :fechaInicial AND :fechaFinal)'],
+            'tipoMoneda' => ['tipoDato' => 'STRING', 'sqlFiltro' => 'c.idCatTipoMoneda = :tipoMoneda'],
+            'nacional' => ['tipoDato' => 'INT', 'sqlFiltro' => '']
         ];
 
         $filtrosSQL = '';
@@ -62,13 +64,19 @@ class Compras_Mdl
                         $filtrosSQL .= ' AND ' . $filtrosDisponibles[$nombreFiltro]['sqlFiltro'];
                         $params[':fechaInicial'] = $fechaInicial;
                         $params[':fechaFinal'] = $fechaFinal;
+                    } elseif ($nombreFiltro == 'nacional') {
+                        if ($valorFiltro == 1) {
+                            $filtrosSQL .= " AND pv.pais = 'MX'";
+                        } else {
+                            $filtrosSQL .= " AND pv.pais <> 'MX'";
+                        }
                     } else {
                         $filtrosSQL .= ' AND ' . $filtrosDisponibles[$nombreFiltro]['sqlFiltro'];
                         $params[':' . $nombreFiltro] = $valorFiltro;
                     }
                 }
             }
-            
+
             if (empty($filtrosSQL)) {
                 throw new \Exception('No se encontró ningún parámetro válido.');
             }
@@ -82,8 +90,9 @@ class Compras_Mdl
 
             $sql = "SELECT c.id AS acuse, c.claseDocto, dc.ordenCompra, c.estatus,
                     GROUP_CONCAT(DISTINCT dc.noRecepcion ORDER BY dc.noRecepcion SEPARATOR ', ') AS noRecepcion,
-                    c.fechaReg, c.referencia, cf.urlPDF, cf.urlXML 
+                    c.fechaReg, c.referencia, cf.urlPDF, cf.urlXML, pv.pais, pv.id AS 'IdProveedor'
                     FROM compras c
+                    INNER JOIN proveedores pv ON c.idProveedor = pv.id
                     INNER JOIN detcompras dc ON c.id = dc.idCompra
                     LEFT JOIN cfdi_facturas cf ON cf.idCompra = c.id
                     WHERE $filtrosSQL
