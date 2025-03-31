@@ -33,6 +33,8 @@ if ($debug == 1) {
     var_dump($piezasURL);
     echo '<br><br>Ruta del MenuActual: ' . $rutaMenu . '<br><br>Contenido de datosPagina:';
     var_dump($datosPagina);
+    echo '<br><br>Valores pasados del Controller Data:';
+    var_dump($data['datosProveedor']);
 }
 $noti = '';
 if ($notificaciones['success'] && !empty($notificaciones['data'])) {
@@ -57,7 +59,7 @@ if ($notificaciones['success'] && !empty($notificaciones['data'])) {
 
     <!-- Vendor -->
     <link href="/assets/extra-libs/datatables.net-bs4/css/dataTables.bootstrap4.css" rel="stylesheet">
-    <link href="/assets/libs/fancybox/fancybox.css" rel="stylesheet">
+    <link href="/assets/libs/fancybox/dist/fancybox/fancybox.css" rel="stylesheet">
     <link href="/assets/libs/fancybox/dist/carousel/carousel.css" rel="stylesheet">
     <link href="/assets/libs/fancybox/dist/carousel/carousel.thumbs.css" rel="stylesheet">
     <link href="/assets/libs/fancybox/dist/panzoom/panzoom.css" rel="stylesheet">
@@ -117,9 +119,9 @@ if ($notificaciones['success'] && !empty($notificaciones['data'])) {
                 <div class="row">
                     <div class="col-lg-9 col-md-9">
                         <div class="card">
-                            <h3 class="card-title m-t-10 m-l-15"><?= $_SESSION['EQXrazonSocial']; ?></h3>
-                            <p class="card-text m-l-15"><b><?= $_SESSION['EQXrfc']; ?></b>.<br>
-                                <?= $_SESSION['EQXcorreo']; ?></p>
+                            <h3 class="card-title m-t-10 m-l-15"><?= $data['datosProveedor']['RazonSocial']; ?></h3>
+                            <p class="card-text m-l-15"><b><?= $data['datosProveedor']['RFC']; ?></b>.<br>
+                                <?= $data['datosProveedor']['Correo']; ?></p>
                         </div>
                     </div>
                     <div class="col-lg-3 col-md-3">
@@ -383,7 +385,7 @@ if ($notificaciones['success'] && !empty($notificaciones['data'])) {
     <script src="/assets/libs/fancybox/dist/panzoom/panzoom.umd.js"></script>
     <script src="/assets/libs/fancybox/dist/panzoom/panzoom.toolbar.umd.js"></script>
     <script src="/assets/libs/fancybox/dist/panzoom/panzoom.pins.umd.js"></script>
-    <script src="/assets/libs/fancybox/l10n/es.umd.js"></script>
+    <script src="/assets/libs/fancybox/dist/fancybox/l10n/es.umd.js"></script>
     <script src="/assets/libs/fancybox/dist/panzoom/l10n/es.umd.js"></script>   
     <script src="/assets/libs/fancybox/dist/carousel/l10n/es.umd.js"></script>   
 

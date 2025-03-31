@@ -24,7 +24,7 @@ class InicioController extends Controller
     public function __construct()
     {
         if ($this->debug == 1) {
-            echo "<h2>Ya estamos dentro de controllers\Administrador\InicioController.php.</h2>";
+            echo "<h2>Ya estamos dentro de controllers\ProveedorNacional\InicioController.php.</h2>";
         }
         // Llama a checkSession para verificar la sesión y el estatus del usuario
         $this->checkSession();
@@ -60,6 +60,9 @@ class InicioController extends Controller
         $MDL_notificaProveedor = new NotificaProveedores_Mdl();
         $notificaciones = $MDL_notificaProveedor->NotificacionesProveedor($_SESSION['EQXpais']);
 
+        $MDL_proveedores = new Proveedores_Mdl();
+        $datosProveedor = $MDL_proveedores->obtenerDatosProveedor($_SESSION['EQXnoProveedor']);
+
         if ($menuData['success']) {
             if ($areaData['success']) {
                 // Enviar datos a la Vista
@@ -68,6 +71,7 @@ class InicioController extends Controller
                 $data['areaLink'] =  $areaLink;
                 $data['bloqueoCargaFactura'] =  $bloqueoCargaFactura;
                 $data['notificaciones'] =  $notificaciones;
+                $data['datosProveedor'] =  $datosProveedor['data'];
 
                 // Cargar la vista correspondiente
                 $this->view('ProveedorNacional/Inicio/index', $data);

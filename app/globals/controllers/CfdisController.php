@@ -11,7 +11,22 @@ class CfdisController extends Controller
 
     public function leerCfdiXML($xmlPath, $tipoCfdi)
     {
+        $this->debug = 1;
         //Tipos de CFDI: Ingreso, Egreso, Traslado, Nomina, Pago, RecepcionPagos o Retenciones
+        // Definir el arreglo de tipos de CFDI
+        $tiposCfdi = [
+            'Ingreso' => 'I',
+            'Egreso' => 'E',
+            'Traslado' => 'T',
+            'Nomina' => 'N',
+            'Pago' => 'P'
+        ];
+
+        // Validar que el tipo de comprobante que vamos a recibir este en el arreglo aceptado
+        if (!isset($tiposCfdi[$tipoCfdi])) {
+            return ['success' => false, 'message' => "El tipo de CFDI '$tipoCfdi' no es válido."];
+        }
+
         // Validar que los parámetros sean correctos
         if (empty($xmlPath) || empty($tipoCfdi)) {
             return ['success' => false, 'message' => 'El archivo XML y el tipo de CFDI son obligatorios.'];
@@ -31,6 +46,14 @@ class CfdisController extends Controller
         $versionCFDI = $dataXML['data']['Comprobante']['Version'];
         if (empty($versionCFDI)) {
             return ['success' => false, 'message' => 'No se pudo determinar la versión del CFDI desde el archivo XML.'];
+        }
+        
+        $tipoComprobanteXML = $dataXML['data']['Comprobante']['TipoDeComprobante'] ?? '';
+        if ($tipoComprobanteXML !== $tiposCfdi[$tipoCfdi]) {
+            return [
+            'success' => false,
+            'message' => "El tipo de comprobante en el XML ('$tipoComprobanteXML') no coincide con el tipo de CFDI esperado ('$tiposCfdi[$tipoCfdi]')."
+            ];
         }
 
         // 2. Consultar la tabla 'versionescfdi' para obtener configuraciones

@@ -266,9 +266,17 @@ if ($debug == 1) {
             pdf: {
                 iframe: {
                     // Opciones de iframe
-                    preload: false
+                    preload: true
+                },
+                Toolbar: {
+                    display: {
+                        left: ["infobar"],
+                        middle: [],
+                        right: ["download", "close"],
+                    }
                 }
-            }
+            },
+            
         });
         
     });

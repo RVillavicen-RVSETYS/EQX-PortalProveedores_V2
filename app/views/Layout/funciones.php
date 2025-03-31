@@ -23,7 +23,8 @@ function generarMenu($menuData, $linkActual)
                     'descripcion' => $item['menu_descripcion'],
                     'icono' => $item['menu_icono'],
                     'link' => $item['menu_link'],
-                    'tipo' => $item['menu_tipo']
+                    'tipo' => $item['menu_tipo'],
+                    'visible' => $item['menu_visible']
                 ],
                 'submenus' => []
             ];
@@ -37,6 +38,7 @@ function generarMenu($menuData, $linkActual)
                     'descripcion' => $item['submenu1_descripcion'],
                     'icono' => $item['submenu1_icono'],
                     'link' => $item['submenu1_link'],
+                    'visible' => $item['submenu1_visible'],
                     'submenus' => []
                 ];
             }
@@ -49,6 +51,7 @@ function generarMenu($menuData, $linkActual)
                         'descripcion' => $item['submenu2_descripcion'],
                         'icono' => $item['submenu2_icono'],
                         'link' => $item['submenu2_link'],
+                        'visible' => $item['submenu2_visible'],
                         'submenus' => []
                     ];
                 }
@@ -59,7 +62,8 @@ function generarMenu($menuData, $linkActual)
                         'nombre' => $item['submenu3_nombre'],
                         'descripcion' => $item['submenu3_descripcion'],
                         'icono' => $item['submenu3_icono'],
-                        'link' => $item['submenu3_link']
+                        'link' => $item['submenu3_link'],
+                        'visible' => $item['submenu3_visible']
                     ];
                 }
             }
@@ -80,6 +84,10 @@ function generarMenu($menuData, $linkActual)
                 'menu_descripcion' => $menuInfo['descripcion']
             ];
             $rutaMenu = $menuInfo['nombre'];
+        }
+
+        if ($menuInfo['visible'] == 0) {
+            continue;
         }
 
         // Generación del menú principal según el tipo
@@ -239,8 +247,8 @@ function generaSeccionUserMenu($areaData, $areaLink)
             </div>
             <?= $arsLinks; ?>
             <hr>
-            <li><a href="<?=$linkPerfil;?>"><i class="fas fa-user-tie"></i> <?= $textPerfil;?></a></li>
-            <li><a href="<?= $linkSoporte;?>"><i class="fas fa-question-circle"></i> <?= $textSoporte; ?></a></li>
+            <li><a id="menuMiPerfil" href="<?=$linkPerfil;?>"><i class="fas fa-user-tie"></i> <?= $textPerfil;?></a></li>
+            <li><a id="menuCentroAyuda" href="<?= $linkSoporte;?>"><i class="fas fa-question-circle"></i> <?= $textSoporte; ?></a></li>
             <hr>
             <li><a href="<?= $linkLogout; ?>"><i class="fas fa-sign-out-alt"></i> <?= $textlogout; ?></a></li>
         </ul>

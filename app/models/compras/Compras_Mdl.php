@@ -121,6 +121,118 @@ class Compras_Mdl
         }
     }
 
+    public function dataCompraPorFacturas($filtros = [], INT $cantMaxRes = 0, $orden = 'DESC')
+    {
+        self::$debug = 1; // Cambiar a 0 para desactivar mensajes de depuración
+        if (self::$debug) {
+            echo '<br><br>Filtros Recibidos: ';
+            var_dump($filtros);
+        }
+        $filtrosDisponibles = [
+            'uuids' => ['tipoDato' => 'STRING', 'sqlFiltro' => 'fc.uuid IN (:uuids)'],
+            'metodoPago' => ['tipoDato' => 'STRING', 'sqlFiltro' => 'fc.idCatMetodoPago =:metodoPago'],
+            'formaPago' => ['tipoDato' => 'STRING', 'sqlFiltro' => 'fc.idCatFormaPago =:formaPago'],
+            'estatusPagado' => ['tipoDato' => 'STRING', 'sqlFiltro' => 'cp.idPago'], // Se usa con 0 si no está pagado o con 1 si está pagado
+            'idProveedor' => ['tipoDato' => 'INT', 'sqlFiltro' => 'c.idProveedor = :idProveedor'],
+            'entreFechas' => ['tipoDato' => 'STRING', 'sqlFiltro' => '(c.fechaReg BETWEEN :fechaInicial AND :fechaFinal)']
+        ];
+
+        $filtrosSQL = '';
+        $params = [];
+
+        try {
+            if (!is_int($cantMaxRes)) {
+                throw new \Exception('El valor de $cantMaxRes debe ser un entero.');
+            }
+            $limiteResult = ($cantMaxRes == 0) ? '' : 'LIMIT ' . $cantMaxRes;
+
+            if (!in_array($orden, ['DESC', 'ASC'])) {
+                throw new \Exception('El orden debe ser DESC o ASC.');
+            } else {
+                $orden = strtoupper($orden);
+            }
+
+            foreach ($filtros as $nombreFiltro => $valorFiltro) {
+                if (isset($filtrosDisponibles[$nombreFiltro]) && $valorFiltro !== null) {
+                    if ($nombreFiltro == 'entreFechas') {
+                        list($fechaInicial, $fechaFinal) = explode(',', $valorFiltro);
+                        if (!strtotime($fechaInicial) || !strtotime($fechaFinal)) {
+                            throw new \Exception('Las fechas proporcionadas no son válidas.');
+                        }
+                        $filtrosSQL .= ' AND ' . $filtrosDisponibles[$nombreFiltro]['sqlFiltro'];
+                        $params[':fechaInicial'] = $fechaInicial;
+                        $params[':fechaFinal'] = $fechaFinal;
+                    } elseif ($nombreFiltro == 'uuids') {
+                        // Validar que el valor sea una cadena de UUIDs separados por comas
+                        $uuids = explode(',', $valorFiltro);
+                        $uuids = array_map('trim', $uuids); // Limpiar espacios en blanco
+                        $filtrosSQL .= ' AND ' . $filtrosDisponibles[$nombreFiltro]['sqlFiltro'];
+                        $params[':uuids'] = implode(',', $uuids); // Convertir a cadena separada por comas
+                    } elseif ($nombreFiltro == 'estatusPagado') {
+                        if ($valorFiltro === 0) {
+                            $filtrosSQL .= ' AND ' . $filtrosDisponibles[$nombreFiltro]['sqlFiltro'] . ' IS NULL';
+                        } elseif ($valorFiltro === 1) {
+                            $filtrosSQL .= ' AND ' . $filtrosDisponibles[$nombreFiltro]['sqlFiltro'] . ' IS NOT NULL';
+                        } else {
+                            throw new \Exception('El valor de estatusPagado debe ser 0 o 1.');
+                        }
+                    }else {
+                        $filtrosSQL .= ' AND ' . $filtrosDisponibles[$nombreFiltro]['sqlFiltro'];
+                        $params[':' . $nombreFiltro] = $valorFiltro;
+                    }
+                }
+            }
+            
+            if (empty($filtrosSQL)) {
+                throw new \Exception('No se encontró ningún parámetro válido.');
+            }
+            $filtrosSQL = ltrim($filtrosSQL, ' AND');
+
+            if (self::$debug) {
+                echo '<br><br>Parametros: ';
+                var_dump($params);
+                echo '<br><br>';
+            }
+
+            $sql = "SELECT cp.*, fc.*, MAX(cpd.idComplementoPago) AS idUltimoComplemento, MAX(cpd.noParcialidad) AS ultimaParcialidad, MIN(cpd.saldoInsoluto) AS minInsoluto
+                    FROM compras cp
+                    INNER JOIN cfdi_facturas fc ON cp.id = fc.idCompra
+                    LEFT JOIN cfdi_complementoPagoDet cpd ON fc.uuid = cpd.uuidFact
+                    WHERE $filtrosSQL
+                    GROUP BY fc.uuid
+                    ORDER BY fc.fechaFac $orden
+                    $limiteResult";
+
+            if (self::$debug) {
+                $this->db->imprimirConsulta($sql, $params, 'Lista de Facturas por UUID: ');
+            }
+            $stmt = $this->db->prepare($sql);
+            foreach ($params as $param => $value) {
+                $stmt->bindValue($param, $value, is_int($value) ? PDO::PARAM_INT : PDO::PARAM_STR);
+            }
+            $stmt->execute();
+            $comprasresult = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            // Obtener la cantidad de registros
+            $cantCompras = $stmt->rowCount();
+
+            if (self::$debug) {
+                echo '<br>Resultado de Query:';
+                var_dump($comprasresult);
+                echo '<br><br>';
+            }
+
+            return ['success' => true, 'cantRes' => $cantCompras, 'data' => $comprasresult];
+        } catch (\Exception $e) {
+            $timestamp = date("Y-m-d H:i:s");
+            error_log("[$timestamp] app/models/compras/Compras_Mdl.php ->Error buscar Facturas por UUID: " . $e->getMessage(), 3, LOG_FILE_BD);
+            if (self::$debug) {
+                echo "<br>Error al listar Facturas por UUID: " . $e->getMessage(); // Mostrar error en modo depuración
+            }
+            return ['success' => false, 'message' => 'Problemas al listar Facturas por UUID, Notifica a tu administrador.'];
+        }
+    }
+
     public function dataCompraPorAcuse(INT $idUser, INT $acuse)
     {
         if (empty($idUser) || empty($acuse)) {

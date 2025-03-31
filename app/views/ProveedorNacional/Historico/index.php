@@ -43,9 +43,7 @@ $cantCompras = $data['datosIniciales']['cantCompras'];
 
     <!-- Vendor -->
     <link href="/assets/extra-libs/datatables.net-bs4/css/dataTables.bootstrap4.css" rel="stylesheet">
-    <link href="/assets/libs/fancybox/fancybox.css" rel="stylesheet">
-    <link href="/assets/libs/fancybox/dist/carousel/carousel.css" rel="stylesheet">
-    <link href="/assets/libs/fancybox/dist/carousel/carousel.thumbs.css" rel="stylesheet">
+    <link href="/assets/libs/fancybox/dist/fancybox/fancybox.css" rel="stylesheet">
     <link href="/assets/libs/fancybox/dist/panzoom/panzoom.css" rel="stylesheet">
     <link href="/assets/libs/fancybox/dist/panzoom/panzoom.toolbar.css" rel="stylesheet">
     <link href="/assets/libs/fancybox/dist/panzoom/panzoom.pins.css" rel="stylesheet">
@@ -109,7 +107,7 @@ $cantCompras = $data['datosIniciales']['cantCompras'];
                                 <div class="col-md-12">
                                     <div class="d-flex no-block align-items-center">
                                         <div>
-                                            <i class="mdi mdi-poll font-20 text-muted"></i>
+                                            <i class="fas fa-copy font-20 text-muted"></i>
                                             <p class="font-16 m-b-5">Complementos de Pago Pendientes</p>
                                         </div>
                                         <div class="ml-auto">
@@ -132,7 +130,7 @@ $cantCompras = $data['datosIniciales']['cantCompras'];
                                 <div class="col-md-12">
                                     <div class="d-flex no-block align-items-center">
                                         <div>
-                                            <i class="mdi mdi-image font-20  text-muted"></i>
+                                            <i class="fas fa-ban font-20  text-muted"></i>
                                             <p class="font-16 m-b-5">Limite de Complementos</p>
                                         </div>
                                         <div class="ml-auto">
@@ -179,15 +177,14 @@ $cantCompras = $data['datosIniciales']['cantCompras'];
                         <div class="card">
                             <div class="card-header bg-pyme-primary headerFiltros">
                                 <h4 class="m-b-0 text-white">Filtros de búsqueda</h4>
-                                <!-- <button class="btn btn-sm btn-pyme px-0" onclick="actualizarFiltros();"><i class="fas fa-undo text-white"></i> -->
-                                </button>
+                                <!-- <button class="btn btn-sm btn-pyme px-0" onclick="actualizarFiltros();"><i class="fas fa-undo text-white"></i> </button>-->
                             </div>
                             <div class="card-body">
-                                <form id="filtrado" method="POST" role="form" autocomplete="off">
+                                <form id="filtrado" method="post" role="form" autocomplete="off">
                                     <div class="container-fluid">
                                         <div class="row ">
                                             <div class="col-12 col-sm-12 col-md-2 col-lg-3">
-                                                <label class="col-form-label">Rango de Fechas de Ventas</label>
+                                                <label class="col-form-label" for="fechaInicial">Rango de Fechas de Ventas</label>
                                                 <div class="input-group input-daterange mb-3" id="date-range">
                                                     <div class="input-group-addon">
                                                         <span class="input-group-text pyme b-0 text-white bg-pyme-primary"> Desde </span>
@@ -251,7 +248,7 @@ $cantCompras = $data['datosIniciales']['cantCompras'];
                                                 <p>Se han detectado <b>' . $cantComplementos . '</b> facturas pendientes de complemento de pago desde ' . $oldComplementos . ', por favor carguelos a la brevedad.</p>
                                             </div>
                                             <div class="col text-right" id="cargaComplementoPago">
-                                                <button class="btn bg-pyme-primary btn-md" id="btnCargaComplementoPago">Cargar Complemento de Pago</button>
+                                                <button class="btn bg-pyme-primary btn-md" id="btnCargaComplementoPago" onclick="cargaComplementoPago()">Cargar Complemento de Pago</button>
                                             </div>' : ''; ?>
                                         </div>
                                     </div>
@@ -306,6 +303,7 @@ $cantCompras = $data['datosIniciales']['cantCompras'];
     <!-- All Jquery -->
     <!-- ============================================================== -->
     <script src="/assets/libs/jquery/dist/jquery.min.js"></script>
+    <script src="/assets/libs/fancybox/dist/index.umd.js"></script>
     <script src="/assets/libs/fancybox/dist/fancybox/fancybox.umd.js"></script>
     <script src="/assets/libs/fancybox/dist/carousel/carousel.umd.js"></script>
     <script src="/assets/libs/fancybox/dist/carousel/carousel.autoplay.umd.js"></script>
@@ -313,7 +311,7 @@ $cantCompras = $data['datosIniciales']['cantCompras'];
     <script src="/assets/libs/fancybox/dist/panzoom/panzoom.umd.js"></script>
     <script src="/assets/libs/fancybox/dist/panzoom/panzoom.toolbar.umd.js"></script>
     <script src="/assets/libs/fancybox/dist/panzoom/panzoom.pins.umd.js"></script>
-    <script src="/assets/libs/fancybox/l10n/es.umd.js"></script>
+    <script src="/assets/libs/fancybox/dist/fancybox/l10n/es.umd.js"></script>
     <script src="/assets/libs/fancybox/dist/panzoom/l10n/es.umd.js"></script>   
     <script src="/assets/libs/fancybox/dist/carousel/l10n/es.umd.js"></script>   
 
@@ -337,6 +335,7 @@ $cantCompras = $data['datosIniciales']['cantCompras'];
     <script src="/dist/js/sidebarmenu.js"></script>
     <!--Custom JavaScript -->
     <script src="/dist/js/custom.js"></script>
+    <script src="/dist/js/basicFuctions.js"></script>
     <script src="/assets/libs/toastr/build/toastr.min.js"></script>
 
     <script src="/assets/extra-libs/datatables.net/js/jquery.dataTables.min-ESP.js"></script>
@@ -397,6 +396,17 @@ $cantCompras = $data['datosIniciales']['cantCompras'];
             $(".service-panel-toggle").toggle();
             $.post("Historico/detalladoDeCompra", {
                     acuse: acuse
+                },
+                function(respuesta) {
+                    $("#customizer_body").html(respuesta);
+                });
+        }       
+
+        function cargaComplementoPago() {
+            $('#customizer_body').html('<div class="loading text-center"><img src="../assets/images/loading.gif" alt="loading" /><br/>Un momento, por favor...</div>');
+            $(".customizer").toggleClass('show-service-panel');
+            $(".service-panel-toggle").toggle();
+            $.post("Historico/cargaComplementoPago", {
                 },
                 function(respuesta) {
                     $("#customizer_body").html(respuesta);

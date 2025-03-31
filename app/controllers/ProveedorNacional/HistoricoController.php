@@ -3,10 +3,13 @@
 namespace App\Controllers\ProveedorNacional;
 
 use Core\Controller;
+use App\Globals\Controllers\DocumentosController;
+use App\Globals\Controllers\FacturasNacionalesController;
 use App\Models\Menu_Mdl;
 use App\Models\Proveedores\Proveedores_Mdl;
 use App\Models\Compras\Compras_Mdl;
 use App\Models\Configuraciones\ConfiguracionGral_Mdl;
+use App\Models\DatosCompra\OrdenCompra_Mdl;
 use DateTime;
 
 class HistoricoController extends Controller
@@ -16,7 +19,7 @@ class HistoricoController extends Controller
     public function __construct()
     {
         if ($this->debug == 1) {
-            echo "<h2>Ya estamos dentro de controllers\Administrador\InicioController.php.</h2>";
+            echo "<h2>Ya estamos dentro de controllers\ProveedorNacional\HistoricoController.php.</h2>";
         }
         // Llama a checkSession para verificar la sesión y el estatus del usuario
         $this->checkSession();
@@ -197,5 +200,113 @@ class HistoricoController extends Controller
 
         // Cargar la vista correspondiente
         $this->view('ProveedorNacional/Historico/tablaFacturasRecibidas', $data);
+    }
+
+    public function cargaComplementoPago()
+    {
+        $data = []; // Aquí puedes pasar datos a la vista si es necesario
+
+        $noProveedor = $_SESSION['EQXnoProveedor'];
+
+        $data['noProveedor'] = $noProveedor;
+
+        // Cargar la vista correspondiente
+        $this->view('ProveedorNacional/VistasCompartidas/cargaComplementoPago', $data);
+    }
+
+    public function registraComplementoPago()
+    {
+        $data = []; // Aquí puedes pasar datos a la vista si es necesario
+        $this->debug = 1;
+
+        if ($this->debug == 1) {
+            echo '<br>----SESSION<br>';
+            print_r($_SESSION);
+            echo '<br>----POST<br>';
+            print_r($_POST);
+            echo '<br>----Files<br>';
+            print_r($_FILES);
+        }
+
+        $noProveedor = $_SESSION['EQXnoProveedor'] ?? '0000';
+        $doctos = []; //Variable para paso de documentos Validados
+
+        if (empty($_FILES['complementoPDF'])) {
+            if ($this->debug == 1) {
+                echo "<br>Falta el PDF del Complemento de Pago";
+            }
+        }
+        
+        if (empty($_FILES['complementoXML'])) {
+            if ($this->debug == 1) {
+                echo "<br>Falta el XML del Complemento de Pago";
+            }
+        }
+
+        //1 Verifica el Completo de Pago
+        $Ctrl_Documentos = new DocumentosController();
+        $complementoPDF = $Ctrl_Documentos->verificadorDeDocumentoARecibir($_FILES['complementoPDF'], 'pdf');
+        if ($this->debug == 1) {
+            echo '<br><br>Resultado de verificadorDeDocumentoARecibir complementoPDF: ' . PHP_EOL;
+            var_dump($complementoPDF);
+        }
+        if ($complementoPDF['success']) {
+            $doctos['complementoPDF'] = $complementoPDF['data'];
+
+            //2.- Verificamos el XML el Complemento de Pago
+            $ComplementoXML = $Ctrl_Documentos->verificadorDeDocumentoARecibir($_FILES['complementoXML'], 'xml');
+            if ($this->debug == 1) {
+                echo '<br><br>Resultado de verificadorDeDocumentoARecibir complementoXML: ' . PHP_EOL;
+                var_dump($ComplementoXML);
+            }
+            if ($ComplementoXML['success']) {
+                $doctos['complementoXML'] = $ComplementoXML['data'];
+
+                echo 'Complemento Valido.....';
+
+                //3.- Verificar Complemento, aplicar Reglas de Negocio, Fiscales y Carga de CFDI desde el Controlador Global para Proveedores Nacionales
+                $Ctrl_FactNacionales = new FacturasNacionalesController();
+                $verificaComplemento = $Ctrl_FactNacionales->verificaNuevoComplementoPago($_FILES['complementoPDF'], $_FILES['complementoXML'], $noProveedor);
+                if ($this->debug == 1) {
+                    echo '<br><br>Resultado de FacturasNacionalesController: ' . PHP_EOL;
+                    var_dump($verificaComplemento);
+                }
+
+                if ($verificaComplemento['success']) {
+                    echo '<br><h1>Hasta aqui ya se verifico el Complemento de Pago y vamos OK';
+                    exit(0);
+                    //7.- Registrar Factura de Ingreso
+                    $registraComplemento = $Ctrl_FactNacionales->registraNuevoComplementoPago($_FILES['complementoPDF'], $_FILES['complementoXML'], $noProveedor);
+                    if ($this->debug == 1) {
+                        echo '<br><br>Registro de Complemento: ' . PHP_EOL;
+                        var_dump($registraComplemento);
+                    }
+
+                    if ($registraComplemento['success']) {
+
+                        echo '<br><h1>Hasta aqui ya se verifico el Complemento de Pago y vamos OK';
+
+                    } else {
+                        echo json_encode([
+                            'success' => false,
+                            'message' => 'Problemas al Registrar el Complemento: ' . $registraComplemento['message']
+                        ]);
+                    }
+
+                } else {
+                    echo json_encode([
+                        'success' => false,
+                        'message' => 'Problemas al Validar el Complemento: ' . $verificaComplemento['message']
+                    ]);
+                }
+
+            }
+        }
+
+
+
+
+
+
     }
 }

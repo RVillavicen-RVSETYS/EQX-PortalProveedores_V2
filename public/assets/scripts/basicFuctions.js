@@ -32,20 +32,6 @@ function bloqueoModal(event, modal, opcion) {
 
 }
 
-function notificaSuc(cont) {
-    toastr.success(cont, 'Excelente!', {
-        "progressBar": true,
-        "CerrarButton": true
-    });
-}
-
-function notificaBad(cont) {
-    toastr.error(cont, 'Lo Sentimos!', {
-        "progressBar": true,
-        "closeButton": true
-    });
-}
-
 function bloqueoBtn(boton, no) {
     // verifica si hay un valor en la variable boton, si no le coloca una por default llamada "bloquear-btn"
     if (boton == '') {

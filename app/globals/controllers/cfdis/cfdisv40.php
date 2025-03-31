@@ -127,7 +127,7 @@ class cfdisv40
             $timbre = $xml->xpath('//tfd:TimbreFiscalDigital');
             $uuid = $timbre ? (string) ($timbre[0]['UUID'] ?? '') : '';
             $response['data']['TimbreFiscal'] = $timbre ? [
-                'UUID' => (string) ($timbre[0]['UUID'] ?? ''),
+                'UUID' => strtoupper((string) ($timbre[0]['UUID'] ?? '')),
                 'FechaTimbrado' => (string) ($timbre[0]['FechaTimbrado'] ?? ''),
                 'RfcProvCertif' => (string) ($timbre[0]['RfcProvCertif'] ?? '')
             ] : [];
@@ -150,6 +150,143 @@ class cfdisv40
         return $response;
     }
 
+    public function leerCfdi_Pago($xmlPath, $version)
+    {
+        $response = [
+            'success' => false,
+            'version' => $version,
+            'message' => '',
+            'data' => []
+        ];
+
+        try {
+            // Cargar el archivo XML
+            $xml = simplexml_load_file($xmlPath, null, LIBXML_NOCDATA);
+            if ($xml === false) {
+                throw new Exception('No se pudo cargar el archivo XML.');
+            }
+
+            // Registrar namespaces del XML
+            $namespaces = $xml->getNamespaces(true);
+            $xml->registerXPathNamespace('cfdi', $namespaces['cfdi']);
+            if (isset($namespaces['pago20'])) {
+                $xml->registerXPathNamespace('pago20', $namespaces['pago20']);
+            }
+            if (isset($namespaces['tfd'])) {
+                $xml->registerXPathNamespace('tfd', $namespaces['tfd']);
+            }
+
+            // Datos del comprobante
+            $comprobante = $xml->attributes();
+            $response['data']['Comprobante'] = [
+                'Version' => (string) ($comprobante['Version'] ?? ''),
+                'Serie' => (string) ($comprobante['Serie'] ?? ''),
+                'Folio' => (string) ($comprobante['Folio'] ?? ''),
+                'Fecha' => (string) ($comprobante['Fecha'] ?? ''),
+                'SubTotal' => (float) ($comprobante['SubTotal'] ?? 0),
+                'Moneda' => (string) ($comprobante['Moneda'] ?? ''),
+                'Total' => (float) ($comprobante['Total'] ?? 0),
+                'TipoDeComprobante' => (string) ($comprobante['TipoDeComprobante'] ?? ''),
+                'Exportacion' => (string) ($comprobante['Exportacion'] ?? ''),
+                'LugarExpedicion' => (string) ($comprobante['LugarExpedicion'] ?? '')
+            ];
+
+            // Datos del emisor
+            $emisor = $xml->xpath('//cfdi:Emisor');
+            $response['data']['Emisor'] = $emisor ? [
+                'Rfc' => (string) ($emisor[0]['Rfc'] ?? ''),
+                'Nombre' => (string) ($emisor[0]['Nombre'] ?? ''),
+                'RegimenFiscal' => (string) ($emisor[0]['RegimenFiscal'] ?? '')
+            ] : [];
+
+            // Datos del receptor
+            $receptor = $xml->xpath('//cfdi:Receptor');
+            $response['data']['Receptor'] = $receptor ? [
+                'Rfc' => (string) ($receptor[0]['Rfc'] ?? ''),
+                'Nombre' => (string) ($receptor[0]['Nombre'] ?? ''),
+                'DomicilioFiscalReceptor' => (string) ($receptor[0]['DomicilioFiscalReceptor'] ?? ''),
+                'RegimenFiscalReceptor' => (string) ($receptor[0]['RegimenFiscalReceptor'] ?? ''),
+                'UsoCFDI' => (string) ($receptor[0]['UsoCFDI'] ?? '')
+            ] : [];
+
+            // Complemento de pagos
+            $pagos = $xml->xpath('//cfdi:Complemento/pago20:Pagos');
+            if ($pagos) {
+                $pagoData = [];
+                foreach ($pagos[0]->xpath('pago20:Pago') as $pago) {
+                    $doctosRelacionados = [];
+                    foreach ($pago->xpath('pago20:DoctoRelacionado') as $docto) {
+                        $impuestosDR = [];
+                        foreach ($docto->xpath('pago20:ImpuestosDR/pago20:TrasladosDR/pago20:TrasladoDR') as $trasladoDR) {
+                            $impuestosDR[] = [
+                                'BaseDR' => (float) ($trasladoDR['BaseDR'] ?? 0),
+                                'ImpuestoDR' => (string) ($trasladoDR['ImpuestoDR'] ?? ''),
+                                'TipoFactorDR' => (string) ($trasladoDR['TipoFactorDR'] ?? ''),
+                                'TasaOCuotaDR' => (float) ($trasladoDR['TasaOCuotaDR'] ?? 0),
+                                'ImporteDR' => (float) ($trasladoDR['ImporteDR'] ?? 0)
+                            ];
+                        }
+
+                        $doctosRelacionados[] = [
+                            'IdDocumento' => strtoupper((string) ($docto['IdDocumento'] ?? '')),
+                            'Folio' => (string) ($docto['Folio'] ?? ''),
+                            'MonedaDR' => (string) ($docto['MonedaDR'] ?? ''),
+                            'NumParcialidad' => (int) ($docto['NumParcialidad'] ?? 0),
+                            'ImpSaldoAnt' => (float) ($docto['ImpSaldoAnt'] ?? 0),
+                            'ImpPagado' => (float) ($docto['ImpPagado'] ?? 0),
+                            'ImpSaldoInsoluto' => (float) ($docto['ImpSaldoInsoluto'] ?? 0),
+                            'ImpuestosDR' => $impuestosDR
+                        ];
+                    }
+
+                    $impuestosP = [];
+                    foreach ($pago->xpath('pago20:ImpuestosP/pago20:TrasladosP/pago20:TrasladoP') as $trasladoP) {
+                        $impuestosP[] = [
+                            'BaseP' => (float) ($trasladoP['BaseP'] ?? 0),
+                            'ImpuestoP' => (string) ($trasladoP['ImpuestoP'] ?? ''),
+                            'TipoFactorP' => (string) ($trasladoP['TipoFactorP'] ?? ''),
+                            'TasaOCuotaP' => (float) ($trasladoP['TasaOCuotaP'] ?? 0),
+                            'ImporteP' => (float) ($trasladoP['ImporteP'] ?? 0)
+                        ];
+                    }
+
+                    $pagoData[] = [
+                        'FechaPago' => (string) ($pago['FechaPago'] ?? ''),
+                        'FormaDePagoP' => (string) ($pago['FormaDePagoP'] ?? ''),
+                        'MonedaP' => (string) ($pago['MonedaP'] ?? ''),
+                        'Monto' => (float) ($pago['Monto'] ?? 0),
+                        'DoctosRelacionados' => $doctosRelacionados,
+                        'ImpuestosP' => $impuestosP
+                    ];
+                }
+
+                $response['data']['Pagos'] = [
+                    'Version' => (string) ($pagos[0]['Version'] ?? ''),
+                    'Totales' => [
+                        'MontoTotalPagos' => (float) ($pagos[0]->Totales['MontoTotalPagos'] ?? 0),
+                        'TotalTrasladosBaseIVA0' => (float) ($pagos[0]->Totales['TotalTrasladosBaseIVA0'] ?? 0),
+                        'TotalTrasladosImpuestoIVA0' => (float) ($pagos[0]->Totales['TotalTrasladosImpuestoIVA0'] ?? 0)
+                    ],
+                    'Pagos' => $pagoData
+                ];
+            }
+
+            // Complemento Timbre Fiscal
+            $timbre = $xml->xpath('//tfd:TimbreFiscalDigital');
+            $response['data']['TimbreFiscal'] = $timbre ? [
+                'UUID' => strtoupper((string) ($timbre[0]['UUID'] ?? '')),
+                'FechaTimbrado' => (string) ($timbre[0]['FechaTimbrado'] ?? ''),
+                'RfcProvCertif' => (string) ($timbre[0]['RfcProvCertif'] ?? '')
+            ] : [];
+
+            $response['success'] = true;
+            $response['message'] = 'CFDI de Pago leído correctamente.';
+        } catch (Exception $e) {
+            $response['message'] = 'Error al procesar el XML: ' . $e->getMessage();
+        }
+
+        return $response;
+    }
 
     public function validarCFDIv1($dataXML) {
         $response = [

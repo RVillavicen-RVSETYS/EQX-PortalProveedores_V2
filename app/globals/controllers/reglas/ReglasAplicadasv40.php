@@ -336,4 +336,6 @@ class ReglasAplicadasv40
 
         return $response;
     }
+
+    
 }

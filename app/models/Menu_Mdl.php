@@ -81,6 +81,7 @@ class Menu_Mdl
                         m.link AS menu_link,
                         m.orden AS menu_orden,
                         m.tipo AS menu_tipo,
+                        m.visible AS menu_visible,
                         
                         sm1.id AS submenu1_id,
                         sm1.nombre AS submenu1_nombre,
@@ -88,6 +89,7 @@ class Menu_Mdl
                         sm1.icono AS submenu1_icono,
                         sm1.link AS submenu1_link,
                         sm1.orden AS submenu1_orden,
+                        sm1.visible AS submenu1_visible,
                         
                         sm2.id AS submenu2_id,
                         sm2.nombre AS submenu2_nombre,
@@ -95,20 +97,22 @@ class Menu_Mdl
                         sm2.icono AS submenu2_icono,
                         sm2.link AS submenu2_link,
                         sm2.orden AS submenu2_orden,
+                        sm2.visible AS submenu2_visible,
                         
                         sm3.id AS submenu3_id,
                         sm3.nombre AS submenu3_nombre,
                         sm3.descripcion AS submenu3_descripcion,
                         sm3.icono AS submenu3_icono,
                         sm3.link AS submenu3_link,
-                        sm3.orden AS submenu3_orden
+                        sm3.orden AS submenu3_orden,
+                        sm3.visible AS submenu3_visible
 
                     FROM segdetnivel dn
                     INNER JOIN segareas a ON a.id = dn.idArea AND a.estatus = 1
-                    INNER JOIN segmenus m ON m.id = dn.idMenu AND m.estatus = 1 AND m.visible = 1
-                    LEFT JOIN segsubmenus sm1 ON sm1.id = dn.idSubMenu AND sm1.estatus = 1 AND sm1.visible = 1
-                    LEFT JOIN segsubmenu2 sm2 ON sm2.id = dn.idSubMenu2 AND sm2.estatus = 1 AND sm2.visible = 1
-                    LEFT JOIN segsubmenu3 sm3 ON sm3.id = dn.idSubMenu3 AND sm3.estatus = 1 AND sm3.visible = 1
+                    INNER JOIN segmenus m ON m.id = dn.idMenu AND m.estatus = 1
+                    LEFT JOIN segsubmenus sm1 ON sm1.id = dn.idSubMenu AND sm1.estatus = 1
+                    LEFT JOIN segsubmenu2 sm2 ON sm2.id = dn.idSubMenu2 AND sm2.estatus = 1
+                    LEFT JOIN segsubmenu3 sm3 ON sm3.id = dn.idSubMenu3 AND sm3.estatus = 1
 
                     WHERE 
                         dn.idNivel = :nivel AND dn.idArea = :idArea

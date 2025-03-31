@@ -797,7 +797,7 @@ class Proveedores_Mdl
                     }
                 }
 
-                $oldData = (empty($fechaMasVieja)) ? date('Y-m-d H:i:s') : $fechaMasVieja->format('Y-m-d H:i:s'); 
+                $oldData = (empty($fechaMasVieja)) ? date('Y-m-d H:i:s') : $fechaMasVieja->format('Y-m-d H:i:s');
 
                 return ['success' => true, 'data' => $dataResul, 'cantData' => $cantData, 'oldData' => $oldData];
             } else {
@@ -810,6 +810,130 @@ class Proveedores_Mdl
             $timestamp = date("Y-m-d H:i:s");
             error_log("[$timestamp] app/models/Proveedores_Mdl.php -> Error al obtener complementos pendientes: " . $e->getMessage(), 3, LOG_FILE_BD);
             return ['success' => false, 'message' => 'Error Al Obtener Complementos Pendientes. Notifica a tu administrador', 'cantData' => 0];
+        }
+    }
+
+    public function actualizarDatosProveedor($campos = [], $filtros = [])
+    {
+        $camposValidos = [
+            'nombre' => ['tipoDato' => 'STRING', 'sqlQuery' => ', nombre = :nombre'],
+            'direccion' => ['tipoDato' => 'STRING', 'sqlQuery' => ', direccion = :direccion'],
+            'pais' => ['tipoDato' => 'STRING', 'sqlQuery' => ', pais = :pais'],
+            'cp' => ['tipoDato' => 'STRING', 'sqlQuery' => ', cp = :cp'],
+            'poblacion' => ['tipoDato' => 'STRING', 'sqlQuery' => ', poblacion = :poblacion'],
+            'grupo' => ['tipoDato' => 'INT', 'sqlQuery' => ', grupo = :grupo'],
+            'rfc' => ['tipoDato' => 'STRING', 'sqlQuery' => ', rfc = :rfc'],
+            'razonSocial' => ['tipoDato' => 'STRING', 'sqlQuery' => ', razonSocial = :razonSocial'],
+            'regimenFiscal' => ['tipoDato' => 'STRING', 'sqlQuery' => ', regimenFiscal = :regimenFiscal'],
+            'cpag' => ['tipoDato' => 'STRING', 'sqlQuery' => ', cpag = :cpag'],
+            'moneda' => ['tipoDato' => 'STRING', 'sqlQuery' => ', moneda = :moneda'],
+            'pass' => ['tipoDato' => 'STRING', 'sqlQuery' => ', pass = :pass'],
+            'correo' => ['tipoDato' => 'STRING', 'sqlQuery' => ', correo = :correo'],
+            'reseteoPass' => ['tipoDato' => 'INT', 'sqlQuery' => ', reseteoPass = :reseteoPass'],
+            'estatus' => ['tipoDato' => 'INT', 'sqlQuery' => ', estatus = :estatus'],
+            'idioma' => ['tipoDato' => 'STRING', 'sqlQuery' => ', idioma = :idioma']
+        ];
+
+        $filtrosValidos = [
+            'id' => ['tipoDato' => 'INT', 'sqlQuery' => 'id = :id'],
+            'pais' => ['tipoDato' => 'STRING', 'sqlQuery' => 'pais = :pais'],
+            'grupo' => ['tipoDato' => 'INT', 'sqlQuery' => 'grupo = :grupo'],
+            'rfc' => ['tipoDato' => 'STRING', 'sqlQuery' => 'rfc = :rfc'],
+            'estatus' => ['tipoDato' => 'INT', 'sqlQuery' => 'estatus = :estatus'],
+            'idioma' => ['tipoDato' => 'STRING', 'sqlQuery' => 'idioma = :idioma']
+        ];
+
+        try {
+            if (!is_array($campos) || !is_array($filtros)) {
+                throw new \Exception('Los campos y filtros deben ser arreglos.');
+            }
+
+            if (count($campos) == 0) {
+                throw new \Exception('Los campos no pueden estar vacíos.');
+            }
+
+            if (count($filtros) == 0) {
+                throw new \Exception('Los filtros no pueden estar vacíos.');
+            }
+
+            $params = [];
+            $invalidCampos = [];
+            $invalidFiltros = [];
+            $camposSQL = '';
+            $filtrosSQL = '';
+
+            foreach ($campos as $campo => $valor) {
+                if (!array_key_exists($campo, $camposValidos)) {
+                    $invalidCampos[] = $campo;
+                } else {
+                    if ($campo === 'pass') {
+                        $valor = password_hash($valor, PASSWORD_DEFAULT);
+                    }
+                    $camposSQL .= $camposValidos[$campo]['sqlQuery'];
+                    $params[":$campo"] = $valor;
+                }
+            }
+
+            foreach ($filtros as $filtro => $valor) {
+                if (!array_key_exists($filtro, $filtrosValidos)) {
+                    $invalidFiltros[] = $filtro;
+                } else {
+                    $filtrosSQL .= (empty($filtrosSQL) ? ' WHERE ' : ' AND ') . $filtrosValidos[$filtro]['sqlQuery'];
+                    $params[":$filtro"] = $valor;
+                }
+            }
+
+            // Si hay errores de validación, lanza excepción con detalles
+            if (!empty($invalidCampos) || !empty($invalidFiltros)) {
+                throw new \Exception(
+                    (!empty($invalidCampos) ? 'Campos no válidos: ' . implode(', ', $invalidCampos) . '. ' : '') .
+                        (!empty($invalidFiltros) ? 'Filtros no válidos: ' . implode(', ', $invalidFiltros) . '.' : '')
+                );
+            }
+
+            $idUser = $_SESSION['EQXident'];
+
+            $sql = "UPDATE proveedores SET " . ltrim($camposSQL, ','). ", userUpdate = '$idUser', fechaUpdate = NOW() " . $filtrosSQL;
+
+            if (self::$debug) {
+                $this->db->imprimirConsulta($sql, $params, 'Actualiza Datos Del Proveedor');
+            }
+
+            $stmt = $this->db->prepare($sql);
+
+            $allParametros = array_merge($camposValidos, $filtrosValidos); // Unimos ambos arreglos
+            foreach ($params as $param => $value) {
+                $clave = trim($param, ':'); // Elimina ":" del nombre del parámetro
+                if (isset($allParametros[$clave])) { // Verifica que la clave exista
+                    $stmt->bindValue($param, $value, $allParametros[$clave]['tipoDato'] == 'INT' ? PDO::PARAM_INT : PDO::PARAM_STR);
+                }
+            }
+            
+            $stmt->execute();
+            $filasAfectadas = $stmt->rowCount();
+
+            if (self::$debug) {
+                echo '<br>Resultado de Query:';
+                var_dump($filasAfectadas);
+                echo '<br><br>';
+            }
+
+            if ($filasAfectadas >= 1) {
+                return [
+                    'success' => true, 
+                    'message' => 'Datos Actualizados Correctamente.', 
+                    'filasAfectadas' => $filasAfectadas
+                ];
+            } else {
+                if (self::$debug) {
+                    echo "Error Al Actualizar Los Datos.<br>";
+                }
+                return ['success' => true, 'message' => 'No se Actualizo ningun Dato.'];
+            }
+        } catch (\Exception $e) {
+            $timestamp = date("Y-m-d H:i:s");
+            error_log("[$timestamp] app/models/proveedores/Proveedores_MDL.php ->Al Actualizar datos del Proveedor: " . $e->getMessage(), 3, LOG_FILE_BD);
+            return ['success' => false, 'message' => 'Error: ' . $e->getMessage()];
         }
     }
 }
