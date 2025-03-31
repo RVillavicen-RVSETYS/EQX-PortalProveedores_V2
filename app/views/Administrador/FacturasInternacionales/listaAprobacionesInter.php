@@ -92,7 +92,7 @@ if ($debug == 1) {
                     <td>' . $row['referencia'] . '</td>
                     <td>' . $valida . ' </td>
                     <td>' . $statContable . '</td>
-                    <td> <button class="btn btn-sm btn-success" onClick="detalleCompra(\'' . $row['acuse'] . '\',' . $row['IdProveedor'] . ');"><i class="text-white icon-doc"></i></button> </td>
+                    <td> <button class="btn btn-sm btn-success" onClick="detalleCompra(\'' . $row['acuse'] . '\');"><i class="text-white icon-doc"></i></button> </td>
                     </tr>';
                 }
             }
@@ -101,6 +101,18 @@ if ($debug == 1) {
     </table>
 </div>
 <script>
+    function detalleCompra(acuse) {
+        $('#customizer_body').html('<div class="loading text-center"><img src="../assets/images/loading.gif" alt="loading" /><br/>Un momento, por favor...</div>');
+        $(".customizer").toggleClass('show-service-panel');
+        $(".service-panel-toggle").toggle();
+        $.post("Inicio/detalladoDeCompra", {
+                acuse: acuse
+            },
+            function(respuesta) {
+                $("#customizer_body").html(respuesta);
+            });
+    }
+
     $('#tableListaCompras').DataTable({
         iDisplayLength: 25,
         responsive: false,

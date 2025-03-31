@@ -6,16 +6,16 @@ use Core\Controller;
 use App\Models\Menu_Mdl;
 use App\Models\Proveedores\Proveedores_Mdl;
 use App\Models\Compras\Compras_Mdl;
-use App\Globals\Controllers\DocumentosController;
+use App\Models\Facturas\Nacionales_Mdl;
 
-class FacturasNacionalesController extends Controller
+class FacturasInternacionalesController extends Controller
 {
     protected $debug = 0;
 
     public function __construct()
     {
         if ($this->debug == 1) {
-            echo "<h2>Ya estamos dentro de controllers\Administrador\FacturasNacionalesController.php.</h2>";
+            echo "<h2>Ya estamos dentro de controllers\Administrador\FacturasInternacionalesController.php.</h2>";
         }
         // Llama a checkSession para verificar la sesión y el estatus del usuario
         $this->checkSessionAdmin();
@@ -59,30 +59,30 @@ class FacturasNacionalesController extends Controller
                 $data['listaProveedores'] = $resultProveedores;
 
                 // Cargar la vista correspondiente
-                $this->view('Administrador/FacturasNacionales/index', $data);
+                $this->view('Administrador/FacturasInternacionales/index', $data);
             } else {
                 $timestamp = date("Y-m-d H:i:s");
-                error_log("[$timestamp] app\controllers\Administrador\FacturasNacionalesController ->Error al listar las Areas: " . PHP_EOL, 3, LOG_FILE);
+                error_log("[$timestamp] app\controllers\Administrador\FacturasInternacionalesController ->Error al listar las Areas: " . PHP_EOL, 3, LOG_FILE);
                 echo 'Problemas con las Areas de Acceso:' . $resultIdArea['message'];
                 exit(0);
             }
         } else {
             $timestamp = date("Y-m-d H:i:s");
-            error_log("[$timestamp] app\controllers\Administrador\FacturasNacionalesController ->Error al buscar Id del Area (nombre: $areaLink): " . PHP_EOL, 3, LOG_FILE);
+            error_log("[$timestamp] app\controllers\Administrador\FacturasInternacionalesController ->Error al buscar Id del Area (nombre: $areaLink): " . PHP_EOL, 3, LOG_FILE);
             echo 'No pudimos traer el detallado del Menu:' . $resultIdArea['message'];
             exit(0);
         }
     }
 
-    public function listaAprobacionesNa()
+    public function listaAprobacionesInter()
     {
         $data = []; // Aquí puedes pasar datos a la vista si es necesario
 
         if (!empty($_POST['idProveedor'])) {
             $filtros['idProveedor'] = $_POST['idProveedor'];
         }
-
-        if (!empty($_POST['fechaInicial']) and !empty($_POST['fechaFinal'])) {
+        
+        if (!empty($_POST['fechaInicial']) AND !empty($_POST['fechaFinal'])) {
             $filtros['entreFechas'] = $_POST['fechaInicial'] . ',' . $_POST['fechaFinal'];
         }
 
@@ -90,7 +90,7 @@ class FacturasNacionalesController extends Controller
             $filtros['tipoMoneda'] = $_POST['tipoMoneda'];
         }
 
-        $filtros['nacional'] = '1';
+        $filtros['nacional'] = '0';
 
         $MDL_compras = new Compras_Mdl();
 
@@ -111,50 +111,7 @@ class FacturasNacionalesController extends Controller
         }
 
         // Cargar la vista correspondiente
-        $this->view('Administrador/FacturasNacionales/listaAprobacionesNa', $data);
+        $this->view('Administrador/FacturasInternacionales/listaAprobacionesInter', $data);
     }
 
-    public function detalladoDeCompra()
-    {
-        $data = []; // Aquí puedes pasar datos a la vista si es necesario
-        $noProveedor = (empty($_POST['idProveedor'])) ? '' : $_POST['idProveedor'];
-        $acuse = (empty($_POST['acuse'])) ? '' : $_POST['acuse'];
-
-        $MDL_compras = new Compras_Mdl();
-        $dataCompra = $MDL_compras->dataCompraPorAcuse($noProveedor, $acuse);
-
-        $data['noProveedor'] = $noProveedor;
-        $data['acuse'] =  $acuse;
-        $data['dataCompra'] =  $dataCompra;
-
-        if ($this->debug == 1) {
-            echo 'Variables enviadas:' . PHP_EOL;
-            var_dump($data);
-            echo '<br><br>';
-        }
-
-        // Cargar la vista correspondiente
-        $this->view('Administrador/FacturasNacionales/detalladoDeCompra', $data);
-    }
-
-    public function verDocumento()
-    {
-        $data = []; // Aquí puedes pasar datos a la vista si es necesario
-
-        //Obtener Parametros
-        $params = func_get_args();
-
-        if ($this->debug == 1) {
-            echo "Parámetros recibidos:<br>";
-            echo "<pre>";
-            print_r($params);
-            echo "</pre>";
-        }
-
-        $tipoDocumeto = $params[0];
-        $rutaDocumento = $params[1];
-
-        $Ctrl_Documentos = new DocumentosController();
-        return $Ctrl_Documentos->mostrarDocumento($rutaDocumento, $tipoDocumeto);
-    }
 }

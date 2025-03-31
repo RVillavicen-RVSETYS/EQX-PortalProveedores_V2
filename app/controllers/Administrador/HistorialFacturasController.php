@@ -4,7 +4,7 @@ namespace App\Controllers\Administrador;
 
 use Core\Controller;
 use App\Models\Menu_Mdl;
-use App\Models\Proveedores_Mdl;
+use App\Models\Proveedores\Proveedores_Mdl;
 use App\Models\Facturas\HistorialFacturas_Mdl;
 
 class HistorialFacturasController extends Controller
@@ -85,9 +85,9 @@ class HistorialFacturasController extends Controller
 
         $filtroFecha = "AND DATE_FORMAT(cp.fechaReg, '%Y-%m-%d') BETWEEN '$fechaInicial' AND '$fechaFinal'";
         $filtroProveedor = (empty($_POST['idProveedor'])) ?  '' : "AND cp.idProveedor = " . $_POST['idProveedor'];
-        $filtroEstatusCont = (empty($_POST['estatusCont'])) ? '' : "AND cp.estatus = " . $_POST['estatusCont'];
+        //$filtroEstatusCont = (empty($_POST['estatusCont'])) ? '' : "AND cp.estatus = " . $_POST['estatusCont'];
 
-        $estatusComp = $_POST['estatusComp'] ?? '';
+        /*$estatusComp = $_POST['estatusComp'] ?? '';
         switch ($estatusComp) {
             case '1':
                 $filtroEstatusComp = "AND (fac.idCatMetodoPago == 'PPD' AND  (dtpg.cantComp < '1' OR dtpg.insolutos > '0'))";
@@ -104,7 +104,7 @@ class HistorialFacturasController extends Controller
             default:
                 $filtroEstatusComp = '';
                 break;
-        }
+        }*/
 
 
         // Obtener el nombre del namespace para identificar el área
@@ -115,7 +115,7 @@ class HistorialFacturasController extends Controller
         $resultIdArea = $menuModel->obtenerIdAreaPorLink($areaLink);
 
         $historialModel = new HistorialFacturas_Mdl();
-        $resultHistorial = $historialModel->obtenerHistorial($filtroFecha, $filtroProveedor, $filtroEstatusCont, $filtroEstatusComp);
+        $resultHistorial = $historialModel->obtenerHistorial($filtroFecha, $filtroProveedor);
 
         if ($resultIdArea['success']) {
             $idArea = $resultIdArea['data'];
@@ -153,4 +153,42 @@ class HistorialFacturasController extends Controller
         }
     }
 
+    public function buscarPagos()
+    {
+        $data = []; // Aquí puedes pasar datos a la vista si es necesario
+        $fechaInicial = $_POST['fechaInicialBus'] ?? '';
+        $fechaFinal = $_POST['fechaFinalBus'] ?? '';
+
+        //echo 'Id Del Proveedor: ' . $idProveedor . " Nuevo Correo: " . $nuevoCorreo;
+        if ($this->debug == 1) {
+            echo "<br>Contenido de data:<br>";
+            var_dump($data);
+            echo "<br>Contenido de fechaInicial: $fechaInicial <br>";
+            echo "<br>Contenido de fechaFinal: $fechaFinal <br>";
+        }
+
+        $historialModel = new HistorialFacturas_Mdl();
+        $resultPagos = $historialModel->buscaPagoSilme($fechaInicial, $fechaFinal);
+
+        if ($resultPagos['success']) {
+
+            $insertarPagos = $historialModel->insertarPagos($resultPagos['data']);
+
+            if ($insertarPagos['success']) {
+                $Message = $insertarPagos['data'];
+                echo json_encode([
+                    'success' => true,
+                    'message' => $Message
+                ]);
+            } else {
+                $errorMessage = $insertarPagos['message'];
+                echo json_encode([
+                    'success' => false,
+                    'message' => $errorMessage
+                ]);
+            }
+
+
+        }
+    }
 }

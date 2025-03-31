@@ -20,12 +20,11 @@ if ($debug == 1) {
     var_dump($areaLink);
     echo '<br><br>Contenido de _SESSION:';
     var_dump($_SESSION);
-    echo '<br><br>Request-URI: '.$_SERVER['REQUEST_URI'].'<br>Contenido de piezasURL:';
+    echo '<br><br>Request-URI: ' . $_SERVER['REQUEST_URI'] . '<br>Contenido de piezasURL:';
     var_dump($piezasURL);
-    echo '<br><br>Ruta del MenuActual: '.$rutaMenu.'<br><br>Contenido de datosPagina:';
+    echo '<br><br>Ruta del MenuActual: ' . $rutaMenu . '<br><br>Contenido de datosPagina:';
     var_dump($datosPagina);
 }
-
 
 ?>
 
@@ -43,6 +42,7 @@ if ($debug == 1) {
     <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
 
 <![endif]-->
+
 </head>
 
 <body>
@@ -66,7 +66,7 @@ if ($debug == 1) {
         <!-- ============================================================== -->
         <!-- End Topbar header -->
         <!-- ============================================================== -->
-  
+
 
         <!-- ============================================================== -->
         <!-- Page wrapper  -->
@@ -87,102 +87,56 @@ if ($debug == 1) {
                 <!-- ============================================================== -->
                 <!-- Sales chart -->
                 <!-- ============================================================== -->
-                <div class="card-group">
-                    <div class="card">
-                        <div class="card-body">
-                            <div class="row">
-                                <div class="col-md-12">
-                                    <div class="d-flex no-block align-items-center">
-                                        <div>
-                                            <i class="mdi mdi-emoticon font-20 text-muted"></i>
-                                            <p class="font-16 m-b-5">New Clients</p>
-                                        </div>
-                                        <div class="ml-auto">
-                                            <h1 class="font-light text-right">23</h1>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-12">
-                                    <div class="progress">
-                                        <div class="progress-bar bg-info" role="progressbar" style="width: 75%; height: 6px;" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
-                                    </div>
-                                </div>
+
+                <div class="row">
+                    <div class="col-sm-12 col-md-12 col-lg-12">
+                        <div class="card">
+                            <div class="card-header bg-pyme-primary text-white">
+                                <h4 class="card-title">Validar Factura</h4>
                             </div>
-                        </div>
-                    </div>
-                    <!-- Column -->
-                    <!-- Column -->
-                    <div class="card">
-                        <div class="card-body">
-                            <div class="row">
-                                <div class="col-md-12">
-                                    <div class="d-flex no-block align-items-center">
-                                        <div>
-                                            <i class="mdi mdi-image font-20  text-muted"></i>
-                                            <p class="font-16 m-b-5">New Projects</p>
+                            <div class="card-body">
+                                <form id="formValidarXml">
+                                    <div class="row">
+                                        <div class="col-sm-4 col-md-4 col-lg-4">
+                                            <div class="form-group">
+                                                <label for="facturaPDF">Facturas</label>
+                                                <div class="form-group">
+                                                    <div class="input-group">
+                                                        <div class="input-group-prepend">
+                                                            <span class="input-group-text"><i class="far fa-file-code text-info"></i> &nbsp;XML</span>
+                                                        </div>
+                                                        <div class="custom-file">
+                                                            <input type="file" class="custom-file-input" id="facturaXML" name="facturaXML" accept=".xml" required multiple>
+                                                            <label class="custom-file-label" for="facturaXML">Elegir XML de Factura..</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
-                                        <div class="ml-auto">
-                                            <h1 class="font-light text-right">169</h1>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-12">
-                                    <div class="progress">
-                                        <div class="progress-bar bg-success" role="progressbar" style="width: 60%; height: 6px;" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Column -->
-                    <!-- Column -->
-                    <div class="card">
-                        <div class="card-body">
-                            <div class="row">
-                                <div class="col-md-12">
-                                    <div class="d-flex no-block align-items-center">
-                                        <div>
-                                            <i class="mdi mdi-currency-eur font-20 text-muted"></i>
-                                            <p class="font-16 m-b-5">New Invoices</p>
-                                        </div>
-                                        <div class="ml-auto">
-                                            <h1 class="font-light text-right">157</h1>
+
+                                        <div class="col-md-1 align-self-center">
+                                            <button type="submit" class="btn btn-success mt-3" name="btnValidarFacturas" id="btnValidarFacturas">Validar</button>
                                         </div>
                                     </div>
-                                </div>
-                                <div class="col-12">
-                                    <div class="progress">
-                                        <div class="progress-bar bg-purple" role="progressbar" style="width: 65%; height: 6px;" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Column -->
-                    <!-- Column -->
-                    <div class="card">
-                        <div class="card-body">
-                            <div class="row">
-                                <div class="col-md-12">
-                                    <div class="d-flex no-block align-items-center">
-                                        <div>
-                                            <i class="mdi mdi-poll font-20 text-muted"></i>
-                                            <p class="font-16 m-b-5">New Sales</p>
-                                        </div>
-                                        <div class="ml-auto">
-                                            <h1 class="font-light text-right">236</h1>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-12">
-                                    <div class="progress">
-                                        <div class="progress-bar bg-danger" role="progressbar" style="width: 70%; height: 6px;" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
-                                    </div>
-                                </div>
+                                </form>
                             </div>
                         </div>
                     </div>
                 </div>
+
+                <div class="row">
+                    <div class="col-sm-12 col-md-12 col-lg-12">
+                        <div class="card">
+                            <div class="card-header bg-pyme-primary text-white">
+                                <h4 class="card-title">Datos De Factura(s)</h4>
+                            </div>
+                            <div class="card-body" id="divDataValidacion">
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- ============================================================== -->
                 <!-- Sales chart -->
                 <!-- ============================================================== -->
@@ -210,6 +164,12 @@ if ($debug == 1) {
     <!-- ============================================================== -->
     <!-- customizer Panel -->
     <!-- ============================================================== -->
+    <div id="loadingOverlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); z-index: 9999;">
+        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: white; font-size: 20px;">
+            <div class="loading text-center"><img src="/assets/images/loading.gif" alt="loading" /><br />Actualizando Proveedores, Esto Puede Tardar Unos Minutos</div>
+
+        </div>
+    </div>
     <div class="chat-windows"></div>
     <!-- ============================================================== -->
     <!-- All Jquery -->
@@ -233,17 +193,30 @@ if ($debug == 1) {
     <script src="/dist/js/sidebarmenu.js"></script>
     <!--Custom JavaScript -->
     <script src="/dist/js/custom.js"></script>
-    <!--This page JavaScript -->
-    <!--chartis chart-->
+    <script src="/assets/libs/toastr/build/toastr.min.js"></script>
+    <script src="/assets/extra-libs/prism/prism.js"></script>
+    <script src="/assets/scripts/basicFuctions.js"></script>
+    <script src="/assets/libs/select2/dist/js/select2.full.min.js"></script>
+    <script src="/assets/libs/select2/dist/js/select2.min.js"></script>
+    <script src="/dist/js/pages/forms/select2/select2.init.js"></script>
+
+    <script src="/assets/extra-libs/datatables.net/js/jquery.dataTables.min-ESP.js"></script>
+    <script src="/dist/js/pages/datatable/datatable-basic.init.js"></script>
+
+    <script src="/assets/extra-libs/datatables.net/js/jszip.min.js"></script>
+    <script src="/assets/extra-libs/datatables.net/js/vfs_fonts.js"></script>
+
+    <script src="/assets/extra-libs/datatables.net/js/dataTables.buttons.min.js"></script>
+    <script src="/assets/extra-libs/datatables.net/js/buttons.flash.min.js"></script>
+    <script src="/assets/extra-libs/datatables.net/js/buttons.html5.min.js"></script>
+    <script src="/assets/extra-libs/datatables.net/js/buttons.print.min.js"></script>
     <script src="/assets/libs/chartist/dist/chartist.min.js"></script>
     <script src="/assets/libs/chartist-plugin-tooltips/dist/chartist-plugin-tooltip.min.js"></script>
-    <!--c3 charts -->
-    <script src="/assets/extra-libs/c3/d3.min.js"></script>
-    <script src="/assets/extra-libs/c3/c3.min.js"></script>
-    <script src="/assets/extra-libs/jvector/jquery-jvectormap-2.0.2.min.js"></script>
-    <script src="/assets/extra-libs/jvector/jquery-jvectormap-world-mill-en.js"></script>
-    <script src="/dist/js/pages/dashboards/dashboard1.js"></script>
+    <script src="/assets/extra-libs/datatables.net/js/pdfmake.min.js"></script>
+    <script src="/assets/extra-libs/datatables.net/js/vfs_fonts.js"></script>
+
+    <?php include 'index_js.php'; ?>
+
 </body>
 
 </html>
-       

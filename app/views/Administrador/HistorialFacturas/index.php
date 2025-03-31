@@ -109,6 +109,22 @@ $fechaFinal = date("Y-m-t");
             opacity: 1;
             transform: translateX(-50%) translateY(-5px);
         }
+
+        #btnBuscaPagos {
+            display: inline-block;
+            padding: 8px 15px;
+            border: 2px solid white;
+            border-radius: 10px;
+            text-decoration: none;
+            transition: 0.3s;
+            color: white;
+        }
+
+        #btnBuscaPagos:hover {
+            background-color: white;
+            color: black;
+            border-color: #ddd;
+        }
     </style>
 
 </head>
@@ -159,7 +175,7 @@ $fechaFinal = date("Y-m-t");
                 <div class="row">
                     <div class="col-md-12">
                         <div class="card">
-                            <div class="card-header bg-Equinoxgold text-white">
+                            <div class="card-header bg-pyme-primary text-white">
                                 <h4 class="card-title">Filtros De Búsqueda</h4>
                             </div>
                             <div class="card-body">
@@ -244,11 +260,61 @@ $fechaFinal = date("Y-m-t");
                 <div class="row">
                     <div class="col-sm-12 col-md-12 col-lg-12">
                         <div class="card">
-                            <div class="card-header bg-Equinoxgold text-white">
+                            <div class="card-header bg-pyme-primary text-white d-flex justify-content-between align-items-center">
                                 <h4 class="card-title">Historial De Facturas</h4>
+                                <a href="#" id="btnBuscaPagos" onclick="$('#modalFechasPagos').modal('show');">Buscar Pagos</a>
                             </div>
                             <div id="tarjetaListaFacturas" class="card-body">
 
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- MODAL PARA BUSCAR PAGOS EN SILME -->
+                <div class="modal fade" id="modalFechasPagos" role="dialog" aria-labelledby="modalFechasPagosLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-md modalFechasPagos" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header bg-pyme-primary">
+                                <h5 class="modal-title text-white" id="modalFechasPagosLabel">Seleccione Rango De Fechas</h5>
+                                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close" onclick="$('#modalFechasPagos').modal('hide');">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                <form id="formRangoBuscaPago">
+                                    <div class="col-12 col-sm-12 col-md-12 col-lg-12">
+                                        <label for="fecha" class="col-form-label">Fechas</label>
+                                        <div class="input-group mb-3">
+                                            <div class="input-daterange input-group" id="date-range">
+                                                <input type="date" class="form-control" name="fechaInicialBus" id="fechaInicialBus" value="<?= $fechaInicial; ?>" />
+                                                <div class="input-group-append">
+                                                    <span class="input-group-text pyme b-0 text-white bg-success"> A </span>
+                                                </div>
+                                                <input type="date" class="form-control" name="fechaFinalBus" id="fechaFinalBus" value="<?= $fechaFinal; ?>" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                            <div class="modal-footer">
+                                <!--<div id="bloquear-btnCerrarModal" style="display:none;">
+                                    <button class="btn btn-danger btn-md" type="button" disabled="" style="height: 100%;">
+                                        <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
+                                    </button>
+                                </div>
+                                <div id="desbloquear-btnCerrarModal">
+                                    <button type="button" id="btnCerrarModal" data-dismiss="modal" onclick="$('#modalFechasPagos').modal('hide');" class="btn btn-md btn-outline-danger mx-2 mt-3">Cerrar</button>
+                                </div>-->
+
+                                <div id="bloquear-btnActualizaPagos" style="display:none;">
+                                    <button class="btn btn-primary btn-md" type="button" disabled="" style="height: 100%;">
+                                        <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
+                                    </button>
+                                </div>
+                                <div id="desbloquear-btnActualizaPagos">
+                                    <button form="formRangoBuscaPago" id="btnActualizaPagos" class="btn btn-md btn-outline-primary mx-2 mt-3">Actualizar</button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -280,7 +346,12 @@ $fechaFinal = date("Y-m-t");
     <!-- ============================================================== -->
     <!-- customizer Panel -->
     <!-- ============================================================== -->
+    <div id="loadingOverlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); z-index: 9999;">
+        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: white; font-size: 20px;">
+            <div class="loading text-center"><img src="/assets/images/loading.gif" alt="loading" /><br />Buscando Nuevos Pagos, Esto Puede Tardar Unos Minutos</div>
 
+        </div>
+    </div>
     <div class="chat-windows"></div>
     <!-- ============================================================== -->
     <!-- All Jquery -->

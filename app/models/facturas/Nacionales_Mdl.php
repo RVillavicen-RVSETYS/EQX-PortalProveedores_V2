@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\Facturas;
 
 use PDO; // Asegúrate de importar PDO si es necesario
 use BD_Connect; // Asegúrate de que la conexión esté disponible
