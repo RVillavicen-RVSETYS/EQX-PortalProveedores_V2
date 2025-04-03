@@ -27,9 +27,7 @@ class Nacionales_Mdl
             $sql = "";
 
             if (self::$debug) {
-                $params = [
-                    
-                ];
+                $params = [];
                 $this->db->imprimirConsulta($sql, $params, 'Obtiene Los Datos De Un Proveedor.');
             }
             $stmt = $this->db->prepare($sql);

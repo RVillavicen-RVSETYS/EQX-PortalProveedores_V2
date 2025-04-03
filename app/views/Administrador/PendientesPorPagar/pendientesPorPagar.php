@@ -1,6 +1,10 @@
 <?php
 $debug = 0;
 
+use App\Globals\FuncionesBasicas\FuncionesBasicasController;
+
+$funcionesBase = new FuncionesBasicasController();
+
 if ($debug == 1) {
     echo 'Contenido de areaData:' . PHP_EOL;
     var_dump($listaCompras);
@@ -13,6 +17,7 @@ if ($debug == 1) {
             <tr>
                 <th class="text-center"># Acuse</th>
                 <th class="">Tipo</th>
+                <th>Proveedor</th>
                 <th>Orden Compra</th>
                 <th>No Recepcion</th>
                 <th>Fecha Recepción</th>
@@ -86,6 +91,7 @@ if ($debug == 1) {
                     echo '<tr class="' . $txtColor . ' ' . $bgColor . '" >
                     <td class="text-center">' . $row['acuse'] . '</td>
                     <td>' . $claseDocto . '</td>
+                    <td>' . $row['RazonSocial'] . '</td>
                     <td>' . $row['ordenCompra'] . '</td>
                     <td>' . $recepciones . '</td>
                     <td>' . $row['fechaReg'] . '</td>

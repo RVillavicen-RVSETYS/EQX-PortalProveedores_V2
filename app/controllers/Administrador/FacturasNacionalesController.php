@@ -7,6 +7,7 @@ use App\Models\Menu_Mdl;
 use App\Models\Proveedores\Proveedores_Mdl;
 use App\Models\Compras\Compras_Mdl;
 use App\Globals\Controllers\DocumentosController;
+use App\Models\Facturas\Nacionales_Mdl;
 
 class FacturasNacionalesController extends Controller
 {
@@ -156,5 +157,71 @@ class FacturasNacionalesController extends Controller
 
         $Ctrl_Documentos = new DocumentosController();
         return $Ctrl_Documentos->mostrarDocumento($rutaDocumento, $tipoDocumeto);
+    }
+
+    public function rechazarFactura()
+    {
+        $data = []; // Aquí puedes pasar datos a la vista si es necesario
+        $acuse = $_POST['acuse'] ?? '';
+        $motivo = $_POST['motivo'] ?? '';
+
+        if ($this->debug == 1) {
+            echo "<br>Contenido de data:<br>";
+            var_dump($data);
+            echo "<br>Contenido de POST: ";
+            var_dump($_POST);
+            echo "<br>Acuse: $acuse<br>";
+            echo "<br>Motivo: $motivo<br>";
+        }
+
+        if (empty($acuse)) {
+            $response = [
+                'success' => false,
+                'message' => 'No se recibio acuse de la factura.'
+            ];
+            echo json_encode($response);
+            exit(0);
+        }
+
+        if (empty($motivo)) {
+            $response = [
+                'success' => false,
+                'message' => 'No se recibio el motivo para rechazar la factura.'
+            ];
+            echo json_encode($response);
+            exit(0);
+        }
+
+        $campos = [
+            'estatus' => 3,
+            'comentRegresa' => $motivo
+        ];
+        $filtros = [
+            'id' => $acuse
+        ];
+
+        $MDL_compras = new Compras_Mdl();
+        $resultActualizaFactura = $MDL_compras->actualizarDataCompras($campos, $filtros);
+
+        if ($this->debug == 1) {
+            echo '<br><br>Resultado de Actualizar Datos de Proveedores: ' . PHP_EOL;
+            var_dump($resultActualizaFactura);
+        }
+
+        if ($resultActualizaFactura['success']) {
+            $response = [
+                'success' => true,
+                'message' => $resultActualizaFactura['message']
+            ];
+            echo json_encode($response);
+            exit(0);
+        } else {
+            $response = [
+                'success' => false,
+                'message' => 'Error al regresar factura al proveedor.'
+            ];
+            echo json_encode($response);
+            exit(0);
+        }
     }
 }

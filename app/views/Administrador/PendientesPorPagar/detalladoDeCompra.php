@@ -308,7 +308,7 @@ if ($debug == 1) {
         }).then((result) => {
             if (result.value && result.value.trim()) {
                 $.ajax({
-                    url: 'FacturasNacionales/rechazarFactura',
+                    url: 'FacturasInternacionales/rechazarFactura',
                     type: 'POST',
                     data: {
                         acuse: acuse,

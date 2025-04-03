@@ -90,7 +90,7 @@ class Compras_Mdl
 
             $sql = "SELECT c.id AS acuse, c.claseDocto, dc.ordenCompra, c.estatus,
                     GROUP_CONCAT(DISTINCT dc.noRecepcion ORDER BY dc.noRecepcion SEPARATOR ', ') AS noRecepcion,
-                    c.fechaReg, c.referencia, cf.urlPDF, cf.urlXML, pv.pais, pv.id AS 'IdProveedor'
+                    c.fechaReg, c.referencia, cf.urlPDF, cf.urlXML, pv.pais, pv.id AS 'IdProveedor', pv.razonSocial AS 'RazonSocial'
                     FROM compras c
                     INNER JOIN proveedores pv ON c.idProveedor = pv.id
                     INNER JOIN detcompras dc ON c.id = dc.idCompra
@@ -235,6 +235,108 @@ class Compras_Mdl
                 }
                 return ['success' => false, 'message' => 'Problemas al buscar este Documento, Notifica a tu administrador.'];
             }
+        }
+    }
+
+    public function actualizarDataCompras($campos = [], $filtros = [])
+    {
+        $camposValidos = [
+            'estatus' => ['tipoDato' => 'INT', 'sqlQuery' => ', estatus = :estatus'],
+            'comentRegresa' => ['tipoDato' => 'STRING', 'sqlQuery' => ', comentRegresa = :comentRegresa']
+        ];
+
+        $filtrosValidos = [
+            'id' => ['tipoDato' => 'INT', 'sqlQuery' => 'id = :id'],
+        ];
+
+        try {
+            if (!is_array($campos) || !is_array($filtros)) {
+                throw new \Exception('Los campos y filtros deben ser arreglos.');
+            }
+
+            if (count($campos) == 0) {
+                throw new \Exception('Los campos no pueden estar vacíos.');
+            }
+
+            if (count($filtros) == 0) {
+                throw new \Exception('Los filtros no pueden estar vacíos.');
+            }
+
+            $params = [];
+            $invalidCampos = [];
+            $invalidFiltros = [];
+            $camposSQL = '';
+            $filtrosSQL = '';
+
+            foreach ($campos as $campo => $valor) {
+                if (!array_key_exists($campo, $camposValidos)) {
+                    $invalidCampos[] = $campo;
+                } else {
+                    $camposSQL .= $camposValidos[$campo]['sqlQuery'];
+                    $params[":$campo"] = $valor;
+                }
+            }
+
+            foreach ($filtros as $filtro => $valor) {
+                if (!array_key_exists($filtro, $filtrosValidos)) {
+                    $invalidFiltros[] = $filtro;
+                } else {
+                    $filtrosSQL .= (empty($filtrosSQL) ? ' WHERE ' : ' AND ') . $filtrosValidos[$filtro]['sqlQuery'];
+                    $params[":$filtro"] = $valor;
+                }
+            }
+
+            // Si hay errores de validación, lanza excepción con detalles
+            if (!empty($invalidCampos) || !empty($invalidFiltros)) {
+                throw new \Exception(
+                    (!empty($invalidCampos) ? 'Campos no válidos: ' . implode(', ', $invalidCampos) . '. ' : '') .
+                        (!empty($invalidFiltros) ? 'Filtros no válidos: ' . implode(', ', $invalidFiltros) . '.' : '')
+                );
+            }
+
+            $idUser = $_SESSION['EQXident'];
+
+            $sql = "UPDATE compras SET " . ltrim($camposSQL, ',') . ", idUserValida = '$idUser', fechaVal = NOW() " . $filtrosSQL;
+
+            if (self::$debug) {
+                $this->db->imprimirConsulta($sql, $params, 'Actualiza Datos Del Proveedor');
+            }
+
+            $stmt = $this->db->prepare($sql);
+
+            $allParametros = array_merge($camposValidos, $filtrosValidos); // Unimos ambos arreglos
+            foreach ($params as $param => $value) {
+                $clave = trim($param, ':'); // Elimina ":" del nombre del parámetro
+                if (isset($allParametros[$clave])) { // Verifica que la clave exista
+                    $stmt->bindValue($param, $value, $allParametros[$clave]['tipoDato'] == 'INT' ? PDO::PARAM_INT : PDO::PARAM_STR);
+                }
+            }
+
+            $stmt->execute();
+            $filasAfectadas = $stmt->rowCount();
+
+            if (self::$debug) {
+                echo '<br>Resultado de Query:';
+                var_dump($filasAfectadas);
+                echo '<br><br>';
+            }
+
+            if ($filasAfectadas >= 1) {
+                return [
+                    'success' => true,
+                    'message' => 'Datos Actualizados Correctamente.',
+                    'filasAfectadas' => $filasAfectadas
+                ];
+            } else {
+                if (self::$debug) {
+                    echo "Error Al Actualizar Los Datos.<br>";
+                }
+                return ['success' => false, 'message' => 'No Se Actualizo Ningún Dato.'];
+            }
+        } catch (\Exception $e) {
+            $timestamp = date("Y-m-d H:i:s");
+            error_log("[$timestamp] app/models/compras/Compras_Mdl.php ->Al Actualizar datos del Proveedor: " . $e->getMessage() . PHP_EOL, 3, LOG_FILE_BD);
+            return ['success' => false, 'message' => 'Error: ' . $e->getMessage()];
         }
     }
 }

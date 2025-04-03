@@ -8,14 +8,14 @@ use App\Models\Proveedores\Proveedores_Mdl;
 use App\Models\Compras\Compras_Mdl;
 use App\Globals\Controllers\DocumentosController;
 
-class FacturasInternacionalesController extends Controller
+class PendientesPorPagarController extends Controller
 {
     protected $debug = 0;
 
     public function __construct()
     {
         if ($this->debug == 1) {
-            echo "<h2>Ya estamos dentro de controllers\Administrador\FacturasInternacionalesController.php.</h2>";
+            echo "<h2>Ya estamos dentro de controllers\Administrador\PendientesPorPagarController.php.</h2>";
         }
         // Llama a checkSession para verificar la sesión y el estatus del usuario
         $this->checkSessionAdmin();
@@ -41,7 +41,7 @@ class FacturasInternacionalesController extends Controller
             $idArea = $resultIdArea['data'];
         } else {
             $timestamp = date("Y-m-d H:i:s");
-            error_log("[$timestamp] app\controllers\Administrador\FacturasNacionalesController ->Error al buscar Id del Area (nombre: $areaLink): " . PHP_EOL, 3, LOG_FILE);
+            error_log("[$timestamp] app\controllers\Administrador\PendientesPorPagarController ->Error al buscar Id del Area (nombre: $areaLink): " . PHP_EOL, 3, LOG_FILE);
             echo 'No pudimos traer el id del Area:' . $resultIdArea['message'];
             exit(0);
         }
@@ -59,22 +59,22 @@ class FacturasInternacionalesController extends Controller
                 $data['listaProveedores'] = $resultProveedores;
 
                 // Cargar la vista correspondiente
-                $this->view('Administrador/FacturasInternacionales/index', $data);
+                $this->view('Administrador/PendientesPorPagar/index', $data);
             } else {
                 $timestamp = date("Y-m-d H:i:s");
-                error_log("[$timestamp] app\controllers\Administrador\FacturasInternacionalesController ->Error al listar las Areas: " . PHP_EOL, 3, LOG_FILE);
+                error_log("[$timestamp] app\controllers\Administrador\PendientesPorPagarController ->Error al listar las Areas: " . PHP_EOL, 3, LOG_FILE);
                 echo 'Problemas con las Areas de Acceso:' . $resultIdArea['message'];
                 exit(0);
             }
         } else {
             $timestamp = date("Y-m-d H:i:s");
-            error_log("[$timestamp] app\controllers\Administrador\FacturasInternacionalesController ->Error al buscar Id del Area (nombre: $areaLink): " . PHP_EOL, 3, LOG_FILE);
+            error_log("[$timestamp] app\controllers\Administrador\PendientesPorPagarController ->Error al buscar Id del Area (nombre: $areaLink): " . PHP_EOL, 3, LOG_FILE);
             echo 'No pudimos traer el detallado del Menu:' . $resultIdArea['message'];
             exit(0);
         }
     }
 
-    public function listaAprobacionesInter()
+    public function listaPendientesPorPagar()
     {
         $data = []; // Aquí puedes pasar datos a la vista si es necesario
 
@@ -90,7 +90,7 @@ class FacturasInternacionalesController extends Controller
             $filtros['tipoMoneda'] = $_POST['tipoMoneda'];
         }
 
-        $filtros['nacional'] = '0';
+        $filtros['estatusFactura'] = '2';
 
         $MDL_compras = new Compras_Mdl();
 
@@ -111,7 +111,7 @@ class FacturasInternacionalesController extends Controller
         }
 
         // Cargar la vista correspondiente
-        $this->view('Administrador/FacturasInternacionales/listaAprobacionesInter', $data);
+        $this->view('Administrador/PendientesPorPagar/pendientesPorPagar', $data);
     }
 
     public function detalladoDeCompra()
@@ -134,7 +134,7 @@ class FacturasInternacionalesController extends Controller
         }
 
         // Cargar la vista correspondiente
-        $this->view('Administrador/FacturasInternacionales/detalladoDeCompra', $data);
+        $this->view('Administrador/PendientesPorPagar/detalladoDeCompra', $data);
     }
 
     public function verDocumento()
@@ -156,71 +156,5 @@ class FacturasInternacionalesController extends Controller
 
         $Ctrl_Documentos = new DocumentosController();
         return $Ctrl_Documentos->mostrarDocumento($rutaDocumento, $tipoDocumeto);
-    }
-
-    public function rechazarFactura()
-    {
-        $data = []; // Aquí puedes pasar datos a la vista si es necesario
-        $acuse = $_POST['acuse'] ?? '';
-        $motivo = $_POST['motivo'] ?? '';
-
-        if ($this->debug == 1) {
-            echo "<br>Contenido de data:<br>";
-            var_dump($data);
-            echo "<br>Contenido de POST: ";
-            var_dump($_POST);
-            echo "<br>Acuse: $acuse<br>";
-            echo "<br>Motivo: $motivo<br>";
-        }
-
-        if (empty($acuse)) {
-            $response = [
-                'success' => false,
-                'message' => 'No se recibio acuse de la factura.'
-            ];
-            echo json_encode($response);
-            exit(0);
-        }
-
-        if (empty($motivo)) {
-            $response = [
-                'success' => false,
-                'message' => 'No se recibio el motivo para rechazar la factura.'
-            ];
-            echo json_encode($response);
-            exit(0);
-        }
-
-        $campos = [
-            'estatus' => 3,
-            'comentRegresa' => $motivo
-        ];
-        $filtros = [
-            'id' => $acuse
-        ];
-
-        $MDL_compras = new Compras_Mdl();
-        $resultActualizaFactura = $MDL_compras->actualizarDataCompras($campos, $filtros);
-
-        if ($this->debug == 1) {
-            echo '<br><br>Resultado de Actualizar Datos de Proveedores: ' . PHP_EOL;
-            var_dump($resultActualizaFactura);
-        }
-
-        if ($resultActualizaFactura['success']) {
-            $response = [
-                'success' => true,
-                'message' => $resultActualizaFactura['message']
-            ];
-            echo json_encode($response);
-            exit(0);
-        } else {
-            $response = [
-                'success' => false,
-                'message' => 'Error al regresar factura al proveedor.'
-            ];
-            echo json_encode($response);
-            exit(0);
-        }
     }
 }

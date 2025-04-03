@@ -1,6 +1,6 @@
 <?php
 
-use App\Globals\Controllers\FuncionesBasicas\FuncionesBasicasController;
+use App\Globals\FuncionesBasicas\FuncionesBasicasController;
 
 $funcionesBase = new FuncionesBasicasController();
 

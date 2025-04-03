@@ -109,19 +109,20 @@ $fechaFinal = date("Y-m-t");
                                 <h4 class="card-title">Filtros De Búsqueda</h4>
                             </div>
                             <div class="card-body">
-                                <form id="formConsultaAprobaciones">
+                                <form id="formConsultaPendientesPorPagar">
                                     <div class="row">
 
                                         <div class="col-12 col-sm-12 col-md-4 col-lg-4">
-                                            <label for="fecha" class="col-form-label">Fecha</label>
-                                            <div class="input-group mb-3">
-                                                <div class="input-daterange input-group" id="date-range">
-                                                    <input type="date" class="form-control" name="fechaInicial" id="fechaInicial" value="<?= $fechaInicial; ?>" />
-                                                    <div class="input-group-append">
-                                                        <span class="input-group-text pyme b-0 text-white bg-success"> A </span>
-                                                    </div>
-                                                    <input type="date" class="form-control" name="fechaFinal" id="fechaFinal" value="<?= $fechaFinal; ?>" />
+                                            <label class="col-form-label">Rango de Fechas</label>
+                                            <div class="input-group input-daterange mb-3" id="date-range">
+                                                <div class="input-group-addon">
+                                                    <span class="input-group-text pyme b-0 text-white bg-pyme-primary"> Desde </span>
                                                 </div>
+                                                <input type="date" class="form-control" name="fechaInicial" id="fechaInicial" value="<?= $fechaInicial; ?>" />
+                                                <div class="input-group-addon">
+                                                    <span class="input-group-text pyme b-0 text-white bg-pyme-primary"> Hasta </span>
+                                                </div>
+                                                <input type="date" class="form-control " name="fechaFinal" id="fechaFinal" value="<?= $fechaFinal; ?>" />
                                             </div>
                                         </div>
 
@@ -158,7 +159,7 @@ $fechaFinal = date("Y-m-t");
                                         </div>
 
                                         <div class="col-md-2 align-self-center">
-                                            <button form="formConsultaAprobaciones" type="submit" class="btn btn-success mt-3" name="btnFiltros" id="btnFiltros">Consultar</button>
+                                            <button form="formConsultaPendientesPorPagar" type="submit" class="btn btn-success mt-3" name="btnFiltros" id="btnFiltros">Consultar</button>
                                         </div>
                                     </div>
                                 </form>
@@ -173,7 +174,7 @@ $fechaFinal = date("Y-m-t");
                             <div class="card-header bg-pyme-primary text-white">
                                 <h4 class="card-title">Lista De Aprobaciones</h4>
                             </div>
-                            <div id="tarjetaListaAprob" class="card-body">
+                            <div id="tarjetaListaPendientesPagar" class="card-body">
 
                             </div>
                         </div>

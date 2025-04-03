@@ -183,15 +183,16 @@ $fechaFinal = date("Y-m-t");
                                     <div class="row">
 
                                         <div class="col-12 col-sm-12 col-md-4 col-lg-4">
-                                            <label for="fecha" class="col-form-label">Fecha</label>
-                                            <div class="input-group mb-3">
-                                                <div class="input-daterange input-group" id="date-range">
-                                                    <input type="date" class="form-control" name="fechaInicial" id="fechaInicial" value="<?= $fechaInicial; ?>" />
-                                                    <div class="input-group-append">
-                                                        <span class="input-group-text pyme b-0 text-white bg-success"> A </span>
-                                                    </div>
-                                                    <input type="date" class="form-control" name="fechaFinal" id="fechaFinal" value="<?= $fechaFinal; ?>" />
+                                            <label class="col-form-label">Rango de Fechas</label>
+                                            <div class="input-group input-daterange mb-3" id="date-range">
+                                                <div class="input-group-addon">
+                                                    <span class="input-group-text pyme b-0 text-white bg-pyme-primary"> Desde </span>
                                                 </div>
+                                                <input type="date" class="form-control" name="fechaInicial" id="fechaInicial" value="<?= $fechaInicial; ?>" />
+                                                <div class="input-group-addon">
+                                                    <span class="input-group-text pyme b-0 text-white bg-pyme-primary"> Hasta </span>
+                                                </div>
+                                                <input type="date" class="form-control " name="fechaFinal" id="fechaFinal" value="<?= $fechaFinal; ?>" />
                                             </div>
                                         </div>
 
@@ -284,15 +285,16 @@ $fechaFinal = date("Y-m-t");
                             <div class="modal-body">
                                 <form id="formRangoBuscaPago">
                                     <div class="col-12 col-sm-12 col-md-12 col-lg-12">
-                                        <label for="fecha" class="col-form-label">Fechas</label>
-                                        <div class="input-group mb-3">
-                                            <div class="input-daterange input-group" id="date-range">
-                                                <input type="date" class="form-control" name="fechaInicialBus" id="fechaInicialBus" value="<?= $fechaInicial; ?>" />
-                                                <div class="input-group-append">
-                                                    <span class="input-group-text pyme b-0 text-white bg-success"> A </span>
-                                                </div>
-                                                <input type="date" class="form-control" name="fechaFinalBus" id="fechaFinalBus" value="<?= $fechaFinal; ?>" />
+                                        <label class="col-form-label">Rango de Fechas</label>
+                                        <div class="input-group input-daterange mb-3" id="date-range">
+                                            <div class="input-group-addon">
+                                                <span class="input-group-text pyme b-0 text-white bg-pyme-primary"> Desde </span>
                                             </div>
+                                            <input type="text" class="form-control" name="fechaInicialBus" id="fechaInicialBus" value="<?= $fechaInicial; ?>" />
+                                            <div class="input-group-addon">
+                                                <span class="input-group-text pyme b-0 text-white bg-pyme-primary"> Hasta </span>
+                                            </div>
+                                            <input type="text" class="form-control " name="fechaFinalBus" id="fechaFinalBus" value="<?= $fechaFinal; ?>" />
                                         </div>
                                     </div>
                                 </form>
