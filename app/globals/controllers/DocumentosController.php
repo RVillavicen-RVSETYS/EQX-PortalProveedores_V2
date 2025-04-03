@@ -216,7 +216,7 @@ class DocumentosController extends Controller
         // Verificar si el archivo existe
         if (!file_exists($rutaAbsoluta)) {
             http_response_code(404);
-            echo '<br> Error: El archivo solicitado no existe.' . PHP_EOL;
+            echo '<br> <span style="color: white;">Error: El archivo solicitado no existe.</span>' . PHP_EOL;
             if ($this->debug) {
                 echo '<br> Ruta probada: ' . $rutaAbsoluta . PHP_EOL;
             }
