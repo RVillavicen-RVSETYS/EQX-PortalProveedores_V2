@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Globals\Controllers\FuncionesBasicas;
+namespace App\Globals\FuncionesBasicas;
 
 use Core\Controller;
 
@@ -59,6 +59,4 @@ class FuncionesBasicasController extends Controller
             return $response;
         }
     }
-
-    public function calcularFechaDePago($fechaVencimiento) {}
 }

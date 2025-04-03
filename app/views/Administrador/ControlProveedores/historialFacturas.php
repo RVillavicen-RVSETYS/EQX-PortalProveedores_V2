@@ -1,6 +1,6 @@
 <?php
 
-use App\Globals\Controllers\FuncionesBasicas\FuncionesBasicasController;
+use App\Globals\FuncionesBasicas\FuncionesBasicasController;
 
 $funcionesBase = new FuncionesBasicasController();
 
@@ -40,11 +40,11 @@ if ($debug == 1) {
                             <label class="col-form-label">Rango de Fechas</label>
                             <div class="input-group input-daterange mb-3" id="date-range">
                                 <div class="input-group-addon">
-                                    <span class="input-group-text pyme b-0 text-white bg-Equinoxgold"> Desde </span>
+                                    <span class="input-group-text pyme b-0 text-white bg-pyme-primary"> Desde </span>
                                 </div>
                                 <input type="text" class="form-control" name="fechaInicial" id="fechaInicial" id="fechaInicial" />
                                 <div class="input-group-addon">
-                                    <span class="input-group-text pyme b-0 text-white bg-Equinoxgold"> Hasta </span>
+                                    <span class="input-group-text pyme b-0 text-white bg-pyme-primary"> Hasta </span>
                                 </div>
                                 <input type="text" class="form-control " name="fechaFinal" id="fechaFinal" id="fechaFinal" />
                             </div>

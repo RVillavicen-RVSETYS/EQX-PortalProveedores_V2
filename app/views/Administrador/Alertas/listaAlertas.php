@@ -229,7 +229,7 @@ if ($debug == 1) {
 <div class="modal fade" id="modalEditaAlerta" role="dialog" aria-labelledby="modalEditaAlertaLabel" aria-hidden="true">
     <div class="modal-dialog modal-md modalEditaAlerta" role="document">
         <div class="modal-content">
-            <div class="modal-header" style="background-color:#11334b;">
+            <div class="modal-header bg-pyme-primary">
                 <h5 class="modal-title text-white" id="modalEditaAlertaLabel">Editar Alerta</h5>
                 <button type="button" class="close text-white" aria-label="Close" onclick="$('#modalEditaAlerta').modal('hide');">
                     <span aria-hidden="true">&times;</span>
