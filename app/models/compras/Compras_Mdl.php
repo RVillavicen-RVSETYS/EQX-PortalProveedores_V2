@@ -242,7 +242,8 @@ class Compras_Mdl
     {
         $camposValidos = [
             'estatus' => ['tipoDato' => 'INT', 'sqlQuery' => ', estatus = :estatus'],
-            'comentRegresa' => ['tipoDato' => 'STRING', 'sqlQuery' => ', comentRegresa = :comentRegresa']
+            'comentRegresa' => ['tipoDato' => 'STRING', 'sqlQuery' => ', comentRegresa = :comentRegresa'],
+            'fechaVence' => ['tipoDato' => 'STRING', 'sqlQuery' => ', fechaVence = :fechaVence'],
         ];
 
         $filtrosValidos = [
@@ -335,7 +336,7 @@ class Compras_Mdl
             }
         } catch (\Exception $e) {
             $timestamp = date("Y-m-d H:i:s");
-            error_log("[$timestamp] app/models/compras/Compras_Mdl.php ->Al Actualizar datos del Proveedor: " . $e->getMessage() . PHP_EOL, 3, LOG_FILE_BD);
+            error_log("[$timestamp] app/models/compras/Compras_Mdl.php ->Error Al Actualizar Datos De La Factura: " . $e->getMessage() . PHP_EOL, 3, LOG_FILE_BD);
             return ['success' => false, 'message' => 'Error: ' . $e->getMessage()];
         }
     }

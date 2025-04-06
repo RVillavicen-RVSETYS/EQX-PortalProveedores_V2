@@ -92,6 +92,8 @@ class FacturasInternacionalesController extends Controller
 
         $filtros['nacional'] = '0';
 
+        $filtros['estatusFactura'] = '1';
+
         $MDL_compras = new Compras_Mdl();
 
         $listaCompras = $MDL_compras->listaComprasFacturadas($filtros, 0, 'DESC');
@@ -218,6 +220,124 @@ class FacturasInternacionalesController extends Controller
             $response = [
                 'success' => false,
                 'message' => 'Error al regresar factura al proveedor.'
+            ];
+            echo json_encode($response);
+            exit(0);
+        }
+    }
+
+    public function aceptarFactura()
+    {
+        $data = []; // Aquí puedes pasar datos a la vista si es necesario
+        $acuse = $_POST['acuse'] ?? '';
+
+        if ($this->debug == 1) {
+            echo "<br>Contenido de data:<br>";
+            var_dump($data);
+            echo "<br>Contenido de POST: ";
+            var_dump($_POST);
+            echo "<br>Acuse: $acuse<br>";
+        }
+
+        if (empty($acuse)) {
+            $response = [
+                'success' => false,
+                'message' => 'No se recibio acuse de la factura.'
+            ];
+            echo json_encode($response);
+            exit(0);
+        }
+
+        $campos = [
+            'estatus' => 2
+        ];
+        $filtros = [
+            'id' => $acuse
+        ];
+
+        $MDL_compras = new Compras_Mdl();
+        $resultActualizaFactura = $MDL_compras->actualizarDataCompras($campos, $filtros);
+
+        if ($this->debug == 1) {
+            echo '<br><br>Resultado de Actualizar Datos de Facturas: ' . PHP_EOL;
+            var_dump($resultActualizaFactura);
+        }
+
+        if ($resultActualizaFactura['success']) {
+            $response = [
+                'success' => true,
+                'message' => $resultActualizaFactura['message']
+            ];
+            echo json_encode($response);
+            exit(0);
+        } else {
+            $response = [
+                'success' => false,
+                'message' => 'Error al aceptar factura.'
+            ];
+            echo json_encode($response);
+            exit(0);
+        }
+    }
+
+    public function cambiarFechaPago()
+    {
+        $data = []; // Aquí puedes pasar datos a la vista si es necesario
+        $acuse = $_POST['acuse'] ?? '';
+        $nuevaFecha = $_POST['nuevaFecha'] ?? '';
+
+        if ($this->debug == 1) {
+            echo "<br>Contenido de data:<br>";
+            var_dump($data);
+            echo "<br>Contenido de POST: ";
+            var_dump($_POST);
+            echo "<br>Acuse: $acuse<br>";
+            echo "<br>Nueva Fecha: $nuevaFecha<br>";
+        }
+
+        if (empty($acuse)) {
+            $response = [
+                'success' => false,
+                'message' => 'No se recibio acuse de la factura.'
+            ];
+            echo json_encode($response);
+            exit(0);
+        }
+        if (empty($nuevaFecha)) {
+            $response = [
+                'success' => false,
+                'message' => 'No se recibio la nueva fecha de pago.'
+            ];
+            echo json_encode($response);
+            exit(0);
+        }
+
+        $campos = [
+            'fechaVence' => $nuevaFecha
+        ];
+        $filtros = [
+            'id' => $acuse
+        ];
+
+        $MDL_compras = new Compras_Mdl();
+        $resultActualizaFactura = $MDL_compras->actualizarDataCompras($campos, $filtros);
+
+        if ($this->debug == 1) {
+            echo '<br><br>Resultado de Actualizar Datos de Facturas: ' . PHP_EOL;
+            var_dump($resultActualizaFactura);
+        }
+
+        if ($resultActualizaFactura['success']) {
+            $response = [
+                'success' => true,
+                'message' => $resultActualizaFactura['message']
+            ];
+            echo json_encode($response);
+            exit(0);
+        } else {
+            $response = [
+                'success' => false,
+                'message' => 'Error al aceptar factura.'
             ];
             echo json_encode($response);
             exit(0);

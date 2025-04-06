@@ -6,7 +6,7 @@ if ($debug == 1) {
     var_dump($data);
     echo '<br><br>';
 }
-
+$fechaMin = date('Y-m-d', strtotime('-1 day'));
 ?>
 <div class="card border">
     <div class="card-header bg-pyme-primary">
@@ -70,24 +70,34 @@ if ($debug == 1) {
             $contNotaCredito = $data['dataCompra']['data']['notaCredito'];
             $requiereComplementoPago = ($data['dataCompra']['data']['idPago'] >= 1 and $data['dataCompra']['data']['FacMetodoPago'] == 'PPD') ? 1 : 0;
 ?>
-<div class="row">
-    <div class="col-12">
-        <div class="bg-light p-10 d-flex align-items-center do-block">
-            <div class="ml-auto">
-                <div class="btn-group m-r-10" role="group" aria-label="Button group with nested dropdown">
-                    <div class="btn-group" role="group">
-                        <button id="btnGroupDrop1" type="button" class="btn btn-outline-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> <i class="mdi mdi-label font-18"></i> </button>
-                        <div class="dropdown-menu" aria-labelledby="btnGroupDrop1">
-                            <a class="dropdown-item" href="javascript:void(0)"> <i class="fas fa-check-circle text-success">&nbsp;</i>Aceptar</a>
-                            <a class="dropdown-item" href="javascript:rechazarFactura(<?= $data['dataCompra']['data']['acuse'] ?>);"> <i class="fas fa-times-circle text-danger">&nbsp;</i>Rechazar</a>
-                            <a class="dropdown-item" href="javascript:void(0)"> <i class="fas fa-undo-alt text-info">&nbsp;</i>Nueva Fecha Pago</a>
+
+<?php
+if ($data['dataCompra']['data']['CpaEstatus'] == '1') {
+?>
+    <div class="row">
+        <div class="col-12">
+            <div class="bg-light p-10 d-flex align-items-center do-block">
+                <div class="ml-auto">
+                    <div class="btn-group m-r-10" role="group" aria-label="Button group with nested dropdown">
+                        <div class="btn-group" role="group">
+                            <button id="btnGroupDrop1" type="button" class="btn btn-outline-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> <i class="mdi mdi-label font-18"></i> </button>
+                            <div class="dropdown-menu" aria-labelledby="btnGroupDrop1">
+
+                                <a class="dropdown-item" href="javascript:aceptarFactura(<?= $data['dataCompra']['data']['acuse'] ?>);"> <i class="fas fa-check-circle text-success">&nbsp;</i>Aceptar</a>
+                                <a class="dropdown-item" href="javascript:rechazarFactura(<?= $data['dataCompra']['data']['acuse'] ?>);"> <i class="fas fa-times-circle text-danger">&nbsp;</i>Rechazar</a>
+                                <a class="dropdown-item" href="javascript:cambiarFecha(<?= $data['dataCompra']['data']['acuse'] ?>);"> <i class="fas fa-undo-alt text-info">&nbsp;</i>Nueva Fecha Pago</a>
+
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
+<?php
+}
+?>
+
 <ul class="nav customizer-tab" role="tablist">
     <li class="nav-item">
         <a class="nav-link active" id="factura-tab" data-toggle="pill" href="#factura" role="tab" aria-controls="factura"
@@ -181,9 +191,9 @@ if ($debug == 1) {
             </div>
             <div class="col-xs-6 col-md-4">
                 <span class="text-muted">Subtotal </span>
-                <h6><?= (empty($data['dataCompra']['data']['FacSubtotal'])) ? 0 : number_format(abs($data['dataCompra']['data']['FacSubtotal']), 2, '.', ','); ?> <?= $data['dataCompra']['data']['idCatTipoMoneda']; ?></h6>
+                <h6><?= (empty($data['dataCompra']['data']['FacSubtotal'])) ? 0 : '$ ' . number_format(abs($data['dataCompra']['data']['FacSubtotal']), 2, '.', ','); ?> <?= $data['dataCompra']['data']['FacTipoMoneda']; ?></h6>
                 <span class="text-muted">Total </span>
-                <h6><?= (empty($data['dataCompra']['data']['FacMonto'])) ? 0 : number_format(abs($data['dataCompra']['data']['FacMonto']), 2, '.', ','); ?> <?= $data['dataCompra']['data']['idCatTipoMoneda']; ?></h6>
+                <h6><?= (empty($data['dataCompra']['data']['FacMonto'])) ? 0 : '$ ' . number_format(abs($data['dataCompra']['data']['FacMonto']), 2, '.', ','); ?> <?= $data['dataCompra']['data']['FacTipoMoneda']; ?></h6>
             </div>
         </div>
         <div class="row show-grid"></div>
@@ -210,7 +220,7 @@ if ($debug == 1) {
                         <div class="alert alert-warning">
                             <button type="button" class="close" data-dismiss="alert" aria-label="Close"> <span aria-hidden="true">×</span> </button>
                             <h3 class="text-warning"><i class="fa fa-exclamation-triangle"></i> Complemento de Pago Pendiente...</h3>
-                            Le solicitamos subir su complemento de pago para evitar bloqueos.
+                            Favor de Solicitar El Complemento de Pago al Proveedor.
                         </div> ';
             } else { ?>
                 <div class="row show-grid">
@@ -288,6 +298,90 @@ if ($debug == 1) {
         });
 
     });
+
+    function aceptarFactura(acuse) {
+        Swal.fire({
+            title: '¿Aceptar?',
+            text: "¿Estas seguro de aceptar esta facura?",
+            type: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Aceptar',
+            cancelButtonText: 'Cancelar'
+        }).then((result) => {
+            if (result.value) {
+                $.ajax({
+                    url: 'FacturasNacionales/aceptarFactura',
+                    type: 'POST',
+                    data: {
+                        acuse: acuse,
+                    },
+                    success: function(response) {
+                        const respuesta = JSON.parse(response);
+                        if (respuesta.success) {
+                            Swal.fire(
+                                'Correcto',
+                                'Factura Aceptada Correctamente.',
+                                'success'
+                            )
+                            $(".customizer").toggleClass('show-service-panel');
+                            $(".service-panel-toggle").toggle();
+                            cargarFacturasNa();
+                        } else {
+                            Swal.fire(
+                                'Error!',
+                                'Error al recibir factura del proveedor, comunicate con tu administrador.',
+                                'error'
+                            )
+                        }
+                    }
+                });
+            }
+        })
+    }
+
+    function cambiarFecha(acuse) {
+        Swal.fire({
+            title: 'Cambiar Fecha De Pago',
+            html: `<div>Por favor, ingresa la nueva fecha de pago:<br><br> 
+            <input class="form-control" type="date" min="<?= $fechaMin; ?>" name="nuevaFecha" id="nuevaFecha" style="width: 70%; margin: 0 auto;"></div>`,
+            showCancelButton: true,
+            confirmButtonText: 'Aceptar',
+            confirmButtonColor: '#3085d6',
+            cancelButtonText: 'Cancelar',
+            cancelButtonColor: '#d33',
+            preConfirm: () => {
+                const fecha = document.getElementById('nuevaFecha').value;
+                if (!fecha) {
+                    Swal.showValidationMessage('Debes ingresar una nueva fecha de pago.');
+                }
+                return fecha;
+            }
+        }).then((result) => {
+            if (result.value) {
+                $.ajax({
+                    url: 'FacturasNacionales/cambiarFechaPago',
+                    type: 'POST',
+                    data: {
+                        acuse: acuse,
+                        nuevaFecha: result.value
+                    },
+                    success: function(response) {
+                        const respuesta = JSON.parse(response);
+                        if (respuesta.success) {
+                            notificaSuc(respuesta.message);
+                            $(".customizer").toggleClass('show-service-panel');
+                            $(".service-panel-toggle").toggle();
+                            cargarFacturasNa();
+                        } else {
+                            notificaBad(respuesta.message);
+                        }
+                    }
+                });
+            }
+        });
+    }
 
     function rechazarFactura(acuse) {
         Swal.fire({
