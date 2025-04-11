@@ -18,8 +18,6 @@ if ($debug == 1) {
                 <th>No Recepcion</th>
                 <th>Fecha Recepción</th>
                 <th>Folio Interno</th>
-                <th>Estatus Contable</th>
-                <th>Programación de Pago</th>
                 <th>Ver</th>
             </tr>
         </thead>
@@ -92,8 +90,6 @@ if ($debug == 1) {
                     <td>' . $recepciones . '</td>
                     <td>' . $row['fechaReg'] . '</td>
                     <td>' . $row['referencia'] . '</td>
-                    <td>' . $valida . ' </td>
-                    <td>' . $statContable . '</td>
                     <td> <button class="btn btn-sm btn-success" onClick="detalleCompra(\'' . $row['acuse'] . '\',' . $row['IdProveedor'] . ');"><i class="text-white icon-doc"></i></button> </td>
                     </tr>';
                 }

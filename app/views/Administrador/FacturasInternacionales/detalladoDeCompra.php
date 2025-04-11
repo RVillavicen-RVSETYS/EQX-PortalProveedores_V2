@@ -139,8 +139,10 @@ if ($data['dataCompra']['data']['CpaEstatus'] == '1') {
                 <h6><?= $data['dataCompra']['data']['FacUUID']; ?></h6>
 
                 <p class="m-t-15">
+                    <b>Fecha Vence :</b> <?= $data['dataCompra']['data']['FechaVence']; ?><br>
+                    <b>Fecha de Pago :</b> <?= $data['dataCompra']['data']['FechaProbablePago']; ?><br>
+                    <b>Fecha Recepción :</b> <?= $data['dataCompra']['data']['fechaReg']; ?><br>
                     <b>Fecha Factura :</b> <?= $data['dataCompra']['data']['fechaFac']; ?><br>
-                    <b>Fecha Recepción :</b> <?= $data['dataCompra']['data']['fechaReg']; ?>
                 </p>
             </div>
             <div class="col-xs-6 col-md-4">
@@ -171,8 +173,8 @@ if ($data['dataCompra']['data']['CpaEstatus'] == '1') {
                     echo $msjStatus;
                     ?>
                     <br><br>
-                    <button data-fancybox type="button" data-type="pdf" data-preloader="true" data-src="<?= '/Administrador/FacturasNacionales/verDocumento/PDF/' . $urlFacPDF; ?>/#toolbar=0" class="btn btn-outline-danger"><i class="far fa-file-pdf"></i> Ver PDF</button>
-                    <button type="button" onclick="verFacturaXML('<?= '/Administrador/FacturasNacionales/verDocumento/XML/' . $urlFacXML; ?>')" class="btn btn-outline-info"><i class="far fa-file-code"></i> Ver XML</button>
+                    <button data-fancybox type="button" data-type="pdf" data-preloader="true" data-src="<?= '/Administrador/FacturasInternacionales/verDocumento/PDF/' . $urlFacPDF; ?>/#toolbar=0" class="btn btn-outline-danger"><i class="far fa-file-pdf"></i> Ver PDF</button>
+                    <!--<button type="button" onclick="verFacturaXML('<?= '/Administrador/FacturasInternacionales/verDocumento/XML/' . $urlFacXML; ?>')" class="btn btn-outline-info"><i class="far fa-file-code"></i> Ver XML</button>-->
                 </div>
             </div>
         </div>
@@ -263,8 +265,8 @@ if ($data['dataCompra']['data']['CpaEstatus'] == '1') {
                             echo $msjStatus;
                             ?>
                             <br><br>
-                            <button data-fancybox type="button" data-type="pdf" data-preloader="true" data-src="<?= '/Administrador/FacturasNacionales/verDocumento/PDF/' . $urlFacPDF; ?>/#toolbar=0" class="btn btn-outline-danger"><i class="far fa-file-pdf"></i> Ver PDF</button>
-                            <button type="button" onclick="verFacturaXML('<?= '/Administrador/FacturasNacionales/verDocumento/XML/' . $urlFacXML; ?>')" class="btn btn-outline-info"><i class="far fa-file-code"></i> Ver XML</button>
+                            <button data-fancybox type="button" data-type="pdf" data-preloader="true" data-src="<?= '/Administrador/FacturasInternacionales/verDocumento/PDF/' . $urlFacPDF; ?>/#toolbar=0" class="btn btn-outline-danger"><i class="far fa-file-pdf"></i> Ver PDF</button>
+                            <!--<button type="button" onclick="verFacturaXML('<?= '/Administrador/FacturasInternacionales/verDocumento/XML/' . $urlFacXML; ?>')" class="btn btn-outline-info"><i class="far fa-file-code"></i> Ver XML</button>-->
                         </div>
                     </div>
                 </div>
@@ -425,7 +427,7 @@ if ($data['dataCompra']['data']['CpaEstatus'] == '1') {
     }
 
     // Botón para cargar el XML
-    function verFacturaXML(xmlUrl) {
+    /*function verFacturaXML(xmlUrl) {
         verCFDI = document.getElementById("verCFDI");
         verCFDI.innerHTML = '<div class="loading text-center"><img src="../assets/images/loading.gif" alt="loading" /><br/>Un momento, por favor...</div>';
         fetch(xmlUrl)
@@ -445,5 +447,5 @@ if ($data['dataCompra']['data']['CpaEstatus'] == '1') {
             .catch((error) => {
                 verCFDI.innerHTML = `<p style="color: red;">Error al cargar el XML: ${error.message}</p>`;
             });
-    }
+    }*/
 </script>

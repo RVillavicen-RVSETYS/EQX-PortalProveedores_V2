@@ -139,8 +139,10 @@ if ($data['dataCompra']['data']['CpaEstatus'] == '1') {
                 <h6><?= $data['dataCompra']['data']['FacUUID']; ?></h6>
 
                 <p class="m-t-15">
+                    <b>Fecha Vence :</b> <?= $data['dataCompra']['data']['FechaVence']; ?><br>
+                    <b>Fecha de Pago :</b> <?= $data['dataCompra']['data']['FechaProbablePago']; ?><br>
+                    <b>Fecha Recepción :</b> <?= $data['dataCompra']['data']['fechaReg']; ?><br>
                     <b>Fecha Factura :</b> <?= $data['dataCompra']['data']['fechaFac']; ?><br>
-                    <b>Fecha Recepción :</b> <?= $data['dataCompra']['data']['fechaReg']; ?>
                 </p>
             </div>
             <div class="col-xs-6 col-md-4">

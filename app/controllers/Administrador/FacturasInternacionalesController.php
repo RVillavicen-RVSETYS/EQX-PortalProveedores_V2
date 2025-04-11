@@ -313,7 +313,8 @@ class FacturasInternacionalesController extends Controller
         }
 
         $campos = [
-            'fechaVence' => $nuevaFecha
+            'fechaProbablePago' => $nuevaFecha,
+            'estatus' => 2
         ];
         $filtros = [
             'id' => $acuse

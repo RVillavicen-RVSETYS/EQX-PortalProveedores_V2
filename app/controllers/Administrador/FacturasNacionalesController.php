@@ -84,7 +84,7 @@ class FacturasNacionalesController extends Controller
         }
 
         if (!empty($_POST['fechaInicial']) and !empty($_POST['fechaFinal'])) {
-            $filtros['entreFechas'] = $_POST['fechaInicial'] . ',' . $_POST['fechaFinal'];
+            $filtros['entreFechasPago'] = $_POST['fechaInicial'] . ',' . $_POST['fechaFinal'];
         }
 
         if (!empty($_POST['tipoMoneda'])) {
@@ -314,7 +314,8 @@ class FacturasNacionalesController extends Controller
         }
 
         $campos = [
-            'fechaVence' => $nuevaFecha
+            'fechaProbablePago' => $nuevaFecha,
+            'estatus' => 2
         ];
         $filtros = [
             'id' => $acuse
