@@ -70,24 +70,32 @@ if ($debug == 1) {
             $contNotaCredito = $data['dataCompra']['data']['notaCredito'];
             $requiereComplementoPago = ($data['dataCompra']['data']['idPago'] >= 1 and $data['dataCompra']['data']['FacMetodoPago'] == 'PPD') ? 1 : 0;
 ?>
-<div class="row">
-    <div class="col-12">
-        <div class="bg-light p-10 d-flex align-items-center do-block">
-            <div class="ml-auto">
-                <div class="btn-group m-r-10" role="group" aria-label="Button group with nested dropdown">
-                    <div class="btn-group" role="group">
-                        <button id="btnGroupDrop1" type="button" class="btn btn-outline-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> <i class="mdi mdi-label font-18"></i> </button>
-                        <div class="dropdown-menu" aria-labelledby="btnGroupDrop1">
-                            <a class="dropdown-item" href="javascript:void(0)"> <i class="fas fa-check-circle text-success">&nbsp;</i>Aceptar</a>
-                            <a class="dropdown-item" href="javascript:rechazarFactura(<?= $data['dataCompra']['data']['acuse'] ?>);"> <i class="fas fa-times-circle text-danger">&nbsp;</i>Rechazar</a>
-                            <a class="dropdown-item" href="javascript:void(0)"> <i class="fas fa-undo-alt text-info">&nbsp;</i>Nueva Fecha Pago</a>
+<?php
+if ($data['dataCompra']['data']['CpaEstatus'] == '1') {
+?>
+    <div class="row">
+        <div class="col-12">
+            <div class="bg-light p-10 d-flex align-items-center do-block">
+                <div class="ml-auto">
+                    <div class="btn-group m-r-10" role="group" aria-label="Button group with nested dropdown">
+                        <div class="btn-group" role="group">
+                            <button id="btnGroupDrop1" type="button" class="btn btn-outline-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> <i class="mdi mdi-label font-18"></i> </button>
+                            <div class="dropdown-menu" aria-labelledby="btnGroupDrop1">
+
+                                <a class="dropdown-item" href="javascript:aceptarFactura(<?= $data['dataCompra']['data']['acuse'] ?>);"> <i class="fas fa-check-circle text-success">&nbsp;</i>Aceptar</a>
+                                <a class="dropdown-item" href="javascript:rechazarFactura(<?= $data['dataCompra']['data']['acuse'] ?>);"> <i class="fas fa-times-circle text-danger">&nbsp;</i>Rechazar</a>
+                                <a class="dropdown-item" href="javascript:cambiarFecha(<?= $data['dataCompra']['data']['acuse'] ?>);"> <i class="fas fa-undo-alt text-info">&nbsp;</i>Nueva Fecha Pago</a>
+
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
+<?php
+}
+?>
 <ul class="nav customizer-tab" role="tablist">
     <li class="nav-item">
         <a class="nav-link active" id="factura-tab" data-toggle="pill" href="#factura" role="tab" aria-controls="factura"
@@ -129,8 +137,10 @@ if ($debug == 1) {
                 <h6><?= $data['dataCompra']['data']['FacUUID']; ?></h6>
 
                 <p class="m-t-15">
+                    <b>Fecha Vence :</b> <?= $data['dataCompra']['data']['FechaVence']; ?><br>
+                    <b>Fecha de Pago :</b> <?= $data['dataCompra']['data']['FechaProbablePago']; ?><br>
+                    <b>Fecha Recepción :</b> <?= $data['dataCompra']['data']['fechaReg']; ?><br>
                     <b>Fecha Factura :</b> <?= $data['dataCompra']['data']['fechaFac']; ?><br>
-                    <b>Fecha Recepción :</b> <?= $data['dataCompra']['data']['fechaReg']; ?>
                 </p>
             </div>
             <div class="col-xs-6 col-md-4">

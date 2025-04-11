@@ -92,6 +92,8 @@ class PendientesPorPagarController extends Controller
 
         $filtros['estatusFactura'] = '2';
 
+        $filtros['pagada'] = '0';
+
         $MDL_compras = new Compras_Mdl();
 
         $listaCompras = $MDL_compras->listaComprasFacturadas($filtros, 0, 'DESC');

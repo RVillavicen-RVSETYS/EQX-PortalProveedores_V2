@@ -21,8 +21,10 @@ if ($debug == 1) {
                 <th>Orden Compra</th>
                 <th>No Recepcion</th>
                 <th>Fecha Recepción</th>
+                <th>Fecha Pago</th>
+                <th>Fecha Limite</th>
                 <th>Folio Interno</th>
-                <th>Status Fiscal</th>
+                <th>Estatus Fiscal</th>
                 <th>Programación de Pago</th>
                 <th>Ver</th>
             </tr>
@@ -95,6 +97,8 @@ if ($debug == 1) {
                     <td>' . $row['ordenCompra'] . '</td>
                     <td>' . $recepciones . '</td>
                     <td>' . $row['fechaReg'] . '</td>
+                    <td>' . $row['FechaPago'] . '</td>
+                    <td>' . $row['FechaVence'] . '</td>
                     <td>' . $row['referencia'] . '</td>
                     <td>' . $valida . ' </td>
                     <td>' . $statContable . '</td>
