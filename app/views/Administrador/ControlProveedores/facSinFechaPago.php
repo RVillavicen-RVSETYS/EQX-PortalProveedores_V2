@@ -1,26 +1,12 @@
 <?php
 
-use App\Globals\FuncionesBasicas\FuncionesBasicasController;
-
-$funcionesBase = new FuncionesBasicasController();
-
 $debug = 0;
 
 if ($debug == 1) {
-    echo 'Contenido de menuData:';
-    var_dump($menuData);
-    echo '<br><br>Contenido de areaData:';
-    var_dump($areaData);
-    echo '<br><br>Contenido de areaLink:';
-    var_dump($areaLink);
-    echo '<br><br>Contenido de _SESSION:';
-    var_dump($_SESSION);
-    echo '<br><br>Request-URI: ' . $_SERVER['REQUEST_URI'] . '<br>Contenido de piezasURL:';
-    var_dump($piezasURL);
-    echo '<br><br>Ruta del MenuActual: ' . $rutaMenu . '<br><br>Contenido de datosPagina:';
-    var_dump($datosPagina);
-    //echo '<br><br>Facturas Sin Fecha De Pago:  <br><br>';
-    //var_dump($facturasSinFechaPago);
+    echo 'Contenido de areaData:' . PHP_EOL;
+    var_dump($listaCompras);
+    echo 'Contenido IdProveedor' . PHP_EOL;
+    var_dump($idProveedor);
 }
 
 ?>
@@ -44,18 +30,83 @@ if ($debug == 1) {
         </tr>
     </thead>
     <tbody>
-        <tr>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-        </tr>
+        <?php
+        if (!empty($listaCompras)) {
+            foreach ($listaCompras as $row) {
+                switch ($row['claseDocto']) {
+                    case 'WE':
+                        $claseDocto = 'FACT';
+                        break;
+
+                    case 'KA':
+                        $claseDocto = '<b>ANT</b>';
+                        break;
+
+                    case 'RZ':
+                        $claseDocto = '<b>CONS</b>';
+                        break;
+
+                    default:
+                        $claseDocto = '<span class="text-danger"> NO_DEF </span>';
+                        break;
+                }
+
+                switch ($row['estatus']) {
+                    case '1':
+                        $statContable = '<center class="text-danger"><i class="fas fa-clock"></i></center>';
+                        $txtColor = '';
+                        $bgColor = '';
+                        break;
+
+                    case '2':
+                        $statContable = '<center class="text-success"><i class="fas fa-check"></i></center>';
+                        $txtColor = '';
+                        $bgColor = '';
+                        break;
+
+                    case '3':
+                        $statContable = '<center class="text-danger"><i class="fas fa-times"></i></center>';
+                        $txtColor = 'text-danger';
+                        $bgColor = 'danger';
+                        break;
+
+                    case '4':
+                        $statContable = '<center class="text-danger"><i class="fas fa-times"></i></center>';
+                        $txtColor = 'text-danger';
+                        $bgColor = 'danger';
+                        break;
+
+                    default:
+                        $txtColor = '';
+                        $bgColor = '';
+                        break;
+                }
+
+                $valida = '<center class="text-success"><i class="fas fa-check"></i></center>';
+                $cantCharRecp = strlen($row['noRecepcion']);
+                if ($cantCharRecp > 25) {
+                    $recepciones = substr($row['noRecepcion'], 0, 25) . '...';
+                } else {
+                    $recepciones = $row['noRecepcion'];
+                }
+                $count = 1;
+        ?>
+                <tr>
+                    <th><?= $count++; ?></th>
+                    <th><?= $row['acuse']; ?></th>
+                    <th><?= $claseDocto; ?></th>
+                    <th><?= $row['RazonSocial']; ?></th>
+                    <th><?= $row['ordenCompra']; ?></th>
+                    <th><?= $recepciones; ?></th>
+                    <th><?= $row['SerieFact']; ?><?= $row['FolioFact']; ?></th>
+                    <th><?= number_format($row['Total'], 2, '.', ','); ?></th>
+                    <th><?= $statContable; ?></th>
+                    <th><?= $row['FechaReg']; ?></th>
+                </tr>
+        <?php
+            }
+        }
+        ?>
     </tbody>
 </table>
 

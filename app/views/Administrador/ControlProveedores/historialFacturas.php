@@ -7,22 +7,14 @@ $funcionesBase = new FuncionesBasicasController();
 $debug = 0;
 
 if ($debug == 1) {
-    echo 'Contenido de menuData:';
-    var_dump($menuData);
-    echo '<br><br>Contenido de areaData:';
-    var_dump($areaData);
-    echo '<br><br>Contenido de areaLink:';
-    var_dump($areaLink);
-    echo '<br><br>Contenido de _SESSION:';
-    var_dump($_SESSION);
-    echo '<br><br>Request-URI: ' . $_SERVER['REQUEST_URI'] . '<br>Contenido de piezasURL:';
-    var_dump($piezasURL);
-    echo '<br><br>Ruta del MenuActual: ' . $rutaMenu . '<br><br>Contenido de datosPagina:';
-    var_dump($datosPagina);
-    echo '<br><br>Id Del Proveedor: ';
+    echo 'Contenido de areaData:' . PHP_EOL;
+    var_dump($listaCompras);
+    echo 'Contenido IdProveedor' . PHP_EOL;
     var_dump($idProveedor);
 }
 
+$fechaInicial = date("Y-m-01");
+$fechaFinal = date("Y-m-t");
 ?>
 
 <h3 class="mt-3">HISTORIAL DE FACTURAS</h3>
@@ -33,7 +25,7 @@ if ($debug == 1) {
     <div class="col-md-12 col-lg-12">
         <div class="card">
             <div class="card-body">
-                <form id="filtrado" method="POST" role="form" autocomplete="off">
+                <form id="formHistorico" method="POST" role="form" autocomplete="off">
                     <input type="hidden" name="idProveedor" id="idProveedor" value="<?= $idProveedor; ?>">
                     <div class="row ">
                         <div class="col-12 col-sm-12 col-md-6 col-lg-6">
@@ -42,11 +34,11 @@ if ($debug == 1) {
                                 <div class="input-group-addon">
                                     <span class="input-group-text pyme b-0 text-white bg-pyme-primary"> Desde </span>
                                 </div>
-                                <input type="text" class="form-control" name="fechaInicial" id="fechaInicial" id="fechaInicial" />
+                                <input type="date" class="form-control" name="fechaInicial" id="fechaInicial" value="<?= $fechaInicial; ?>" />
                                 <div class="input-group-addon">
                                     <span class="input-group-text pyme b-0 text-white bg-pyme-primary"> Hasta </span>
                                 </div>
-                                <input type="text" class="form-control " name="fechaFinal" id="fechaFinal" id="fechaFinal" />
+                                <input type="date" class="form-control " name="fechaFinal" id="fechaFinal" value="<?= $fechaFinal; ?>" />
                             </div>
                         </div>
 
@@ -60,16 +52,150 @@ if ($debug == 1) {
     </div>
 </div>
 
+<div class="table-responsive">
+    <table class="table table-sm table-striped" id="tableListaCompras" style="width:100%">
+        <thead>
+            <tr>
+                <th class="text-center"># Acuse</th>
+                <th class="">Tipo</th>
+                <th>Orden Compra</th>
+                <th>No Recepcion</th>
+                <th>Fecha Recepción</th>
+                <th>Folio Interno</th>
+                <th>Status Fiscal</th>
+                <th>Programación de Pago</th>
+                <th>Ver</th>
+            </tr>
+        </thead>
+        <tbody>
+            <?php
+            if (!empty($listaCompras)) {
+                foreach ($listaCompras as $row) {
+                    switch ($row['claseDocto']) {
+                        case 'WE':
+                            $claseDocto = 'FACT';
+                            break;
+
+                        case 'KA':
+                            $claseDocto = '<b>ANT</b>';
+                            break;
+
+                        case 'RZ':
+                            $claseDocto = '<b>CONS</b>';
+                            break;
+
+                        default:
+                            $claseDocto = '<span class="text-danger"> NO_DEF </span>';
+                            break;
+                    }
+
+                    switch ($row['estatus']) {
+                        case '1':
+                            $statContable = '<center class="text-danger"><i class="md md-close"></i></center>';
+                            $txtColor = '';
+                            $bgColor = '';
+                            break;
+
+                        case '2':
+                            $statContable = '<center class="text-success"><i class="fas fa-check"></i></center>';
+                            $txtColor = '';
+                            $bgColor = '';
+                            break;
+
+                        case '3':
+                            $statContable = '<center class="text-danger"><i class="md md-close"></i></center>';
+                            $txtColor = 'text-danger';
+                            $bgColor = 'danger';
+                            break;
+
+                        case '4':
+                            $statContable = '<center class="text-danger"><i class="md md-close"></i></center>';
+                            $txtColor = 'text-danger';
+                            $bgColor = 'danger';
+                            break;
+
+                        default:
+                            $txtColor = '';
+                            $bgColor = '';
+                            break;
+                    }
+
+                    $valida = '<center class="text-success"><i class="fas fa-check"></i></center>';
+                    $cantCharRecp = strlen($row['noRecepcion']);
+                    if ($cantCharRecp > 25) {
+                        $recepciones = substr($row['noRecepcion'], 0, 25) . '...';
+                    } else {
+                        $recepciones = $row['noRecepcion'];
+                    }
+
+                    echo '<tr class="' . $txtColor . ' ' . $bgColor . '" >
+                    <td class="text-center">' . $row['acuse'] . '</td>
+                    <td>' . $claseDocto . '</td>
+                    <td>' . $row['ordenCompra'] . '</td>
+                    <td>' . $recepciones . '</td>
+                    <td>' . $row['fechaReg'] . '</td>
+                    <td>' . $row['referencia'] . '</td>
+                    <td>' . $valida . ' </td>
+                    <td>' . $statContable . '</td>
+                    <td> <button class="btn btn-sm btn-success" onClick="detalleCompra(\'' . $row['acuse'] . '\',' . $row['IdProveedor'] . ');"><i class="text-white icon-doc"></i></button> </td>
+                    </tr>';
+                }
+            }
+            ?>
+        </tbody>
+    </table>
+</div>
+
 <script>
-    $(document).ready(function() {
-        $("#fechaInicial").val(moment().format('01/MM/YYYY'));
-        $("#fechaFinal").val(moment().format('DD/MM/YYYY'));
-        jQuery('#date-range').datepicker({
-            toggleActive: true,
-            orientation: "bottom",
-            language: 'es',
-            todayHighlight: true,
-            autoclose: true,
-        });
+    $('#tableListaCompras').DataTable({
+        iDisplayLength: 25,
+        responsive: false,
+        fixedColumns: true,
+        fixedHeader: true,
+        scrollCollapse: true,
+        autoWidth: true,
+        bSort: true,
+        order: [
+            [0, "desc"]
+        ],
+        dom: 'Blfrtip',
+        lengthMenu: [
+            [10, 25, 50, -1],
+            [10, 25, 50, "Todo"]
+        ],
+        info: true,
+        buttons: [{
+                extend: 'pdfHtml5',
+                className: 'btn btn-pdf bg-pyme-primary text-white',
+                orientation: 'landscape',
+                pageSize: 'LEGAL',
+                text: "Pdf",
+            },
+
+            {
+                extend: 'csvHtml5',
+                className: 'btn btn-pdf bg-pyme-primary text-white',
+                text: "Csv",
+                exportOptions: {
+                    columns: ":not(.no-exportar)"
+                }
+            },
+            {
+                extend: 'excelHtml5',
+                className: 'btn btn-pdf bg-pyme-primary text-white',
+                text: "Excel",
+                exportOptions: {
+                    columns: ":not(.no-exportar)"
+                }
+            },
+            {
+                extend: 'copy',
+                className: 'btn btn-pdf bg-pyme-primary text-white',
+                text: "Copiar",
+                exportOptions: {
+                    columns: ":not(.no-exportar)"
+                }
+            }
+        ]
     });
 </script>
