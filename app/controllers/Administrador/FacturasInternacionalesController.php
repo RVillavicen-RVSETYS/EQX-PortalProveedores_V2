@@ -6,7 +6,7 @@ use Core\Controller;
 use App\Models\Menu_Mdl;
 use App\Models\Proveedores\Proveedores_Mdl;
 use App\Models\Compras\Compras_Mdl;
-use App\Models\Facturas\Nacionales_Mdl;
+use App\Globals\Controllers\DocumentosController;
 
 class FacturasInternacionalesController extends Controller
 {
@@ -81,8 +81,8 @@ class FacturasInternacionalesController extends Controller
         if (!empty($_POST['idProveedor'])) {
             $filtros['idProveedor'] = $_POST['idProveedor'];
         }
-        
-        if (!empty($_POST['fechaInicial']) AND !empty($_POST['fechaFinal'])) {
+
+        if (!empty($_POST['fechaInicial']) and !empty($_POST['fechaFinal'])) {
             $filtros['entreFechas'] = $_POST['fechaInicial'] . ',' . $_POST['fechaFinal'];
         }
 
@@ -91,6 +91,8 @@ class FacturasInternacionalesController extends Controller
         }
 
         $filtros['nacional'] = '0';
+
+        $filtros['estatusFactura'] = '1';
 
         $MDL_compras = new Compras_Mdl();
 
@@ -114,4 +116,232 @@ class FacturasInternacionalesController extends Controller
         $this->view('Administrador/FacturasInternacionales/listaAprobacionesInter', $data);
     }
 
+    public function detalladoDeCompra()
+    {
+        $data = []; // Aquí puedes pasar datos a la vista si es necesario
+        $noProveedor = (empty($_POST['idProveedor'])) ? '' : $_POST['idProveedor'];
+        $acuse = (empty($_POST['acuse'])) ? '' : $_POST['acuse'];
+
+        $MDL_compras = new Compras_Mdl();
+        $dataCompra = $MDL_compras->dataCompraPorAcuse($noProveedor, $acuse);
+
+        $data['noProveedor'] = $noProveedor;
+        $data['acuse'] =  $acuse;
+        $data['dataCompra'] =  $dataCompra;
+
+        if ($this->debug == 1) {
+            echo 'Variables enviadas:' . PHP_EOL;
+            var_dump($data);
+            echo '<br><br>';
+        }
+
+        // Cargar la vista correspondiente
+        $this->view('Administrador/FacturasInternacionales/detalladoDeCompra', $data);
+    }
+
+    public function verDocumento()
+    {
+        $data = []; // Aquí puedes pasar datos a la vista si es necesario
+
+        //Obtener Parametros
+        $params = func_get_args();
+
+        if ($this->debug == 1) {
+            echo "Parámetros recibidos:<br>";
+            echo "<pre>";
+            print_r($params);
+            echo "</pre>";
+        }
+
+        $tipoDocumeto = $params[0];
+        $rutaDocumento = $params[1];
+
+        $Ctrl_Documentos = new DocumentosController();
+        return $Ctrl_Documentos->mostrarDocumento($rutaDocumento, $tipoDocumeto);
+    }
+
+    public function rechazarFactura()
+    {
+        $data = []; // Aquí puedes pasar datos a la vista si es necesario
+        $acuse = $_POST['acuse'] ?? '';
+        $motivo = $_POST['motivo'] ?? '';
+
+        if ($this->debug == 1) {
+            echo "<br>Contenido de data:<br>";
+            var_dump($data);
+            echo "<br>Contenido de POST: ";
+            var_dump($_POST);
+            echo "<br>Acuse: $acuse<br>";
+            echo "<br>Motivo: $motivo<br>";
+        }
+
+        if (empty($acuse)) {
+            $response = [
+                'success' => false,
+                'message' => 'No se recibio acuse de la factura.'
+            ];
+            echo json_encode($response);
+            exit(0);
+        }
+
+        if (empty($motivo)) {
+            $response = [
+                'success' => false,
+                'message' => 'No se recibio el motivo para rechazar la factura.'
+            ];
+            echo json_encode($response);
+            exit(0);
+        }
+
+        $campos = [
+            'estatus' => 3,
+            'comentRegresa' => $motivo
+        ];
+        $filtros = [
+            'id' => $acuse
+        ];
+
+        $MDL_compras = new Compras_Mdl();
+        $resultActualizaFactura = $MDL_compras->actualizarDataCompras($campos, $filtros);
+
+        if ($this->debug == 1) {
+            echo '<br><br>Resultado de Actualizar Datos de Proveedores: ' . PHP_EOL;
+            var_dump($resultActualizaFactura);
+        }
+
+        if ($resultActualizaFactura['success']) {
+            $response = [
+                'success' => true,
+                'message' => $resultActualizaFactura['message']
+            ];
+            echo json_encode($response);
+            exit(0);
+        } else {
+            $response = [
+                'success' => false,
+                'message' => 'Error al regresar factura al proveedor.'
+            ];
+            echo json_encode($response);
+            exit(0);
+        }
+    }
+
+    public function aceptarFactura()
+    {
+        $data = []; // Aquí puedes pasar datos a la vista si es necesario
+        $acuse = $_POST['acuse'] ?? '';
+
+        if ($this->debug == 1) {
+            echo "<br>Contenido de data:<br>";
+            var_dump($data);
+            echo "<br>Contenido de POST: ";
+            var_dump($_POST);
+            echo "<br>Acuse: $acuse<br>";
+        }
+
+        if (empty($acuse)) {
+            $response = [
+                'success' => false,
+                'message' => 'No se recibio acuse de la factura.'
+            ];
+            echo json_encode($response);
+            exit(0);
+        }
+
+        $campos = [
+            'estatus' => 2
+        ];
+        $filtros = [
+            'id' => $acuse
+        ];
+
+        $MDL_compras = new Compras_Mdl();
+        $resultActualizaFactura = $MDL_compras->actualizarDataCompras($campos, $filtros);
+
+        if ($this->debug == 1) {
+            echo '<br><br>Resultado de Actualizar Datos de Facturas: ' . PHP_EOL;
+            var_dump($resultActualizaFactura);
+        }
+
+        if ($resultActualizaFactura['success']) {
+            $response = [
+                'success' => true,
+                'message' => $resultActualizaFactura['message']
+            ];
+            echo json_encode($response);
+            exit(0);
+        } else {
+            $response = [
+                'success' => false,
+                'message' => 'Error al aceptar factura.'
+            ];
+            echo json_encode($response);
+            exit(0);
+        }
+    }
+
+    public function cambiarFechaPago()
+    {
+        $data = []; // Aquí puedes pasar datos a la vista si es necesario
+        $acuse = $_POST['acuse'] ?? '';
+        $nuevaFecha = $_POST['nuevaFecha'] ?? '';
+
+        if ($this->debug == 1) {
+            echo "<br>Contenido de data:<br>";
+            var_dump($data);
+            echo "<br>Contenido de POST: ";
+            var_dump($_POST);
+            echo "<br>Acuse: $acuse<br>";
+            echo "<br>Nueva Fecha: $nuevaFecha<br>";
+        }
+
+        if (empty($acuse)) {
+            $response = [
+                'success' => false,
+                'message' => 'No se recibio acuse de la factura.'
+            ];
+            echo json_encode($response);
+            exit(0);
+        }
+        if (empty($nuevaFecha)) {
+            $response = [
+                'success' => false,
+                'message' => 'No se recibio la nueva fecha de pago.'
+            ];
+            echo json_encode($response);
+            exit(0);
+        }
+
+        $campos = [
+            'fechaProbablePago' => $nuevaFecha,
+            'estatus' => 2
+        ];
+        $filtros = [
+            'id' => $acuse
+        ];
+
+        $MDL_compras = new Compras_Mdl();
+        $resultActualizaFactura = $MDL_compras->actualizarDataCompras($campos, $filtros);
+
+        if ($this->debug == 1) {
+            echo '<br><br>Resultado de Actualizar Datos de Facturas: ' . PHP_EOL;
+            var_dump($resultActualizaFactura);
+        }
+
+        if ($resultActualizaFactura['success']) {
+            $response = [
+                'success' => true,
+                'message' => $resultActualizaFactura['message']
+            ];
+            echo json_encode($response);
+            exit(0);
+        } else {
+            $response = [
+                'success' => false,
+                'message' => 'Error al aceptar factura.'
+            ];
+            echo json_encode($response);
+            exit(0);
+        }
+    }
 }

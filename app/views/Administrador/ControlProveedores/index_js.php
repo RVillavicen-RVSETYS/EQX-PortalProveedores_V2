@@ -60,7 +60,9 @@
         $.ajax({
             type: 'POST',
             url: 'ControlProveedores/historico',
-            data: $(this).serialize(),
+            data: {
+                idProveedor: idProveedor
+            },
             success: function(response) {
                 $('#list-Historico').html(response);
             },
@@ -72,6 +74,37 @@
             }
         });
     }
+
+    function detalleCompra(acuse, idProveedor) {
+        $('#customizer_body').html('<div class="loading text-center"><img src="../assets/images/loading.gif" alt="loading" /><br/>Un momento, por favor...</div>');
+        $(".customizer").toggleClass('show-service-panel');
+        $(".service-panel-toggle").toggle();
+        $.post("ControlProveedores/detalladoDeCompra", {
+                acuse: acuse,
+                idProveedor: idProveedor
+            },
+            function(respuesta) {
+                $("#customizer_body").html(respuesta);
+            });
+    }
+
+    $(document).on('submit', '#formHistorico', function(event) {
+        event.preventDefault();
+        $.ajax({
+            type: 'POST',
+            url: 'ControlProveedores/historico',
+            data: $(this).serialize(),
+            success: function(response) {
+                $('#list-Historico').html(response);
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+                $('#list-Historico').html('Error en el inicio de sesión.Consulta a tu administrador');
+            },
+            beforeSend: function() {
+                $('#list-Historico').html('<div class="loading text-center"><img src="../assets/images/loading.gif" alt="loading" /><br/>Un momento, por favor...</div>');
+            }
+        });
+    });
 
     $(document).on('submit', '#consultarProveedor', function(event) {
         event.preventDefault();
