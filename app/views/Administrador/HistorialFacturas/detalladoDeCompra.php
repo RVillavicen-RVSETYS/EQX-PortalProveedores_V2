@@ -147,7 +147,7 @@ $fechaMin = date('Y-m-d', strtotime('-1 day'));
                     ?>
                     <br><br>
                     <button data-fancybox type="button" data-type="pdf" data-preloader="true" data-src="<?= '/Administrador/FacturasInternacionales/verDocumento/PDF/' . $urlFacPDF; ?>/#toolbar=0" class="btn btn-outline-danger"><i class="far fa-file-pdf"></i> Ver PDF</button>
-                    <!--<button type="button" onclick="verFacturaXML('<?= '/Administrador/FacturasInternacionales/verDocumento/XML/' . $urlFacXML; ?>')" class="btn btn-outline-info"><i class="far fa-file-code"></i> Ver XML</button>-->
+                    <button type="button" onclick="verFacturaXML('<?= '/Administrador/FacturasInternacionales/verDocumento/XML/' . $urlFacXML; ?>')" class="btn btn-outline-info"><i class="far fa-file-code"></i> Ver XML</button>
                 </div>
             </div>
         </div>
@@ -239,7 +239,7 @@ $fechaMin = date('Y-m-d', strtotime('-1 day'));
                             ?>
                             <br><br>
                             <button data-fancybox type="button" data-type="pdf" data-preloader="true" data-src="<?= '/Administrador/FacturasInternacionales/verDocumento/PDF/' . $urlFacPDF; ?>/#toolbar=0" class="btn btn-outline-danger"><i class="far fa-file-pdf"></i> Ver PDF</button>
-                            <!--<button type="button" onclick="verFacturaXML('<?= '/Administrador/FacturasInternacionales/verDocumento/XML/' . $urlFacXML; ?>')" class="btn btn-outline-info"><i class="far fa-file-code"></i> Ver XML</button>-->
+                            <button type="button" onclick="verFacturaXML('<?= '/Administrador/FacturasInternacionales/verDocumento/XML/' . $urlFacXML; ?>')" class="btn btn-outline-info"><i class="far fa-file-code"></i> Ver XML</button>
                         </div>
                     </div>
                 </div>
