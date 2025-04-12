@@ -285,7 +285,7 @@ class Proveedores_Mdl
                             erpHes.idCompra AS 'ErpIdCompra',
                             erpHes.OC AS 'OC',
                             erpHes.HES AS 'HES',
-                            erpHes.subtotal AS 'Monto',
+                            SUM( erpHes.subtotal ) AS 'Monto',
                             erpHes.idMoneda AS 'Moneda',
                             erpHes.CPago AS 'CP',
                             dtcomp.idCompra AS 'DtIdCompra' 
