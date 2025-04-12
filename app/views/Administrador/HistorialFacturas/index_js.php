@@ -20,6 +20,19 @@
         });
     }
 
+    function detalleCompra(acuse, idProveedor) {
+        $('#customizer_body').html('<div class="loading text-center"><img src="../assets/images/loading.gif" alt="loading" /><br/>Un momento, por favor...</div>');
+        $(".customizer").toggleClass('show-service-panel');
+        $(".service-panel-toggle").toggle();
+        $.post("HistorialFacturas/detalladoDeCompra", {
+                acuse: acuse,
+                idProveedor: idProveedor
+            },
+            function(respuesta) {
+                $("#customizer_body").html(respuesta);
+            });
+    }
+
     $(document).on('submit', '#filtroHistorial', function(event) {
 
         event.preventDefault();

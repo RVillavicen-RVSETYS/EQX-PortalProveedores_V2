@@ -37,6 +37,15 @@ if ($debug == 1) {
     <?php include '../app/views/Layout/header.php'; ?>
     <!-- Custom CSS -->
 
+    <link href="/assets/extra-libs/datatables.net-bs4/css/dataTables.bootstrap4.css" rel="stylesheet">
+    <link href="/assets/libs/fancybox/fancybox.css" rel="stylesheet">
+    <link href="/assets/libs/fancybox/dist/carousel/carousel.css" rel="stylesheet">
+    <link href="/assets/libs/fancybox/dist/carousel/carousel.thumbs.css" rel="stylesheet">
+    <link href="/assets/libs/fancybox/dist/panzoom/panzoom.css" rel="stylesheet">
+    <link href="/assets/libs/fancybox/dist/panzoom/panzoom.toolbar.css" rel="stylesheet">
+    <link href="/assets/libs/fancybox/dist/panzoom/panzoom.pins.css" rel="stylesheet">
+    <link href="/assets/libs/sweetalert2/dist/sweetalert2.min.css" rel="stylesheet">
+
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
     <!--[if lt IE 9]>
@@ -203,10 +212,30 @@ if ($debug == 1) {
 
         </div>
     </div>
+
+    <aside class="customizer">
+
+        <div class="customizer-body" id="customizer_body">
+
+        </div>
+    </aside>
     <div class="chat-windows"></div>
     <!-- ============================================================== -->
     <!-- All Jquery -->
     <!-- ============================================================== -->
+
+    <script src="/assets/libs/jquery/dist/jquery.min.js"></script>
+    <script src="/assets/libs/fancybox/dist/fancybox/fancybox.umd.js"></script>
+    <script src="/assets/libs/fancybox/dist/carousel/carousel.umd.js"></script>
+    <script src="/assets/libs/fancybox/dist/carousel/carousel.autoplay.umd.js"></script>
+    <script src="/assets/libs/fancybox/dist/carousel/carousel.thumbs.umd.js"></script>
+    <script src="/assets/libs/fancybox/dist/panzoom/panzoom.umd.js"></script>
+    <script src="/assets/libs/fancybox/dist/panzoom/panzoom.toolbar.umd.js"></script>
+    <script src="/assets/libs/fancybox/dist/panzoom/panzoom.pins.umd.js"></script>
+    <script src="/assets/libs/fancybox/l10n/es.umd.js"></script>
+    <script src="/assets/libs/fancybox/dist/panzoom/l10n/es.umd.js"></script>
+    <script src="/assets/libs/fancybox/dist/carousel/l10n/es.umd.js"></script>
+
     <script src="/assets/libs/jquery/dist/jquery.min.js"></script>
     <!-- Bootstrap tether Core JavaScript -->
     <script src="/assets/libs/popper.js/dist/umd/popper.min.js"></script>

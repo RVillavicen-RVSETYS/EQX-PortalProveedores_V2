@@ -42,6 +42,14 @@ $fechaFinal = date("Y-m-t");
     <?php include '../app/views/Layout/header.php'; ?>
     <!-- Custom CSS -->
 
+    <link href="/assets/extra-libs/datatables.net-bs4/css/dataTables.bootstrap4.css" rel="stylesheet">
+    <link href="/assets/libs/fancybox/fancybox.css" rel="stylesheet">
+    <link href="/assets/libs/fancybox/dist/carousel/carousel.css" rel="stylesheet">
+    <link href="/assets/libs/fancybox/dist/carousel/carousel.thumbs.css" rel="stylesheet">
+    <link href="/assets/libs/fancybox/dist/panzoom/panzoom.css" rel="stylesheet">
+    <link href="/assets/libs/fancybox/dist/panzoom/panzoom.toolbar.css" rel="stylesheet">
+    <link href="/assets/libs/fancybox/dist/panzoom/panzoom.pins.css" rel="stylesheet">
+    <link href="/assets/libs/sweetalert2/dist/sweetalert2.min.css" rel="stylesheet">
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
     <!--[if lt IE 9]>
@@ -197,12 +205,29 @@ $fechaFinal = date("Y-m-t");
     <!-- ============================================================== -->
     <!-- ============================================================== -->
     <!-- customizer Panel -->
+    <aside class="customizer">
+
+        <div class="customizer-body" id="customizer_body">
+
+        </div>
+    </aside>
     <!-- ============================================================== -->
     <div class="chat-windows"></div>
     <!-- ============================================================== -->
     <!-- All Jquery -->
     <!-- ============================================================== -->
     <script src="/assets/libs/jquery/dist/jquery.min.js"></script>
+    <script src="/assets/libs/fancybox/dist/fancybox/fancybox.umd.js"></script>
+    <script src="/assets/libs/fancybox/dist/carousel/carousel.umd.js"></script>
+    <script src="/assets/libs/fancybox/dist/carousel/carousel.autoplay.umd.js"></script>
+    <script src="/assets/libs/fancybox/dist/carousel/carousel.thumbs.umd.js"></script>
+    <script src="/assets/libs/fancybox/dist/panzoom/panzoom.umd.js"></script>
+    <script src="/assets/libs/fancybox/dist/panzoom/panzoom.toolbar.umd.js"></script>
+    <script src="/assets/libs/fancybox/dist/panzoom/panzoom.pins.umd.js"></script>
+    <script src="/assets/libs/fancybox/l10n/es.umd.js"></script>
+    <script src="/assets/libs/fancybox/dist/panzoom/l10n/es.umd.js"></script>
+    <script src="/assets/libs/fancybox/dist/carousel/l10n/es.umd.js"></script>
+
     <!-- Bootstrap tether Core JavaScript -->
     <script src="/assets/libs/popper.js/dist/umd/popper.min.js"></script>
     <script src="/assets/libs/bootstrap/dist/js/bootstrap.min.js"></script>
@@ -227,40 +252,22 @@ $fechaFinal = date("Y-m-t");
     <script src="/assets/libs/select2/dist/js/select2.full.min.js"></script>
     <script src="/assets/libs/select2/dist/js/select2.min.js"></script>
     <script src="/dist/js/pages/forms/select2/select2.init.js"></script>
-
     <script src="/assets/extra-libs/datatables.net/js/jquery.dataTables.min-ESP.js"></script>
     <script src="/dist/js/pages/datatable/datatable-basic.init.js"></script>
-
     <script src="/assets/extra-libs/datatables.net/js/jszip.min.js"></script>
     <script src="/assets/extra-libs/datatables.net/js/vfs_fonts.js"></script>
-
     <script src="/assets/extra-libs/datatables.net/js/dataTables.buttons.min.js"></script>
     <script src="/assets/extra-libs/datatables.net/js/buttons.flash.min.js"></script>
     <script src="/assets/extra-libs/datatables.net/js/buttons.html5.min.js"></script>
     <script src="/assets/extra-libs/datatables.net/js/buttons.print.min.js"></script>
+    <script src="/assets/libs/moment/moment.js"></script>
+    <script src="/assets/libs/chartist/dist/chartist.min.js"></script>
+    <script src="/assets/libs/chartist-plugin-tooltips/dist/chartist-plugin-tooltip.min.js"></script>
+    <script src="/assets/extra-libs/datatables.net/js/pdfmake.min.js"></script>
+    <script src="/assets/libs/sweetalert2/dist/sweetalert2.all.min.js"></script>
+    <script src="/assets/libs/sweetalert2/sweet-alert.init.js"></script>
 
     <?php include 'index_js.php'; ?>
-    <script>
-        $(document).ready(function() {
-
-
-        });
-
-        $(document).on('submit', '#consultaAprobaciones', function(event) {
-            event.preventDefault();
-            $.ajax({
-                type: 'POST',
-                url: 'FacturasNacionales/listaAprobacionesNa',
-                data: $(this).serialize(),
-                success: function(response) {
-                    $('#tarjetaListaAprob').html(response);
-                },
-                error: function(jqXHR, textStatus, errorThrown) {
-                    $('#tarjetaListaAprob').html('Error en el inicio de sesión.Consulta a tu administrador');
-                }
-            });
-        });
-    </script>
 </body>
 
 </html>

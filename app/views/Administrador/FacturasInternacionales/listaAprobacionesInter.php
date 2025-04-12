@@ -13,12 +13,12 @@ if ($debug == 1) {
             <tr>
                 <th class="text-center"># Acuse</th>
                 <th class="">Tipo</th>
+                <th>Proveedor</th>
                 <th>Orden Compra</th>
                 <th>No Recepcion</th>
                 <th>Fecha Recepción</th>
                 <th>Folio Interno</th>
-                <th>Status Fiscal</th>
-                <th>Programación de Pago</th>
+                <th>Estatus Contable</th>
                 <th>Ver</th>
             </tr>
         </thead>
@@ -86,13 +86,13 @@ if ($debug == 1) {
                     echo '<tr class="' . $txtColor . ' ' . $bgColor . '" >
                     <td class="text-center">' . $row['acuse'] . '</td>
                     <td>' . $claseDocto . '</td>
+                    <td>' . $row['RazonSocial'] . '</td>
                     <td>' . $row['ordenCompra'] . '</td>
                     <td>' . $recepciones . '</td>
                     <td>' . $row['fechaReg'] . '</td>
                     <td>' . $row['referencia'] . '</td>
-                    <td>' . $valida . ' </td>
                     <td>' . $statContable . '</td>
-                    <td> <button class="btn btn-sm btn-success" onClick="detalleCompra(\'' . $row['acuse'] . '\');"><i class="text-white icon-doc"></i></button> </td>
+                    <td> <button class="btn btn-sm btn-success" onClick="detalleCompra(\'' . $row['acuse'] . '\',' . $row['IdProveedor'] . ');"><i class="text-white icon-doc"></i></button> </td>
                     </tr>';
                 }
             }
@@ -101,18 +101,6 @@ if ($debug == 1) {
     </table>
 </div>
 <script>
-    function detalleCompra(acuse) {
-        $('#customizer_body').html('<div class="loading text-center"><img src="../assets/images/loading.gif" alt="loading" /><br/>Un momento, por favor...</div>');
-        $(".customizer").toggleClass('show-service-panel');
-        $(".service-panel-toggle").toggle();
-        $.post("Inicio/detalladoDeCompra", {
-                acuse: acuse
-            },
-            function(respuesta) {
-                $("#customizer_body").html(respuesta);
-            });
-    }
-
     $('#tableListaCompras').DataTable({
         iDisplayLength: 25,
         responsive: false,

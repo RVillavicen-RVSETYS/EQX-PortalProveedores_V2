@@ -172,7 +172,7 @@ class DocumentosController extends Controller
     public function mostrarDocumento($rutaRelativa, $fileExtension)
     {
         $rutaRelativa = base64_decode($rutaRelativa);
-        
+
         if ($this->debug) {
             echo '<br> Ruta Relativa Codificada: ' . $rutaRelativa . PHP_EOL;
             echo '<br> Extensión del Archivo: ' . $fileExtension . PHP_EOL;
@@ -212,16 +212,18 @@ class DocumentosController extends Controller
         if ($this->debug) {
             echo '<br> Ruta Absoluta:' . $rutaAbsoluta . PHP_EOL;
         }
-        
+
         // Verificar si el archivo existe
         if (!file_exists($rutaAbsoluta)) {
             http_response_code(404);
-            echo '<br> Error: El archivo solicitado no existe.' . PHP_EOL;
+            echo '<br> <span style="color: white;">Error: El archivo solicitado no existe.</span>' . PHP_EOL;
             if ($this->debug) {
                 echo '<br> Ruta probada: ' . $rutaAbsoluta . PHP_EOL;
             }
             exit;
         }
+
+        //////////////////////////////////////////////////////////////////////////////////////////////////
 
         // Obtener la extensión real del archivo y normalizarla a minúsculas
         $extensionReal = strtolower(pathinfo($rutaAbsoluta, PATHINFO_EXTENSION));
@@ -262,6 +264,62 @@ class DocumentosController extends Controller
             readfile($rutaAbsoluta);
         }
         exit;
+    }
+
+    public function generadorDeRutas($rutaRelativa, $fileExtension)
+    {
+        //$this->debug = 1;
+        $rutaRelativa = base64_decode($rutaRelativa);
+
+        if ($this->debug) {
+            echo '<br> Ruta Relativa Codificada: ' . $rutaRelativa . PHP_EOL;
+        }
+
+        // Tipos MIME aceptados
+        $tiposAceptados = [
+            'pdf' => 'application/pdf',  // PDF
+            'xml' => ['application/xml', 'text/xml'], // XML
+            'zip' => 'application/zip', // ZIP
+        ];
+
+        // Validar si la extensión está permitida
+        $fileExtension = strtolower($fileExtension); // Normalizar la extensión esperada a minúsculas
+        if (!array_key_exists($fileExtension, $tiposAceptados)) {
+            http_response_code(400); // Bad Request
+            echo '<br> Error: La extensión no está permitida.' . PHP_EOL;
+            if ($this->debug) {
+                echo '<br> Extensión recibida: ' . $fileExtension . PHP_EOL;
+                echo '<br> Extensiones permitidas: ' . implode(', ', array_keys($tiposAceptados)) . PHP_EOL;
+            }
+
+            $timestamp = date("Y-m-d H:i:s");
+            error_log("[$timestamp] app\globals\controllers\DocumentosController ->(mostrarDocumento)Se solicito extensión no permitida: $fileExtension" . PHP_EOL, 3, LOG_FILE);
+            exit;
+        }
+
+        // Sanitizar la ruta para evitar accesos indebidos
+        $rutaSanitizada = str_replace(['..', './', '../'], '', $rutaRelativa);
+        $rutaSanitizada = str_replace("\Documentos\\", "", $rutaSanitizada);
+        if ($this->debug) {
+            echo '<br> Ruta Sanitizada:' . $rutaSanitizada . PHP_EOL;
+        }
+
+        $rutaAbsoluta = $this->basePath . DIRECTORY_SEPARATOR . $rutaSanitizada;
+        if ($this->debug) {
+            echo '<br> Ruta Absoluta:' . $rutaAbsoluta . PHP_EOL;
+        }
+
+        // Verificar si el archivo existe
+        if (!file_exists($rutaAbsoluta)) {
+            http_response_code(404);
+            echo '<br> <span style="color: white;">Error: El archivo solicitado no existe.</span>' . PHP_EOL;
+            if ($this->debug) {
+                echo '<br> Ruta probada: ' . $rutaAbsoluta . PHP_EOL;
+            }
+            exit;
+        }
+
+        return $rutaAbsoluta;
     }
 
     /**
@@ -344,5 +402,4 @@ class DocumentosController extends Controller
 
         return $response;
     }
-
 }

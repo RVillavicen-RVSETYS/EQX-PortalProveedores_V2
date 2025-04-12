@@ -5,6 +5,8 @@ namespace App\Controllers\Administrador;
 use Core\Controller;
 use App\Models\Menu_Mdl;
 use App\Models\Proveedores\Proveedores_Mdl;
+use App\Models\Compras\Compras_Mdl;
+use App\Globals\Controllers\DocumentosController;
 use App\Models\Facturas\HistorialFacturas_Mdl;
 
 class HistorialFacturasController extends Controller
@@ -73,84 +75,51 @@ class HistorialFacturasController extends Controller
 
     public function listarFacturas()
     {
-        // Lógica para la vista de inicio
+
         $data = []; // Aquí puedes pasar datos a la vista si es necesario
-        $fechaInicial = $_POST['fechaInicial'] ?? '';
-        $fechaFinal = $_POST['fechaFinal'] ?? '';
-
-        if ($fechaInicial == '' and $fechaFinal == '') {
-            $fechaInicial = date('Y-m-01');
-            $fechaFinal = date('Y-m-t');
+        $filtros = [];
+        if (!empty($_POST['idProveedor'])) {
+            $filtros['idProveedor'] = $_POST['idProveedor'];
         }
 
-        $filtroFecha = "AND DATE_FORMAT(cp.fechaReg, '%Y-%m-%d') BETWEEN '$fechaInicial' AND '$fechaFinal'";
-        $filtroProveedor = (empty($_POST['idProveedor'])) ?  '' : "AND cp.idProveedor = " . $_POST['idProveedor'];
-        //$filtroEstatusCont = (empty($_POST['estatusCont'])) ? '' : "AND cp.estatus = " . $_POST['estatusCont'];
-
-        /*$estatusComp = $_POST['estatusComp'] ?? '';
-        switch ($estatusComp) {
-            case '1':
-                $filtroEstatusComp = "AND (fac.idCatMetodoPago == 'PPD' AND  (dtpg.cantComp < '1' OR dtpg.insolutos > '0'))";
-                break;
-
-            case '2':
-                $filtroEstatusComp = "AND (dtpg.cantComp >= '1' AND  dtpg.insolutos < '0.01')";
-                break;
-
-            case '3':
-                $filtroEstatusComp = "AND (pvd.pais <> 'MX' OR fac.idCatMetodoPago == 'PUE')";
-                break;
-
-            default:
-                $filtroEstatusComp = '';
-                break;
-        }*/
-
-
-        // Obtener el nombre del namespace para identificar el área
-        $namespaceParts = explode('\\', __NAMESPACE__);
-        $areaLink = end($namespaceParts); // Obtiene el ultimo parametro del NameSpace
-
-        $menuModel = new Menu_Mdl();
-        $resultIdArea = $menuModel->obtenerIdAreaPorLink($areaLink);
-
-        $historialModel = new HistorialFacturas_Mdl();
-        $resultHistorial = $historialModel->obtenerHistorial($filtroFecha, $filtroProveedor);
-
-        if ($resultIdArea['success']) {
-            $idArea = $resultIdArea['data'];
-        } else {
-            $timestamp = date("Y-m-d H:i:s");
-            error_log("[$timestamp] app\controllers\Administrador\HistorialFacturasController ->Error al buscar Id del Area (nombre: $areaLink): " . PHP_EOL, 3, LOG_FILE);
-            echo 'No pudimos traer el id del Area:' . $resultIdArea['message'];
-            exit(0);
+        if (!empty($_POST['fechaInicial']) and !empty($_POST['fechaFinal'])) {
+            $filtros['entreFechasRecepcion'] = $_POST['fechaInicial'] . ',' . $_POST['fechaFinal'];
+        }else {
+            $filtros['entreFechasRecepcion'] = date('Y-m-1') . ',' . date('Y-m-t');
         }
 
-        $menuData = $menuModel->obtenerEstructuraMenu($_SESSION['EQXidNivel'], $idArea);
-        $areaData = $menuModel->listarAreasDisponibles($_SESSION['EQXidNivel']);
-
-        if ($menuData['success']) {
-            if ($areaData['success']) {
-                // Enviar datos a la Vista
-                $data['menuData'] =  $menuData;
-                $data['areaData'] =  $areaData;
-                $data['areaLink'] =  $areaLink;
-                $data['historialFacturas'] =  $resultHistorial;
-
-                // Cargar la vista correspondiente
-                $this->view('Administrador/HistorialFacturas/facturasRecibidas', $data);
+        if (!empty($_POST['nacionalidad'])) {
+            if ($_POST['nacionalidad'] == 'MX') {
+                $filtros['nacional'] = '1';
             } else {
-                $timestamp = date("Y-m-d H:i:s");
-                error_log("[$timestamp] app\controllers\Administrador\HistorialFacturasController ->Error al listar las Areas: " . PHP_EOL, 3, LOG_FILE);
-                echo 'Problemas con las Areas de Acceso:' . $resultIdArea['message'];
-                exit(0);
+                $filtros['nacional'] = '0';
             }
-        } else {
-            $timestamp = date("Y-m-d H:i:s");
-            error_log("[$timestamp] app\controllers\Administrador\HistorialFacturasController ->Error al buscar Id del Area (nombre: $areaLink): " . PHP_EOL, 3, LOG_FILE);
-            echo 'No pudimos traer el detallado del Menu:' . $resultIdArea['message'];
-            exit(0);
         }
+
+        if (!empty($_POST['estatusFactura'])) {
+            $filtros['estatusFactura'] = $_POST['estatusFactura'];
+        }
+
+        $MDL_compras = new Compras_Mdl();
+
+        $listaCompras = $MDL_compras->listaComprasFacturadas($filtros, 0, 'DESC');
+        if ($this->debug == 1) {
+            echo '<br><br>Resultado de listaComprasFacturadas: ' . PHP_EOL;
+            var_dump($listaCompras);
+        }
+
+        if ($listaCompras['success']) {
+            $data['listaCompras'] =  $listaCompras['data'];
+        } else {
+            echo '
+            <div class="alert alert-warning alert-rounded"> 
+                <i class="ti-user"></i> ' . $listaCompras['message'] . '.
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close"> <span aria-hidden="true">×</span> </button>
+            </div>';
+        }
+
+        // Cargar la vista correspondiente
+        $this->view('Administrador/HistorialFacturas/facturasRecibidas', $data);
     }
 
     public function buscarPagos()
@@ -187,8 +156,50 @@ class HistorialFacturasController extends Controller
                     'message' => $errorMessage
                 ]);
             }
-
-
         }
+    }
+
+    public function detalladoDeCompra()
+    {
+        $data = []; // Aquí puedes pasar datos a la vista si es necesario
+        $noProveedor = (empty($_POST['idProveedor'])) ? '' : $_POST['idProveedor'];
+        $acuse = (empty($_POST['acuse'])) ? '' : $_POST['acuse'];
+
+        $MDL_compras = new Compras_Mdl();
+        $dataCompra = $MDL_compras->dataCompraPorAcuse($noProveedor, $acuse);
+
+        $data['noProveedor'] = $noProveedor;
+        $data['acuse'] =  $acuse;
+        $data['dataCompra'] =  $dataCompra;
+
+        if ($this->debug == 1) {
+            echo 'Variables enviadas:' . PHP_EOL;
+            var_dump($data);
+            echo '<br><br>';
+        }
+
+        // Cargar la vista correspondiente
+        $this->view('Administrador/HistorialFacturas/detalladoDeCompra', $data);
+    }
+
+    public function verDocumento()
+    {
+        $data = []; // Aquí puedes pasar datos a la vista si es necesario
+
+        //Obtener Parametros
+        $params = func_get_args();
+
+        if ($this->debug == 1) {
+            echo "Parámetros recibidos:<br>";
+            echo "<pre>";
+            print_r($params);
+            echo "</pre>";
+        }
+
+        $tipoDocumeto = $params[0];
+        $rutaDocumento = $params[1];
+
+        $Ctrl_Documentos = new DocumentosController();
+        return $Ctrl_Documentos->mostrarDocumento($rutaDocumento, $tipoDocumeto);
     }
 }

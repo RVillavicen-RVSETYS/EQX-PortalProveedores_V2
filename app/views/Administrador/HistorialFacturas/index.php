@@ -39,6 +39,14 @@ $fechaFinal = date("Y-m-t");
 <head>
     <?php include '../app/views/Layout/header.php'; ?>
     <!-- Custom CSS -->
+    <link href="/assets/extra-libs/datatables.net-bs4/css/dataTables.bootstrap4.css" rel="stylesheet">
+    <link href="/assets/libs/fancybox/fancybox.css" rel="stylesheet">
+    <link href="/assets/libs/fancybox/dist/carousel/carousel.css" rel="stylesheet">
+    <link href="/assets/libs/fancybox/dist/carousel/carousel.thumbs.css" rel="stylesheet">
+    <link href="/assets/libs/fancybox/dist/panzoom/panzoom.css" rel="stylesheet">
+    <link href="/assets/libs/fancybox/dist/panzoom/panzoom.toolbar.css" rel="stylesheet">
+    <link href="/assets/libs/fancybox/dist/panzoom/panzoom.pins.css" rel="stylesheet">
+    <link href="/assets/libs/sweetalert2/dist/sweetalert2.min.css" rel="stylesheet">
 
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -183,15 +191,16 @@ $fechaFinal = date("Y-m-t");
                                     <div class="row">
 
                                         <div class="col-12 col-sm-12 col-md-4 col-lg-4">
-                                            <label for="fecha" class="col-form-label">Fecha</label>
-                                            <div class="input-group mb-3">
-                                                <div class="input-daterange input-group" id="date-range">
-                                                    <input type="date" class="form-control" name="fechaInicial" id="fechaInicial" value="<?= $fechaInicial; ?>" />
-                                                    <div class="input-group-append">
-                                                        <span class="input-group-text pyme b-0 text-white bg-success"> A </span>
-                                                    </div>
-                                                    <input type="date" class="form-control" name="fechaFinal" id="fechaFinal" value="<?= $fechaFinal; ?>" />
+                                            <label class="col-form-label">Rango de Fechas</label>
+                                            <div class="input-group input-daterange mb-3" id="date-range">
+                                                <div class="input-group-addon">
+                                                    <span class="input-group-text pyme b-0 text-white bg-pyme-primary"> Desde </span>
                                                 </div>
+                                                <input type="date" class="form-control" name="fechaInicial" id="fechaInicial" value="<?= $fechaInicial; ?>" />
+                                                <div class="input-group-addon">
+                                                    <span class="input-group-text pyme b-0 text-white bg-pyme-primary"> Hasta </span>
+                                                </div>
+                                                <input type="date" class="form-control " name="fechaFinal" id="fechaFinal" value="<?= $fechaFinal; ?>" />
                                             </div>
                                         </div>
 
@@ -235,17 +244,6 @@ $fechaFinal = date("Y-m-t");
                                             </div>
                                         </div>
 
-                                        <!--<div class="col-md-1">
-                                            <label for="estatusComp">Complemento</label>
-                                            <div class="input-group mb-3">
-                                                <select name="estatusComp" id="estatusComp" class="select2 form-control custom-select" style="width: 100%;">
-                                                    <option value="">Todos</option>
-                                                    <option value="1">Pendiente</option>
-                                                    <option value="2">Cargado Completo</option>
-                                                    <option value="3">No Rquiere</option>
-                                                </select>
-                                            </div>
-                                        </div>-->
 
                                         <div class="col-md-1 align-self-center">
                                             <button type="submit" class="btn btn-success mt-3" name="btnFiltros" id="btnFiltros">Consultar</button>
@@ -284,15 +282,16 @@ $fechaFinal = date("Y-m-t");
                             <div class="modal-body">
                                 <form id="formRangoBuscaPago">
                                     <div class="col-12 col-sm-12 col-md-12 col-lg-12">
-                                        <label for="fecha" class="col-form-label">Fechas</label>
-                                        <div class="input-group mb-3">
-                                            <div class="input-daterange input-group" id="date-range">
-                                                <input type="date" class="form-control" name="fechaInicialBus" id="fechaInicialBus" value="<?= $fechaInicial; ?>" />
-                                                <div class="input-group-append">
-                                                    <span class="input-group-text pyme b-0 text-white bg-success"> A </span>
-                                                </div>
-                                                <input type="date" class="form-control" name="fechaFinalBus" id="fechaFinalBus" value="<?= $fechaFinal; ?>" />
+                                        <label class="col-form-label">Rango de Fechas</label>
+                                        <div class="input-group input-daterange mb-3" id="date-range">
+                                            <div class="input-group-addon">
+                                                <span class="input-group-text pyme b-0 text-white bg-pyme-primary"> Desde </span>
                                             </div>
+                                            <input type="date" class="form-control" name="fechaInicialBus" id="fechaInicialBus" value="<?= $fechaInicial; ?>" />
+                                            <div class="input-group-addon">
+                                                <span class="input-group-text pyme b-0 text-white bg-pyme-primary"> Hasta </span>
+                                            </div>
+                                            <input type="date" class="form-control " name="fechaFinalBus" id="fechaFinalBus" value="<?= $fechaFinal; ?>" />
                                         </div>
                                     </div>
                                 </form>
@@ -352,11 +351,28 @@ $fechaFinal = date("Y-m-t");
 
         </div>
     </div>
+    <aside class="customizer">
+
+        <div class="customizer-body" id="customizer_body">
+
+        </div>
+    </aside>
     <div class="chat-windows"></div>
     <!-- ============================================================== -->
     <!-- All Jquery -->
     <!-- ============================================================== -->
     <script src="/assets/libs/jquery/dist/jquery.min.js"></script>
+    <script src="/assets/libs/fancybox/dist/fancybox/fancybox.umd.js"></script>
+    <script src="/assets/libs/fancybox/dist/carousel/carousel.umd.js"></script>
+    <script src="/assets/libs/fancybox/dist/carousel/carousel.autoplay.umd.js"></script>
+    <script src="/assets/libs/fancybox/dist/carousel/carousel.thumbs.umd.js"></script>
+    <script src="/assets/libs/fancybox/dist/panzoom/panzoom.umd.js"></script>
+    <script src="/assets/libs/fancybox/dist/panzoom/panzoom.toolbar.umd.js"></script>
+    <script src="/assets/libs/fancybox/dist/panzoom/panzoom.pins.umd.js"></script>
+    <script src="/assets/libs/fancybox/l10n/es.umd.js"></script>
+    <script src="/assets/libs/fancybox/dist/panzoom/l10n/es.umd.js"></script>
+    <script src="/assets/libs/fancybox/dist/carousel/l10n/es.umd.js"></script>
+
     <!-- Bootstrap tether Core JavaScript -->
     <script src="/assets/libs/popper.js/dist/umd/popper.min.js"></script>
     <script src="/assets/libs/bootstrap/dist/js/bootstrap.min.js"></script>
@@ -376,11 +392,25 @@ $fechaFinal = date("Y-m-t");
     <!--Custom JavaScript -->
     <script src="/dist/js/custom.js"></script>
     <script src="/assets/libs/toastr/build/toastr.min.js"></script>
+    <script src="/assets/extra-libs/prism/prism.js"></script>
     <script src="/assets/scripts/basicFuctions.js"></script>
     <script src="/assets/libs/select2/dist/js/select2.full.min.js"></script>
     <script src="/assets/libs/select2/dist/js/select2.min.js"></script>
     <script src="/dist/js/pages/forms/select2/select2.init.js"></script>
-    <script src="/assets/extra-libs/prism/prism.js"></script>
+    <script src="/assets/extra-libs/datatables.net/js/jquery.dataTables.min-ESP.js"></script>
+    <script src="/dist/js/pages/datatable/datatable-basic.init.js"></script>
+    <script src="/assets/extra-libs/datatables.net/js/jszip.min.js"></script>
+    <script src="/assets/extra-libs/datatables.net/js/vfs_fonts.js"></script>
+    <script src="/assets/extra-libs/datatables.net/js/dataTables.buttons.min.js"></script>
+    <script src="/assets/extra-libs/datatables.net/js/buttons.flash.min.js"></script>
+    <script src="/assets/extra-libs/datatables.net/js/buttons.html5.min.js"></script>
+    <script src="/assets/extra-libs/datatables.net/js/buttons.print.min.js"></script>
+    <script src="/assets/libs/moment/moment.js"></script>
+    <script src="/assets/libs/chartist/dist/chartist.min.js"></script>
+    <script src="/assets/libs/chartist-plugin-tooltips/dist/chartist-plugin-tooltip.min.js"></script>
+    <script src="/assets/extra-libs/datatables.net/js/pdfmake.min.js"></script>
+    <script src="/assets/libs/sweetalert2/dist/sweetalert2.all.min.js"></script>
+    <script src="/assets/libs/sweetalert2/sweet-alert.init.js"></script>
 
     <?php include 'index_js.php'; ?>
 </body>

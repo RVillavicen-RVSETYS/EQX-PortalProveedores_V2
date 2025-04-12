@@ -142,14 +142,14 @@ if ($debug == 1) {
         info: true,
         buttons: [{
                 extend: 'pdfHtml5',
-                className: 'btn btn-pdf bg-Equinoxgold text-white',
+                className: 'btn btn-pdf bg-pyme-primary text-white',
                 orientation: 'landscape',
                 pageSize: 'LEGAL',
                 text: "Pdf",
             },
             {
                 extend: 'csvHtml5',
-                className: 'btn btn-pdf bg-Equinoxgold text-white',
+                className: 'btn btn-pdf bg-pyme-primary text-white',
                 text: "Csv",
                 exportOptions: {
                     columns: ":not(.no-exportar)"
@@ -157,7 +157,7 @@ if ($debug == 1) {
             },
             {
                 extend: 'excelHtml5',
-                className: 'btn btn-pdf bg-Equinoxgold text-white',
+                className: 'btn btn-pdf bg-pyme-primary text-white',
                 text: "Excel",
                 exportOptions: {
                     columns: ":not(.no-exportar)"
@@ -165,7 +165,7 @@ if ($debug == 1) {
             },
             {
                 extend: 'copy',
-                className: 'btn btn-pdf bg-Equinoxgold text-white',
+                className: 'btn btn-pdf bg-pyme-primary text-white',
                 text: "Copiar",
                 exportOptions: {
                     columns: ":not(.no-exportar)"
