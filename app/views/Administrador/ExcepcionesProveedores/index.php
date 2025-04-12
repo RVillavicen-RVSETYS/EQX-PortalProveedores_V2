@@ -302,7 +302,7 @@ if ($debug == 1) {
     <script src="/dist/js/custom.js"></script>
     <script src="/assets/libs/toastr/build/toastr.min.js"></script>
     <script src="/assets/extra-libs/prism/prism.js"></script>
-    <script src="/assets/scripts/basicFuctions.js"></script>
+    <script src="/dist/js/basicFuctions.js"></script>
 
 
     <script src="/assets/extra-libs/datatables.net/js/jquery.dataTables.min-ESP.js"></script>
