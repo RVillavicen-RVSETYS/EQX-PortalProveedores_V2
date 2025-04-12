@@ -21,6 +21,8 @@ if ($debug == 1) {
     var_dump($datosPagina);
     echo '<br><br>Datos Del Proveedor: ';
     var_dump($datosProveedor);
+} else {
+    error_reporting(0);
 }
 
 $idProveedor = ($datosProveedor['data']['IdProveedor'] == '') ? '' : $datosProveedor['data']['IdProveedor'];

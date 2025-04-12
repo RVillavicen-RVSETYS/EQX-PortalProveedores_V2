@@ -23,7 +23,7 @@ if (isset($_SESSION['error_message'])) {
     <meta name="description" content="Portal de Proveedores.">
     <meta name="author" content="Ricardo Villavicencio">
     <!-- Favicon icon -->
-    <link rel="icon" type="image/png" sizes="16x16" href="/assets/images/favicon.png">
+    <link rel="icon" type="image/ico" sizes="16x16" href="/assets/images/SilmeAgro.ico">
     <title>Portal de Proveedores.</title>
 
     <!-- Custom CSS -->
@@ -66,7 +66,7 @@ if (isset($_SESSION['error_message'])) {
             <div class="auth-box capaPrincipal" style="opacity:.6;">
                 <div id="loginform">
                     <div class="logo">
-                        <span class="db"><img src="assets/images/logo-equinox-gold3.png" alt="logo" width="80%" id="imgLogo" /></span>
+                        <span class="db"><img src="../assets/images/logo-Silmeagro.png" alt="logo" width="80%" id="imgLogo" /></span>
                         <h3 class="font-medium m-b-20"><br><br>Portal de Proveedores.<br></h3>
                     </div>
                     <!-- Form -->

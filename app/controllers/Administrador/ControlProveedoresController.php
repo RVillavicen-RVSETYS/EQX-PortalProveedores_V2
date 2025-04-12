@@ -123,6 +123,11 @@ class ControlProveedoresController extends Controller
         $data = []; // Aquí puedes pasar datos a la vista si es necesario
         $idProveedor = $_POST['idProveedor'] ?? '';
 
+        if ($this->debug == 1) {
+            echo '<br>Valores para la carga:';
+            echo '<br> * idProveedor:' . $idProveedor;
+        } 
+
         $namespaceParts = explode('\\', __NAMESPACE__);
         $areaLink = end($namespaceParts); // Obtiene el ultimo parametro del NameSpace
 
@@ -131,6 +136,10 @@ class ControlProveedoresController extends Controller
 
         $proveedoresModel = new Proveedores_Mdl();
         $resultProveedores = $proveedoresModel->obtenerDatosProveedor($idProveedor);
+        if ($this->debug == 1) {
+            echo '<br><br>Datos de Proveedores: ' . PHP_EOL;
+            var_dump($resultProveedores);
+        }
 
         if ($resultIdArea['success']) {
             $idArea = $resultIdArea['data'];

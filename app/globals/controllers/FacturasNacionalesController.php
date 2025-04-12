@@ -372,62 +372,127 @@ class FacturasNacionalesController extends Controller
                 var_dump($comprasPorFacturas);
             }
             if ($comprasPorFacturas['success']) {
-                //Verificamos que los datos de las Compras de los UUIDs Relacionados sean correctos
-                if (empty($comprasPorFacturas['data'])) {
-                    return ['success' => false, 'message' => 'No se encontraron Compras relacionadas con los UUIDs del Complemento de Pago.'];
+                // Verificamos que los datos de las Compras de los UUIDs Relacionados sean correctos
+                if ($this->debug == 1) {
+                    echo '<br>Validando datos de las Compras relacionadas con los UUIDs...';
                 }
-
-                if ($comprasPorFacturas['cantRes'] < 1) {
+                if (empty($comprasPorFacturas['data'] || $comprasPorFacturas['cantRes'] < 1)) {
+                    if ($this->debug == 1) {
+                        echo '<br>No se encontraron Compras relacionadas con los UUIDs del Complemento de Pago.';
+                    }
                     return ['success' => false, 'message' => 'No se encontraron Compras relacionadas con los UUIDs del Complemento de Pago.'];
                 }
 
                 $errores = [];
 
+                if ($this->debug == 1) {
+                    echo '<br>Vamos a comenzar a validar los datos de las compras.';
+                }
                 foreach ($comprasPorFacturas['data'] as $factura) {
                     $serie = $factura['serie'] ?? 'N/A';
                     $folio = $factura['folio'] ?? 'N/A';
                     $uuid = $factura['uuid'] ?? 'N/A';
+                    if ($this->debug == 1) {
+                        echo "<br>Evaluación de la Factura '{$serie}{$folio}' con UUID '{$uuid}'";
+                    }
 
                     // Verificar que la factura pertenezca al proveedor
+                    if ($this->debug == 1) {
+                        echo "<br> * La factura debe pertenece al proveedor {$idProveedor}: ".$factura['idProveedor'];
+                    }
                     if ($factura['idProveedor'] != $idProveedor) {
                         $errores[] = "* La factura '{$serie}' '{$folio}' con UUID '{$uuid}': No pertenece al proveedor.";
                     }
 
                     // Verificar que el Método de Pago sea PPD
+                    if ($this->debug == 1) {
+                        echo "<br> * La factura debe tener el método de Pago PPD:".$factura['idCatMetodoPago'];
+                    }
                     if ($factura['idCatMetodoPago'] !== 'PPD') {
                         $errores[] = "* La factura '{$serie}' '{$folio}' con UUID '{$uuid}': El método de Pago no es PPD.";
                     }
 
                     // Verificar que la Forma de Pago sea 99
+                    if ($this->debug == 1) {
+                        echo "<br> * La factura debe tener la forma de Pago 99:".$factura['idCatFormaPago'];
+                    }
                     if ($factura['idCatFormaPago'] !== '99') {
                         $errores[] = "* La factura '{$serie}' '{$folio}' con UUID '{$uuid}': La forma de Pago no es 99.";
                     }
 
                     // Verificar que no tenga un complemento anterior con saldo insoluto en 0
+                    if ($this->debug == 1) {
+                        echo "<br> * La factura no debe tener un complemento de pago con saldo insoluto en 0.".$factura['minInsoluto'] <= 0;
+                    }
                     if (!is_null($factura['idUltimoComplemento']) && $factura['minInsoluto'] <= 0) {
                         $errores[] = "* La factura '{$serie}' '{$folio}' con UUID '{$uuid}': Ya tiene un complemento de pago con saldo insoluto en 0.";
                     }
 
                     // Verificar que la factura ya haya sido pagada
+                    if ($this->debug == 1) {
+                        echo "<br> * La factura debe tener id de pagada:".$factura['idPago'];
+                    }
                     if ($factura['idPago'] < 1) {
                         $errores[] = "* La factura '{$serie}' '{$folio}' con UUID '{$uuid}': No ha sido pagada.";
                     }
                 }
 
-                //Verificamos los datos de los Complementos de Pago recibidos
-                
+                // Verificamos los datos de los Complementos de Pago recibidos
+                if ($this->debug == 1) {
+                    echo '<br><br>Validando los Complementos de Pago recibidos...';
+                }
+                $totalImpPagado = 0;
 
+                foreach ($pagosRecibidos as $pago) {
+                    $idDocumento = $pago["IdDocumento"];
+                    $impPagado = $pago["ImpPagado"];
+                    $totalImpPagado += $impPagado;
 
+                    $documentoEncontrado = false;
+                    foreach ($comprasPorFacturas['data'] as $factura) {
+                        if ($factura["uuid"] === $idDocumento) {
+                            $documentoEncontrado = true;
+
+                            // Verificar que el minInsoluto sea NULL o menor o igual a la suma de los $pagosRecibidos[x]["ImpPagado"]
+                            $minInsoluto = $factura["minInsoluto"];
+                            if ($this->debug == 1) {
+                                echo "<br> * El Total de los Importes Pagados en el complemento ($impPagado) deb ser menor al último insoluto de la factura $impPagado.";
+                            }
+                            if (!is_null($minInsoluto) && $minInsoluto < $impPagado) {
+                                $errores[] = "El Total de los Importes Pagados ($impPagado) es mayor al último insoluto de la factura $idDocumento.";
+                            }
+                            break;
+                        }
+                    }
+
+                    // Veirifca rque exista el documento en las compras relacionadas.
+                    if ($this->debug == 1) {
+                        echo "<br> * Debemos tener una factura con el UUID: $idDocumento";
+                    }
+                    if (!$documentoEncontrado) {
+                        $errores[] = "El documento $idDocumento no lo hemos recibido.";
+                    }
+                }
+
+                // Si hay errores, devolverlos
                 if (!empty($errores)) {
+                    if ($this->debug == 1) {
+                        echo '<br>Errores encontrados durante las validaciones:<br>' . implode('<br>', $errores);
+                    }
                     $response['message'] = implode('<br>', $errores);
                     return $response;
                 }
 
-
-                echo ('<br><br>Hasta el momento OK...');
+                if ($this->debug == 1) {
+                    echo '<br>Hasta el momento OK...';
+                }
             } else {
+                if ($this->debug == 1) {
+                    echo '<br>Error al obtener las Compras relacionadas: ' . $comprasPorFacturas['message'];
+                }
                 return ['success' => false, 'message' => $comprasPorFacturas['message']];
             }
+            return ['success' => false, 'message' => $comprasPorFacturas['message']];
             
         } else {
             return ['success' => false, 'message' => $dataCFDIXML['message']];

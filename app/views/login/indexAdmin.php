@@ -62,7 +62,7 @@ if (isset($_SESSION['error_message'])) {
           }
           ============================================================== -->
         </style>
-        <div class="auth-wrapper d-flex no-block justify-content-center align-items-center" style="background:url(../assets/images/big/auth-bg.jpg) no-repeat center center;background-size:cover; background-color: #141516;">
+        <div class="auth-wrapper d-flex no-block justify-content-center align-items-center" style="background:url(../assets/images/fondoSilmeAdmin.jpg) no-repeat center center;background-size:cover; background-color: #141516;">
             <div class="auth-box capaPrincipal" style="opacity:.6;">
                 <div id="loginform">
                     <div class="logo">

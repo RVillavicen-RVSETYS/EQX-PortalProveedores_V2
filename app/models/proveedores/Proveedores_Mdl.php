@@ -759,16 +759,21 @@ class Proveedores_Mdl
                         fc.idCatTipoMoneda, 
                         fc.serie, 
                         fc.folio, 
-                        fc.fechaReg
+                        fc.fechaReg,
+	                    cpd.insoluto
                     FROM 
                         compras cp
                         INNER JOIN cfdi_facturas fc ON cp.id = fc.idCompra
-                        LEFT JOIN cfdi_complementoPagoDet cpd ON fc.uuid = cpd.uuidFact
+                        LEFT JOIN (
+                            SELECT cpag.uuidFact, MIN(cpag.saldoInsoluto) AS insoluto
+                            FROM cfdi_complementoPagoDet cpag
+                            GROUP BY cpag.uuidFact
+                        ) cpd ON fc.uuid = cpd.uuidFact 
                     WHERE 
                         cp.idProveedor = :idProveedor 
                         AND cp.idPago >= 1 
                         AND fc.idCatMetodoPago = 'PPD' 
-                        AND ISNULL(cpd.id)";
+                        AND (ISNULL(cpd.uuidFact) OR cpd.insoluto > 0)";
 
             if (self::$debug) {
                 $params = [':idProveedor' => $idProveedor];
