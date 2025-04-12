@@ -285,7 +285,7 @@ class Proveedores_Mdl
                             erpHes.idCompra AS 'ErpIdCompra',
                             erpHes.OC AS 'OC',
                             erpHes.HES AS 'HES',
-                            erpHes.subtotal AS 'Monto',
+                            SUM( erpHes.subtotal ) AS 'Monto',
                             erpHes.idMoneda AS 'Moneda',
                             erpHes.CPago AS 'CP',
                             dtcomp.idCompra AS 'DtIdCompra' 
@@ -293,7 +293,9 @@ class Proveedores_Mdl
                             silmeagro_erpV1.vw_ext_PortalProveedores_MontosHES erpHes
                             LEFT JOIN EQX_PortalProveedoresV2.detcompras dtcomp ON erpHes.idCompra = dtcomp.idCompra 
                         WHERE
-                            erpHes.idProveedor = :idProveedor 
+                            erpHes.idProveedor = :idProveedor
+                        GROUP BY
+		                    erpHes.HES
                         ) Datos 
                     WHERE
                         Datos.DtIdCompra IS NULL
