@@ -134,6 +134,8 @@ class cfdisv40
 
             // Generar el campo serializado
             if (!empty($serie) && !empty($folio)) {
+                $serie = preg_replace('/[^A-Za-z0-9]/', '', $serie);
+                $folio = preg_replace('/[^A-Za-z0-9]/', '', $folio);
                 $response['data']['Serializado'] = $serie . $folio;
             } elseif (!empty($uuid)) {
                 $response['data']['Serializado'] = substr($uuid, 0, 16);

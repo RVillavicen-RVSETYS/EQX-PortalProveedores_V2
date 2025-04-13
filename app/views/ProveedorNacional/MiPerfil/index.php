@@ -28,6 +28,19 @@ if ($debug == 1) {
     var_dump($data['datosIniciales']);
 }
 
+$idProveedor = (!empty($data['datosIniciales']['datosProveedores']['IdProveedor'])) ? $data['datosIniciales']['datosProveedores']['IdProveedor'] : '';
+$nombreProveedor = (!empty($data['datosIniciales']['datosProveedores']['RazonSocial'])) ? $data['datosIniciales']['datosProveedores']['RazonSocial'] : '';
+$regimenFiscal = (!empty($data['datosIniciales']['datosProveedores']['RegimenFiscal'])) ? $data['datosIniciales']['datosProveedores']['RegimenFiscal'] : '';
+$pais = (!empty($data['datosIniciales']['datosProveedores']['Pais'])) ? $data['datosIniciales']['datosProveedores']['Pais'] : '';
+$correo = (!empty($data['datosIniciales']['datosProveedores']['Correo'])) ? $data['datosIniciales']['datosProveedores']['Correo'] : '';
+
+$cantCredito = (!empty($data['datosIniciales']['CompromisoPago']['cantidad'])) ? $data['datosIniciales']['CompromisoPago']['cantidad'] : '';
+$tiempoCredito = (!empty($data['datosIniciales']['CompromisoPago']['tiempo'])) ? $data['datosIniciales']['CompromisoPago']['tiempo'] : '';
+if ($cantCredito != '' && $tiempoCredito != '') {
+    $plazoCredito = $cantCredito . ' - ' . $tiempoCredito;
+} else {
+    $plazoCredito = '';
+}
 ?>
 
 <!DOCTYPE html>
@@ -111,15 +124,15 @@ if ($debug == 1) {
                             </div>
                             <div class="card-body">
                                 <small class="text-muted">No. Proveedor </small>
-                                <h6><?=$data['datosIniciales']['datosProveedores']['IdProveedor'];?></h6>
+                                <h6><?=$idProveedor;?></h6>
                                 <small class="text-muted p-t-30 db">Regimen Fiscal</small>
-                                <h6><?=$data['datosIniciales']['datosProveedores']['RegimenFiscal'];?></h6>
+                                <h6><?=$regimenFiscal;?></h6>
                                 <small class="text-muted p-t-30 db">Pais</small>
-                                <h6><?=$data['datosIniciales']['datosProveedores']['Pais'];?></h6>
+                                <h6><?=$pais;?></h6>
                                 <small class="text-muted">Correo </small>
-                                <h6 id="provCorreo"><?=$data['datosIniciales']['datosProveedores']['Correo'];?></h6>
+                                <h6 id="provCorreo"><?=$correo;?></h6>
                                 <small class="text-muted p-t-30 db">Plazo de Credito</small>
-                                <h6><?=$data['datosIniciales']['CompromisoPago']['cantidad'].' - '.$data['datosIniciales']['CompromisoPago']['tiempo'];?></h6>
+                                <h6><?=$plazoCredito;?></h6>
                             </div>
                         </div>
                     </div>
