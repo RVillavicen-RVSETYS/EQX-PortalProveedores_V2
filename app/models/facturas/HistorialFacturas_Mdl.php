@@ -161,8 +161,8 @@ class HistorialFacturas_Mdl
             $sql = "SELECT
                     pc.id AS 'IdPago',
                     pc.idOperacion AS 'IdDetPago',
-                    rec.idCompra AS 'OrdenCompra',
-                    ph.idRecepcion AS 'HojaEntrada',
+                    cmp.folio AS 'OrdenCompra',
+                    rec.folio AS 'HojaEntrada',
                     pc.monto AS 'MontoPago',
                     ph.residual AS 'SaldoInsoluto',
                     pc.idSatMoneda AS 'Moneda',
@@ -173,7 +173,8 @@ class HistorialFacturas_Mdl
                 FROM
                     pagosCompras pc
                     INNER JOIN pagos_hes ph ON pc.idOperacion = ph.id
-                    INNER JOIN recepciones rec ON ph.idRecepcion = rec.id 
+                    INNER JOIN recepciones rec ON ph.idRecepcion = rec.id
+                    INNER JOIN compras cmp ON rec.idCompra = cmp.id
                 WHERE
                     DATE_FORMAT( pc.fechaPago, '%Y-%m-%d' ) BETWEEN :fechaInicial 
                     AND :fechaFinal";
@@ -250,8 +251,8 @@ class HistorialFacturas_Mdl
             foreach ($dataPagos as $pago) {
                 $stmt->bindValue(':idPago', $pago['IdPago'], PDO::PARAM_INT);
                 $stmt->bindValue(':idDetPago', $pago['IdDetPago'], PDO::PARAM_INT);
-                $stmt->bindValue(':OC', $pago['OrdenCompra'], PDO::PARAM_INT);
-                $stmt->bindValue(':HES', $pago['HojaEntrada'], PDO::PARAM_INT);
+                $stmt->bindValue(':OC', $pago['OrdenCompra'], PDO::PARAM_STR);
+                $stmt->bindValue(':HES', $pago['HojaEntrada'], PDO::PARAM_STR);
                 $stmt->bindValue(':montoPagado', $pago['MontoPago'], PDO::PARAM_STR);
                 $stmt->bindValue(':saldoInsoluto', $pago['SaldoInsoluto'], PDO::PARAM_STR);
                 $stmt->bindValue(':moneda', $pago['Moneda'], PDO::PARAM_STR);

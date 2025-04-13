@@ -292,7 +292,7 @@ class Proveedores_Mdl
                             dtcomp.idCompra AS 'DtIdCompra' 
                         FROM
                             silmeagro_erpV1.vw_ext_PortalProveedores_MontosHES erpHes
-                            LEFT JOIN EQX_PortalProveedoresV2.detcompras dtcomp ON erpHes.idCompra = dtcomp.idCompra 
+                            LEFT JOIN EQX_PortalProveedoresV2.detcompras dtcomp ON erpHes.HES = dtcomp.noRecepcion
                         WHERE
                             erpHes.idProveedor = :idProveedor
                         GROUP BY
@@ -335,46 +335,6 @@ class Proveedores_Mdl
                 echo "Error Al Obtener Las Recepciones Sin Facturas: " . $e->getMessage(); // Mostrar error en modo depuración
             }
             return ['success' => false, 'message' => 'Problemas Al Obtener Recepciones Sin Facturas, Notifica a tu administrador.'];
-        }
-    }
-
-    public function obtenerFacturasSinFechaPago($idProveedor)
-    {
-        try {
-            $sql = "";
-
-            if (self::$debug) {
-                $params = [
-                    ':idProveedor' => $idProveedor
-                ];
-                $this->dbHes->imprimirConsulta($sql, $params, 'Busca Las Facturas Sin Fecha De Pago');
-            }
-            $stmt = $this->dbHes->prepare($sql);
-            $stmt->bindParam(':idProveedor', $idProveedor, PDO::PARAM_INT);
-            $stmt->execute();
-            $dataRecepcionesSinF = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-            if (self::$debug) {
-                echo '<br>Resultado de Query:';
-                var_dump($dataRecepcionesSinF);
-                echo '<br><br>';
-            }
-
-            if ($dataRecepcionesSinF) {
-                return ['success' => true, 'data' => $dataRecepcionesSinF];
-            } else {
-                if (self::$debug) {
-                    echo "No Se Obtuvieron Facturas Sin Fecha De Pago.<br>"; // Mostrar error en modo depuración
-                }
-                return ['success' => false, 'message' => 'No Se Obtuvieron Facturas Sin Fecha De Pago..'];
-            }
-        } catch (\Exception $e) {
-            $timestamp = date("Y-m-d H:i:s");
-            error_log("[$timestamp] app/models/Proveedores_Mdl.php ->Error Al Obtener Las Facturas Sin Fecha De Pago: " . $e->getMessage(), 3, LOG_FILE_BD); // Manejo del error
-            if (self::$debug) {
-                echo "Error Al Obtener Las Facturas Sin Fecha De Pago: " . $e->getMessage(); // Mostrar error en modo depuración
-            }
-            return ['success' => false, 'message' => 'Problemas Al Obtener Facturas Sin Fecha De Pago, Notifica a tu administrador.'];
         }
     }
 
