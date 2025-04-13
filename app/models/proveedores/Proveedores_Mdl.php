@@ -135,7 +135,8 @@ class Proveedores_Mdl
                         prov.pais AS 'Pais',
                         prov.cpag AS 'CPag',
                         prov.razonSocial AS 'RazonSocial',
-                        CONCAT_WS('-',prov.regimenFiscal, sat.descripcion) AS 'RegimenFiscal'
+                        prov.regimenFiscal AS 'RegimenFiscal',
+                        CONCAT_WS('-',prov.regimenFiscal, sat.descripcion) AS 'RegimenFiscalConNombre'
                     FROM
                         proveedores prov
                         INNER JOIN sat_catRegimenFiscal sat ON prov.regimenFiscal = sat.id

@@ -175,7 +175,7 @@ class ReglasAplicadasv40
         // Validación de Año Fiscal
         $fechaFactura = strtotime($dataXML['Comprobante']['Fecha'] ?? '');
         $fechaTimbrado = strtotime($dataXML['TimbreFiscal']['FechaTimbrado'] ?? '');
-        $anioActual = (int) date('Y');
+        $anioActual = date('Y');
 
         if (
             !$configParaValidaciones['excepcionesProveedor']['AnioFiscal'] &&

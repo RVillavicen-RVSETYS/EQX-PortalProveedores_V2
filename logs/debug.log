@@ -4,3 +4,13 @@
 [2025-04-06 23:45:36] core/App.php ->Controlador como archivo no encontrado: assets
 [2025-04-06 23:45:44] core/App.php ->Controlador como archivo no encontrado: assets
 [2025-04-06 23:46:57] core/App.php ->Controlador como archivo no encontrado: assets
+[2025-04-13 20:33:13] app\controllers\ProveedorNacional\MiPerfil ->Error al obtener los datos iniciales: 
+[2025-04-13 20:51:57] app\controllers\ProveedorNacional\MiPerfil ->Error al obtener los datos iniciales: 
+[2025-04-13 20:51:58] core/App.php ->Controlador como archivo no encontrado: favicon.ico
+[2025-04-13 21:49:28] app\controllers\ProveedorNacional\MiPerfil ->Error al obtener los datos iniciales: 
+[2025-04-13 21:54:20] app\controllers\ProveedorNacional\MiPerfil ->Error al obtener los datos iniciales: 
+[2025-04-13 21:56:14] app\controllers\ProveedorNacional\MiPerfil ->Error al obtener los datos iniciales: 
+[2025-04-13 22:07:01] app\controllers\ProveedorNacional\MiPerfil ->Error al obtener los datos iniciales: 
+[2025-04-13 22:07:17] app\controllers\ProveedorNacional\MiPerfil ->Error al obtener los datos iniciales: 
+[2025-04-13 22:18:13] app\controllers\ProveedorNacional\MiPerfil ->Error al obtener los datos iniciales: 
+[2025-04-13 22:18:52] app\controllers\ProveedorNacional\MiPerfil ->Error al obtener los datos iniciales: 
