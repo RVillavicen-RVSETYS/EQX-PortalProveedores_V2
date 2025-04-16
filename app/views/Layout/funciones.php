@@ -195,7 +195,7 @@ function generaSeccionUserMenu($areaData, $areaLink)
         case '1':
             $linkPerfil = URL_BASE_PROYECT . '/Administrador/MiCuenta';
             $linkSoporte = URL_BASE_PROYECT . '/Administrador/soporteMamalon';
-            $linkLogout = URL_BASE_PROYECT . '/Administrador/logoutAdmin.php';
+            $linkLogout = URL_BASE_PROYECT . '/logoutAdmin.php';
             $nameUser = $_SESSION['EQXnombreUserCto'];
             $subText = $_SESSION['EQXnombreUser'];
             $textSoporte = 'Centro de Ayuda';

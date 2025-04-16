@@ -24,14 +24,9 @@ if ($debug == 1) {
     var_dump($piezasURL);
     echo '<br><br>Ruta del MenuActual: ' . $rutaMenu . '<br><br>Contenido de datosPagina:';
     var_dump($datosPagina);
-    echo '<br><br>Lista De Tipos De Monedas:';
-    var_dump($listaMonedas['data']);
-    echo '<br><br>Lista De Tipos De Monedas:';
-    var_dump($listaProveedores['data']);
+    echo '<br><br> Contenido de datosAdmin:';
+    var_dump($datosAdmin);
 }
-
-$fechaInicial = date("Y-m-01");
-$fechaFinal = date("Y-m-t");
 
 ?>
 
@@ -42,13 +37,6 @@ $fechaFinal = date("Y-m-t");
     <?php include '../app/views/Layout/header.php'; ?>
     <!-- Custom CSS -->
 
-    <link href="/assets/extra-libs/datatables.net-bs4/css/dataTables.bootstrap4.css" rel="stylesheet">
-    <link href="/assets/libs/fancybox/dist/fancybox/fancybox.css" rel="stylesheet">
-    <link href="/assets/libs/fancybox/dist/carousel/carousel.css" rel="stylesheet">
-    <link href="/assets/libs/fancybox/dist/carousel/carousel.thumbs.css" rel="stylesheet">
-    <link href="/assets/libs/fancybox/dist/panzoom/panzoom.css" rel="stylesheet">
-    <link href="/assets/libs/fancybox/dist/panzoom/panzoom.toolbar.css" rel="stylesheet">
-    <link href="/assets/libs/fancybox/dist/panzoom/panzoom.pins.css" rel="stylesheet">
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
     <!--[if lt IE 9]>
@@ -101,83 +89,47 @@ $fechaFinal = date("Y-m-t");
                 <!-- ============================================================== -->
                 <!-- Sales chart -->
                 <!-- ============================================================== -->
+
+                <!-- Row -->
                 <div class="row">
-                    <div class="col-md-12">
+                    <!-- Column -->
+                    <div class="col-lg-4 col-xlg-3 col-md-5">
                         <div class="card">
-                            <div class="card-header bg-pyme-primary text-white">
-                                <h4 class="card-title">Filtros De Búsqueda</h4>
+                            <div class="card-body">
+                                <center class="m-t-30"> <img src="/assets/images/noimg.png" class="rounded-circle" width="150" />
+                                    <h4 class="card-title m-t-10"><?= $datosAdmin[0]['Puesto']; ?></h4>
+                                </center>
+                            </div>
+                            <div>
+                                <hr>
                             </div>
                             <div class="card-body">
-                                <form id="formConsultaAprobaciones">
-                                    <div class="row">
-
-                                        <div class="col-12 col-sm-12 col-md-4 col-lg-4">
-                                            <label for="fecha" class="col-form-label">Fecha</label>
-                                            <div class="input-group mb-3">
-                                                <div class="input-daterange input-group" id="date-range">
-                                                    <input type="date" class="form-control" name="fechaInicial" id="fechaInicial" value="<?= $fechaInicial; ?>" />
-                                                    <div class="input-group-append">
-                                                        <span class="input-group-text pyme b-0 text-white bg-success"> A </span>
-                                                    </div>
-                                                    <input type="date" class="form-control" name="fechaFinal" id="fechaFinal" value="<?= $fechaFinal; ?>" />
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <div class="col-md-4">
-                                            <label for="idProveedor">Proveedores</label>
-                                            <div class="input-group mb-3">
-                                                <select name="idProveedor" id="idProveedor" class="select2 form-control custom-select" style="width: 100%;">
-                                                    <option value="">Selecciona Un Proveedor</option>
-                                                    <?php
-                                                    foreach ($listaProveedores['data'] as $proveedor) {
-                                                    ?>
-                                                        <option value="<?= $proveedor['IdProveedor']; ?>"><?= $proveedor['IdProveedor']; ?> - <?= $proveedor['Proveedor']; ?></option>
-                                                    <?php
-                                                    }
-                                                    ?>
-                                                </select>
-                                            </div>
-                                        </div>
-
-                                        <div class="col-md-1">
-                                            <label for="tipoMoneda">Moneda</label>
-                                            <div class="input-group mb-3">
-                                                <select name="tipoMoneda" id="tipoMoneda" class="select2 form-control custom-select" style="width: 100%;">
-                                                    <option value="">Todas</option>
-                                                    <?php
-                                                    foreach ($listaMonedas['data'] as $monedas) {
-                                                    ?>
-                                                        <option value="<?= $monedas['Moneda']; ?>"><?= $monedas['Moneda']; ?></option>
-                                                    <?php
-                                                    }
-                                                    ?>
-                                                </select>
-                                            </div>
-                                        </div>
-
-                                        <div class="col-md-2 align-self-center">
-                                            <button form="formConsultaAprobaciones" type="submit" class="btn btn-success mt-3" name="btnFiltros" id="btnFiltros">Consultar</button>
-                                        </div>
-                                    </div>
-                                </form>
+                                <small class="text-muted">Nombre </small>
+                                <h6><?= $datosAdmin[0]['Nombre']; ?></h6>
+                                <small class="text-muted p-t-30 db">Apellido Paterno:</small>
+                                <h6><?= $datosAdmin[0]['ApPat']; ?></h6>
+                                <small class="text-muted p-t-30 db">Pais</small>
+                                <h6><?= $datosAdmin[0]['ApMat']; ?></h6>
                             </div>
                         </div>
                     </div>
-                </div>
-
-                <div class="row">
-                    <div class="col-md-12">
+                    <!-- Column -->
+                    <!-- Column -->
+                    <div class="col-lg-8 col-xlg-9 col-md-7">
                         <div class="card">
-                            <div class="card-header bg-pyme-primary text-white">
-                                <h4 class="card-title">Lista De Aprobaciones</h4>
+                            <div class="card-header bg-pyme-primary headerFiltros">
+                                <h4 class="m-b-0 text-white">Actualización de Datos</h4>
                             </div>
-                            <div id="tarjetaListaAprob" class="card-body">
-
+                            <div class="card-body">
+                                <div class="alert alert-info">
+                                    <h3 class="text-info"><i class="fa fa-exclamation-circle"></i> Atención</h3> Para actualizar datos por favor comuniquese con el administrador.
+                                </div>
                             </div>
                         </div>
                     </div>
+                    <!-- Column -->
                 </div>
+                <!-- Row -->
                 <!-- ============================================================== -->
                 <!-- Sales chart -->
                 <!-- ============================================================== -->
@@ -204,29 +156,13 @@ $fechaFinal = date("Y-m-t");
     <!-- ============================================================== -->
     <!-- ============================================================== -->
     <!-- customizer Panel -->
-    <aside class="customizer">
-
-        <div class="customizer-body" id="customizer_body">
-
-        </div>
-    </aside>
     <!-- ============================================================== -->
+
     <div class="chat-windows"></div>
     <!-- ============================================================== -->
     <!-- All Jquery -->
     <!-- ============================================================== -->
     <script src="/assets/libs/jquery/dist/jquery.min.js"></script>
-    <script src="/assets/libs/fancybox/dist/fancybox/fancybox.umd.js"></script>
-    <script src="/assets/libs/fancybox/dist/carousel/carousel.umd.js"></script>
-    <script src="/assets/libs/fancybox/dist/carousel/carousel.autoplay.umd.js"></script>
-    <script src="/assets/libs/fancybox/dist/carousel/carousel.thumbs.umd.js"></script>
-    <script src="/assets/libs/fancybox/dist/panzoom/panzoom.umd.js"></script>
-    <script src="/assets/libs/fancybox/dist/panzoom/panzoom.toolbar.umd.js"></script>
-    <script src="/assets/libs/fancybox/dist/panzoom/panzoom.pins.umd.js"></script>
-    <script src="/assets/libs/fancybox/dist/fancybox/l10n/es.umd.js"></script>
-    <script src="/assets/libs/fancybox/dist/panzoom/l10n/es.umd.js"></script>
-    <script src="/assets/libs/fancybox/dist/carousel/l10n/es.umd.js"></script>
-
     <!-- Bootstrap tether Core JavaScript -->
     <script src="/assets/libs/popper.js/dist/umd/popper.min.js"></script>
     <script src="/assets/libs/bootstrap/dist/js/bootstrap.min.js"></script>
@@ -251,22 +187,22 @@ $fechaFinal = date("Y-m-t");
     <script src="/assets/libs/select2/dist/js/select2.full.min.js"></script>
     <script src="/assets/libs/select2/dist/js/select2.min.js"></script>
     <script src="/dist/js/pages/forms/select2/select2.init.js"></script>
+
     <script src="/assets/extra-libs/datatables.net/js/jquery.dataTables.min-ESP.js"></script>
     <script src="/dist/js/pages/datatable/datatable-basic.init.js"></script>
+
     <script src="/assets/extra-libs/datatables.net/js/jszip.min.js"></script>
     <script src="/assets/extra-libs/datatables.net/js/vfs_fonts.js"></script>
+
     <script src="/assets/extra-libs/datatables.net/js/dataTables.buttons.min.js"></script>
     <script src="/assets/extra-libs/datatables.net/js/buttons.flash.min.js"></script>
     <script src="/assets/extra-libs/datatables.net/js/buttons.html5.min.js"></script>
     <script src="/assets/extra-libs/datatables.net/js/buttons.print.min.js"></script>
-    <script src="/assets/libs/moment/moment.js"></script>
     <script src="/assets/libs/chartist/dist/chartist.min.js"></script>
     <script src="/assets/libs/chartist-plugin-tooltips/dist/chartist-plugin-tooltip.min.js"></script>
     <script src="/assets/extra-libs/datatables.net/js/pdfmake.min.js"></script>
-    <script src="/assets/libs/sweetalert2/dist/sweetalert2.all.min.js"></script>
-    <script src="/assets/libs/sweetalert2/sweet-alert.init.js"></script>
+    <script src="/assets/extra-libs/datatables.net/js/vfs_fonts.js"></script>
 
-    <?php include 'index_js.php'; ?>
 </body>
 
 </html>
