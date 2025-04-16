@@ -11,7 +11,7 @@ class LoginAdmin
     public function index()
     {
         // Cargar la vista de login
-        require_once '../../app/views/login/indexAdmin.php';
+        require_once '../../app/Views/login/indexAdmin.php';
     }
 
     public function authenticate()

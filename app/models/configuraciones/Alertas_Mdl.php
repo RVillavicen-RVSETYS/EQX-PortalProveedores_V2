@@ -74,7 +74,7 @@ class Alertas_Mdl
         } catch (\PDOException $e) {
             // Captura de errores y almacenamiento en el log
             $timestamp = date("Y-m-d H:i:s");
-            error_log("[$timestamp] app/models/Alertas_Mdl.php -> Error al listar las Alertas: " . $e->getMessage(), 3, LOG_FILE_BD);
+            error_log("[$timestamp] app/Models/Alertas_Mdl.php -> Error al listar las Alertas: " . $e->getMessage(), 3, LOG_FILE_BD);
             return ['success' => false, 'message' => 'Error Al Obtener Alertas. Notifica a tu administrador'];
         }
     }
@@ -132,7 +132,7 @@ class Alertas_Mdl
         } catch (\PDOException $e) {
             // Captura de errores y almacenamiento en el log
             $timestamp = date("Y-m-d H:i:s");
-            error_log("[$timestamp] app/models/Alertas_Mdl.php -> Error Al Obtener Información De Una Alerta: " . $e->getMessage(), 3, LOG_FILE_BD);
+            error_log("[$timestamp] app/Models/Alertas_Mdl.php -> Error Al Obtener Información De Una Alerta: " . $e->getMessage(), 3, LOG_FILE_BD);
             return ['success' => false, 'message' => 'Error Al Obtener Información De Alertas. Notifica a tu administrador'];
         }
     }
@@ -192,7 +192,7 @@ class Alertas_Mdl
             }
         } catch (\Exception $e) {
             $timestamp = date("Y-m-d H:i:s");
-            error_log("[$timestamp] app/models/Alertas_Mdl.php ->Error Al Crear Alerta: " . $e->getMessage(), 3, LOG_FILE_BD);
+            error_log("[$timestamp] app/Models/Alertas_Mdl.php ->Error Al Crear Alerta: " . $e->getMessage(), 3, LOG_FILE_BD);
             if (self::$debug) {
                 echo "Error Al Crear Alerta: " . $e->getMessage();
             }
@@ -235,7 +235,7 @@ class Alertas_Mdl
             }
         } catch (\Exception $e) {
             $timestamp = date("Y-m-d H:i:s");
-            error_log("[$timestamp] app/models/Alertas_Mdl.php ->Error Al Cambiar Estatus: " . $e->getMessage(), 3, LOG_FILE_BD);
+            error_log("[$timestamp] app/Models/Alertas_Mdl.php ->Error Al Cambiar Estatus: " . $e->getMessage(), 3, LOG_FILE_BD);
             if (self::$debug) {
                 echo "Error Al Cambiar Estatus: " . $e->getMessage();
             }
@@ -311,7 +311,7 @@ class Alertas_Mdl
             }
         } catch (\Exception $e) {
             $timestamp = date("Y-m-d H:i:s");
-            error_log("[$timestamp] app/models/Alertas_Mdl.php ->Error Al Actualizar Alerta: " . $e->getMessage(), 3, LOG_FILE_BD);
+            error_log("[$timestamp] app/Models/Alertas_Mdl.php ->Error Al Actualizar Alerta: " . $e->getMessage(), 3, LOG_FILE_BD);
             if (self::$debug) {
                 echo "Error Al Actualizar Alerta: " . $e->getMessage() . PHP_EOL;
             }

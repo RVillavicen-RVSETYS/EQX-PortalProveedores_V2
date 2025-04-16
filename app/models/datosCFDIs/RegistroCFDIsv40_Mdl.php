@@ -112,8 +112,8 @@ class RegistroCFDIsv40_Mdl
             if (!$almacenaPDF["success"] || !$almacenaXML["success"]) {
                 throw new \Exception("Problemas al Almacenar la Factura, Notifica a tu Administrador.");
             } else {
-                $urlFacturaPDF = $almacenaPDF["data"]["relativePath"];
-                $urlFacturaXML = $almacenaXML["data"]["relativePath"];
+                $urlFacturaPDF = $almacenaPDF["data"]["rutaParaBD"];
+                $urlFacturaXML = $almacenaXML["data"]["rutaParaBD"];
 
                 if (self::$debug) {
                     echo "<br> * Factura almacenada correctamente. <br>";
@@ -234,7 +234,7 @@ class RegistroCFDIsv40_Mdl
         } catch (\Exception $e) {
             BD_Connect::rollBack();
             $timestamp = date("Y-m-d H:i:s");
-            error_log("[$timestamp] app/models/datosCFDIs/RegistroCFDIsv40_Mdl.php -> Error al registrar la Compra: " . $e->getMessage(), 3, LOG_FILE_BD);
+            error_log("[$timestamp] app/Models/datosCFDIs/RegistroCFDIsv40_Mdl.php -> Error al registrar la Compra: " . $e->getMessage(), 3, LOG_FILE_BD);
             if (self::$debug) {
                 echo "Error al registrar la Compra: " . $e->getMessage();
             }

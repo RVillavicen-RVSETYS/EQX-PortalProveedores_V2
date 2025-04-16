@@ -100,6 +100,7 @@ class DocumentosController extends Controller
         $currentYear = date('Y'); // Año actual
         $currentYearMonth = date('Y-m'); // Mes actual
         $destinationDir = $this->basePath . DIRECTORY_SEPARATOR . $empresa . DIRECTORY_SEPARATOR . $tipoDoctoNombre . DIRECTORY_SEPARATOR . $currentYear . DIRECTORY_SEPARATOR . $idProveedor . DIRECTORY_SEPARATOR . $currentYearMonth;
+        $destinationDirSinBasePath = $empresa . DIRECTORY_SEPARATOR . $tipoDoctoNombre . DIRECTORY_SEPARATOR . $currentYear . DIRECTORY_SEPARATOR . $idProveedor . DIRECTORY_SEPARATOR . $currentYearMonth;
 
         if ($this->debug == 1) {
             echo "Directorio de Destino: {$destinationDir}<br>";
@@ -123,11 +124,13 @@ class DocumentosController extends Controller
 
         // Ruta absoluta y relativa
         $destinationPath = $destinationDir . DIRECTORY_SEPARATOR . $fileName; // Ruta absoluta
+        $destinationDirSinBasePath = $destinationDirSinBasePath . DIRECTORY_SEPARATOR . $fileName; // Ruta relativa para almacenar en la base de datos
         $relativePath = str_replace(realpath(__DIR__ . '/../../../'), '', $destinationPath); // Ruta relativa basada en __DIR__
 
         if ($this->debug == 1) {
             echo "Ruta Relativa: {$relativePath}<br>";
             echo "Ruta Destino final: {$destinationPath}<br>";
+            echo "Ruta a Almacenar en BD: {$destinationDirSinBasePath}<br>";
         }
 
         // Mover el archivo temporal a la ubicación final
@@ -142,6 +145,7 @@ class DocumentosController extends Controller
         $response['data'] = [
             'absolutePath' => $destinationPath,
             'relativePath' => $relativePath,
+            'rutaParaBD' => $destinationDirSinBasePath,
             'fileName' => $fileName,
             'directory' => $destinationDir,
             'idProveedor' => $idProveedor,

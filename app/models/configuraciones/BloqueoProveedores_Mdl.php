@@ -71,7 +71,7 @@ class BloqueoProveedores_Mdl
         } catch (\PDOException $e) {
             // Captura de errores y almacenamiento en el log
             $timestamp = date("Y-m-d H:i:s");
-            error_log("[$timestamp] app/models/BloqueoProveedores_Mdl.php -> Error Al Obtener Datos Del Periodo De Bloqueo: " . $e->getMessage(), 3, LOG_FILE_BD);
+            error_log("[$timestamp] app/Models/BloqueoProveedores_Mdl.php -> Error Al Obtener Datos Del Periodo De Bloqueo: " . $e->getMessage(), 3, LOG_FILE_BD);
             return ['success' => false, 'message' => 'Error Al Obtener Datos Del Periodo De Bloqueo. Notifica a tu administrador'];
         }
     }
@@ -120,7 +120,7 @@ class BloqueoProveedores_Mdl
         } catch (\PDOException $e) {
             // Captura de errores y almacenamiento en el log
             $timestamp = date("Y-m-d H:i:s");
-            error_log("[$timestamp] app/models/BloqueoProveedores_Mdl.php -> Error Al Obtener Cierre Anual: " . $e->getMessage(), 3, LOG_FILE_BD);
+            error_log("[$timestamp] app/Models/BloqueoProveedores_Mdl.php -> Error Al Obtener Cierre Anual: " . $e->getMessage(), 3, LOG_FILE_BD);
             return ['success' => false, 'message' => 'Error Al Obtener Cierre Anual. Notifica a tu administrador'];
         }
     }
@@ -168,7 +168,7 @@ class BloqueoProveedores_Mdl
             }
         } catch (\Exception $e) {
             $timestamp = date("Y-m-d H:i:s");
-            error_log("[$timestamp] app/models/BloqueoProveedores_Mdl.php ->Error Al Actualizar Datos De Bloqueo: " . $e->getMessage(), 3, LOG_FILE_BD);
+            error_log("[$timestamp] app/Models/BloqueoProveedores_Mdl.php ->Error Al Actualizar Datos De Bloqueo: " . $e->getMessage(), 3, LOG_FILE_BD);
             if (self::$debug) {
                 echo "Error Al Actualizar Datos De Bloqueo: " . $e->getMessage();
             }
@@ -215,7 +215,7 @@ class BloqueoProveedores_Mdl
             }
         } catch (\Exception $e) {
             $timestamp = date("Y-m-d H:i:s");
-            error_log("[$timestamp] app/models/BloqueoProveedores_Mdl.php ->Error Al Actualizar Datos De Bloqueo: " . $e->getMessage(), 3, LOG_FILE_BD);
+            error_log("[$timestamp] app/Models/BloqueoProveedores_Mdl.php ->Error Al Actualizar Datos De Bloqueo: " . $e->getMessage(), 3, LOG_FILE_BD);
             if (self::$debug) {
                 echo "Error Al Actualizar Datos De Bloqueo: " . $e->getMessage();
             }
@@ -253,7 +253,7 @@ class BloqueoProveedores_Mdl
             }
         } catch (\Exception $e) {
             $timestamp = date("Y-m-d H:i:s");
-            error_log("[$timestamp] app/models/BloqueoProveedores_Mdl.php ->Error Al Desactivar Cierre Anual: " . $e->getMessage(), 3, LOG_FILE_BD);
+            error_log("[$timestamp] app/Models/BloqueoProveedores_Mdl.php ->Error Al Desactivar Cierre Anual: " . $e->getMessage(), 3, LOG_FILE_BD);
             if (self::$debug) {
                 echo "Error Al Desactivar Cierre Anual: " . $e->getMessage();
             }
@@ -308,7 +308,7 @@ class BloqueoProveedores_Mdl
             }
         } catch (\Exception $e) {
             $timestamp = date("Y-m-d H:i:s");
-            error_log("[$timestamp] app/models/BloqueoProveedores_Mdl.php ->Error Al Registrar Cierre Anual: " . $e->getMessage(), 3, LOG_FILE_BD);
+            error_log("[$timestamp] app/Models/BloqueoProveedores_Mdl.php ->Error Al Registrar Cierre Anual: " . $e->getMessage(), 3, LOG_FILE_BD);
             if (self::$debug) {
                 echo "Error Al Registrar Cierre Anual: " . $e->getMessage();
             }
@@ -346,7 +346,7 @@ class BloqueoProveedores_Mdl
             }
         } catch (\Exception $e) {
             $timestamp = date("Y-m-d H:i:s");
-            error_log("[$timestamp] app/models/BloqueoProveedores_Mdl.php ->Error Al Actualizar Estatus: " . $e->getMessage(), 3, LOG_FILE_BD);
+            error_log("[$timestamp] app/Models/BloqueoProveedores_Mdl.php ->Error Al Actualizar Estatus: " . $e->getMessage(), 3, LOG_FILE_BD);
             if (self::$debug) {
                 echo "Error Al Actualizar Estatus: " . $e->getMessage();
             }
@@ -384,7 +384,7 @@ class BloqueoProveedores_Mdl
             }
         } catch (\Exception $e) {
             $timestamp = date("Y-m-d H:i:s");
-            error_log("[$timestamp] app/models/BloqueoProveedores_Mdl.php ->Error Al Actualizar Estatus: " . $e->getMessage(), 3, LOG_FILE_BD);
+            error_log("[$timestamp] app/Models/BloqueoProveedores_Mdl.php ->Error Al Actualizar Estatus: " . $e->getMessage(), 3, LOG_FILE_BD);
             if (self::$debug) {
                 echo "Error Al Actualizar Estatus: " . $e->getMessage();
             }
@@ -438,7 +438,7 @@ class BloqueoProveedores_Mdl
             }
         } catch (\Exception $e) {
             $timestamp = date("Y-m-d H:i:s");
-            error_log("[$timestamp] app/models/BloqueoProveedores_Mdl.php ->Error Al Actualizar Lista De Proveedores: " . $e->getMessage(), 3, LOG_FILE_BD);
+            error_log("[$timestamp] app/Models/BloqueoProveedores_Mdl.php ->Error Al Actualizar Lista De Proveedores: " . $e->getMessage(), 3, LOG_FILE_BD);
             if (self::$debug) {
                 echo "Error Al Actualizar Lista De Proveedores: " . $e->getMessage();
             }
@@ -494,7 +494,7 @@ class BloqueoProveedores_Mdl
             }
         } catch (\Exception $e) {
             $timestamp = date("Y-m-d H:i:s");
-            error_log("[$timestamp] app/models/BloqueoProveedores_Mdl.php ->Error Al Agregar El Proveedor: " . $e->getMessage(), 3, LOG_FILE_BD);
+            error_log("[$timestamp] app/Models/BloqueoProveedores_Mdl.php ->Error Al Agregar El Proveedor: " . $e->getMessage(), 3, LOG_FILE_BD);
             if (self::$debug) {
                 echo "Error Al Agregar El Proveedor: " . $e->getMessage();
             }
@@ -534,7 +534,7 @@ class BloqueoProveedores_Mdl
             }
         } catch (\Exception $e) {
             $timestamp = date("Y-m-d H:i:s");
-            error_log("[$timestamp] app/models/BloqueoProveedores_Mdl.php ->Error Al Cambiar Estatus: " . $e->getMessage(), 3, LOG_FILE_BD);
+            error_log("[$timestamp] app/Models/BloqueoProveedores_Mdl.php ->Error Al Cambiar Estatus: " . $e->getMessage(), 3, LOG_FILE_BD);
             if (self::$debug) {
                 echo "Error Al Cambiar Estatus: " . $e->getMessage();
             }

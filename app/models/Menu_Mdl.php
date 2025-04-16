@@ -149,7 +149,7 @@ class Menu_Mdl
         } catch (\PDOException $e) {
             // Captura de errores y almacenamiento en el log
             $timestamp = date("Y-m-d H:i:s");
-            error_log("[$timestamp] app/models/Menu_Mdl.php -> Error al obtener datos para el menú: " . $e->getMessage(), 3, LOG_FILE_BD);
+            error_log("[$timestamp] app/Models/Menu_Mdl.php -> Error al obtener datos para el menú: " . $e->getMessage(), 3, LOG_FILE_BD);
             return ['success' => false, 'message' => 'Error al obtener el menú. Notifica a tu administrador'];
         }
     }
@@ -197,7 +197,7 @@ class Menu_Mdl
         } catch (\PDOException $e) {
             // Captura de errores y almacenamiento en el log
             $timestamp = date("Y-m-d H:i:s");
-            error_log("[$timestamp] app/models/Menu_Mdl.php -> Error al listar las Areas de acceso: " . $e->getMessage(), 3, LOG_FILE_BD);
+            error_log("[$timestamp] app/Models/Menu_Mdl.php -> Error al listar las Areas de acceso: " . $e->getMessage(), 3, LOG_FILE_BD);
             return ['success' => false, 'message' => 'Error al obtener las Areas. Notifica a tu administrador'];
         }
     }

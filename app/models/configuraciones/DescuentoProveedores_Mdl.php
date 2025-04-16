@@ -70,7 +70,7 @@ class DescuentoProveedores_Mdl
         } catch (\PDOException $e) {
             // Captura de errores y almacenamiento en el log
             $timestamp = date("Y-m-d H:i:s");
-            error_log("[$timestamp] app/models/DescuentoProveedores_Mdl.php -> Error al listar Proveedores Con Descuento: " . $e->getMessage(), 3, LOG_FILE_BD);
+            error_log("[$timestamp] app/Models/DescuentoProveedores_Mdl.php -> Error al listar Proveedores Con Descuento: " . $e->getMessage(), 3, LOG_FILE_BD);
             return ['success' => false, 'message' => 'Error al listar Proveedores Con Descuento. Notifica a tu administrador'];
         }
     }
@@ -119,7 +119,7 @@ class DescuentoProveedores_Mdl
         } catch (\PDOException $e) {
             // Captura de errores y almacenamiento en el log
             $timestamp = date("Y-m-d H:i:s");
-            error_log("[$timestamp] app/models/DescuentoProveedores_Mdl.php -> Error al listar Proveedores Con Descuento: " . $e->getMessage(), 3, LOG_FILE_BD);
+            error_log("[$timestamp] app/Models/DescuentoProveedores_Mdl.php -> Error al listar Proveedores Con Descuento: " . $e->getMessage(), 3, LOG_FILE_BD);
             return ['success' => false, 'message' => 'Error al listar Proveedores Con Descuento. Notifica a tu administrador'];
         }
     }
@@ -164,7 +164,7 @@ class DescuentoProveedores_Mdl
             }
         } catch (\Exception $e) {
             $timestamp = date("Y-m-d H:i:s");
-            error_log("[$timestamp] app/models/DescuentoProveedores_Mdl.php ->Error Al Agregar Proveedor: " . $e->getMessage(), 3, LOG_FILE_BD);
+            error_log("[$timestamp] app/Models/DescuentoProveedores_Mdl.php ->Error Al Agregar Proveedor: " . $e->getMessage(), 3, LOG_FILE_BD);
             if (self::$debug) {
                 echo "Error Al Agregar Proveedor: " . $e->getMessage();
             }
@@ -207,7 +207,7 @@ class DescuentoProveedores_Mdl
             }
         } catch (\Exception $e) {
             $timestamp = date("Y-m-d H:i:s");
-            error_log("[$timestamp] app/models/DescuentoProveedores_Mdl.php ->Error Al Cambiar Estatus: " . $e->getMessage(), 3, LOG_FILE_BD);
+            error_log("[$timestamp] app/Models/DescuentoProveedores_Mdl.php ->Error Al Cambiar Estatus: " . $e->getMessage(), 3, LOG_FILE_BD);
             if (self::$debug) {
                 echo "Error Al Cambiar Estatus: " . $e->getMessage();
             }
