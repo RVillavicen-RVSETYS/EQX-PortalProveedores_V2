@@ -41,7 +41,7 @@ class Anticipos_Mdl
             }
         } catch (\Exception $e) {
             $timestamp = date("Y-m-d H:i:s");
-            error_log("[$timestamp] app/models/datosCompra/Anticipos_Mdl.php ->Error buscar Anticipos para la OC: " . $e->getMessage(), 3, LOG_FILE_BD); // Manejo del error
+            error_log("[$timestamp] app/Models/datosCompra/Anticipos_Mdl.php ->Error buscar Anticipos para la OC: " . $e->getMessage(), 3, LOG_FILE_BD); // Manejo del error
             if (self::$debug) {
                 echo "Error al contar Anticipos: " . $e->getMessage(); // Mostrar error en modo depuración
             }
@@ -85,7 +85,7 @@ class Anticipos_Mdl
             }
         } catch (\Exception $e) {
             $timestamp = date("Y-m-d H:i:s");
-            error_log("[$timestamp] app/models/datosCompra/Anticipos_Mdl.php ->Error contar HES de la OC: " . $e->getMessage(), 3, LOG_FILE_BD); // Manejo del error
+            error_log("[$timestamp] app/Models/datosCompra/Anticipos_Mdl.php ->Error contar HES de la OC: " . $e->getMessage(), 3, LOG_FILE_BD); // Manejo del error
             if (self::$debug) {
                 echo "Error al buscar Anticipo: " . $e->getMessage(); // Mostrar error en modo depuración
             }

@@ -61,7 +61,7 @@ class Empresas_Mdl
             
         } catch (\Exception $e) {
             $timestamp = date("Y-m-d H:i:s");
-            error_log("[$timestamp] app/models/empresas/Empresas_Mdl.php ->Error buscar Empresas: " . $e->getMessage(), 3, LOG_FILE_BD); 
+            error_log("[$timestamp] app/Models/empresas/Empresas_Mdl.php ->Error buscar Empresas: " . $e->getMessage(), 3, LOG_FILE_BD); 
             if (self::$debug) {
                 echo "Error al listar Empresas: " . $e->getMessage(); // Mostrar error en modo depuración
             }
@@ -98,7 +98,7 @@ class Empresas_Mdl
                 
             } catch (\Exception $e) {
                 $timestamp = date("Y-m-d H:i:s");
-                error_log("[$timestamp] app/models/empresas/Empresas_Mdl.php ->Error buscar Empresas por Id: " . $e->getMessage(), 3, LOG_FILE_BD); 
+                error_log("[$timestamp] app/Models/empresas/Empresas_Mdl.php ->Error buscar Empresas por Id: " . $e->getMessage(), 3, LOG_FILE_BD); 
                 if (self::$debug) {
                     echo "Error al bucar Empresa: " . $e->getMessage(); // Mostrar error en modo depuración
                 }

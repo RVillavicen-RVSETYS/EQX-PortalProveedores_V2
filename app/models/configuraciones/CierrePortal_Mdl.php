@@ -65,7 +65,7 @@ class CierrePortal_Mdl
             }
         } catch (\Exception $e) {
             $timestamp = date("Y-m-d H:i:s");
-            error_log("[$timestamp] app/models/configuraciones/CierrePortal_Mdl.php ->Error al listar fechas de Bloqueo: " . $e->getMessage(), 3, LOG_FILE_BD); // Manejo del error
+            error_log("[$timestamp] app/Models/configuraciones/CierrePortal_Mdl.php ->Error al listar fechas de Bloqueo: " . $e->getMessage(), 3, LOG_FILE_BD); // Manejo del error
             if (self::$debug) {
                 echo "Error al listar fechas de Bloqueo: " . $e->getMessage(); // Mostrar error en modo depuración
             }
@@ -104,7 +104,7 @@ class CierrePortal_Mdl
             }
         } catch (\Exception $e) {
             $timestamp = date("Y-m-d H:i:s");
-            error_log("[$timestamp] app/models/Configuraciones/CierrePortal_Mdl.php ->Error al buscar Proveedor Excento: " . $e->getMessage(), 3, LOG_FILE); // Manejo del error
+            error_log("[$timestamp] app/Models/Configuraciones/CierrePortal_Mdl.php ->Error al buscar Proveedor Excento: " . $e->getMessage(), 3, LOG_FILE); // Manejo del error
             if (self::$debug) {
                 echo "Error al buscar Proveedor Excento: " . $e->getMessage(); // Mostrar error en modo depuración
             }

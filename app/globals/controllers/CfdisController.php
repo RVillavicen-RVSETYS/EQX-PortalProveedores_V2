@@ -149,7 +149,7 @@ class CfdisController extends Controller
         } catch (\Exception $e) {
             // Manejo de errores
             $timestamp = date("Y-m-d H:i:s");
-            error_log("[$timestamp] app/models/CFDI_Mdl.php ->Error al leer CFDI XML: " . $e->getMessage(), 3, LOG_FILE_BD);
+            error_log("[$timestamp] app/Models/CFDI_Mdl.php ->Error al leer CFDI XML: " . $e->getMessage(), 3, LOG_FILE_BD);
             $response['message'] = 'Error al leer el archivo XML: ' . $e->getMessage();
 
             if (self::$debug) {

@@ -11,7 +11,7 @@ class Login
     public function index()
     {
         // Cargar la vista de login
-        require_once '../app/views/login/index.php';
+        require_once '../app/Views/login/index.php';
     }
 
     public function authenticate()

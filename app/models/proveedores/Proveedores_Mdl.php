@@ -76,7 +76,7 @@ class Proveedores_Mdl
         } catch (\PDOException $e) {
             // Captura de errores y almacenamiento en el log
             $timestamp = date("Y-m-d H:i:s");
-            error_log("[$timestamp] app/models/ControlProveedores_Mdl.php -> Error al listar las Areas de acceso: " . $e->getMessage(), 3, LOG_FILE_BD);
+            error_log("[$timestamp] app/Models/ControlProveedores_Mdl.php -> Error al listar las Areas de acceso: " . $e->getMessage(), 3, LOG_FILE_BD);
             return ['success' => false, 'message' => 'Error Al Obtener Proveedores. Notifica a tu administrador'];
         }
     }
@@ -119,7 +119,7 @@ class Proveedores_Mdl
         } catch (\PDOException $e) {
             // Captura de errores y almacenamiento en el log
             $timestamp = date("Y-m-d H:i:s");
-            error_log("[$timestamp] app/models/ControlProveedores_Mdl.php -> Error al listar las Areas de acceso: " . $e->getMessage(), 3, LOG_FILE_BD);
+            error_log("[$timestamp] app/Models/ControlProveedores_Mdl.php -> Error al listar las Areas de acceso: " . $e->getMessage(), 3, LOG_FILE_BD);
             return ['success' => false, 'message' => 'Error Al Obtener Proveedores. Notifica a tu administrador'];
         }
     }
@@ -170,7 +170,7 @@ class Proveedores_Mdl
             }
         } catch (\Exception $e) {
             $timestamp = date("Y-m-d H:i:s");
-            error_log("[$timestamp] app/models/Proveedores_Mdl.php ->Error Al Obtener Datos Del Proveedor: " . $e->getMessage(), 3, LOG_FILE_BD); // Manejo del error
+            error_log("[$timestamp] app/Models/Proveedores_Mdl.php ->Error Al Obtener Datos Del Proveedor: " . $e->getMessage(), 3, LOG_FILE_BD); // Manejo del error
             if (self::$debug) {
                 echo "Error Al Obtener Datos Del Proveedor: " . $e->getMessage(); // Mostrar error en modo depuración
             }
@@ -207,7 +207,7 @@ class Proveedores_Mdl
             }
         } catch (\Exception $e) {
             $timestamp = date("Y-m-d H:i:s");
-            error_log("[$timestamp] app/models/Proveedores_Mdl.php ->Error Al Obtener Tipos De Monedas: " . $e->getMessage(), 3, LOG_FILE_BD); // Manejo del error
+            error_log("[$timestamp] app/Models/Proveedores_Mdl.php ->Error Al Obtener Tipos De Monedas: " . $e->getMessage(), 3, LOG_FILE_BD); // Manejo del error
             if (self::$debug) {
                 echo "Error Al Obtener Tipos De Monedas: " . $e->getMessage(); // Mostrar error en modo depuración
             }
@@ -267,7 +267,7 @@ class Proveedores_Mdl
             }
         } catch (\Exception $e) {
             $timestamp = date("Y-m-d H:i:s");
-            error_log("[$timestamp] app/models/Proveedores_Mdl.php ->Error Al Obtener Los Proveedores: " . $e->getMessage(), 3, LOG_FILE_BD); // Manejo del error
+            error_log("[$timestamp] app/Models/Proveedores_Mdl.php ->Error Al Obtener Los Proveedores: " . $e->getMessage(), 3, LOG_FILE_BD); // Manejo del error
             if (self::$debug) {
                 echo "Error Al Obtener Los Proveedores: " . $e->getMessage(); // Mostrar error en modo depuración
             }
@@ -330,11 +330,51 @@ class Proveedores_Mdl
             }
         } catch (\Exception $e) {
             $timestamp = date("Y-m-d H:i:s");
-            error_log("[$timestamp] app/models/Proveedores_Mdl.php ->Error Al Obtener Las Recepciones Sin Facturas: " . $e->getMessage(), 3, LOG_FILE_BD); // Manejo del error
+            error_log("[$timestamp] app/Models/Proveedores_Mdl.php ->Error Al Obtener Las Recepciones Sin Facturas: " . $e->getMessage(), 3, LOG_FILE_BD); // Manejo del error
             if (self::$debug) {
                 echo "Error Al Obtener Las Recepciones Sin Facturas: " . $e->getMessage(); // Mostrar error en modo depuración
             }
             return ['success' => false, 'message' => 'Problemas Al Obtener Recepciones Sin Facturas, Notifica a tu administrador.'];
+        }
+    }
+
+    public function obtenerFacturasSinFechaPago($idProveedor)
+    {
+        try {
+            $sql = "";
+
+            if (self::$debug) {
+                $params = [
+                    ':idProveedor' => $idProveedor
+                ];
+                $this->dbHes->imprimirConsulta($sql, $params, 'Busca Las Facturas Sin Fecha De Pago');
+            }
+            $stmt = $this->dbHes->prepare($sql);
+            $stmt->bindParam(':idProveedor', $idProveedor, PDO::PARAM_INT);
+            $stmt->execute();
+            $dataRecepcionesSinF = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            if (self::$debug) {
+                echo '<br>Resultado de Query:';
+                var_dump($dataRecepcionesSinF);
+                echo '<br><br>';
+            }
+
+            if ($dataRecepcionesSinF) {
+                return ['success' => true, 'data' => $dataRecepcionesSinF];
+            } else {
+                if (self::$debug) {
+                    echo "No Se Obtuvieron Facturas Sin Fecha De Pago.<br>"; // Mostrar error en modo depuración
+                }
+                return ['success' => false, 'message' => 'No Se Obtuvieron Facturas Sin Fecha De Pago..'];
+            }
+        } catch (\Exception $e) {
+            $timestamp = date("Y-m-d H:i:s");
+            error_log("[$timestamp] app/Models/Proveedores_Mdl.php ->Error Al Obtener Las Facturas Sin Fecha De Pago: " . $e->getMessage(), 3, LOG_FILE_BD); // Manejo del error
+            if (self::$debug) {
+                echo "Error Al Obtener Las Facturas Sin Fecha De Pago: " . $e->getMessage(); // Mostrar error en modo depuración
+            }
+            return ['success' => false, 'message' => 'Problemas Al Obtener Facturas Sin Fecha De Pago, Notifica a tu administrador.'];
         }
     }
 
@@ -375,7 +415,7 @@ class Proveedores_Mdl
             }
         } catch (\Exception $e) {
             $timestamp = date("Y-m-d H:i:s");
-            error_log("[$timestamp] app/models/Proveedores_Mdl.php ->Error Al Actualizar El RFC Del Proveedor: " . $e->getMessage(), 3, LOG_FILE_BD);
+            error_log("[$timestamp] app/Models/Proveedores_Mdl.php ->Error Al Actualizar El RFC Del Proveedor: " . $e->getMessage(), 3, LOG_FILE_BD);
             if (self::$debug) {
                 echo "Error Al Actualizar El RFC Del Proveedor: " . $e->getMessage();
             }
@@ -451,7 +491,7 @@ class Proveedores_Mdl
         } catch (\Exception $e) {
             // Registrar error
             $timestamp = date("Y-m-d H:i:s");
-            error_log("[$timestamp] app/models/proveedores/Proveedores_Mdl.php -> Error en exepcionesProveedoresFacturas: " . $e->getMessage(), 3, LOG_FILE_BD);
+            error_log("[$timestamp] app/Models/proveedores/Proveedores_Mdl.php -> Error en exepcionesProveedoresFacturas: " . $e->getMessage(), 3, LOG_FILE_BD);
 
             // Debug del error
             if (self::$debug) {
@@ -500,7 +540,7 @@ class Proveedores_Mdl
             }
         } catch (\Exception $e) {
             $timestamp = date("Y-m-d H:i:s");
-            error_log("[$timestamp] app/models/Proveedores_Mdl.php ->Error Al Actualizar El Correo Del Proveedor: " . $e->getMessage(), 3, LOG_FILE_BD);
+            error_log("[$timestamp] app/Models/Proveedores_Mdl.php ->Error Al Actualizar El Correo Del Proveedor: " . $e->getMessage(), 3, LOG_FILE_BD);
             if (self::$debug) {
                 echo "Error Al Actualizar El Correo Del Proveedor: " . $e->getMessage();
             }
@@ -544,7 +584,7 @@ class Proveedores_Mdl
             }
         } catch (\Exception $e) {
             $timestamp = date("Y-m-d H:i:s");
-            error_log("[$timestamp] app/models/Proveedores_Mdl.php ->Error Al Actualizar La Contraseña Del Proveedor: " . $e->getMessage(), 3, LOG_FILE_BD);
+            error_log("[$timestamp] app/Models/Proveedores_Mdl.php ->Error Al Actualizar La Contraseña Del Proveedor: " . $e->getMessage(), 3, LOG_FILE_BD);
             if (self::$debug) {
                 echo "Error Al Actualizar La Contraseña Del Proveedor: " . $e->getMessage();
             }
@@ -646,7 +686,7 @@ class Proveedores_Mdl
             }
         } catch (\Exception $e) {
             $timestamp = date("Y-m-d H:i:s");
-            error_log("[$timestamp] app/models/Proveedores_Mdl.php ->Error Al Actualizar La Lista Temporal De Proveedores: " . $e->getMessage(), 3, LOG_FILE_BD);
+            error_log("[$timestamp] app/Models/Proveedores_Mdl.php ->Error Al Actualizar La Lista Temporal De Proveedores: " . $e->getMessage(), 3, LOG_FILE_BD);
             if (self::$debug) {
                 echo "Error Al Actualizar La Lista Temporal De Proveedores: " . $e->getMessage();
             }
@@ -705,7 +745,7 @@ class Proveedores_Mdl
             }
         } catch (\Exception $e) {
             $timestamp = date("Y-m-d H:i:s");
-            error_log("[$timestamp] app/models/Proveedores_Mdl.php ->Error Al Actualizar La Lista De Proveedores: " . $e->getMessage(), 3, LOG_FILE_BD);
+            error_log("[$timestamp] app/Models/Proveedores_Mdl.php ->Error Al Actualizar La Lista De Proveedores: " . $e->getMessage(), 3, LOG_FILE_BD);
             if (self::$debug) {
                 echo "Error Al Actualizar La Lista De Proveedores: " . $e->getMessage();
             }
@@ -776,7 +816,7 @@ class Proveedores_Mdl
             }
         } catch (\PDOException $e) {
             $timestamp = date("Y-m-d H:i:s");
-            error_log("[$timestamp] app/models/Proveedores_Mdl.php -> Error al obtener complementos pendientes: " . $e->getMessage(), 3, LOG_FILE_BD);
+            error_log("[$timestamp] app/Models/Proveedores_Mdl.php -> Error al obtener complementos pendientes: " . $e->getMessage(), 3, LOG_FILE_BD);
             return ['success' => false, 'message' => 'Error Al Obtener Complementos Pendientes. Notifica a tu administrador', 'cantData' => 0];
         }
     }
@@ -900,7 +940,7 @@ class Proveedores_Mdl
             }
         } catch (\Exception $e) {
             $timestamp = date("Y-m-d H:i:s");
-            error_log("[$timestamp] app/models/proveedores/Proveedores_MDL.php ->Al Actualizar datos del Proveedor: " . $e->getMessage(), 3, LOG_FILE_BD);
+            error_log("[$timestamp] app/Models/proveedores/Proveedores_MDL.php ->Al Actualizar datos del Proveedor: " . $e->getMessage(), 3, LOG_FILE_BD);
             return ['success' => false, 'message' => 'Error: ' . $e->getMessage()];
         }
     }
