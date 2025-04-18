@@ -45,29 +45,31 @@ if ($debug == 1) {
                             break;
                     }
 
+                    $valida = '<center class="text-success"><i class="fas fa-check"></i></center>';
                     switch ($row['estatus']) {
                         case '1':
-                            $statContable = '<center class="text-danger"><i class="md md-close"></i></center>';
+                            $statContable = '<center class="text-muted"><i class="mdi mdi-clock"></i> En Verificación</center>';
                             $txtColor = '';
                             $bgColor = '';
                             break;
 
                         case '2':
-                            $statContable = '<center class="text-success"><i class="fas fa-check"></i></center>';
+                            $statContable = '<center class=""> ' . date('d-m-Y', strtotime($row['FechaPago'])) . ' </i></center>';
                             $txtColor = '';
                             $bgColor = '';
                             break;
 
                         case '3':
-                            $statContable = '<center class="text-danger"><i class="md md-close"></i></center>';
+                            $statContable = '<center class="text-danger"><i class="fas fa-ban"></i> Factura rechazada</center>';
                             $txtColor = 'text-danger';
                             $bgColor = 'danger';
                             break;
 
                         case '4':
-                            $statContable = '<center class="text-danger"><i class="md md-close"></i></center>';
+                            $statContable = '<center class="text-danger"><i class="mdi mdi-close-circle-outline"></i> Factura Cancelada</center>';
                             $txtColor = 'text-danger';
                             $bgColor = 'danger';
+                            $valida = '<center class="text-danger"><i class="fas fa-times"></i> Cancelada</center>';
                             break;
 
                         default:
@@ -75,14 +77,13 @@ if ($debug == 1) {
                             $bgColor = '';
                             break;
                     }
-
-                    $valida = '<center class="text-success"><i class="fas fa-check"></i></center>';
+                    
                     $cantCharRecp = strlen($row['noRecepcion']);
                     if ($cantCharRecp > 25) {
                         $recepciones = substr($row['noRecepcion'], 0, 25) . '...';
                     } else {
                         $recepciones = $row['noRecepcion'];
-                    }
+                    }                   
 
                     echo '<tr class="' . $txtColor . ' ' . $bgColor . '" >
                     <td class="text-center">' . $row['acuse'] . '</td>

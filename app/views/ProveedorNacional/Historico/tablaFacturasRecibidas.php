@@ -1,5 +1,5 @@
 <?php
-$debug = 0;
+$debug = 1;
 
 if ($debug == 1) {
     echo 'Contenido de areaData:' . PHP_EOL;
@@ -19,7 +19,7 @@ if ($debug == 1) {
                 <th>Fecha Recepción</th>
                 <th>Folio Interno</th>
                 <th>Status Fiscal</th>
-                <th>Estatus</th>
+                <th>Probable Pago</th>
                 <th>Comp. Pago</th> 
                 <th class="no-exportar">Ver</th>
             </tr>
@@ -45,29 +45,49 @@ if ($debug == 1) {
                         break;
                 }
 
+                $valida = '<center class="text-success"><i class="fas fa-check"></i></center>';
+                $compPago = '<center class="text-danger"><i class="fas fa-times"></i></center>';
+
+                if ($row['totalPagos'] == $row['totalComplementos'] &&  $row['Total'] == $row['totalPagos']) {
+                    $compPago = '<center class="text-success"><i class="fas fa-check"></i></center>';
+                }
+                if ($row['totalPagos'] == $row['totalComplementos']) {
+                    if ($row['totalComplementos'] > 0) {
+                        $compPago = '<center class="text-success">Al Corriente</center>';
+                    } else {
+                        $compPago = '';
+                    }
+                    
+                }
+                if ($row['totalPagos'] > $row['totalComplementos']) {
+                    $compPago = '<center class="text-danger">Pendiente</center>';
+                }
+
                 switch ($row['estatus']) {
                     case '1':
-                        $statContable = '<center class="text-danger"><i class="md md-close"></i></center>';
+                        $statContable = '<center class="text-muted"><i class="mdi mdi-clock"></i> En Verificación</center>';
                         $txtColor = '';
                         $bgColor = '';
                         break;
 
                     case '2':
-                        $statContable = '<center class="text-success"><i class="fas fa-check"></i></center>';
+                        $statContable = '<center class=""> ' . date('d-m-Y', strtotime($row['FechaPago'])) . ' </i></center>';
                         $txtColor = '';
                         $bgColor = '';
                         break;
 
                     case '3':
-                        $statContable = '<center class="text-danger"><i class="md md-close"></i></center>';
+                        $statContable = '<center class="text-danger"><i class="fas fa-ban"></i> Factura rechazada</center>';
                         $txtColor = 'text-danger';
                         $bgColor = 'danger';
                         break;
 
                     case '4':
-                        $statContable = '<center class="text-danger"><i class="md md-close"></i></center>';
+                        $statContable = '<center class="text-danger"><i class="mdi mdi-close-circle-outline"></i> Factura Cancelada</center>';
                         $txtColor = 'text-danger';
                         $bgColor = 'danger';
+                        $valida = '<center class="text-danger"><i class="fas fa-times"></i> Cancelada</center>';
+                        $compPago = '<center class="text-danger"><i class="fas fa-times"></i></center>';
                         break;
 
                     default:
@@ -76,7 +96,6 @@ if ($debug == 1) {
                         break;
                 }
 
-                $valida = '<center class="text-success"><i class="fas fa-check"></i></center>';
                 $cantCharRecp = strlen($row['noRecepcion']);
                 if ($cantCharRecp > 25) {
                     $recepciones = substr($row['noRecepcion'], 0, 25) . '...';
@@ -93,7 +112,7 @@ if ($debug == 1) {
                     <td>' . $row['referencia'] . '</td>
                     <td>' . $valida . ' </td>
                     <td>' . $statContable . '</td>
-                    <td></td>
+                    <td>' . $compPago . '</td>
                     <td> <button class="btn btn-sm btn-success" onClick="detalleCompra(\'' . $row['acuse'] . '\');"><i class="text-white icon-doc"></i></button> </td>';
             }
             ?>

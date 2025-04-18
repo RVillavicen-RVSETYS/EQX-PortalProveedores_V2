@@ -75,8 +75,9 @@ class Empresas_Mdl
             return ['success' => false, 'message' => 'Se requiere Id de Empresa.'];
         } else {
             try {
-                $sql = "SELECT *
+                $sql = "SELECT e.*, cg.diasPago, cg.maxComplementosPendientes
                         FROM empresas e
+                        INNER JOIN configuracionGral cg ON e.id = cg.idEmpresa
                         WHERE e.id = :idempresa"; 
     
                 if (self::$debug) {

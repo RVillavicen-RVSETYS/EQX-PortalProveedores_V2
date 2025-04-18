@@ -193,7 +193,7 @@ class ReglasAplicadasv40
         $fechaLimite = strtotime("- $tiempoVigencia");
 
         if (
-            !$configParaValidaciones['excepcionesProveedor']['AnioFiscal'] &&
+            !$configParaValidaciones['excepcionesProveedor']['FechaEmision'] &&
             ($fechaFactura < $fechaLimite || $fechaTimbrado < $fechaLimite)
         ) {
             $response["isValid"] = false;

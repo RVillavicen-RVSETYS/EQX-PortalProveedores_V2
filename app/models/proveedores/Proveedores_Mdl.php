@@ -755,6 +755,7 @@ class Proveedores_Mdl
 
     public function complementosPagoPendientesPorProveedor($idProveedor)
     {
+        //self::$debug = 1;
         try {
             $sql = "SELECT 
                         fc.uuid, 
@@ -774,7 +775,7 @@ class Proveedores_Mdl
                         ) cpd ON fc.uuid = cpd.uuidFact 
                     WHERE 
                         cp.idProveedor = :idProveedor 
-                        AND cp.idPago >= 1 
+                        AND cp.totalPagos > cp.totalComplementos
                         AND fc.idCatMetodoPago = 'PPD' 
                         AND (ISNULL(cpd.uuidFact) OR cpd.insoluto > 0)";
 

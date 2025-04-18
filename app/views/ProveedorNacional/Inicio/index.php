@@ -407,7 +407,7 @@ if ($notificaciones['success'] && !empty($notificaciones['data'])) {
     <script src="/dist/js/sidebarmenu.js"></script>
     <!--Custom JavaScript -->
     <script src="/dist/js/custom.js"></script>
-    <script src="/assets/scripts/basicFuctions.js"></script>
+    <script src="/dist/js/basicFuctions.js"></script>
     <script src="/assets/libs/toastr/build/toastr.min.js"></script>
     <script src="/assets/libs/moment/moment.js"></script>
     <script src="/assets/extra-libs/datatables.net/js/jquery.dataTables.min-ESP.js"></script>
@@ -435,7 +435,7 @@ if ($notificaciones['success'] && !empty($notificaciones['data'])) {
             $("#Form_CargaFactura").submit(function(e) {
                 e.preventDefault();
                 var formData = new FormData(this);
-                bloquearBtn('btn1');
+                //bloquearBtn('btn1');
                 $.ajax({
                     type: 'POST',
                     url: 'Inicio/registraNuevaFactura',
@@ -444,13 +444,13 @@ if ($notificaciones['success'] && !empty($notificaciones['data'])) {
                     processData: false,
                     contentType: false,
                     success: function(response) {
+                        desbloquearBtn('btn1');
                         if (response.success) {                            
                             resetFormulario("Form_CargaFactura");
                             notificaSuc(response.message); // Muestra el mensaje OK
                         } else {
                             notificaBad(response.message); // Muestra el mensaje de error
                         }
-                        desbloquearBtn('btn1');
                     },
                     error: function() {
                         notificaBad('Error al querer cargar factura. Consulta a tu administrador');
