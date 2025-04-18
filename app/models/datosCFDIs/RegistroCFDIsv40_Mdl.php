@@ -83,12 +83,16 @@ class RegistroCFDIsv40_Mdl
                 echo "<br> * Fecha Final de pago ajustada: $fechaPago";
                 $response["debug"] .= "\n* Fecha de pago ajustada: $fechaPago<br>";
             }
+            if ($dataDeValidacion["dataFactXML"]["Comprobante"]["MetodoPago"] == 'PUE') {
+                $valorTotalComplementos = $dataDeValidacion["dataFactXML"]["Comprobante"]["Total"];
+            } else {
+                $valorTotalComplementos = 0;
+            }
 
 
             // Insertar en compras
-            $sqlCompras = "INSERT INTO compras (idProveedor, subTotal, total, idCatTipoMoneda, sociedad, cPago, estatus, idUserReg, tipoUserReg, fechaReg, fechaVence, fechaProbablePago, claseDocto, referencia, descuento, notaCredito)
-                            VALUES (:idProveedor, :subTotal, :total, :idCatTipoMoneda, :sociedad, :cPago, :estatus, :idUserReg, :tipoUserReg, NOW(), :fechaVence, :fechaProbablePago, :claseDocto, :referencia, :descuento, :notaCredito)";
-            
+            $sqlCompras = "INSERT INTO compras (idProveedor, subTotal, total, idCatTipoMoneda, sociedad, cPago, estatus, idUserReg, tipoUserReg, fechaReg, fechaVence, fechaProbablePago, claseDocto, referencia, descuento, notaCredito, totalComplementos)
+                            VALUES (:idProveedor, :subTotal, :total, :idCatTipoMoneda, :sociedad, :cPago, :estatus, :idUserReg, :tipoUserReg, NOW(), :fechaVence, :fechaProbablePago, :claseDocto, :referencia, :descuento, :notaCredito, :totalComplementos)";
             $params = [
                 ":idProveedor" => $dataDeValidacion["dataMontosHES"]["idProveedor"],
                 ":subTotal" => $dataDeValidacion["dataFactXML"]["Comprobante"]["SubTotal"],
@@ -104,7 +108,8 @@ class RegistroCFDIsv40_Mdl
                 ":claseDocto" => $dataDeValidacion["dataMontosHES"]["resultQuery"][0]["TipoDocumento"],
                 ":referencia" => $dataDeValidacion["dataFactXML"]["Serializado"],
                 ":descuento" => ($dataDeValidacion["dataFactXML"]["Comprobante"]["SubTotal"] > $dataDeValidacion["dataFactXML"]["Comprobante"]["Total"]) ? 1 : 0,
-                ":notaCredito" => ($dataDeValidacion["anticipo"] > 0) ? 1 : 0
+                ":notaCredito" => ($dataDeValidacion["anticipo"] > 0) ? 1 : 0,
+                ":totalComplementos" => $valorTotalComplementos
             ];
 
             if (self::$debug) {                
@@ -195,8 +200,6 @@ class RegistroCFDIsv40_Mdl
             :idCatMetodoPago, :idCatFormaPago, :fechaFac, :usoCfdi, :folio, :serie, :noCertificadoSAT, :urlXML, :urlPDF, :estatus, :idUserReg, NOW(), '1', 
             :validada, :codigoEstatusSAT, :estadoValidaSAT, :estadoEFO, :serializado, :totalImpuestosTrasladados, :totalImpuestosRetenidos, :regimenFiscEmisor,
             :razonSocialRec, :regimenFiscRec, :exportacion, :tipoCambio, :version, :tipoComprobante)";
-            
-            
             $params = [
                 ":estatus" => '2',
                 ":urlXML" => isset($urlFacturaXML) ? $urlFacturaXML : NULL,

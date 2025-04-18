@@ -69,7 +69,7 @@ if ($debug == 1) {
             }
                 
             $contNotaCredito = $data['dataCompra']['data']['notaCredito'];
-            $requiereComplementoPago = ($data['dataCompra']['data']['idPago'] >= 1 AND $data['dataCompra']['data']['FacMetodoPago'] == 'PPD') ? 1 : 0 ;
+            $requiereComplementoPago = ($data['dataCompra']['data']['totalPagos'] > $data['dataCompra']['data']['totalPagos'] AND $data['dataCompra']['data']['FacMetodoPago'] == 'PPD') ? 1 : 0 ;
             ?>
             <ul class="nav customizer-tab" role="tablist">
                 <li class="nav-item">
@@ -138,7 +138,7 @@ if ($debug == 1) {
                                         $msjStatus = '<span class="label label-warning label-rounded" style="font-size: 1.5em;">CANCELADA</span>';
                                         break;
                                 }
-                                if ($data['dataCompra']['data']['idPago'] > 0) {
+                                if ($data['dataCompra']['data']['totalPagos'] > 0) {
                                     $msjStatus = '<span class="label label-success label-rounded" style="font-size: 1.5em;">PAGADA</span>';
                                 }
                                 echo $msjStatus;
