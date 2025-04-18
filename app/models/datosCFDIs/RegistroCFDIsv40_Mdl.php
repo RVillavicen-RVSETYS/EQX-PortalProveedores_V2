@@ -32,19 +32,67 @@ class RegistroCFDIsv40_Mdl
         try {
             // Iniciar transacción
             BD_Connect::beginTransaction();
+
+            //self::$debug = 1;
+            $facturaAlmacenada = 0;
             
             if (self::$debug) {
                 $response["debug"] .= "\n* Iniciando transacción...<br>";
+                echo "<br> * Iniciando transacción...<br>";
+                echo "<br> * Datos de validación: <br>";
+                var_dump($dataDeValidacion);
             }
+
             // Calcular fecha de vencimiento
+            // Ajustar la zona horaria a la de México
+            $timezone = new \DateTimeZone('America/Mexico_City');
+            $fechaActual = new \DateTime('now', $timezone);
+
             $dias = intval(str_replace(["DAY-", "MONTH-"], "", $dataDeValidacion["dataMontosHES"]["CPago"]));
             $intervalo = strpos($dataDeValidacion["dataMontosHES"]["CPago"], "MONTH") !== false ? "P{$dias}M" : "P{$dias}D";
-            $fechaVence = (new \DateTime())->add(new \DateInterval($intervalo))->format('Y-m-d');
+            $fechaVence = (clone $fechaActual)->add(new \DateInterval($intervalo))->format('Y-m-d');
+            if (self::$debug) {
+                echo "<br> * Fecha de vencimiento calculada: $fechaVence";
+                echo "<br> * Tiempo Agregado: $intervalo <br>";
+                echo "<br> * Dias de Pago: ".$dataDeValidacion["dataEmpresa"]["diasPago"]." <br>";
+                $response["debug"] .= "\n* Fecha de vencimiento calculada: $fechaVence<br>";
+            }
+
+            // Revisar en qué día cae $fechaVence
+            $diaSemana = (new \DateTime($fechaVence))->format('N'); // 1 (lunes) a 7 (domingo)
+            $diasPago = explode(',', $dataDeValidacion["dataEmpresa"]["diasPago"]); // Convertir días de pago a un array
+
+            // Ajustar $fechaPago al día de pago más cercano
+            $fechaPago = $fechaVence;
+            while (!in_array($diaSemana, $diasPago)) {
+                $fechaPago = (new \DateTime($fechaPago))->modify('-1 day')->format('Y-m-d');
+                $diaSemana = (new \DateTime($fechaPago))->format('N');
+            }
+
+            if (self::$debug) {
+                echo "<br> * Fecha de probable de pago ajustada: $fechaPago";
+                $response["debug"] .= "\n* Fecha probable de pago ajustada: $fechaPago<br>";
+            }
+
+            // Comparar si $fechaPago es menor que la fecha actual
+            if ($fechaPago < $fechaActual->format('Y-m-d')) {
+                $fechaPago = $fechaVence;
+            }
+
+            if (self::$debug) {
+                echo "<br> * Fecha Final de pago ajustada: $fechaPago";
+                $response["debug"] .= "\n* Fecha de pago ajustada: $fechaPago<br>";
+            }
+            if ($dataDeValidacion["dataFactXML"]["Comprobante"]["MetodoPago"] == 'PUE') {
+                $valorTotalComplementos = $dataDeValidacion["dataFactXML"]["Comprobante"]["Total"];
+            } else {
+                $valorTotalComplementos = 0;
+            }
+
 
             // Insertar en compras
-            $sqlCompras = "INSERT INTO compras (idProveedor, subTotal, total, idCatTipoMoneda, sociedad, cPago, estatus, idUserReg, tipoUserReg, fechaReg, fechaVence, claseDocto, referencia, descuento, notaCredito)
-                            VALUES (:idProveedor, :subTotal, :total, :idCatTipoMoneda, :sociedad, :cPago, :estatus, :idUserReg, :tipoUserReg, NOW(), :fechaVence, :claseDocto, :referencia, :descuento, :notaCredito)";
-            
+            $sqlCompras = "INSERT INTO compras (idProveedor, subTotal, total, idCatTipoMoneda, sociedad, cPago, estatus, idUserReg, tipoUserReg, fechaReg, fechaVence, fechaProbablePago, claseDocto, referencia, descuento, notaCredito, totalComplementos)
+                            VALUES (:idProveedor, :subTotal, :total, :idCatTipoMoneda, :sociedad, :cPago, :estatus, :idUserReg, :tipoUserReg, NOW(), :fechaVence, :fechaProbablePago, :claseDocto, :referencia, :descuento, :notaCredito, :totalComplementos)";
             $params = [
                 ":idProveedor" => $dataDeValidacion["dataMontosHES"]["idProveedor"],
                 ":subTotal" => $dataDeValidacion["dataFactXML"]["Comprobante"]["SubTotal"],
@@ -56,10 +104,12 @@ class RegistroCFDIsv40_Mdl
                 ":idUserReg" => $_SESSION['EQXident'],
                 ":tipoUserReg" => ($dataDeValidacion["isAdmin"] == 0) ? "PROV" : "ADMIN",
                 ":fechaVence" => $fechaVence,
+                ":fechaProbablePago" => $fechaPago,
                 ":claseDocto" => $dataDeValidacion["dataMontosHES"]["resultQuery"][0]["TipoDocumento"],
-                ":referencia" => empty($dataDeValidacion["dataFactXML"]["serializado"]),
+                ":referencia" => $dataDeValidacion["dataFactXML"]["Serializado"],
                 ":descuento" => ($dataDeValidacion["dataFactXML"]["Comprobante"]["SubTotal"] > $dataDeValidacion["dataFactXML"]["Comprobante"]["Total"]) ? 1 : 0,
-                ":notaCredito" => ($dataDeValidacion["anticipo"] > 0) ? 1 : 0
+                ":notaCredito" => ($dataDeValidacion["anticipo"] > 0) ? 1 : 0,
+                ":totalComplementos" => $valorTotalComplementos
             ];
 
             if (self::$debug) {                
@@ -114,6 +164,7 @@ class RegistroCFDIsv40_Mdl
             } else {
                 $urlFacturaPDF = $almacenaPDF["data"]["rutaParaBD"];
                 $urlFacturaXML = $almacenaXML["data"]["rutaParaBD"];
+                $facturaAlmacenada = 1;
 
                 if (self::$debug) {
                     echo "<br> * Factura almacenada correctamente. <br>";
@@ -149,8 +200,6 @@ class RegistroCFDIsv40_Mdl
             :idCatMetodoPago, :idCatFormaPago, :fechaFac, :usoCfdi, :folio, :serie, :noCertificadoSAT, :urlXML, :urlPDF, :estatus, :idUserReg, NOW(), '1', 
             :validada, :codigoEstatusSAT, :estadoValidaSAT, :estadoEFO, :serializado, :totalImpuestosTrasladados, :totalImpuestosRetenidos, :regimenFiscEmisor,
             :razonSocialRec, :regimenFiscRec, :exportacion, :tipoCambio, :version, :tipoComprobante)";
-            
-            
             $params = [
                 ":estatus" => '2',
                 ":urlXML" => isset($urlFacturaXML) ? $urlFacturaXML : NULL,
@@ -185,7 +234,7 @@ class RegistroCFDIsv40_Mdl
                 ":codigoEstatusSAT" => $dataDeValidacion["ValidFiscal"]["CodigoEstatus"],
                 ":estadoValidaSAT" => $dataDeValidacion["ValidFiscal"]["Estado"],
                 ":estadoEFO" => $dataDeValidacion["ValidFiscal"]["ValidacionEFOS"],
-                ":serializado" => empty($dataDeValidacion["dataFactXML"]["serializado"])
+                ":serializado" => $dataDeValidacion["dataFactXML"]["Serializado"]
             ];
 
             if (self::$debug) {
@@ -234,6 +283,37 @@ class RegistroCFDIsv40_Mdl
         } catch (\Exception $e) {
             BD_Connect::rollBack();
             $timestamp = date("Y-m-d H:i:s");
+            if ($facturaAlmacenada == 1) {
+                $borraDocumento = $almacenaDoctos->eliminaDocumento($urlFacturaPDF, 'PDF');
+                if ($borraDocumento["success"] == false) {
+                    error_log("[$timestamp] app/Models/datosCFDIs/RegistroCFDIsv40_Mdl.php -> Error al borrar la Factura: " . $urlFacturaPDF, 3, LOG_FILE);
+                    $response["debug"] .= "\n* Error al eliminar el PDF de la Factura: " . $borraDocumento["message"];
+                } else {
+                    $response["debug"] .= "\n* PDF de la Factura eliminado correctamente.";
+                }
+                if (self::$debug) {
+                    var_dump($borraDocumento);
+                    echo "<br> * Factura PDF eliminada correctamente. <br>";
+                }
+
+                $borraDocumento = $almacenaDoctos->eliminaDocumento($urlFacturaXML, 'XML');
+                if ($borraDocumento["success"] == false) {
+                    error_log("[$timestamp] app/Models/datosCFDIs/RegistroCFDIsv40_Mdl.php -> Error al borrar la Factura: " . $urlFacturaXML, 3, LOG_FILE);
+                    $response["debug"] .= "\n* Error al eliminar el XML de la Factura: " . $borraDocumento["message"];
+                } else {
+                    $response["debug"] .= "\n* XML de la Factura eliminado correctamente.";
+                }
+                if (self::$debug) {
+                    var_dump($borraDocumento);
+                    echo "<br> * Factura XML eliminada correctamente. <br>";
+                }   
+                
+                if (self::$debug) {
+                    echo "<br> * Facturas eliminada correctamente. <br>";
+                    $response["debug"] .= "\n* Facturas eliminada correctamente.<br>";
+                }
+            }
+
             error_log("[$timestamp] app/Models/datosCFDIs/RegistroCFDIsv40_Mdl.php -> Error al registrar la Compra: " . $e->getMessage(), 3, LOG_FILE_BD);
             if (self::$debug) {
                 echo "Error al registrar la Compra: " . $e->getMessage();

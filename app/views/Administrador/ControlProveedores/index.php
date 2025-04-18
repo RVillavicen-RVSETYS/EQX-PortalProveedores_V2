@@ -144,7 +144,7 @@ if ($debug == 1) {
                                             <label for="proveedor">Lista De Proveedores</label>
                                             <div class="input-group mb-3">
 
-                                                <select name="proveedor" id="proveedor" class="select2 form-control custom-select" style="width: 100%;height: 36px;">
+                                                <select name="proveedor" id="proveedor" class="select2 form-control custom-select" style="width: 100%;height: 36px;" required>
                                                     <option value="">Selecciona Un Proveedor</option>
                                                     <?php
                                                     foreach ($listaProveedores['data'] as $proveedor) {

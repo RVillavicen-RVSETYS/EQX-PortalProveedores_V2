@@ -109,7 +109,7 @@ class Compras_Mdl
                 echo '<br><br>';
             }
 
-            $sql = "SELECT c.id AS acuse, c.claseDocto, dc.ordenCompra, c.estatus,
+            $sql = "SELECT c.id AS acuse, c.claseDocto, dc.ordenCompra, c.estatus, c.totalPagos, c.totalComplementos,
                     GROUP_CONCAT(DISTINCT dc.noRecepcion ORDER BY dc.noRecepcion SEPARATOR ', ') AS noRecepcion,
                     c.fechaReg, c.referencia, cf.urlPDF, cf.urlXML, pv.pais, pv.id AS 'IdProveedor', pv.razonSocial AS 'RazonSocial', pv.rfc AS 'RFC',
                     cf.serie AS 'SerieFact', cf.folio AS 'FolioFact', cf.fechaReg AS 'FechaReg', c.total AS 'Total', c.fechaProbablePago AS 'FechaPago', 
@@ -268,6 +268,7 @@ class Compras_Mdl
 
     public function dataCompraPorAcuse(INT $idUser, INT $acuse)
     {
+        self::$debug = 0;
         if (empty($idUser) || empty($acuse)) {
             return ['success' => false, 'message' => 'Se requiere No. de Acuse.'];
         } else {
@@ -279,7 +280,7 @@ class Compras_Mdl
                 }
 
                 $sql = "SELECT c.id AS acuse, c.claseDocto, c.estatus AS CpaEstatus, c.fechaVal, c.comentRegresa, c.subTotal, c.idCatTipoMoneda AS CpaTipoMoneda,
-                            c.idProveedor, c.notaCredito,	c.idPago, c.fechaReg, c.referencia, c.fechaVence AS 'FechaVence', c.fechaProbablePago AS 'FechaProbablePago',
+                            c.idProveedor, c.notaCredito, c.totalPagos,	c.totalComplementos, c.fechaReg, c.referencia, c.fechaVence AS 'FechaVence', c.fechaProbablePago AS 'FechaProbablePago',
                             dcp.ordenCompra, dcp.noRecepcion,
                             cf.urlPDF AS FacUrlPDF, cf.urlXML AS FacUrlXML, cf.subtotal AS FacSubtotal, cf.monto AS FacMonto, cf.idCatTipoMoneda AS FacTipoMoneda, 
                             cf.idCatMetodoPago AS FacMetodoPago, cf.idCatFormaPago AS FacFormaPago, cf.usoCfdi AS FacUsoCfdi,cuc.descripcion AS nameUsoCfdi, 
