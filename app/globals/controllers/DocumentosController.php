@@ -55,8 +55,6 @@ class DocumentosController extends Controller
             echo "Valor de basePathTemp: {$this->basePathTemp}<br>";
         }
 
-
-
         // Validar que la ruta base existe
         if (empty($this->basePath) || !is_dir($this->basePath)) {
             $response['message'] = 'La ruta base temporal no está configurada correctamente.';
@@ -100,6 +98,7 @@ class DocumentosController extends Controller
         $currentYear = date('Y'); // Año actual
         $currentYearMonth = date('Y-m'); // Mes actual
         $destinationDir = $this->basePath . DIRECTORY_SEPARATOR . $empresa . DIRECTORY_SEPARATOR . $tipoDoctoNombre . DIRECTORY_SEPARATOR . $currentYear . DIRECTORY_SEPARATOR . $idProveedor . DIRECTORY_SEPARATOR . $currentYearMonth;
+        $destinationDirSinBasePath = $empresa . DIRECTORY_SEPARATOR . $tipoDoctoNombre . DIRECTORY_SEPARATOR . $currentYear . DIRECTORY_SEPARATOR . $idProveedor . DIRECTORY_SEPARATOR . $currentYearMonth;
 
         if ($this->debug == 1) {
             echo "Directorio de Destino: {$destinationDir}<br>";
@@ -123,11 +122,13 @@ class DocumentosController extends Controller
 
         // Ruta absoluta y relativa
         $destinationPath = $destinationDir . DIRECTORY_SEPARATOR . $fileName; // Ruta absoluta
+        $destinationDirSinBasePath = $destinationDirSinBasePath . DIRECTORY_SEPARATOR . $fileName; // Ruta relativa para almacenar en la base de datos
         $relativePath = str_replace(realpath(__DIR__ . '/../../../'), '', $destinationPath); // Ruta relativa basada en __DIR__
 
         if ($this->debug == 1) {
             echo "Ruta Relativa: {$relativePath}<br>";
             echo "Ruta Destino final: {$destinationPath}<br>";
+            echo "Ruta a Almacenar en BD: {$destinationDirSinBasePath}<br>";
         }
 
         // Mover el archivo temporal a la ubicación final
@@ -142,12 +143,60 @@ class DocumentosController extends Controller
         $response['data'] = [
             'absolutePath' => $destinationPath,
             'relativePath' => $relativePath,
+            'rutaParaBD' => $destinationDirSinBasePath,
             'fileName' => $fileName,
             'directory' => $destinationDir,
             'idProveedor' => $idProveedor,
             'tipoDocto' => $tipoDocto,
             'identDocto' => $identDocto
         ];
+
+        return $response;
+    }
+
+    public function eliminaDocumento($url, $tipoDocto)
+    {
+        $response = [
+            'success' => false,
+            'message' => '',
+            'data' => []
+        ]; 
+        //$this->debug = 1;
+        if ($this->debug == 1) {
+            echo "<br>URL Recibida: {$url}<br>";
+            echo "Tipo de Documento: {$tipoDocto}<br>";
+        }
+
+        // Validar que la ruta base existe
+        if (empty($this->basePath) || !is_dir($this->basePath)) {
+            $response['message'] = 'La ruta base temporal no está configurada correctamente.';
+            if ($this->debug == 1) {
+                echo "Ruta basePath inválida o inexistente: {$this->basePath}<br>";
+            }
+            return $response;
+        }
+
+        $url = $this->basePath . DIRECTORY_SEPARATOR . $url; // Ruta absoluta
+        if ($this->debug == 1) {
+            echo "URL Absoluta: {$url}<br>";
+        }
+        // Validar que el archivo exista
+        if (!file_exists($url)) {
+            if ($this->debug == 1) {
+                echo "El archivo no existe: {$url}<br>";
+            }
+            $response['message'] = 'El archivo especificado no existe.';
+            return $response;
+        }
+
+        // Intentar eliminar el archivo
+        if (!unlink($url)) {
+            $response['message'] = 'No se pudo eliminar el archivo.';
+            return $response;
+        } else {
+            $response['success'] = true;
+            $response['message'] = 'El archivo se eliminó correctamente.';
+        }
 
         return $response;
     }

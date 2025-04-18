@@ -5,7 +5,7 @@ $requestUri = $_SERVER['REQUEST_URI'];
 $cleanUri = parse_url($requestUri, PHP_URL_PATH);
 $piezasURL = explode('/', trim($cleanUri, '/'));
 $paginaLink = $piezasURL[1];
-include '../app/views/Layout/funciones.php';
+include '../app/Views/Layout/funciones.php';
 
 $funcionMenu = generarMenu($menuData['data'], $paginaLink);
 $datosPagina = $funcionMenu['datosPagina'];
@@ -34,11 +34,11 @@ if ($debug == 1) {
 <html dir="ltr" lang="es">
 
 <head>
-    <?php include '../app/views/Layout/header.php'; ?>
+    <?php include '../app/Views/Layout/header.php'; ?>
     <!-- Custom CSS -->
 
     <link href="/assets/extra-libs/datatables.net-bs4/css/dataTables.bootstrap4.css" rel="stylesheet">
-    <link href="/assets/libs/fancybox/fancybox.css" rel="stylesheet">
+    <link href="/assets/libs/fancybox/dist/fancybox/fancybox.css" rel="stylesheet">
     <link href="/assets/libs/fancybox/dist/carousel/carousel.css" rel="stylesheet">
     <link href="/assets/libs/fancybox/dist/carousel/carousel.thumbs.css" rel="stylesheet">
     <link href="/assets/libs/fancybox/dist/panzoom/panzoom.css" rel="stylesheet">
@@ -105,7 +105,7 @@ if ($debug == 1) {
         <!-- ============================================================== -->
         <!-- Topbar header - style you can find in pages.scss -->
         <!-- ============================================================== -->
-        <?php include '../app/views/Layout/menu.php'; ?>
+        <?php include '../app/Views/Layout/menu.php'; ?>
         <!-- ============================================================== -->
         <!-- End Topbar header -->
         <!-- ============================================================== -->
@@ -118,7 +118,7 @@ if ($debug == 1) {
             <!-- ============================================================== -->
             <!-- Bread crumb and right sidebar toggle -->
             <!-- ============================================================== -->
-            <?php include '../app/views/Layout/title.php'; ?>
+            <?php include '../app/Views/Layout/title.php'; ?>
             <!-- ============================================================== -->
             <!-- End Bread crumb and right sidebar toggle -->
             <!-- ============================================================== -->
@@ -144,7 +144,7 @@ if ($debug == 1) {
                                             <label for="proveedor">Lista De Proveedores</label>
                                             <div class="input-group mb-3">
 
-                                                <select name="proveedor" id="proveedor" class="select2 form-control custom-select" style="width: 100%;height: 36px;">
+                                                <select name="proveedor" id="proveedor" class="select2 form-control custom-select" style="width: 100%;height: 36px;" required>
                                                     <option value="">Selecciona Un Proveedor</option>
                                                     <?php
                                                     foreach ($listaProveedores['data'] as $proveedor) {
@@ -190,7 +190,7 @@ if ($debug == 1) {
             <!-- ============================================================== -->
             <!-- footer -->
             <!-- ============================================================== -->
-            <?php include '../app/views/Layout/footer.php'; ?>
+            <?php include '../app/Views/Layout/footer.php'; ?>
             <!-- ============================================================== -->
             <!-- End footer -->
             <!-- ============================================================== -->
@@ -232,7 +232,7 @@ if ($debug == 1) {
     <script src="/assets/libs/fancybox/dist/panzoom/panzoom.umd.js"></script>
     <script src="/assets/libs/fancybox/dist/panzoom/panzoom.toolbar.umd.js"></script>
     <script src="/assets/libs/fancybox/dist/panzoom/panzoom.pins.umd.js"></script>
-    <script src="/assets/libs/fancybox/l10n/es.umd.js"></script>
+    <script src="/assets/libs/fancybox/dist/fancybox/l10n/es.umd.js"></script>
     <script src="/assets/libs/fancybox/dist/panzoom/l10n/es.umd.js"></script>
     <script src="/assets/libs/fancybox/dist/carousel/l10n/es.umd.js"></script>
 

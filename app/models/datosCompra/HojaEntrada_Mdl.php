@@ -116,7 +116,7 @@ class HojaEntrada_Mdl
                 }
             } catch (\Exception $e) {
                 $timestamp = date("Y-m-d H:i:s");
-                error_log("[$timestamp] app/models/datosCompra/HojaEntrada_Mdl.php ->Error contar HES de la OC: " . $e->getMessage(), 3, LOG_FILE_BD); // Manejo del error
+                error_log("[$timestamp] app/Models/datosCompra/HojaEntrada_Mdl.php ->Error contar HES de la OC: " . $e->getMessage(), 3, LOG_FILE_BD); // Manejo del error
                 if (self::$debug) {
                     echo "Error al contar HES: " . $e->getMessage(); // Mostrar error en modo depuración
                 }
@@ -197,7 +197,7 @@ class HojaEntrada_Mdl
             }
         } catch (\Exception $e) {
             $timestamp = date("Y-m-d H:i:s");
-            error_log("[$timestamp] app/models/datosCompra/HojaEntrada_Mdl.php ->Error al consultar HES ya Facturadas: " . $e->getMessage(), 3, LOG_FILE_BD); // Manejo del error
+            error_log("[$timestamp] app/Models/datosCompra/HojaEntrada_Mdl.php ->Error al consultar HES ya Facturadas: " . $e->getMessage(), 3, LOG_FILE_BD); // Manejo del error
             if (self::$debug) {
                 echo "Error al consultar HES ya Facturadas: " . $e->getMessage(); // Mostrar error en modo depuración
             }
@@ -312,7 +312,7 @@ class HojaEntrada_Mdl
             }
         } catch (\Exception $e) {
             $timestamp = date("Y-m-d H:i:s");
-            error_log("[$timestamp] app/models/datosCompra/HojaEntrada_Mdl.php ->Error al consultar montos HES: " . $e->getMessage(), 3, LOG_FILE_BD);
+            error_log("[$timestamp] app/Models/datosCompra/HojaEntrada_Mdl.php ->Error al consultar montos HES: " . $e->getMessage(), 3, LOG_FILE_BD);
             if (self::$debug) {
                 echo "Error al consultar montos HES: " . $e->getMessage();
             }

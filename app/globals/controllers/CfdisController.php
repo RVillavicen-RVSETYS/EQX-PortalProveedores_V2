@@ -11,7 +11,7 @@ class CfdisController extends Controller
 
     public function leerCfdiXML($xmlPath, $tipoCfdi)
     {
-        $this->debug = 1;
+        //$this->debug = 1;
         //Tipos de CFDI: Ingreso, Egreso, Traslado, Nomina, Pago, RecepcionPagos o Retenciones
         // Definir el arreglo de tipos de CFDI
         $tiposCfdi = [
@@ -79,12 +79,16 @@ class CfdisController extends Controller
         }
 
         // 4. Cargar el archivo y clase de la versión correspondiente
-        $archivoVersion = __DIR__ . "/cfdis/{$claseFuncion}.php";
+        $archivoVersion = __DIR__ . '\Cfdis\\'.$claseFuncion.'.php';
         if ($this->debug == 1) {
             echo '<br><br>URL de la Clase que leera el Archivo: ' . $archivoVersion .'<br>';
         }
         if (!file_exists($archivoVersion)) {
-            return ['success' => false, 'message' => "El archivo para la versión $claseFuncion no existe."];
+            return [
+                'success' => false, 
+                'message' => "El archivo para la versión $claseFuncion no existe.",
+                'debug' => 'Archivo: ' . $archivoVersion
+            ];
         }
 
         require_once $archivoVersion;
@@ -149,7 +153,7 @@ class CfdisController extends Controller
         } catch (\Exception $e) {
             // Manejo de errores
             $timestamp = date("Y-m-d H:i:s");
-            error_log("[$timestamp] app/models/CFDI_Mdl.php ->Error al leer CFDI XML: " . $e->getMessage(), 3, LOG_FILE_BD);
+            error_log("[$timestamp] app/Models/CFDI_Mdl.php ->Error al leer CFDI XML: " . $e->getMessage(), 3, LOG_FILE_BD);
             $response['message'] = 'Error al leer el archivo XML: ' . $e->getMessage();
 
             if (self::$debug) {

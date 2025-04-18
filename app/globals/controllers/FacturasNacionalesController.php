@@ -8,6 +8,7 @@ use App\Models\DatosCompra\HojaEntrada_Mdl;
 use App\Models\Configuraciones\RecepcionCFDIs_Mdl;
 use App\Models\Empresas\Empresas_Mdl;
 use App\Models\Proveedores\Proveedores_Mdl;
+use App\Models\DatosCFDIs\RegistroCFDIsv33_Mdl;
 use App\Models\DatosCFDIs\RegistroCFDIsv40_Mdl;
 
 class FacturasNacionalesController extends Controller
@@ -146,7 +147,7 @@ class FacturasNacionalesController extends Controller
 
             // 9. Cargar el archivo y clase de la versión correspondiente para las validaciones
             $claseFuncion = 'ReglasAplicadas' . $versionDocto;
-            $archivoVersion = __DIR__ . "/reglas/{$claseFuncion}.php";
+            $archivoVersion = __DIR__ . "/Reglas/{$claseFuncion}.php";
             if ($this->debug == 1) {
                 echo '<br><br>URL de la Clase que Valida Reglas de Negocio: ' . $archivoVersion . '<br>';
                 echo '<br><br>Clase que validara: ' . $claseFuncion . '<br>';
@@ -208,7 +209,7 @@ class FacturasNacionalesController extends Controller
 
                 //13. Ejecutar las Validaciones Fiscales del CFDI
                 $claseFuncionFiscal = 'cfdis' . $versionDocto;
-                $archivoVersion = __DIR__ . "/cfdis/{$claseFuncionFiscal}.php";
+                $archivoVersion = __DIR__ . "/Cfdis/{$claseFuncionFiscal}.php";
                 if ($this->debug == 1) {
                     echo '<br><br>URL de la Clase que Valida Fiscalmente es: ' . $archivoVersion . '<br>';
                     echo 'Clase que validara  Fiscalmente: ' . $claseFuncionFiscal . '<br>';
@@ -226,6 +227,9 @@ class FacturasNacionalesController extends Controller
                         echo '<br><br> ****** PASAMOS LA VALIDACION FISCAL <br>';
                     }
 
+                    //14. Ejecutar las Validaciones de la Nota de Credito
+
+
                     $response = [
                         'success' => true,
                         'message' => 'Todas las Validaciones se han aplicado correctamente.',
@@ -237,7 +241,8 @@ class FacturasNacionalesController extends Controller
                             'dataMontosHES' => $dataMontosHES['data'],
                             'dataProv' => $dataProv['data'],
                             'dataFactXML' => $dataFactXML['data'],
-                            'dataNotaCredXML' => $dataNotaCredXML['data']
+                            'dataNotaCredXML' => $dataNotaCredXML['data'],
+                            'dataEmpresa' => $dataEmpresa['data']
                         ]
                     ];
 
@@ -256,9 +261,33 @@ class FacturasNacionalesController extends Controller
 
     public function registraNuevaFacturaIngresos($resultadoDeVerificacion)
     {
+        //$this->debug = 1;
+        if ($this->debug == 1) {
+            echo '<br><br>Datos Recibidos de ResultadoDeVerificacion: ' . PHP_EOL;
+            var_dump($resultadoDeVerificacion);
+        }
+
+        if (empty($resultadoDeVerificacion['version'])) {
+            return ['success' => false, 'message' => 'No se recibio la version del CFDI.'];
+        } 
+        if ($this->debug == 1) {
+            echo '<br><br>Version del CFDI recibido: ' . $resultadoDeVerificacion['version'];
+        }
+
+        switch ($resultadoDeVerificacion['version']) {
+            case 'v33':
+                $MDL_registraCFDI = new  RegistroCFDIsv33_Mdl();
+                $metodoFunction = 'registrarCFDI_Ingresosv33';
+                break;
+            case 'v40':
+                $MDL_registraCFDI = new  RegistroCFDIsv40_Mdl();
+                $metodoFunction = 'registrarCFDI_Ingresosv40';
+                break;
+            default:
+                return ['success' => false, 'message' => 'La version del CFDI no es valida.'];
+        }
         
-        $MDL_registraCFDI = new RegistroCFDIsv40_Mdl();
-        $respRegistro = $MDL_registraCFDI->registrarCFDI_Ingresosv40($resultadoDeVerificacion);
+        $respRegistro = $MDL_registraCFDI->$metodoFunction($resultadoDeVerificacion);
         if ($this->debug == 1) {
             echo '<br><br>Resultado de registroCFDI: ' . PHP_EOL;
             var_dump($respRegistro);

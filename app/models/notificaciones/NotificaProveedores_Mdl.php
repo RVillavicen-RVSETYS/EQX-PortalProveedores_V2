@@ -58,7 +58,7 @@ class NotificaProveedores_Mdl
             }
         } catch (\Exception $e) {
             $timestamp = date("Y-m-d H:i:s");
-            error_log("[$timestamp] app/models/notificaciones/NotificaProveedores_Mdl.php ->Error al buscar notificaciones: " . $e->getMessage(), 3, LOG_FILE); // Manejo del error
+            error_log("[$timestamp] app/Models/notificaciones/NotificaProveedores_Mdl.php ->Error al buscar notificaciones: " . $e->getMessage(), 3, LOG_FILE); // Manejo del error
             if (self::$debug) {
                 echo "Error al buscar notificaciones: " . $e->getMessage(); // Mostrar error en modo depuración
             }
