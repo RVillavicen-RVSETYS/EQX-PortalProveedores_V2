@@ -52,7 +52,7 @@ $fechaMin = date('Y-m-d', strtotime('-1 day'));
         <!-- Comment Row -->
         <div class="d-flex flex-row comment-row m-t-0">
             <div class="p-2">
-                <img src="/assets/images/favicon.png" alt="user" width="50" class="rounded-circle">
+                <img src="/assets/images/SilmeAgro.ico" alt="user" width="50" class="rounded-circle">
             </div>
             <div class="comment-text w-100">
                 <h6 class="font-medium">Corrige y carga de nuevo.</h6>
