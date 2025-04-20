@@ -435,7 +435,7 @@ if ($notificaciones['success'] && !empty($notificaciones['data'])) {
             $("#Form_CargaFactura").submit(function(e) {
                 e.preventDefault();
                 var formData = new FormData(this);
-                //bloquearBtn('btn1');
+                bloquearBtn('btn1');
                 $.ajax({
                     type: 'POST',
                     url: 'Inicio/registraNuevaFactura',
