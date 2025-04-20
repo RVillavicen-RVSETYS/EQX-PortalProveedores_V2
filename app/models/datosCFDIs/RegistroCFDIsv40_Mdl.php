@@ -89,7 +89,6 @@ class RegistroCFDIsv40_Mdl
                 $valorTotalComplementos = 0;
             }
 
-
             // Insertar en compras
             $sqlCompras = "INSERT INTO compras (idProveedor, subTotal, total, idCatTipoMoneda, sociedad, cPago, estatus, idUserReg, tipoUserReg, fechaReg, fechaVence, fechaProbablePago, claseDocto, referencia, descuento, notaCredito, totalComplementos)
                             VALUES (:idProveedor, :subTotal, :total, :idCatTipoMoneda, :sociedad, :cPago, :estatus, :idUserReg, :tipoUserReg, NOW(), :fechaVence, :fechaProbablePago, :claseDocto, :referencia, :descuento, :notaCredito, :totalComplementos)";
@@ -323,5 +322,278 @@ class RegistroCFDIsv40_Mdl
         }
 
         return $response;
+    }
+
+    public function registrarCFDI_Pagosv40($dataDeValidacion)
+    {
+        $response = ["success" => true, "message" => "", "debug" => ""];
+
+        try {
+            // Iniciar transacción
+            BD_Connect::beginTransaction();
+
+            //self::$debug = 1;
+            $complementoAlmacenado = 0;
+            
+            if (self::$debug) {
+                $response["debug"] .= "\n* Iniciando transacción...<br>";
+                echo "<br> * Iniciando transacción...<br>";
+                echo "<br> * Datos de validación: <br>";
+                var_dump($dataDeValidacion);
+            }
+
+            // Calcular fecha de vencimiento
+            // Ajustar la zona horaria a la de México
+            $timezone = new \DateTimeZone('America/Mexico_City');
+            $fechaActual = new \DateTime('now', $timezone);
+            $idProveedor = $dataDeValidacion["dataProv"]["IdProveedor"];
+            $sociedad = $dataDeValidacion["dataEmpresa"]["id"];
+
+            // Insertar en cfdi_complementoPago
+            //id	idProveedor	uuid	estatus	montoTotalPago	monto	serie	folio	version	tipoFactura	rfcEmisor	rfcReceptor	fechaPago	selloCFDI	selloSAT	formaDePago	numOperacion	urlPDF	urlXML	idUserReg	fechaReg	moneda	tipoCambioP	domicilioRec	domicilioEmisor	regimenFiscEmisor	razonSocialRec	razonSocialEm	regimenFiscRec	usoCFDI
+            $sqlComplemento = "INSERT INTO cfdi_complementoPago (idProveedor, uuid, estatus, subtotal, total, montoTotalPagos, montoTotalTrasladobaseIVA, montoTotalTrasladoImpuestoIVA, moneda, serie, 
+                            folio, version, tipoFactura, rfcEmisor, rfcReceptor, fecha, exportacion, noCertificado, idUserReg, fechaReg, domicilioRec, 
+                            LugarExpedicion, regimenFiscEmisor, razonSocialRec, razonSocialEm, regimenFiscRec, usoCFDI, reglasNegocio, validada, codigoEstatusSAT, estadoValidaSAT, estadoEFO, serializado)
+                                VALUES (:idProveedor, :uuid, :estatus, :subtotal, :total, :montoTotalPagos, :montoTotalTrasladobaseIVA, :montoTotalTrasladoImpuestoIVA, :moneda, :serie,
+                            :folio,:version,:tipoFactura,:rfcEmisor,:rfcReceptor,:fecha, :exportacion, :noCertificado, :idUserReg, NOW(),:domicilioRec,
+                            :LugarExpedicion,:regimenFiscEmisor,:razonSocialRec,:razonSocialEm, :regimenFiscRec,:usoCFDI, :reglasNegocio, :validada, :codigoEstatusSAT, :estadoValidaSAT, :estadoEFO, :serializado)";
+            $paramsComplemento = [
+                ":idProveedor" => $idProveedor,
+                ":uuid" => $dataDeValidacion["dataComplementoXML"]["TimbreFiscal"]["UUID"],
+                ":estatus" => 2,
+                ":subtotal" => $dataDeValidacion["dataComplementoXML"]["Comprobante"]["SubTotal"],
+                ":total" => $dataDeValidacion["dataComplementoXML"]["Comprobante"]["Total"],
+                ":montoTotalPagos" => $dataDeValidacion["dataComplementoXML"]["Pagos"]["Totales"]["MontoTotalPagos"],
+                ":montoTotalTrasladobaseIVA" => $dataDeValidacion["dataComplementoXML"]["Pagos"]["Totales"]["TotalTrasladosBaseIVA0"],
+                ":montoTotalTrasladoImpuestoIVA" => $dataDeValidacion["dataComplementoXML"]["Pagos"]["Totales"]["TotalTrasladosBaseIVA0"],
+                ":moneda" => $dataDeValidacion["dataComplementoXML"]["Comprobante"]["Moneda"],
+                ":serie" => $dataDeValidacion["dataComplementoXML"]["Comprobante"]["Serie"],
+                ":folio" => $dataDeValidacion["dataComplementoXML"]["Comprobante"]["Folio"],
+                ":version" => $dataDeValidacion["dataComplementoXML"]["Comprobante"]["Version"],
+                ":tipoFactura" => $dataDeValidacion["dataComplementoXML"]["Comprobante"]["TipoDeComprobante"],
+                ":rfcEmisor" => $dataDeValidacion["dataComplementoXML"]["Emisor"]["Rfc"],
+                ":rfcReceptor" => $dataDeValidacion["dataComplementoXML"]["Receptor"]["Rfc"],
+                ":fecha" => $dataDeValidacion["dataComplementoXML"]["Comprobante"]["Fecha"],
+                ":exportacion" => $dataDeValidacion["dataComplementoXML"]["Comprobante"]["Exportacion"],
+                ":noCertificado" => $dataDeValidacion["dataComplementoXML"]["Comprobante"]["NoCertificado"],
+                ":idUserReg" => $_SESSION['EQXident'],
+                ":domicilioRec" => $dataDeValidacion["dataComplementoXML"]["Receptor"]["DomicilioFiscalReceptor"],
+                ":LugarExpedicion" => $dataDeValidacion["dataComplementoXML"]["Comprobante"]["LugarExpedicion"],
+                ":regimenFiscEmisor" => $dataDeValidacion["dataComplementoXML"]["Emisor"]["RegimenFiscal"],
+                ":razonSocialRec" => $dataDeValidacion["dataComplementoXML"]["Receptor"]["Nombre"],
+                ":razonSocialEm" => $dataDeValidacion["dataComplementoXML"]["Emisor"]["Nombre"],
+                ":regimenFiscRec" => $dataDeValidacion["dataComplementoXML"]["Receptor"]["RegimenFiscalReceptor"],
+                ":usoCFDI" => $dataDeValidacion["dataComplementoXML"]["Receptor"]["UsoCFDI"], 
+                ":reglasNegocio" => 1,
+                ":validada" => 2,
+                ":codigoEstatusSAT" => $dataDeValidacion["ValidFiscal"]["CodigoEstatus"],
+                ":estadoValidaSAT" => $dataDeValidacion["ValidFiscal"]["Estado"], 
+                ":estadoEFO" => $dataDeValidacion["ValidFiscal"]["ValidacionEFOS"], 
+                ":serializado" => $dataDeValidacion["dataComplementoXML"]["Serializado"]
+            ];            
+
+            if (self::$debug) {
+                $this->db->imprimirConsulta($sqlComplemento, $paramsComplemento, "Registro de Complemento de Pago");
+            }
+            
+            $stmt = $this->db->prepare($sqlComplemento);
+            $stmt->execute($paramsComplemento);
+            
+            $idComplemento = $this->db->getConnection()->lastInsertId();
+            if (!$idComplemento) {
+                throw new \Exception("No se pudo registrar el Complemento de Pago.");
+            }
+
+            if (self::$debug) {
+                echo "<br> * Complemento registrado con ID: $idComplemento <br>";
+                $response["debug"] .= "\n* Complemento registrado con ID: $idComplemento<br>";
+            }
+
+            // Almacenar Complemento de Pago
+            $almacenaDoctos = new DocumentosController();
+
+            $doctoPDF = $dataDeValidacion['documentos']['ComplementoPDF']['tmp_name'];
+            $doctoXML = $dataDeValidacion['documentos']['ComplementoXML']['tmp_name'];
+            $almacenaPDF = $almacenaDoctos->almacenaCFDI($doctoPDF, 'COMPPAG', $idProveedor, $idComplemento, $sociedad,'PDF');
+            $almacenaXML = $almacenaDoctos->almacenaCFDI($doctoXML, 'COMPPAG', $idProveedor, $idComplemento, $sociedad,'XML');
+            if (self::$debug) {
+                echo "<br> * PDF de Complemento de Pago Registrado: <br>";
+                var_dump($almacenaPDF);
+                echo "<br><br> * XML de Complemento de Pago Registrado: <br>";
+                var_dump($almacenaXML);
+            }
+
+            if (!$almacenaPDF["success"] || !$almacenaXML["success"]) {
+                throw new \Exception("Problemas al Almacenar el Complemento de Pago, Notifica a tu Administrador.");
+            } else {
+                $urlComplementoPDF = $almacenaPDF["data"]["rutaParaBD"];
+                $urlComplementoXML = $almacenaXML["data"]["rutaParaBD"];
+                $complementoAlmacenado = 1;
+
+                if (self::$debug) {
+                    echo "<br> * Factura almacenada correctamente. <br>";
+                    $response["debug"] .= "\n* Fact PDF Almacenada: $urlComplementoPDF<br>";
+                    $response["debug"] .= "\n* Fact XML Almacenada: $urlComplementoXML<br>";
+                }
+            }
+
+            // Actualizar la ruta del complemento de pago en la base de datos
+            $sqlUpdateComplemento = "UPDATE cfdi_complementoPago SET urlPDF = :urlPDF, urlXML = :urlXML WHERE id = :idComplemento";
+            $paramsUpdateComplemento = [
+                ":urlPDF" => $urlComplementoPDF,
+                ":urlXML" => $urlComplementoXML,
+                ":idComplemento" => $idComplemento
+            ];
+            if (self::$debug) {
+                $this->db->imprimirConsulta($sqlUpdateComplemento, $paramsUpdateComplemento, "Actualización de Complemento de Pago");
+            }   
+
+            $stmt = $this->db->prepare($sqlUpdateComplemento);
+            $stmt->execute($paramsUpdateComplemento);
+            
+            if ($stmt->rowCount() == 0) {
+                throw new \Exception("No se pudo actualizar la ruta del complemento de pago.");
+            }
+
+            if (self::$debug) {
+                echo "<br> * Ruta del complemento de pago actualizada correctamente. <br>";
+                $response["debug"] .= "\n* Ruta del complemento de pago actualizada correctamente.<br>";
+            }
+
+            // Insertar en cfdi_complementoPagoDetalle
+            $valuesInsert = '';
+            $montosPagadosPorUUID = [];
+            foreach ($dataDeValidacion["dataComplementoXML"]["Pagos"]["Pagos"] as $pago) {
+                $fechaPago = $pago["FechaPago"];
+                $formaPago = $pago["FormaDePagoP"];
+                $totalPagado = $pago["Monto"];
+                $idCatTipoMoneda = $pago["MonedaP"];
+                $tipoCambioP = $pago["TipoCambioP"];
+
+                foreach ($pago["DoctosRelacionados"] as $docto) {
+                    $uuidFact = $docto["IdDocumento"];
+                    $serie = $docto["Serie"];
+                    $folio = $docto["Folio"];
+                    $monedaDR = $docto["MonedaDR"];
+                    $noParcialidad = $docto["NumParcialidad"];
+                    $saldoAnterior = $docto["ImpSaldoAnt"];
+                    $importePagado = $docto["ImpPagado"];
+                    $saldoInsoluto = $docto["ImpSaldoInsoluto"];
+
+                    $valuesInsert .= "($idComplemento, '$fechaPago', '$formaPago', $totalPagado, '$idCatTipoMoneda', '$tipoCambioP', '$uuidFact', '$serie', '$folio',  '$monedaDR', $noParcialidad, $saldoAnterior, $importePagado, $saldoInsoluto), ";
+                    if (isset($montosPagadosPorUUID[$uuidFact])) {
+                        $montosPagadosPorUUID[$uuidFact]['montoPagado'] += floatval($importePagado);
+                        if ($saldoInsoluto < $montosPagadosPorUUID[$uuidFact]['insoluto']) {
+                            $montosPagadosPorUUID[$uuidFact]['insoluto'] = floatval($saldoInsoluto);
+                        }
+                    }  else {
+                        $montosPagadosPorUUID[$uuidFact]['montoPagado'] = floatval($importePagado);
+                        $montosPagadosPorUUID[$uuidFact]['insoluto'] = floatval($saldoInsoluto);
+                    }
+                    
+                }
+            }
+            $valuesInsert = rtrim($valuesInsert, ', ');
+            if (self::$debug) {
+                echo '<br><br> Datos para Insert de cfdi_complementoPagoDetalle: '.$valuesInsert;
+            }
+
+            $sqlDetComplemento = "INSERT INTO cfdi_complementoPagoDet(idComplementoPago, fechaPago, formaPago, totalPagado, idCatTipoMoneda, tipoCambio, uuidFact, serie, folio, monedaDR, noParcialidad, saldoAnterior, importePagado, saldoInsoluto) 
+                        VALUES $valuesInsert";           
+            if (self::$debug) {
+                $this->db->imprimirConsulta($sqlDetComplemento, [], 'Registro de cfdi_complementoPagoDetalle');
+            }
+            $stmt = $this->db->prepare($sqlDetComplemento);
+            $stmt->execute();
+
+            if ($stmt->rowCount() == 0) {
+                throw new \Exception("No se pudo registrar el detalle del complemento de pago.");
+            }
+            if (self::$debug) {
+                echo "<br> * Detalle del complemento de pago registrado correctamente. <br>";
+                $response["debug"] .= "\n* Detalle del complemento de pago registrado correctamente.<br>";
+            }
+            
+            // Actualizar los montos del Complemento de Pago en la tabla Compras            
+            foreach ($montosPagadosPorUUID as $uuid => $data) {
+                $montoPagado = $data['montoPagado'];
+                $insoluto = $data['insoluto'];
+                if (self::$debug) {
+                    echo "<br> * UUID: $uuid - Monto Pagado: $montoPagado - Insoluto: $insoluto <br>";
+                }
+                
+                $sqlUpdateMontos = "UPDATE compras c
+                    INNER JOIN cfdi_facturas fc ON c.id = fc.idCompra
+                    SET c.totalComplementos = c.totalComplementos + :montoPagado, 
+                        c.insolutoPendiente = IF(ISNULL(c.insolutoPendiente), :insoluto, if(:insoluto2 < c.insolutoPendiente, :insoluto3, c.insolutoPendiente))
+                    WHERE fc.uuid = :uuid";
+                $paramsUpdateMontos = [
+                    ":montoPagado" => $montoPagado,
+                    ":insoluto" => $insoluto,
+                    ":insoluto2" => $insoluto,
+                    ":insoluto3" => $insoluto,
+                    ":uuid" => $uuid
+                ];
+                if (self::$debug) {
+                    $this->db->imprimirConsulta($sqlUpdateMontos, $paramsUpdateMontos, "Actualización de montos del Complemento de Pago en Compras");
+                }
+                
+                $stmt = $this->db->prepare($sqlUpdateMontos);
+                $stmt->execute($paramsUpdateMontos);
+            }
+            if (self::$debug) {
+                echo "<br> * Montos del Complemento de Pago actualizados correctamente en Compras. <br>";
+                $response["debug"] .= "\n* Montos del Complemento de Pago actualizados correctamente en Compras.<br>";
+            }
+
+            
+            // Commit final si todo salió bien
+            BD_Connect::commit();
+            $response["message"] = "El Complemento de Pago se ha agregado correctamente con el Acuse: $idComplemento.";
+            $response["debug"] .= "\n* Complemento de Pago registrado correctamente.";
+        } catch (\Exception $e) {
+            BD_Connect::rollBack();
+            $timestamp = date("Y-m-d H:i:s");
+            if ($complementoAlmacenado == 1) {
+                $borraDocumento = $almacenaDoctos->eliminaDocumento($urlComplementoPDF, 'PDF');
+                if ($borraDocumento["success"] == false) {
+                    error_log("[$timestamp] app/Models/datosCFDIs/RegistroCFDIsv40_Mdl.php -> Error al borrar el Complemento: " . $urlComplementoPDF, 3, LOG_FILE);
+                    $response["debug"] .= "\n* Error al eliminar el PDF del Complemento : " . $borraDocumento["message"];
+                } else {
+                    $response["debug"] .= "\n* PDF del Complemento de Pago eliminado correctamente.";
+                }
+                if (self::$debug) {
+                    var_dump($borraDocumento);
+                    echo "<br> * Complemento PDF eliminado correctamente. <br>";
+                }
+
+                $borraDocumento = $almacenaDoctos->eliminaDocumento($urlComplementoXML, 'XML');
+                if ($borraDocumento["success"] == false) {
+                    error_log("[$timestamp] app/Models/datosCFDIs/RegistroCFDIsv40_Mdl.php -> Error al borrar el Complemento: " . $urlComplementoXML, 3, LOG_FILE);
+                    $response["debug"] .= "\n* Error al eliminar el XML de la Factura: " . $borraDocumento["message"];
+                } else {
+                    $response["debug"] .= "\n* XML del Complemento de Pago eliminado correctamente.";
+                }
+                if (self::$debug) {
+                    var_dump($borraDocumento);
+                    echo "<br> * Complemento XML eliminado correctamente. <br>";
+                }   
+                
+                if (self::$debug) {
+                    echo "<br> * Complemento eliminado correctamente. <br>";
+                    $response["debug"] .= "\n* Complemento eliminado correctamente.<br>";
+                }
+            }
+
+            error_log("[$timestamp] app/Models/datosCFDIs/RegistroCFDIsv40_Mdl.php -> Error al registrar el Complemento de Pago: " . $e->getMessage(), 3, LOG_FILE_BD);
+            if (self::$debug) {
+                echo "Error al registrar el Complemento: " . $e->getMessage();
+            }
+            $response["success"] = false;
+            $response["message"] = "Ocurrió un error al registrar su Complemento. Notifica al administrador.";
+        }
+
+        return $response;
+
     }
 }

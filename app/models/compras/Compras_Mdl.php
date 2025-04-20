@@ -87,9 +87,9 @@ class Compras_Mdl
                         }
                     } elseif ($nombreFiltro == 'pagada') {
                         if ($valorFiltro == 1) {
-                            $filtrosSQL .= ' AND c.idPago IS NOT NULL';
+                            $filtrosSQL .= ' AND c.totalPagos > 0';
                         } else {
-                            $filtrosSQL .= ' AND c.idPago IS NULL';
+                            $filtrosSQL .= ' AND c.totalPagos = 0';
                         }
                     } else {
                         $filtrosSQL .= ' AND ' . $filtrosDisponibles[$nombreFiltro]['sqlFiltro'];
@@ -156,7 +156,7 @@ class Compras_Mdl
 
     public function dataCompraPorFacturas($filtros = [], INT $cantMaxRes = 0, $orden = 'DESC')
     {
-        self::$debug = 1; // Cambiar a 0 para desactivar mensajes de depuración
+        self::$debug = 0; // Cambiar a 0 para desactivar mensajes de depuración
         if (self::$debug) {
             echo '<br><br>Filtros Recibidos: ';
             var_dump($filtros);

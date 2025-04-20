@@ -74,7 +74,7 @@ class App
         }
 
         // Incluir y crear una instancia del controlador
-        require_once "../app/Controllers/" . $this->controller . ".php";
+        require_once "../app/Controllers/" . str_replace('\\', '/', $this->controller) . ".php";
         $controllerClass = "App\\Controllers\\" . str_replace('/', '\\', $this->controller);
         $this->controller = new $controllerClass;
 

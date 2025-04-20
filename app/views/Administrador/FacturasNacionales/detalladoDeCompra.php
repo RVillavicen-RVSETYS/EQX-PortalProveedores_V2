@@ -68,7 +68,7 @@ $fechaMin = date('Y-m-d', strtotime('-1 day'));
             }
 
             $contNotaCredito = $data['dataCompra']['data']['notaCredito'];
-            $requiereComplementoPago = ($data['dataCompra']['data']['idPago'] >= 1 and $data['dataCompra']['data']['FacMetodoPago'] == 'PPD') ? 1 : 0;
+            $requiereComplementoPago = ($data['dataCompra']['data']['totalPagos'] > $data['dataCompra']['data']['totalPagos'] and $data['dataCompra']['data']['FacMetodoPago'] == 'PPD') ? 1 : 0;
 ?>
 
 <?php
@@ -167,7 +167,7 @@ if ($data['dataCompra']['data']['CpaEstatus'] == '1') {
                             $msjStatus = '<span class="label label-warning label-rounded" style="font-size: 1.5em;">CANCELADA</span>';
                             break;
                     }
-                    if ($data['dataCompra']['data']['idPago'] > 0) {
+                    if ($data['dataCompra']['data']['totalPagos'] > 0) {
                         $msjStatus = '<span class="label label-success label-rounded" style="font-size: 1.5em;">PAGADA</span>';
                     }
                     echo $msjStatus;
