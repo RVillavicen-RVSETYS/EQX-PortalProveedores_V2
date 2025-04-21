@@ -68,7 +68,7 @@ $fechaMin = date('Y-m-d', strtotime('-1 day'));
             }
 
             $contNotaCredito = $data['dataCompra']['data']['notaCredito'];
-            $requiereComplementoPago = ($data['dataCompra']['data']['idPago'] >= 1 and $data['dataCompra']['data']['FacMetodoPago'] == 'PPD') ? 1 : 0;
+            $requiereComplementoPago = ($data['dataCompra']['data']['totalPagos'] > $data['dataCompra']['data']['totalPagos'] and $data['dataCompra']['data']['FacMetodoPago'] == 'PPD') ? 1 : 0;
 ?>
 
 <?php
