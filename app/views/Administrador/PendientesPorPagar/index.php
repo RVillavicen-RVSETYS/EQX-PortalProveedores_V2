@@ -5,7 +5,7 @@ $requestUri = $_SERVER['REQUEST_URI'];
 $cleanUri = parse_url($requestUri, PHP_URL_PATH);
 $piezasURL = explode('/', trim($cleanUri, '/'));
 $paginaLink = $piezasURL[1];
-include '../app/views/Layout/funciones.php';
+include '../app/Views/Layout/funciones.php';
 
 $funcionMenu = generarMenu($menuData['data'], $paginaLink);
 $datosPagina = $funcionMenu['datosPagina'];
@@ -39,11 +39,11 @@ $fechaFinal = date("Y-m-t");
 <html dir="ltr" lang="es">
 
 <head>
-    <?php include '../app/views/Layout/header.php'; ?>
+    <?php include '../app/Views/Layout/header.php'; ?>
     <!-- Custom CSS -->
 
     <link href="/assets/extra-libs/datatables.net-bs4/css/dataTables.bootstrap4.css" rel="stylesheet">
-    <link href="/assets/libs/fancybox/fancybox.css" rel="stylesheet">
+    <link href="/assets/libs/fancybox/dist/fancybox/fancybox.css" rel="stylesheet">
     <link href="/assets/libs/fancybox/dist/carousel/carousel.css" rel="stylesheet">
     <link href="/assets/libs/fancybox/dist/carousel/carousel.thumbs.css" rel="stylesheet">
     <link href="/assets/libs/fancybox/dist/panzoom/panzoom.css" rel="stylesheet">
@@ -77,7 +77,7 @@ $fechaFinal = date("Y-m-t");
         <!-- ============================================================== -->
         <!-- Topbar header - style you can find in pages.scss -->
         <!-- ============================================================== -->
-        <?php include '../app/views/Layout/menu.php'; ?>
+        <?php include '../app/Views/Layout/menu.php'; ?>
         <!-- ============================================================== -->
         <!-- End Topbar header -->
         <!-- ============================================================== -->
@@ -90,7 +90,7 @@ $fechaFinal = date("Y-m-t");
             <!-- ============================================================== -->
             <!-- Bread crumb and right sidebar toggle -->
             <!-- ============================================================== -->
-            <?php include '../app/views/Layout/title.php'; ?>
+            <?php include '../app/Views/Layout/title.php'; ?>
             <!-- ============================================================== -->
             <!-- End Bread crumb and right sidebar toggle -->
             <!-- ============================================================== -->
@@ -191,7 +191,7 @@ $fechaFinal = date("Y-m-t");
             <!-- ============================================================== -->
             <!-- footer -->
             <!-- ============================================================== -->
-            <?php include '../app/views/Layout/footer.php'; ?>
+            <?php include '../app/Views/Layout/footer.php'; ?>
             <!-- ============================================================== -->
             <!-- End footer -->
             <!-- ============================================================== -->

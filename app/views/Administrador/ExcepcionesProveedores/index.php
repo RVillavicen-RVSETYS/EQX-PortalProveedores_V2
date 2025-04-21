@@ -5,7 +5,7 @@ $requestUri = $_SERVER['REQUEST_URI'];
 $cleanUri = parse_url($requestUri, PHP_URL_PATH);
 $piezasURL = explode('/', trim($cleanUri, '/'));
 $paginaLink = $piezasURL[1];
-include '../app/views/Layout/funciones.php';
+include '../app/Views/Layout/funciones.php';
 
 $funcionMenu = generarMenu($menuData['data'], $paginaLink);
 $datosPagina = $funcionMenu['datosPagina'];
@@ -32,7 +32,7 @@ if ($debug == 1) {
 <html dir="ltr" lang="es">
 
 <head>
-    <?php include '../app/views/Layout/header.php'; ?>
+    <?php include '../app/Views/Layout/header.php'; ?>
     <!-- Custom CSS -->
 
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
@@ -125,7 +125,7 @@ if ($debug == 1) {
         <!-- ============================================================== -->
         <!-- Topbar header - style you can find in pages.scss -->
         <!-- ============================================================== -->
-        <?php include '../app/views/Layout/menu.php'; ?>
+        <?php include '../app/Views/Layout/menu.php'; ?>
         <!-- ============================================================== -->
         <!-- End Topbar header -->
         <!-- ============================================================== -->
@@ -138,7 +138,7 @@ if ($debug == 1) {
             <!-- ============================================================== -->
             <!-- Bread crumb and right sidebar toggle -->
             <!-- ============================================================== -->
-            <?php include '../app/views/Layout/title.php'; ?>
+            <?php include '../app/Views/Layout/title.php'; ?>
             <!-- ============================================================== -->
             <!-- End Bread crumb and right sidebar toggle -->
             <!-- ============================================================== -->
@@ -169,7 +169,7 @@ if ($debug == 1) {
                                                     <span><i class="fas fa-info-circle font-12"></i></span>
                                                     <div class="tooltip-text">
                                                         <strong>Ignorar Descuento</strong>
-                                                        <p></p>
+                                                        <p>Al estar en esta lista los montos de las facturas se comparan sin incluir el descuento.</p>
                                                     </div>
                                                 </div>
                                             </span>
@@ -184,7 +184,7 @@ if ($debug == 1) {
                                                     <span><i class="fas fa-info-circle font-12"></i></span>
                                                     <div class="tooltip-text">
                                                         <strong>Exento Año Fiscal</strong>
-                                                        <p></p>
+                                                        <p>Esta opción habilita la carga de facturas emitidas en años fiscales anteriores al actual.</p>
                                                     </div>
                                                 </div>
                                             </span>
@@ -199,7 +199,7 @@ if ($debug == 1) {
                                                     <span><i class="fas fa-info-circle font-12"></i></span>
                                                     <div class="tooltip-text">
                                                         <strong>Exento Tiempo Emisión</strong>
-                                                        <p></p>
+                                                        <p>Esta opción habilita la carga de facturas emitidas con una antigüedad mayor a seis meses.</p>
                                                     </div>
                                                 </div>
                                             </span>
@@ -214,7 +214,7 @@ if ($debug == 1) {
                                                     <span><i class="fas fa-info-circle font-12"></i></span>
                                                     <div class="tooltip-text">
                                                         <strong>Uso CFDI Distinto</strong>
-                                                        <p></p>
+                                                        <p>Esta opción habilita la carga de facturas con un uso de CFDI diferente al estándar.</p>
                                                     </div>
                                                 </div>
                                             </span>
@@ -229,7 +229,7 @@ if ($debug == 1) {
                                                     <span><i class="fas fa-info-circle font-12"></i></span>
                                                     <div class="tooltip-text">
                                                         <strong>Bloquear Diferencias</strong>
-                                                        <p></p>
+                                                        <p>No se permiten diferencias de montos entre la factura y la orden de compra para estos proveedores.</p>
                                                     </div>
                                                 </div>
                                             </span>
@@ -260,7 +260,7 @@ if ($debug == 1) {
             <!-- ============================================================== -->
             <!-- footer -->
             <!-- ============================================================== -->
-            <?php include '../app/views/Layout/footer.php'; ?>
+            <?php include '../app/Views/Layout/footer.php'; ?>
             <!-- ============================================================== -->
             <!-- End footer -->
             <!-- ============================================================== -->

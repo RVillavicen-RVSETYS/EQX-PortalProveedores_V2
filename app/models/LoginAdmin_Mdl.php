@@ -116,7 +116,7 @@ class LoginAdmin_Mdl
                 echo "Error en verificarUsuario: " . $e->getMessage(); // Mostrar error en modo depuración
             }
             $timestamp = date("Y-m-d H:i:s");
-            error_log("[$timestamp] app/models/Login_Mdl.php ->Error en verificarUsuario: " . $e->getMessage(), 3, LOG_FILE_BD); // Manejo del error
+            error_log("[$timestamp] app/Models/Login_Mdl.php ->Error en verificarUsuario: " . $e->getMessage(), 3, LOG_FILE_BD); // Manejo del error
             return ['success' => false, 'message' => 'Error al iniciar Session. Notifica a tu Administrador'];
         }
     }
@@ -167,7 +167,7 @@ class LoginAdmin_Mdl
             }
         } catch (\Exception $e) {
             $timestamp = date("Y-m-d H:i:s");
-            error_log("[$timestamp] app/models/Login_Mdl.php ->Error en obtenerPrimerArea: " . $e->getMessage(), 3, LOG_FILE); // Manejo del error
+            error_log("[$timestamp] app/Models/Login_Mdl.php ->Error en obtenerPrimerArea: " . $e->getMessage(), 3, LOG_FILE); // Manejo del error
             if (self::$debug) {
                 echo "Error en obtenerPrimerArea: " . $e->getMessage(); // Mostrar error en modo depuración
             }

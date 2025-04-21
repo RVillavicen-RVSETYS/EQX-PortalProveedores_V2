@@ -87,9 +87,9 @@ class Compras_Mdl
                         }
                     } elseif ($nombreFiltro == 'pagada') {
                         if ($valorFiltro == 1) {
-                            $filtrosSQL .= ' AND c.idPago IS NOT NULL';
+                            $filtrosSQL .= ' AND c.totalPagos > 0';
                         } else {
-                            $filtrosSQL .= ' AND c.idPago IS NULL';
+                            $filtrosSQL .= ' AND c.totalPagos = 0';
                         }
                     } else {
                         $filtrosSQL .= ' AND ' . $filtrosDisponibles[$nombreFiltro]['sqlFiltro'];
@@ -109,7 +109,7 @@ class Compras_Mdl
                 echo '<br><br>';
             }
 
-            $sql = "SELECT c.id AS acuse, c.claseDocto, dc.ordenCompra, c.estatus,
+            $sql = "SELECT c.id AS acuse, c.claseDocto, dc.ordenCompra, c.estatus, c.totalPagos, c.totalComplementos,
                     GROUP_CONCAT(DISTINCT dc.noRecepcion ORDER BY dc.noRecepcion SEPARATOR ', ') AS noRecepcion,
                     c.fechaReg, c.referencia, cf.urlPDF, cf.urlXML, pv.pais, pv.id AS 'IdProveedor', pv.razonSocial AS 'RazonSocial', pv.rfc AS 'RFC',
                     cf.serie AS 'SerieFact', cf.folio AS 'FolioFact', cf.fechaReg AS 'FechaReg', c.total AS 'Total', c.fechaProbablePago AS 'FechaPago', 
@@ -146,7 +146,7 @@ class Compras_Mdl
             return ['success' => true, 'cantRes' => $cantCompras, 'data' => $comprasresult];
         } catch (\Exception $e) {
             $timestamp = date("Y-m-d H:i:s");
-            error_log("[$timestamp] app/models/compras/Compras_Mdl.php ->Error buscar Compras por Proveedor: " . $e->getMessage(), 3, LOG_FILE_BD);
+            error_log("[$timestamp] app/Models/compras/Compras_Mdl.php ->Error buscar Compras por Proveedor: " . $e->getMessage(), 3, LOG_FILE_BD);
             if (self::$debug) {
                 echo "<br>Error al listar Compras Facturadas: " . $e->getMessage(); // Mostrar error en modo depuración
             }
@@ -156,7 +156,7 @@ class Compras_Mdl
 
     public function dataCompraPorFacturas($filtros = [], INT $cantMaxRes = 0, $orden = 'DESC')
     {
-        self::$debug = 1; // Cambiar a 0 para desactivar mensajes de depuración
+        self::$debug = 0; // Cambiar a 0 para desactivar mensajes de depuración
         if (self::$debug) {
             echo '<br><br>Filtros Recibidos: ';
             var_dump($filtros);
@@ -258,7 +258,7 @@ class Compras_Mdl
             return ['success' => true, 'cantRes' => $cantCompras, 'data' => $comprasresult];
         } catch (\Exception $e) {
             $timestamp = date("Y-m-d H:i:s");
-            error_log("[$timestamp] app/models/compras/Compras_Mdl.php ->Error buscar Facturas por UUID: " . $e->getMessage(), 3, LOG_FILE_BD);
+            error_log("[$timestamp] app/Models/compras/Compras_Mdl.php ->Error buscar Facturas por UUID: " . $e->getMessage(), 3, LOG_FILE_BD);
             if (self::$debug) {
                 echo "<br>Error al listar Facturas por UUID: " . $e->getMessage(); // Mostrar error en modo depuración
             }
@@ -268,6 +268,7 @@ class Compras_Mdl
 
     public function dataCompraPorAcuse(INT $idUser, INT $acuse)
     {
+        self::$debug = 0;
         if (empty($idUser) || empty($acuse)) {
             return ['success' => false, 'message' => 'Se requiere No. de Acuse.'];
         } else {
@@ -279,7 +280,7 @@ class Compras_Mdl
                 }
 
                 $sql = "SELECT c.id AS acuse, c.claseDocto, c.estatus AS CpaEstatus, c.fechaVal, c.comentRegresa, c.subTotal, c.idCatTipoMoneda AS CpaTipoMoneda,
-                            c.idProveedor, c.notaCredito,	c.idPago, c.fechaReg, c.referencia, c.fechaVence AS 'FechaVence', c.fechaProbablePago AS 'FechaProbablePago',
+                            c.idProveedor, c.notaCredito, c.totalPagos,	c.totalComplementos, c.fechaReg, c.referencia, c.fechaVence AS 'FechaVence', c.fechaProbablePago AS 'FechaProbablePago',
                             dcp.ordenCompra, dcp.noRecepcion,
                             cf.urlPDF AS FacUrlPDF, cf.urlXML AS FacUrlXML, cf.subtotal AS FacSubtotal, cf.monto AS FacMonto, cf.idCatTipoMoneda AS FacTipoMoneda, 
                             cf.idCatMetodoPago AS FacMetodoPago, cf.idCatFormaPago AS FacFormaPago, cf.usoCfdi AS FacUsoCfdi,cuc.descripcion AS nameUsoCfdi, 
@@ -328,7 +329,7 @@ class Compras_Mdl
                 return ['success' => true, 'data' => $comprasresult];
             } catch (\Exception $e) {
                 $timestamp = date("Y-m-d H:i:s");
-                error_log("[$timestamp] app/models/compras/Compras_Mdl.php ->Error buscar Compras por Proveedor: " . $e->getMessage(), 3, LOG_FILE_BD);
+                error_log("[$timestamp] app/Models/compras/Compras_Mdl.php ->Error buscar Compras por Proveedor: " . $e->getMessage(), 3, LOG_FILE_BD);
                 if (self::$debug) {
                     echo "Error al listar Compras: " . $e->getMessage(); // Mostrar error en modo depuración
                 }
@@ -387,7 +388,7 @@ class Compras_Mdl
                 return ['success' => true, 'data' => $comprasresult];
             } catch (\Exception $e) {
                 $timestamp = date("Y-m-d H:i:s");
-                error_log("[$timestamp] app/models/compras/Compras_Mdl.php ->Error buscar Url de Facturas: " . $e->getMessage(), 3, LOG_FILE_BD);
+                error_log("[$timestamp] app/Models/compras/Compras_Mdl.php ->Error buscar Url de Facturas: " . $e->getMessage(), 3, LOG_FILE_BD);
                 if (self::$debug) {
                     echo "Error al listar Compras: " . $e->getMessage(); // Mostrar error en modo depuración
                 }
@@ -424,7 +425,7 @@ class Compras_Mdl
                 return ['success' => true, 'data' => $comprasresult];
             } catch (\Exception $e) {
                 $timestamp = date("Y-m-d H:i:s");
-                error_log("[$timestamp] app/models/compras/Compras_Mdl.php ->Error buscar Compras por Proveedor: " . $e->getMessage(), 3, LOG_FILE_BD);
+                error_log("[$timestamp] app/Models/compras/Compras_Mdl.php ->Error buscar Compras por Proveedor: " . $e->getMessage(), 3, LOG_FILE_BD);
                 if (self::$debug) {
                     echo "Error al listar Compras: " . $e->getMessage(); // Mostrar error en modo depuración
                 }
@@ -531,7 +532,7 @@ class Compras_Mdl
             }
         } catch (\Exception $e) {
             $timestamp = date("Y-m-d H:i:s");
-            error_log("[$timestamp] app/models/compras/Compras_Mdl.php ->Error Al Actualizar Datos De La Factura: " . $e->getMessage() . PHP_EOL, 3, LOG_FILE_BD);
+            error_log("[$timestamp] app/Models/compras/Compras_Mdl.php ->Error Al Actualizar Datos De La Factura: " . $e->getMessage() . PHP_EOL, 3, LOG_FILE_BD);
             return ['success' => false, 'message' => 'Error: ' . $e->getMessage()];
         }
     }

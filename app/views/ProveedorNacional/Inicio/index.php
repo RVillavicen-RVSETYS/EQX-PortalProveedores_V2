@@ -5,10 +5,10 @@ $requestUri = $_SERVER['REQUEST_URI'];
 $cleanUri = parse_url($requestUri, PHP_URL_PATH);
 $piezasURL = explode('/', trim($cleanUri, '/'));
 $paginaLink = $piezasURL[1];
-$urlIdioma = '../app/views/Layout/Idiomas/' . $piezasURL[0] . '/' . $_SESSION['EQXidioma'] . '.php';
+$urlIdioma = '../app/Views/Layout/Idiomas/' . $piezasURL[0] . '/' . $_SESSION['EQXidioma'] . '.php';
 require_once($urlIdioma);
 $menuModel = new Idiomas($piezasURL[1]);
-include '../app/views/Layout/funciones.php';
+include '../app/Views/Layout/funciones.php';
 
 $funcionMenu = generarMenu($menuData['data'], $paginaLink);
 $datosPagina = $funcionMenu['datosPagina'];
@@ -54,7 +54,7 @@ if ($notificaciones['success'] && !empty($notificaciones['data'])) {
 <html dir="ltr" lang="es">
 
 <head>
-    <?php include '../app/views/Layout/header.php'; ?>
+    <?php include '../app/Views/Layout/header.php'; ?>
     <!-- Custom CSS -->
 
     <!-- Vendor -->
@@ -100,7 +100,7 @@ if ($notificaciones['success'] && !empty($notificaciones['data'])) {
         <!-- ============================================================== -->
         <!-- Topbar header - style you can find in pages.scss -->
         <!-- ============================================================== -->
-        <?php include '../app/views/Layout/menu.php'; ?>
+        <?php include '../app/Views/Layout/menu.php'; ?>
         <!-- ============================================================== -->
         <!-- End Topbar header -->
         <!-- ============================================================== -->
@@ -352,7 +352,7 @@ if ($notificaciones['success'] && !empty($notificaciones['data'])) {
         <!-- ============================================================== -->
         <!-- footer -->
         <!-- ============================================================== -->
-        <?php include '../app/views/Layout/footer.php'; ?>
+        <?php include '../app/Views/Layout/footer.php'; ?>
         <!-- ============================================================== -->
         <!-- End footer -->
         <!-- ============================================================== -->
@@ -444,13 +444,13 @@ if ($notificaciones['success'] && !empty($notificaciones['data'])) {
                     processData: false,
                     contentType: false,
                     success: function(response) {
+                        desbloquearBtn('btn1');
                         if (response.success) {                            
                             resetFormulario("Form_CargaFactura");
                             notificaSuc(response.message); // Muestra el mensaje OK
                         } else {
                             notificaBad(response.message); // Muestra el mensaje de error
                         }
-                        desbloquearBtn('btn1');
                     },
                     error: function() {
                         notificaBad('Error al querer cargar factura. Consulta a tu administrador');

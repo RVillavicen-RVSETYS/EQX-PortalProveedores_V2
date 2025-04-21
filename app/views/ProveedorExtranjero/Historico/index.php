@@ -5,11 +5,11 @@ $requestUri = $_SERVER['REQUEST_URI'];
 $cleanUri = parse_url($requestUri, PHP_URL_PATH);
 $piezasURL = explode('/', trim($cleanUri, '/'));
 $paginaLink = $piezasURL[1];
-$urlIdioma = '../app/views/Layout/Idiomas/' . $piezasURL[0] . '/' . $_SESSION['EQXidioma'] . '.php';
+$urlIdioma = '../app/Views/Layout/Idiomas/' . $piezasURL[0] . '/' . $_SESSION['EQXidioma'] . '.php';
 
 require_once($urlIdioma);
 $menuModel = new Idiomas($piezasURL[1]);
-include '../app/views/Layout/funciones.php';
+include '../app/Views/Layout/funciones.php';
 
 $funcionMenu = generarMenu($menuData['data'], $paginaLink);
 $datosPagina = $funcionMenu['datosPagina'];
@@ -42,7 +42,7 @@ $cantCompras = $data['datosIniciales']['cantCompras'];
 <html dir="ltr" lang="es">
 
 <head>
-    <?php include '../app/views/Layout/header.php'; ?>
+    <?php include '../app/Views/Layout/header.php'; ?>
     <!-- Custom CSS -->
 
     <!-- Vendor -->
@@ -80,7 +80,7 @@ $cantCompras = $data['datosIniciales']['cantCompras'];
         <!-- ============================================================== -->
         <!-- Topbar header - style you can find in pages.scss -->
         <!-- ============================================================== -->
-        <?php include '../app/views/Layout/menu.php'; ?>
+        <?php include '../app/Views/Layout/menu.php'; ?>
         <!-- ============================================================== -->
         <!-- End Topbar header -->
         <!-- ============================================================== -->
@@ -93,7 +93,7 @@ $cantCompras = $data['datosIniciales']['cantCompras'];
             <!-- ============================================================== -->
             <!-- Bread crumb and right sidebar toggle -->
             <!-- ============================================================== -->
-            <?php include '../app/views/Layout/title.php'; ?>
+            <?php include '../app/Views/Layout/title.php'; ?>
             <!-- ============================================================== -->
             <!-- End Bread crumb and right sidebar toggle -->
             <!-- ============================================================== -->
@@ -286,7 +286,7 @@ $cantCompras = $data['datosIniciales']['cantCompras'];
             <!-- ============================================================== -->
             <!-- footer -->
             <!-- ============================================================== -->
-            <?php include '../app/views/Layout/footer.php'; ?>
+            <?php include '../app/Views/Layout/footer.php'; ?>
             <!-- ============================================================== -->
             <!-- End footer -->
             <!-- ============================================================== -->

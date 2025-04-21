@@ -5,7 +5,7 @@
 # NOTA: Para documentar una vista o procedimiento usar estructura --> NombreDeLaVista{ Query que genera la Vista.}
 
 Views (Vistas de BD)[
-    vw_data__Proveedores_AccesoProveedores{
+    vw_data_Proveedores_AccesoProveedores{
         SELECT * FROM proveedores
     }
 

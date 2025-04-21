@@ -72,7 +72,7 @@ class ExcepcionesProveedores_Mdl
         } catch (\PDOException $e) {
             // Captura de errores y almacenamiento en el log
             $timestamp = date("Y-m-d H:i:s");
-            error_log("[$timestamp] app/models/ExcepcionesProveedores_Mdl.php -> Error Al Obtener Proveedores Ignorados: " . $e->getMessage(), 3, LOG_FILE_BD);
+            error_log("[$timestamp] app/Models/ExcepcionesProveedores_Mdl.php -> Error Al Obtener Proveedores Ignorados: " . $e->getMessage(), 3, LOG_FILE_BD);
             return ['success' => false, 'message' => 'Error Al Obtener Proveedores Ignorados. Notifica a tu administrador'];
         }
     }
@@ -122,7 +122,7 @@ class ExcepcionesProveedores_Mdl
         } catch (\PDOException $e) {
             // Captura de errores y almacenamiento en el log
             $timestamp = date("Y-m-d H:i:s");
-            error_log("[$timestamp] app/models/ExcepcionesProveedores_Mdl.php -> Error Al Obtener Proveedores Exentos Año Fiscal: " . $e->getMessage(), 3, LOG_FILE_BD);
+            error_log("[$timestamp] app/Models/ExcepcionesProveedores_Mdl.php -> Error Al Obtener Proveedores Exentos Año Fiscal: " . $e->getMessage(), 3, LOG_FILE_BD);
             return ['success' => false, 'message' => 'Error Al Obtener Proveedores Exentos Año Fiscal. Notifica a tu administrador'];
         }
     }
@@ -173,7 +173,7 @@ class ExcepcionesProveedores_Mdl
         } catch (\PDOException $e) {
             // Captura de errores y almacenamiento en el log
             $timestamp = date("Y-m-d H:i:s");
-            error_log("[$timestamp] app/models/ExcepcionesProveedores_Mdl.php -> Error Al Obtener Proveedores Exentos Fecha De Emision: " . $e->getMessage(), 3, LOG_FILE_BD);
+            error_log("[$timestamp] app/Models/ExcepcionesProveedores_Mdl.php -> Error Al Obtener Proveedores Exentos Fecha De Emision: " . $e->getMessage(), 3, LOG_FILE_BD);
             return ['success' => false, 'message' => 'Error Al Obtener Proveedores Exentos Fecha De Emision. Notifica a tu administrador'];
         }
     }
@@ -226,7 +226,7 @@ class ExcepcionesProveedores_Mdl
         } catch (\PDOException $e) {
             // Captura de errores y almacenamiento en el log
             $timestamp = date("Y-m-d H:i:s");
-            error_log("[$timestamp] app/models/ExcepcionesProveedores_Mdl.php -> Error Al Obtener Proveedores con Uso De CFDI Distinto: " . $e->getMessage(), 3, LOG_FILE_BD);
+            error_log("[$timestamp] app/Models/ExcepcionesProveedores_Mdl.php -> Error Al Obtener Proveedores con Uso De CFDI Distinto: " . $e->getMessage(), 3, LOG_FILE_BD);
             return ['success' => false, 'message' => 'Error Al Obtener Proveedores con Uso De CFDI Distinto. Notifica a tu administrador'];
         }
     }
@@ -277,7 +277,7 @@ class ExcepcionesProveedores_Mdl
         } catch (\PDOException $e) {
             // Captura de errores y almacenamiento en el log
             $timestamp = date("Y-m-d H:i:s");
-            error_log("[$timestamp] app/models/ExcepcionesProveedores_Mdl.php -> Error Al Obtener Proveedores con Uso De CFDI Distinto: " . $e->getMessage(), 3, LOG_FILE_BD);
+            error_log("[$timestamp] app/Models/ExcepcionesProveedores_Mdl.php -> Error Al Obtener Proveedores con Uso De CFDI Distinto: " . $e->getMessage(), 3, LOG_FILE_BD);
             return ['success' => false, 'message' => 'Error Al Obtener Proveedores con Uso De CFDI Distinto. Notifica a tu administrador'];
         }
     }
@@ -327,7 +327,7 @@ class ExcepcionesProveedores_Mdl
         } catch (\PDOException $e) {
             // Captura de errores y almacenamiento en el log
             $timestamp = date("Y-m-d H:i:s");
-            error_log("[$timestamp] app/models/ExcepcionesProveedores_Mdl.php -> Error Al Obtener Proveedores: " . $e->getMessage(), 3, LOG_FILE_BD);
+            error_log("[$timestamp] app/Models/ExcepcionesProveedores_Mdl.php -> Error Al Obtener Proveedores: " . $e->getMessage(), 3, LOG_FILE_BD);
             return ['success' => false, 'message' => 'Error Al Obtener Proveedores. Notifica a tu administrador'];
         }
     }
@@ -376,7 +376,7 @@ class ExcepcionesProveedores_Mdl
         } catch (\PDOException $e) {
             // Captura de errores y almacenamiento en el log
             $timestamp = date("Y-m-d H:i:s");
-            error_log("[$timestamp] app/models/ExcepcionesProveedores_Mdl.php -> Error Al Obtener El Catalogo De Usos De CFDI: " . $e->getMessage(), 3, LOG_FILE_BD);
+            error_log("[$timestamp] app/Models/ExcepcionesProveedores_Mdl.php -> Error Al Obtener El Catalogo De Usos De CFDI: " . $e->getMessage(), 3, LOG_FILE_BD);
             return ['success' => false, 'message' => 'Error Al Obtener El Catalogo De Usos De CFDI. Notifica a tu administrador'];
         }
     }
@@ -440,7 +440,7 @@ class ExcepcionesProveedores_Mdl
                     mkdir($logDir, 0777, true);
                 }
 
-                error_log("[$timestamp] app/models/ExcepcionesProveedores_Mdl.php -> Se " . $estatus . " El Proveedor: " . $idProveedor . ", IdUserReg: " . $_SESSION['EQXident'] . PHP_EOL, 3, $logFile);
+                error_log("[$timestamp] app/Models/ExcepcionesProveedores_Mdl.php -> Se " . $estatus . " El Proveedor: " . $idProveedor . ", IdUserReg: " . $_SESSION['EQXident'] . PHP_EOL, 3, $logFile);
 
                 return ['success' => true, 'data' => 'Estatus Cambiado Correctamente.'];
             } else {
@@ -451,7 +451,7 @@ class ExcepcionesProveedores_Mdl
             }
         } catch (\Exception $e) {
             $timestamp = date("Y-m-d H:i:s");
-            error_log("[$timestamp] app/models/ExcepcionesProveedores_Mdl.php ->Error Al Cambiar Estatus: " . $e->getMessage(), 3, LOG_FILE_BD);
+            error_log("[$timestamp] app/Models/ExcepcionesProveedores_Mdl.php ->Error Al Cambiar Estatus: " . $e->getMessage(), 3, LOG_FILE_BD);
             if (self::$debug) {
                 echo "Error Al Cambiar Estatus: " . $e->getMessage();
             }
@@ -493,7 +493,7 @@ class ExcepcionesProveedores_Mdl
             }
         } catch (\Exception $e) {
             $timestamp = date("Y-m-d H:i:s");
-            error_log("[$timestamp] app/models/ExcepcionesProveedores_Mdl.php ->Error Al Eliminar Proveedor: " . $e->getMessage(), 3, LOG_FILE_BD);
+            error_log("[$timestamp] app/Models/ExcepcionesProveedores_Mdl.php ->Error Al Eliminar Proveedor: " . $e->getMessage(), 3, LOG_FILE_BD);
             if (self::$debug) {
                 echo "Error Al Eliminar Proveedor: " . $e->getMessage();
             }
@@ -536,7 +536,7 @@ class ExcepcionesProveedores_Mdl
                     mkdir($logDir, 0777, true);
                 }
                 $logFile = $logDir . '/ignoraDescuento.log';
-                error_log("[$timestamp] app/models/ExcepcionesProveedores_Mdl.php -> Se Agregó El Proveedor: " . $idProveedor . " Con Motivo: '$motivo', IdUserReg: " . $_SESSION['EQXident'] . PHP_EOL, 3, $logFile);
+                error_log("[$timestamp] app/Models/ExcepcionesProveedores_Mdl.php -> Se Agregó El Proveedor: " . $idProveedor . " Con Motivo: '$motivo', IdUserReg: " . $_SESSION['EQXident'] . PHP_EOL, 3, $logFile);
 
                 return ['success' => true, 'data' => 'Proveedor Agregado Correctamente.'];
             } else {
@@ -547,7 +547,7 @@ class ExcepcionesProveedores_Mdl
             }
         } catch (\Exception $e) {
             $timestamp = date("Y-m-d H:i:s");
-            error_log("[$timestamp] app/models/ExcepcionesProveedores_Mdl.php ->Error Al Agregar Proveedor: " . $e->getMessage(), 3, LOG_FILE_BD);
+            error_log("[$timestamp] app/Models/ExcepcionesProveedores_Mdl.php ->Error Al Agregar Proveedor: " . $e->getMessage(), 3, LOG_FILE_BD);
             if (self::$debug) {
                 echo "Error Al Agregar Proveedor: " . $e->getMessage();
             }
@@ -589,7 +589,7 @@ class ExcepcionesProveedores_Mdl
                     mkdir($logDir, 0777, true);
                 }
                 $logFile = $logDir . '/exentoAnioFiscal.log';
-                error_log("[$timestamp] app/models/ExcepcionesProveedores_Mdl.php -> Se Agregó El Proveedor: " . $idProveedor . ", IdUserReg: " . $_SESSION['EQXident'] . PHP_EOL, 3, $logFile);
+                error_log("[$timestamp] app/Models/ExcepcionesProveedores_Mdl.php -> Se Agregó El Proveedor: " . $idProveedor . ", IdUserReg: " . $_SESSION['EQXident'] . PHP_EOL, 3, $logFile);
 
                 return ['success' => true, 'data' => 'Proveedor Agregado Correctamente.'];
             } else {
@@ -600,7 +600,7 @@ class ExcepcionesProveedores_Mdl
             }
         } catch (\Exception $e) {
             $timestamp = date("Y-m-d H:i:s");
-            error_log("[$timestamp] app/models/ExcepcionesProveedores_Mdl.php ->Error Al Agregar Proveedor: " . $e->getMessage(), 3, LOG_FILE_BD);
+            error_log("[$timestamp] app/Models/ExcepcionesProveedores_Mdl.php ->Error Al Agregar Proveedor: " . $e->getMessage(), 3, LOG_FILE_BD);
             if (self::$debug) {
                 echo "Error Al Agregar Proveedor: " . $e->getMessage();
             }
@@ -642,7 +642,7 @@ class ExcepcionesProveedores_Mdl
                     mkdir($logDir, 0777, true);
                 }
                 $logFile = $logDir . '/exentoTiempoEmision.log';
-                error_log("[$timestamp] app/models/ExcepcionesProveedores_Mdl.php -> Se Agregó El Proveedor: " . $idProveedor . ", IdUserReg: " . $_SESSION['EQXident'] . PHP_EOL, 3, $logFile);
+                error_log("[$timestamp] app/Models/ExcepcionesProveedores_Mdl.php -> Se Agregó El Proveedor: " . $idProveedor . ", IdUserReg: " . $_SESSION['EQXident'] . PHP_EOL, 3, $logFile);
 
                 return ['success' => true, 'data' => 'Proveedor Agregado Correctamente.'];
             } else {
@@ -653,7 +653,7 @@ class ExcepcionesProveedores_Mdl
             }
         } catch (\Exception $e) {
             $timestamp = date("Y-m-d H:i:s");
-            error_log("[$timestamp] app/models/ExcepcionesProveedores_Mdl.php ->Error Al Agregar Proveedor: " . $e->getMessage(), 3, LOG_FILE_BD);
+            error_log("[$timestamp] app/Models/ExcepcionesProveedores_Mdl.php ->Error Al Agregar Proveedor: " . $e->getMessage(), 3, LOG_FILE_BD);
             if (self::$debug) {
                 echo "Error Al Agregar Proveedor: " . $e->getMessage();
             }
@@ -697,7 +697,7 @@ class ExcepcionesProveedores_Mdl
                     mkdir($logDir, 0777, true);
                 }
                 $logFile = $logDir . '/usoCfdiDistinto.log';
-                error_log("[$timestamp] app/models/ExcepcionesProveedores_Mdl.php -> Se Agregó El Proveedor: " . $idProveedor . ", IdUserReg: " . $_SESSION['EQXident'] . PHP_EOL, 3, $logFile);
+                error_log("[$timestamp] app/Models/ExcepcionesProveedores_Mdl.php -> Se Agregó El Proveedor: " . $idProveedor . ", IdUserReg: " . $_SESSION['EQXident'] . PHP_EOL, 3, $logFile);
 
                 return ['success' => true, 'data' => 'Proveedor Agregado Correctamente.'];
             } else {
@@ -708,7 +708,7 @@ class ExcepcionesProveedores_Mdl
             }
         } catch (\Exception $e) {
             $timestamp = date("Y-m-d H:i:s");
-            error_log("[$timestamp] app/models/ExcepcionesProveedores_Mdl.php ->Error Al Agregar Proveedor: " . $e->getMessage(), 3, LOG_FILE_BD);
+            error_log("[$timestamp] app/Models/ExcepcionesProveedores_Mdl.php ->Error Al Agregar Proveedor: " . $e->getMessage(), 3, LOG_FILE_BD);
             if (self::$debug) {
                 echo "Error Al Agregar Proveedor: " . $e->getMessage();
             }
@@ -752,7 +752,7 @@ class ExcepcionesProveedores_Mdl
                     mkdir($logDir, 0777, true);
                 }
                 $logFile = $logDir . '/bloqueoDeDiferencias.log';
-                error_log("[$timestamp] app/models/ExcepcionesProveedores_Mdl.php -> Se Agregó El Proveedor: " . $idProveedor . " Con Motivo: '$motivo', IdUserReg: " . $_SESSION['EQXident'] . PHP_EOL, 3, $logFile);
+                error_log("[$timestamp] app/Models/ExcepcionesProveedores_Mdl.php -> Se Agregó El Proveedor: " . $idProveedor . " Con Motivo: '$motivo', IdUserReg: " . $_SESSION['EQXident'] . PHP_EOL, 3, $logFile);
 
                 return ['success' => true, 'data' => 'Proveedor Agregado Correctamente.'];
             } else {
@@ -763,7 +763,7 @@ class ExcepcionesProveedores_Mdl
             }
         } catch (\Exception $e) {
             $timestamp = date("Y-m-d H:i:s");
-            error_log("[$timestamp] app/models/ExcepcionesProveedores_Mdl.php ->Error Al Agregar Proveedor: " . $e->getMessage(), 3, LOG_FILE_BD);
+            error_log("[$timestamp] app/Models/ExcepcionesProveedores_Mdl.php ->Error Al Agregar Proveedor: " . $e->getMessage(), 3, LOG_FILE_BD);
             if (self::$debug) {
                 echo "Error Al Agregar Proveedor: " . $e->getMessage();
             }

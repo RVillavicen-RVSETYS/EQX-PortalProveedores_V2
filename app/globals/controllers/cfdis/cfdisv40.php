@@ -41,6 +41,7 @@ class cfdisv40
                 'CondicionesDePago' => (string) ($comprobante['CondicionesDePago'] ?? ''),
                 'SubTotal' => (float) ($comprobante['SubTotal'] ?? 0),
                 'Moneda' => (string) ($comprobante['Moneda'] ?? ''),
+                'NoCertificado' => (string) ($comprobante['NoCertificado'] ?? ''),
                 'TipoCambio' => (float) ($comprobante['TipoCambio'] ?? 0),
                 'Total' => (float) ($comprobante['Total'] ?? 0),
                 'TipoDeComprobante' => (string) ($comprobante['TipoDeComprobante'] ?? ''),
@@ -133,10 +134,12 @@ class cfdisv40
             ] : [];
 
             // Generar el campo serializado
-            if (!empty($serie) && !empty($folio)) {
+            if (!empty($serie) || !empty($folio)) {
+                $serie = preg_replace('/[^A-Za-z0-9]/', '', $serie);
+                $folio = preg_replace('/[^A-Za-z0-9]/', '', $folio);
                 $response['data']['Serializado'] = $serie . $folio;
             } elseif (!empty($uuid)) {
-                $response['data']['Serializado'] = substr($uuid, 0, 16);
+                $response['data']['Serializado'] = substr(preg_replace('/[^A-Za-z0-9]/', '', $uuid), 0, 16);
             } else {
                 $response['data']['Serializado'] = '';
             }
@@ -178,6 +181,9 @@ class cfdisv40
 
             // Datos del comprobante
             $comprobante = $xml->attributes();
+            $serie = (string) ($comprobante['Serie'] ?? '');
+            $folio = (string) ($comprobante['Folio'] ?? '');
+
             $response['data']['Comprobante'] = [
                 'Version' => (string) ($comprobante['Version'] ?? ''),
                 'Serie' => (string) ($comprobante['Serie'] ?? ''),
@@ -185,6 +191,7 @@ class cfdisv40
                 'Fecha' => (string) ($comprobante['Fecha'] ?? ''),
                 'SubTotal' => (float) ($comprobante['SubTotal'] ?? 0),
                 'Moneda' => (string) ($comprobante['Moneda'] ?? ''),
+                'NoCertificado' => (string) ($comprobante['NoCertificado'] ?? ''),
                 'Total' => (float) ($comprobante['Total'] ?? 0),
                 'TipoDeComprobante' => (string) ($comprobante['TipoDeComprobante'] ?? ''),
                 'Exportacion' => (string) ($comprobante['Exportacion'] ?? ''),
@@ -255,29 +262,66 @@ class cfdisv40
                         'FormaDePagoP' => (string) ($pago['FormaDePagoP'] ?? ''),
                         'MonedaP' => (string) ($pago['MonedaP'] ?? ''),
                         'Monto' => (float) ($pago['Monto'] ?? 0),
-                        'DoctosRelacionados' => $doctosRelacionados,
+                        'TipoCambioP' => (float) ($pago['TipoCambioP'] ?? 0),
+                        'DoctosRelacionados' => array_map(function ($docto) {
+                            $impuestosDR = [];
+                            foreach ($docto->xpath('pago20:ImpuestosDR/pago20:TrasladosDR/pago20:TrasladoDR') as $trasladoDR) {
+                                $impuestosDR[] = [
+                                    'BaseDR' => (float) ($trasladoDR['BaseDR'] ?? 0),
+                                    'ImpuestoDR' => (string) ($trasladoDR['ImpuestoDR'] ?? ''),
+                                    'TipoFactorDR' => (string) ($trasladoDR['TipoFactorDR'] ?? ''),
+                                    'TasaOCuotaDR' => (float) ($trasladoDR['TasaOCuotaDR'] ?? 0),
+                                    'ImporteDR' => (float) ($trasladoDR['ImporteDR'] ?? 0)
+                                ];
+                            }
+
+                            return [
+                                'IdDocumento' => strtoupper((string) ($docto['IdDocumento'] ?? '')),
+                                'Folio' => (string) ($docto['Folio'] ?? ''),
+                                'Serie' => (string) ($docto['Serie'] ?? ''),
+                                'MonedaDR' => (string) ($docto['MonedaDR'] ?? ''),
+                                'NumParcialidad' => (int) ($docto['NumParcialidad'] ?? 0),
+                                'ImpSaldoAnt' => (float) ($docto['ImpSaldoAnt'] ?? 0),
+                                'ImpPagado' => (float) ($docto['ImpPagado'] ?? 0),
+                                'ImpSaldoInsoluto' => (float) ($docto['ImpSaldoInsoluto'] ?? 0),
+                                'ImpuestosDR' => $impuestosDR
+                            ];
+                        }, $pago->xpath('pago20:DoctoRelacionado')),
                         'ImpuestosP' => $impuestosP
                     ];
                 }
 
+                $totales = $pagos[0]->xpath('pago20:Totales');
                 $response['data']['Pagos'] = [
                     'Version' => (string) ($pagos[0]['Version'] ?? ''),
-                    'Totales' => [
-                        'MontoTotalPagos' => (float) ($pagos[0]->Totales['MontoTotalPagos'] ?? 0),
-                        'TotalTrasladosBaseIVA0' => (float) ($pagos[0]->Totales['TotalTrasladosBaseIVA0'] ?? 0),
-                        'TotalTrasladosImpuestoIVA0' => (float) ($pagos[0]->Totales['TotalTrasladosImpuestoIVA0'] ?? 0)
-                    ],
+                    'Totales' => $totales ? [
+                        'MontoTotalPagos' => (float) ($totales[0]['MontoTotalPagos'] ?? 0),
+                        'TotalTrasladosBaseIVA0' => (float) ($totales[0]['TotalTrasladosBaseIVA0'] ?? 0),
+                        'TotalTrasladosImpuestoIVA0' => (float) ($totales[0]['TotalTrasladosImpuestoIVA0'] ?? 0)
+                    ] : [],
                     'Pagos' => $pagoData
                 ];
             }
 
             // Complemento Timbre Fiscal
             $timbre = $xml->xpath('//tfd:TimbreFiscalDigital');
+            $uuid = $timbre ? (string) ($timbre[0]['UUID'] ?? '') : '';
             $response['data']['TimbreFiscal'] = $timbre ? [
                 'UUID' => strtoupper((string) ($timbre[0]['UUID'] ?? '')),
                 'FechaTimbrado' => (string) ($timbre[0]['FechaTimbrado'] ?? ''),
                 'RfcProvCertif' => (string) ($timbre[0]['RfcProvCertif'] ?? '')
             ] : [];
+
+            // Generar el campo serializado
+            if (!empty($serie) || !empty($folio)) {
+                $serie = preg_replace('/[^A-Za-z0-9]/', '', $serie);
+                $folio = preg_replace('/[^A-Za-z0-9]/', '', $folio);
+                $response['data']['Serializado'] = $serie . $folio;
+            } elseif (!empty($uuid)) {
+                $response['data']['Serializado'] = substr(preg_replace('/[^A-Za-z0-9]/', '', $uuid), 0, 16);
+            } else {
+                $response['data']['Serializado'] = '';
+            }
 
             $response['success'] = true;
             $response['message'] = 'CFDI de Pago leído correctamente.';

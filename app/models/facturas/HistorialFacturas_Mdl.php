@@ -146,7 +146,7 @@ class HistorialFacturas_Mdl
         } catch (\PDOException $e) {
             // Captura de errores y almacenamiento en el log
             $timestamp = date("Y-m-d H:i:s");
-            error_log("[$timestamp] app/models/HistorialFacturas_Mdl.php -> Error Al Listar Facturas Recibidas: " . $e->getMessage(), 3, LOG_FILE_BD);
+            error_log("[$timestamp] app/Models/HistorialFacturas_Mdl.php -> Error Al Listar Facturas Recibidas: " . $e->getMessage(), 3, LOG_FILE_BD);
             return ['success' => false, 'message' => 'Error Al Listar Facturas Recibidas. Notifica a tu administrador'];
         }
     }
@@ -212,7 +212,7 @@ class HistorialFacturas_Mdl
         } catch (\PDOException $e) {
             // Captura de errores y almacenamiento en el log
             $timestamp = date("Y-m-d H:i:s");
-            error_log("[$timestamp] app/models/HistorialFacturas_Mdl.php -> Error Al Buscar Pagos En Silme: " . $e->getMessage() . PHP_EOL, 3, LOG_FILE_BD);
+            error_log("[$timestamp] app/Models/HistorialFacturas_Mdl.php -> Error Al Buscar Pagos En Silme: " . $e->getMessage() . PHP_EOL, 3, LOG_FILE_BD);
             return ['success' => false, 'message' => 'Error Al Buscar Pagos En Silme. Notifica a tu administrador'];
         }
     }
@@ -283,7 +283,7 @@ class HistorialFacturas_Mdl
         } catch (\PDOException $e) {
             // Captura de errores y almacenamiento en el log
             $timestamp = date("Y-m-d H:i:s");
-            error_log("[$timestamp] app/models/HistorialFacturas_Mdl.php -> No Se Encontraron Nuevos Pagos En Silme: " . $e->getMessage() . PHP_EOL, 3, LOG_FILE_BD);
+            error_log("[$timestamp] app/Models/HistorialFacturas_Mdl.php -> No Se Encontraron Nuevos Pagos En Silme: " . $e->getMessage() . PHP_EOL, 3, LOG_FILE_BD);
             return ['success' => false, 'message' => 'No Se Encontraron Nuevos Pagos En Silme. Notifica a tu administrador'];
         }
     }

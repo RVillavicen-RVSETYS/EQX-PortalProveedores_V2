@@ -32,7 +32,7 @@ class App
         }
 
         // Verificar si la URL tiene un controlador en una subcarpeta
-        $controllerPath = "../app/controllers/" . ucfirst($url[0]);
+        $controllerPath = "../app/Controllers/" . ucfirst($url[0]);
         if (is_dir($controllerPath) && isset($url[1])) {
             if ($this->debug == 1) {
                 echo "Si encontro la Ruta del controlador: '" . $controllerPath . "'<br>";
@@ -40,6 +40,8 @@ class App
             $controllerFile = $controllerPath . '/' . ucfirst($url[1]) . 'Controller.php';
             if (file_exists($controllerFile)) {
                 $this->controller = ucfirst($url[0]) . '\\' . ucfirst($url[1]) . 'Controller';
+                $controllerClass = str_replace('/', '\\', $this->controller);
+                $this->controller = $controllerClass;
                 unset($url[0], $url[1]);
                 if ($this->debug == 1) {
                     echo "Registramos en this->Controller y vaciamos url0 y url1.<br>";
@@ -55,8 +57,8 @@ class App
                 $this->logAndRedirect404("Controlador en subcarpeta no encontrado", $url[1] ?? 'N/A');
             }
         }
-        // Verificar si el controlador solicitado existe en /app/controllers/
-        elseif ($url && file_exists("../app/controllers/" . ucfirst($url[0]) . ".php")) {
+        // Verificar si el controlador solicitado existe en /app/Controllers/
+        elseif ($url && file_exists("../app/Controllers/" . ucfirst($url[0]) . ".php")) {
             $this->controller = ucfirst($url[0]);
             unset($url[0]);
             if ($this->debug == 1) {
@@ -72,8 +74,8 @@ class App
         }
 
         // Incluir y crear una instancia del controlador
-        require_once "../app/controllers/" . $this->controller . ".php";
-        $controllerClass = "App\\Controllers\\" . $this->controller;
+        require_once "../app/Controllers/" . str_replace('\\', '/', $this->controller) . ".php";
+        $controllerClass = "App\\Controllers\\" . str_replace('/', '\\', $this->controller);
         $this->controller = new $controllerClass;
 
         if ($this->debug == 1) {
@@ -156,7 +158,7 @@ class App
         if ($this->debug == 1) {
             echo "$error: " . $detail . "<br>";
         }
-        require_once "../app/views/errors/404.php";
+        require_once "../app/Views/errors/404.php";
         exit();
     }
 }
@@ -173,7 +175,7 @@ class Controller
     protected function view($view, $data = [])
     {
         // Generar la ruta de la vista
-        $viewPath = "../app/views/" . rtrim($view, '/') . ".php";
+        $viewPath = "../app/Views/" . rtrim($view, '/') . ".php";
         if ($this->debug == 1) {
             echo '<br>Ruta de Vista:' . $viewPath . '<br>';
         }

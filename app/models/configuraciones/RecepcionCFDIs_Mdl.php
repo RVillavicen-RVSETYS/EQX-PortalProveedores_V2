@@ -85,7 +85,7 @@ class RecepcionCFDIs_Mdl
         } catch (\Exception $e) {
             // Registrar error
             $timestamp = date("Y-m-d H:i:s");
-            error_log("[$timestamp] app/models/configuracion/Configuracion_Mdl.php -> Error en configuracionBaseRecepcionCFDI: " . $e->getMessage(), 3, LOG_FILE_BD);
+            error_log("[$timestamp] app/Models/configuracion/Configuracion_Mdl.php -> Error en configuracionBaseRecepcionCFDI: " . $e->getMessage(), 3, LOG_FILE_BD);
 
             // Debug del error
             if (self::$debug) {
@@ -192,7 +192,7 @@ class RecepcionCFDIs_Mdl
         } catch (\Exception $e) {
             // Manejo de errores
             $timestamp = date("Y-m-d H:i:s");
-            error_log("[$timestamp] app/models/datosCompra/Configuraciones_Mdl.php ->Error en diferenciaMontoXMoneda: " . $e->getMessage(), 3, LOG_FILE);
+            error_log("[$timestamp] app/Models/datosCompra/Configuraciones_Mdl.php ->Error en diferenciaMontoXMoneda: " . $e->getMessage(), 3, LOG_FILE);
             if (self::$debug) {
                 echo "Error en diferenciaMontoXMoneda: " . $e->getMessage();
             }
