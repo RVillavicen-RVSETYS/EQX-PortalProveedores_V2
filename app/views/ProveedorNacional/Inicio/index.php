@@ -407,9 +407,10 @@ if ($notificaciones['success'] && !empty($notificaciones['data'])) {
     <script src="/dist/js/sidebarmenu.js"></script>
     <!--Custom JavaScript -->
     <script src="/dist/js/custom.js"></script>
-    <script src="/dist/js/basicFuctions.js"></script>
     <script src="/assets/libs/toastr/build/toastr.min.js"></script>
     <script src="/assets/libs/moment/moment.js"></script>
+    <script src="/assets/libs/sweetalert2/dist/sweetalert2.js"></script>
+    <script src="/assets/libs/sweetalert2/dist/sweetalert2.all.js"></script>
     <script src="/assets/extra-libs/datatables.net/js/jquery.dataTables.min-ESP.js"></script>
     <script src="/dist/js/pages/datatable/datatable-basic.init.js"></script>
 
@@ -426,8 +427,11 @@ if ($notificaciones['success'] && !empty($notificaciones['data'])) {
     <script src="/assets/libs/chartist-plugin-tooltips/dist/chartist-plugin-tooltip.min.js"></script>
     <script src="/assets/extra-libs/datatables.net/js/pdfmake.min.js"></script>
     <script src="/assets/extra-libs/datatables.net/js/vfs_fonts.js"></script>
+    <script src="/assets/libs/sweetalert2/sweet-alert.init.js"></script>
+    <script src="/dist/js/basicFuctions.js"></script>
     <script>
         $(document).ready(function() {
+            
             let validOC = false;
             let validHES = false;
             let reqAnticipo = false;
@@ -447,9 +451,9 @@ if ($notificaciones['success'] && !empty($notificaciones['data'])) {
                         desbloquearBtn('btn1');
                         if (response.success) {                            
                             resetFormulario("Form_CargaFactura");
-                            notificaSuc(response.message); // Muestra el mensaje OK
+                            notificaSucSweet("Excelente!!", response.message);
                         } else {
-                            notificaBad(response.message); // Muestra el mensaje de error
+                            notificaBadSweet("Lo sentimos!!", response.message); // Muestra el mensaje de error
                         }
                     },
                     error: function() {

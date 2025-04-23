@@ -383,6 +383,7 @@ class ReglasAplicadasv40
 
     public function validarReglasInternasNacional_Pagos($dataProveedor, $dataEmpresa, $dataXML, $dataCompras, $configParaValidaciones = [])
     {
+        $this->debug = 1; // Cambia esto a 0 para desactivar el modo de depuración
         $response = [
             "success" => true,
             "message" => "",
@@ -639,6 +640,8 @@ class ReglasAplicadasv40
 
     public function validarReglasNegocioNacional_Pagos($dataXML, $dataCompras, $dataPagos, $configParaValidaciones = []) 
     {
+        $this->debug = 1; // Cambia esto a 0 para desactivar el modo de depuración
+        
         $response = [
             "success" => false,
             "message" => "",
