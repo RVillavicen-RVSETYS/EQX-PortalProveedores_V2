@@ -1,3 +1,4 @@
+
 function notificaSuc(cont){
   toastr.success(cont, 'Excelente!', {
     "progressBar": true,
@@ -10,6 +11,18 @@ function notificaBad(cont){
     "progressBar": true,
     "closeButton": true
   });
+}
+
+function notificaSucSweet(title, cont){
+  Swal.fire(title, cont, "success");
+}
+
+function notificaBadSweet(title, cont){
+  Swal.fire(title, cont, "error");
+}
+
+function notificaInfoSweet(title, cont){
+  Swal.fire(title, cont, "info"); 
 }
 
 function bloqueoBtn(boton,no){

@@ -128,6 +128,8 @@ class PendientesPorPagarController extends Controller
         $data['noProveedor'] = $noProveedor;
         $data['acuse'] =  $acuse;
         $data['dataCompra'] =  $dataCompra;
+        $data['puedeAutorizar'] = 0; // Cambiar a 0 si no puede autorizar
+        $data['puedeRechazar'] = 1; // Cambiar a 0 si no puede regresar
 
         if ($this->debug == 1) {
             echo 'Variables enviadas:' . PHP_EOL;
@@ -136,7 +138,7 @@ class PendientesPorPagarController extends Controller
         }
 
         // Cargar la vista correspondiente
-        $this->view('Administrador/PendientesPorPagar/detalladoDeCompra', $data);
+        $this->view('Administrador/VistasCompartidas/detalladoDeCompra', $data);
     }
 
     public function verDocumento()

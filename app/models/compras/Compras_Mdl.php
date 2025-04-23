@@ -27,6 +27,7 @@ class Compras_Mdl
 
     public function listaComprasFacturadas($filtros = [], INT $cantMaxRes = 0, $orden = 'DESC')
     {
+        self::$debug = 0; // Cambiar a 0 para desactivar mensajes de depuración
         if (self::$debug) {
             echo '<br><br>Filtros Recibidos: ';
             var_dump($filtros);

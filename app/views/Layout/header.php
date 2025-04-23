@@ -29,5 +29,6 @@
     <link rel="stylesheet" type="text/css" media="all" href="/assets/menu/webslidemenu/webslidemenu-SilmeAgro.css" />
     <link id="theme" rel="stylesheet" type="text/css" media="all" href="/assets/menu/webslidemenu/color-skins/grd-custom.css" />
     <link rel="stylesheet" type="text/css" href="/assets/libs/toastr/build/toastr.min.css">
+    <link rel="stylesheet" type="text/css" href="/assets/libs/sweetalert2/dist/sweetalert2.min.css">
     <link rel="stylesheet" type="text/css" href="/assets/extra-libs/prism/prism.css">
     <link rel="stylesheet" type="text/css" href="/assets/libs/bootstrap-datepicker/dist/css/bootstrap-datepicker.min.css">
