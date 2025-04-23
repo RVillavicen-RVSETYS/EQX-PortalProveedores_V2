@@ -6,17 +6,64 @@ if ($debug == 1) {
     var_dump($data);
     echo '<br><br>';
 }
+
+$puedeAutorizar = (isset($data['puedeAutorizar']) && $data['dataCompra']['data']['CpaEstatus'] == '1') ? $data['puedeAutorizar'] : 0;
+$puedeRechazar = (isset($data['puedeRechazar']) && $data['dataCompra']['data']['totalComplementos'] == 0 && $data['dataCompra']['data']['totalPagos'] == 0) ? $data['puedeRechazar'] : 0;
 $fechaMin = date('Y-m-d', strtotime('-1 day'));
 ?>
 <div class="card border">
     <div class="card-header bg-pyme-primary">
-        <div class="row">
-            <div class="col-8 col-sm-10">
-                <h4 class="m-b-0 text-white">
-                    <a class="btn-close hide-panel-toggle"><i class="fas fa-arrow-circle-left"></i></a> &nbsp;Acuse de Recepción: <?= $acuse; ?>
-                </h4>
+        <div class="d-flex justify-content-between align-items-center w-100">
+            <div class="d-flex align-items-center">
+                <a class="btn-close hide-panel-toggle">
+                    <i class="fas fa-arrow-circle-left"></i>
+                </a>
+                <h4 class="m-b-0 text-white ml-2">Acuse de Recepción: <?= $acuse; ?></h4>
             </div>
-            <div class="col-4 col-sm-2">
+
+            <div class="btn-group text-white" role="group">
+                <?php
+                if($puedeAutorizar == 1 || $puedeRechazar == 1) {
+                ?>                
+                <button id="btnValidacion"
+                    type="button"
+                    class="btn btn-outline-primary dropdown-toggle text-white"
+                    data-toggle="dropdown"
+                    aria-haspopup="true"
+                    aria-expanded="false">
+                    <i class="mdi mdi-label font-18"></i>
+                    FechaPago: <?= $data['dataCompra']['data']['FechaProbablePago']; ?>
+                </button>
+                <div class="dropdown-menu" aria-labelledby="btnValidacion">
+                    <?php
+                    if($puedeAutorizar == 1) {
+                    ?>
+                    <a class="dropdown-item"
+                        href="javascript:aceptarFactura(<?= $data['dataCompra']['data']['acuse'] ?>);">
+                        <i class="fas fa-check-circle text-success"></i> Aceptar Factura
+                    </a>
+                    <?php
+                    }
+                    if($puedeRechazar == 1) {
+                    ?>
+                    <a class="dropdown-item"
+                        href="javascript:rechazarFactura(<?= $data['dataCompra']['data']['acuse'] ?>);">
+                        <i class="fas fa-times-circle text-danger"></i> Rechazar Factura
+                    </a>
+                    <?php
+                    }
+                    if($puedeAutorizar == 1) {
+                    ?>
+                    <a class="dropdown-item"
+                        href="javascript:cambiarFecha(<?= $data['dataCompra']['data']['acuse'] ?>);">
+                        <i class="fas fa-undo-alt text-info"></i> Nueva Fecha Pago
+                    </a>
+                    <?php
+                    }
+                    ?>
+                </div>
+                <?php
+                } ?>
             </div>
         </div>
     </div>
@@ -52,7 +99,7 @@ $fechaMin = date('Y-m-d', strtotime('-1 day'));
         <!-- Comment Row -->
         <div class="d-flex flex-row comment-row m-t-0">
             <div class="p-2">
-                <img src="/assets/images/favicon.png" alt="user" width="50" class="rounded-circle">
+                <img src="/assets/images/SilmeAgro.ico" alt="user" width="50" class="rounded-circle">
             </div>
             <div class="comment-text w-100">
                 <h6 class="font-medium">Corrige y carga de nuevo.</h6>
@@ -68,7 +115,7 @@ $fechaMin = date('Y-m-d', strtotime('-1 day'));
             }
 
             $contNotaCredito = $data['dataCompra']['data']['notaCredito'];
-            $requiereComplementoPago = ($data['dataCompra']['data']['idPago'] >= 1 and $data['dataCompra']['data']['FacMetodoPago'] == 'PPD') ? 1 : 0;
+            $requiereComplementoPago = ($data['dataCompra']['data']['totalPagos'] > $data['dataCompra']['data']['totalPagos'] and $data['dataCompra']['data']['FacMetodoPago'] == 'PPD') ? 1 : 0;
 ?>
 
 <ul class="nav customizer-tab" role="tablist">
@@ -140,14 +187,14 @@ $fechaMin = date('Y-m-d', strtotime('-1 day'));
                             $msjStatus = '<span class="label label-warning label-rounded" style="font-size: 1.5em;">CANCELADA</span>';
                             break;
                     }
-                    if ($data['dataCompra']['data']['idPago'] > 0) {
+                    if ($data['dataCompra']['data']['totalPagos'] > 0) {
                         $msjStatus = '<span class="label label-success label-rounded" style="font-size: 1.5em;">PAGADA</span>';
                     }
                     echo $msjStatus;
                     ?>
                     <br><br>
-                    <button data-fancybox type="button" data-type="pdf" data-preloader="true" data-src="<?= '/Administrador/FacturasInternacionales/verDocumento/PDF/' . $urlFacPDF; ?>/#toolbar=0" class="btn btn-outline-danger"><i class="far fa-file-pdf"></i> Ver PDF</button>
-                    <button type="button" onclick="verFacturaXML('<?= '/Administrador/FacturasInternacionales/verDocumento/XML/' . $urlFacXML; ?>')" class="btn btn-outline-info"><i class="far fa-file-code"></i> Ver XML</button>
+                    <button data-fancybox type="button" data-type="pdf" data-preloader="true" data-src="<?= '/Administrador/FacturasNacionales/verDocumento/PDF/' . $urlFacPDF; ?>/#toolbar=0" class="btn btn-outline-danger"><i class="far fa-file-pdf"></i> Ver PDF</button>
+                    <button type="button" onclick="verFacturaXML('<?= '/Administrador/FacturasNacionales/verDocumento/XML/' . $urlFacXML; ?>')" class="btn btn-outline-info"><i class="far fa-file-code"></i> Ver XML</button>
                 </div>
             </div>
         </div>
@@ -238,8 +285,8 @@ $fechaMin = date('Y-m-d', strtotime('-1 day'));
                             echo $msjStatus;
                             ?>
                             <br><br>
-                            <button data-fancybox type="button" data-type="pdf" data-preloader="true" data-src="<?= '/Administrador/FacturasInternacionales/verDocumento/PDF/' . $urlFacPDF; ?>/#toolbar=0" class="btn btn-outline-danger"><i class="far fa-file-pdf"></i> Ver PDF</button>
-                            <button type="button" onclick="verFacturaXML('<?= '/Administrador/FacturasInternacionales/verDocumento/XML/' . $urlFacXML; ?>')" class="btn btn-outline-info"><i class="far fa-file-code"></i> Ver XML</button>
+                            <button data-fancybox type="button" data-type="pdf" data-preloader="true" data-src="<?= '/Administrador/FacturasNacionales/verDocumento/PDF/' . $urlFacPDF; ?>/#toolbar=0" class="btn btn-outline-danger"><i class="far fa-file-pdf"></i> Ver PDF</button>
+                            <button type="button" onclick="verFacturaXML('<?= '/Administrador/FacturasNacionales/verDocumento/XML/' . $urlFacXML; ?>')" class="btn btn-outline-info"><i class="far fa-file-code"></i> Ver XML</button>
                         </div>
                     </div>
                 </div>
@@ -287,7 +334,7 @@ $fechaMin = date('Y-m-d', strtotime('-1 day'));
         }).then((result) => {
             if (result.value) {
                 $.ajax({
-                    url: 'FacturasInternacionales/aceptarFactura',
+                    url: 'FacturasNacionales/aceptarFactura',
                     type: 'POST',
                     data: {
                         acuse: acuse,
@@ -336,7 +383,7 @@ $fechaMin = date('Y-m-d', strtotime('-1 day'));
         }).then((result) => {
             if (result.value) {
                 $.ajax({
-                    url: 'FacturasInternacionales/cambiarFechaPago',
+                    url: 'FacturasNacionales/cambiarFechaPago',
                     type: 'POST',
                     data: {
                         acuse: acuse,
@@ -377,7 +424,7 @@ $fechaMin = date('Y-m-d', strtotime('-1 day'));
         }).then((result) => {
             if (result.value && result.value.trim()) {
                 $.ajax({
-                    url: 'FacturasInternacionales/rechazarFactura',
+                    url: 'FacturasNacionales/rechazarFactura',
                     type: 'POST',
                     data: {
                         acuse: acuse,
@@ -400,7 +447,7 @@ $fechaMin = date('Y-m-d', strtotime('-1 day'));
     }
 
     // Botón para cargar el XML
-    /*function verFacturaXML(xmlUrl) {
+    function verFacturaXML(xmlUrl) {
         verCFDI = document.getElementById("verCFDI");
         verCFDI.innerHTML = '<div class="loading text-center"><img src="../assets/images/loading.gif" alt="loading" /><br/>Un momento, por favor...</div>';
         fetch(xmlUrl)
@@ -420,5 +467,5 @@ $fechaMin = date('Y-m-d', strtotime('-1 day'));
             .catch((error) => {
                 verCFDI.innerHTML = `<p style="color: red;">Error al cargar el XML: ${error.message}</p>`;
             });
-    }*/
+    }
 </script>

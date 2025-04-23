@@ -473,6 +473,8 @@ class ControlProveedoresController extends Controller
         $data['acuse'] =  $acuse;
         $data['dataCompra'] =  $dataCompra;
         $data['dataProveedor'] =  $resultProveedores['data'];
+        $data['puedeAutorizar'] = 1; // Cambiar a 0 si no puede autorizar
+        $data['puedeRechazar'] = 1; // Cambiar a 0 si no puede regresar
 
         if ($this->debug == 1) {
             echo 'Variables enviadas:' . PHP_EOL;
@@ -481,7 +483,7 @@ class ControlProveedoresController extends Controller
         }
 
         // Cargar la vista correspondiente
-        $this->view('Administrador/ControlProveedores/detalladoDeCompra', $data);
+        $this->view('Administrador/VistasCompartidas/detalladoDeCompra', $data);
     }
 
     public function verDocumento()
