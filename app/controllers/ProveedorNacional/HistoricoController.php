@@ -104,7 +104,10 @@ class HistoricoController extends Controller
             if ($configuracionGral['success']) {
 
                 $MDL_compras = new Compras_Mdl();
-                $comprasPorProveedor = $MDL_compras->cantComprasPorProveedor($noProveedor);
+                $filtrosCompras = [
+                    'idProveedor' => $noProveedor
+                ];
+                $comprasPorProveedor = $MDL_compras->dataCompras($filtrosCompras);
                 if ($this->debug == 1) {
                     echo '<br><br>Resultado de Compras por Proveedor: ' . PHP_EOL;
                     var_dump($comprasPorProveedor);
@@ -217,7 +220,7 @@ class HistoricoController extends Controller
     public function registraComplementoPago()
     {
         $data = []; // Aquí puedes pasar datos a la vista si es necesario
-        //$this->debug = 1;
+        $this->debug = 0;
 
         if ($this->debug == 1) {
             echo '<br>----SESSION<br>';
@@ -301,8 +304,19 @@ class HistoricoController extends Controller
                     ]);
                 }
 
-            }
-        }
+            } else {
+                    echo json_encode([
+                        'success' => false,
+                        'message' => $ComplementoXML['message']
+                    ]);
+                }
+            
+        } else {
+                    echo json_encode([
+                        'success' => false,
+                        'message' => $complementoPDF['message']
+                    ]);
+                }
 
 
 

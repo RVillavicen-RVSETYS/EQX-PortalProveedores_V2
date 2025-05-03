@@ -408,9 +408,9 @@ class DocumentosController extends Controller
         }
 
         // Validar que el archivo tenga un tamaño mínimo
-        $minimumFileSize = 50; // Tamaño mínimo en bytes
+        $minimumFileSize = 0; // Tamaño mínimo en bytes
         if ($fileToValidate['size'] < $minimumFileSize) {
-            $response['message'] = 'El archivo parece estar dañado o es demasiado pequeño.';
+            $response['message'] = 'El archivo parece estar dañado o es demasiado pequeño.'.$fileToValidate['size'];
             return $response;
         }
 
