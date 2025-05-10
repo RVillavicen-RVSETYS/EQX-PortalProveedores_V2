@@ -25,7 +25,7 @@ if ($periodo['success'] == false) {
 ?>
     <div class="alert alert-info">
         <button type="button" class="close" data-dismiss="alert" aria-label="Close"> <span aria-hidden="true">×</span> </button>
-        <h3 class="text-info"><i class="fa fa-exclamation-circle"></i> Atención</h3> No Se Tiene Un Cierre Anual Programado.
+        No se tiene un cierre anual progamado.
     </div>
 <?php
 } else {

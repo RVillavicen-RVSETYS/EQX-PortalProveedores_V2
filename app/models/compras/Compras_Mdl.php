@@ -27,6 +27,7 @@ class Compras_Mdl
 
     public function listaComprasFacturadas($filtros = [], INT $cantMaxRes = 0, $orden = 'DESC')
     {
+        self::$debug = 0; // Cambiar a 0 para desactivar mensajes de depuración
         if (self::$debug) {
             echo '<br><br>Filtros Recibidos: ';
             var_dump($filtros);
@@ -87,9 +88,9 @@ class Compras_Mdl
                         }
                     } elseif ($nombreFiltro == 'pagada') {
                         if ($valorFiltro == 1) {
-                            $filtrosSQL .= ' AND c.idPago IS NOT NULL';
+                            $filtrosSQL .= ' AND c.totalPagos > 0';
                         } else {
-                            $filtrosSQL .= ' AND c.idPago IS NULL';
+                            $filtrosSQL .= ' AND c.totalPagos = 0';
                         }
                     } else {
                         $filtrosSQL .= ' AND ' . $filtrosDisponibles[$nombreFiltro]['sqlFiltro'];
@@ -156,7 +157,7 @@ class Compras_Mdl
 
     public function dataCompraPorFacturas($filtros = [], INT $cantMaxRes = 0, $orden = 'DESC')
     {
-        self::$debug = 1; // Cambiar a 0 para desactivar mensajes de depuración
+        self::$debug = 0; // Cambiar a 0 para desactivar mensajes de depuración
         if (self::$debug) {
             echo '<br><br>Filtros Recibidos: ';
             var_dump($filtros);
@@ -268,7 +269,7 @@ class Compras_Mdl
 
     public function dataCompraPorAcuse(INT $idUser, INT $acuse)
     {
-        self::$debug = 1;
+        self::$debug = 0;
         if (empty($idUser) || empty($acuse)) {
             return ['success' => false, 'message' => 'Se requiere No. de Acuse.'];
         } else {
@@ -280,7 +281,7 @@ class Compras_Mdl
                 }
 
                 $sql = "SELECT c.id AS acuse, c.claseDocto, c.estatus AS CpaEstatus, c.fechaVal, c.comentRegresa, c.subTotal, c.idCatTipoMoneda AS CpaTipoMoneda,
-                            c.idProveedor, c.notaCredito,	c.idPago, c.fechaReg, c.referencia, c.fechaVence AS 'FechaVence', c.fechaProbablePago AS 'FechaProbablePago',
+                            c.idProveedor, c.notaCredito, c.totalPagos,	c.totalComplementos, c.fechaReg, c.referencia, c.fechaVence AS 'FechaVence', c.fechaProbablePago AS 'FechaProbablePago',
                             dcp.ordenCompra, dcp.noRecepcion,
                             cf.urlPDF AS FacUrlPDF, cf.urlXML AS FacUrlXML, cf.subtotal AS FacSubtotal, cf.monto AS FacMonto, cf.idCatTipoMoneda AS FacTipoMoneda, 
                             cf.idCatMetodoPago AS FacMetodoPago, cf.idCatFormaPago AS FacFormaPago, cf.usoCfdi AS FacUsoCfdi,cuc.descripcion AS nameUsoCfdi, 
