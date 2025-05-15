@@ -20,9 +20,9 @@ if ($debug == 1) {
     var_dump($areaLink);
     echo '<br><br>Contenido de _SESSION:';
     var_dump($_SESSION);
-    echo '<br><br>Request-URI: '.$_SERVER['REQUEST_URI'].'<br>Contenido de piezasURL:';
+    echo '<br><br>Request-URI: ' . $_SERVER['REQUEST_URI'] . '<br>Contenido de piezasURL:';
     var_dump($piezasURL);
-    echo '<br><br>Ruta del MenuActual: '.$rutaMenu.'<br><br>Contenido de datosPagina:';
+    echo '<br><br>Ruta del MenuActual: ' . $rutaMenu . '<br><br>Contenido de datosPagina:';
     var_dump($datosPagina);
     echo '<br><br>Valores pasados del Controller Data:';
     echo var_dump($data["datosIniciales"]);
@@ -40,6 +40,8 @@ $PendientesPorProcesar = $data["datosIniciales"]['PendientesPorProcesar'];
 <head>
     <?php include '../app/Views/Layout/header.php'; ?>
     <!-- Custom CSS -->
+    <link href="../assets/extra-libs/c3/c3.min.css" rel="stylesheet">
+    <link href="../assets/extra-libs/jvector/jquery-jvectormap-2.0.2.css" rel="stylesheet" />
 
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -71,7 +73,7 @@ $PendientesPorProcesar = $data["datosIniciales"]['PendientesPorProcesar'];
         <!-- ============================================================== -->
         <!-- End Topbar header -->
         <!-- ============================================================== -->
-  
+
 
         <!-- ============================================================== -->
         <!-- Page wrapper  -->
@@ -103,7 +105,7 @@ $PendientesPorProcesar = $data["datosIniciales"]['PendientesPorProcesar'];
                                             <p class="font-16 m-b-5">Facturas por Procesar</p>
                                         </div>
                                         <div class="ml-auto">
-                                            <h1 class="font-light text-right"><?=$PendientesPorProcesar;?></h1>
+                                            <h1 class="font-light text-right"><?= $PendientesPorProcesar; ?></h1>
                                         </div>
                                     </div>
                                 </div>
@@ -127,7 +129,7 @@ $PendientesPorProcesar = $data["datosIniciales"]['PendientesPorProcesar'];
                                             <p class="font-16 m-b-5">Pendientes por Pagar</p>
                                         </div>
                                         <div class="ml-auto">
-                                            <h1 class="font-light text-right"><?=$PendientesPorPagar;?></h1>
+                                            <h1 class="font-light text-right"><?= $PendientesPorPagar; ?></h1>
                                         </div>
                                     </div>
                                 </div>
@@ -151,7 +153,7 @@ $PendientesPorProcesar = $data["datosIniciales"]['PendientesPorProcesar'];
                                             <p class="font-16 m-b-5">Complementos Pendientes</p>
                                         </div>
                                         <div class="ml-auto">
-                                            <h1 class="font-light text-right"><?= $ComplementosPendientes;?></h1>
+                                            <h1 class="font-light text-right"><?= $ComplementosPendientes; ?></h1>
                                         </div>
                                     </div>
                                 </div>
@@ -175,7 +177,7 @@ $PendientesPorProcesar = $data["datosIniciales"]['PendientesPorProcesar'];
                                             <p class="font-16 m-b-5">Insolutos Pendientes</p>
                                         </div>
                                         <div class="ml-auto">
-                                            <h1 class="font-light text-right"><?= $InsolutosPendientes;?></h1>
+                                            <h1 class="font-light text-right"><?= $InsolutosPendientes; ?></h1>
                                         </div>
                                     </div>
                                 </div>
@@ -195,9 +197,9 @@ $PendientesPorProcesar = $data["datosIniciales"]['PendientesPorProcesar'];
                     <div class="col-sm-12 col-lg-4">
                         <div class="card">
                             <div class="card-body">
-                                <h4 class="card-title">Estatus Facturas <?=date('Y');?></h4>
-                                <div class="status m-t-30" style="height:300px; width:100%"></div>
-                            
+                                <h4 class="card-title">Estatus Facturas <?= date('Y'); ?></h4>
+                                <div id="graficoDona" class="status m-t-30" style="height:300px; width:100%"></div>
+
                                 <div class="row">
                                     <div class="col-4 border-right">
                                         <i class="fa fa-circle text-primary"></i>
@@ -267,101 +269,7 @@ $PendientesPorProcesar = $data["datosIniciales"]['PendientesPorProcesar'];
                                     </div>
                                 </div>
                                 <div class="table-responsive" id="tablaProveedoresSeguimiento">
-                                    <table class="table no-wrap v-middle">
-                                        <thead>
-                                            <tr>
-                                                <th class="border-0 text-muted">Team Lead</th>
-                                                <th class="border-0 text-muted">Project</th>
-                                                <th class="border-0 text-muted">Team</th>
-                                                <th class="border-0 text-muted text-center">Status</th>
-                                                <th class="border-0 text-muted text-center">Weeks</th>
-                                                <th class="border-0 text-muted text-center">Budget</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <tr>
-                                                <td>
-                                                    <div class="d-flex no-block align-items-center">
-                                                        <div class="m-r-10"><img src="../../assets/images/users/d1.jpg" alt="user" class="rounded-circle" width="45" /></div>
-                                                        <div class="">
-                                                            <h5 class="m-b-0 font-16 font-medium">Hanna Gover</h5><span class="text-muted">hgover@gmail.com</span></div>
-                                                    </div>
-                                                </td>
-                                                <td>Elite Admin</td>
-                                                <td>
-                                                    <div class="popover-icon">
-                                                        <a class="btn-circle btn btn-info" href="javascript:void(0)">SS</a>
-                                                        <a class="btn-circle btn btn-purple text-white popover-item" href="javascript:void(0)">DS</a>
-                                                        <a class="btn-circle btn btn-danger text-white popover-item" href="javascript:void(0)">RP</a>
-                                                        <a class="btn-circle btn btn-outline-secondary" href="javascript:void(0)">+</a>
-                                                    </div>
-                                                </td>
-                                                <td class="text-center"><i class="fa fa-circle text-danger" data-toggle="tooltip" data-placement="top" title="In Progress"></i></td>
-                                                <td class="text-center">35</td>
-                                                <td class="font-medium text-center">$96K</td>
-                                            </tr>
-                                            <tr>
-                                                <td>
-                                                    <div class="d-flex no-block align-items-center">
-                                                        <div class="m-r-10"><img src="../../assets/images/users/d2.jpg" alt="user" class="rounded-circle" width="45" /></div>
-                                                        <div class="">
-                                                            <h5 class="m-b-0 font-16 font-medium">Daniel Kristeen</h5><span class="text-muted">Kristeen@gmail.com</span></div>
-                                                    </div>
-                                                </td>
-                                                <td>Real Homes WP Theme</td>
-                                                <td>
-                                                    <div class="popover-icon">
-                                                        <a class="btn-circle btn btn-info" href="javascript:void(0)">SS</a>
-                                                        <a class="btn-circle btn btn-primary text-white popover-item" href="javascript:void(0)">DS</a>
-                                                        <a class="btn-circle btn btn-outline-secondary" href="javascript:void(0)">+</a>
-                                                    </div>
-                                                </td>
-                                                <td class="text-center"><i class="fa fa-circle text-success" data-toggle="tooltip" data-placement="top" title="Active"></i></td>
-                                                <td class="text-center">35</td>
-                                                <td class="font-medium text-center">$96K</td>
-                                            </tr>
-                                            <tr>
-                                                <td>
-                                                    <div class="d-flex no-block align-items-center">
-                                                        <div class="m-r-10"><img src="../../assets/images/users/d3.jpg" alt="user" class="rounded-circle" width="45" /></div>
-                                                        <div class="">
-                                                            <h5 class="m-b-0 font-16 font-medium">Julian Josephs</h5><span class="text-muted">Josephs@gmail.com</span></div>
-                                                    </div>
-                                                </td>
-                                                <td>MedicalPro WP Theme</td>
-                                                <td>
-                                                    <div class="popover-icon">
-                                                        <a class="btn-circle btn btn-info" href="javascript:void(0)">SS</a>
-                                                        <a class="btn-circle btn btn-purple text-white popover-item" href="javascript:void(0)">DS</a>
-                                                        <a class="btn-circle btn btn-danger text-white popover-item" href="javascript:void(0)">RP</a>
-                                                        <a class="btn-circle btn btn-outline-secondary" href="javascript:void(0)">+</a>
-                                                    </div>
-                                                </td>
-                                                <td class="text-center"><i class="fa fa-circle text-success" data-toggle="tooltip" data-placement="top" title="Active"></i></td>
-                                                <td class="text-center">35</td>
-                                                <td class="font-medium text-center">$96K</td>
-                                            </tr>
-                                            <tr>
-                                                <td>
-                                                    <div class="d-flex no-block align-items-center">
-                                                        <div class="m-r-10"><img src="../../assets/images/users/2.jpg" alt="user" class="rounded-circle" width="45" /></div>
-                                                        <div class="">
-                                                            <h5 class="m-b-0 font-16 font-medium">Jan Petrovic</h5><span class="text-muted">hgover@gmail.com</span></div>
-                                                    </div>
-                                                </td>
-                                                <td>Hosting Press HTML</td>
-                                                <td>
-                                                    <div class="popover-icon">
-                                                        <a class="btn-circle btn btn-purple text-white" href="javascript:void(0)">RP</a>
-                                                        <a class="btn-circle btn btn-outline-secondary" href="javascript:void(0)">+</a>
-                                                    </div>
-                                                </td>
-                                                <td class="text-center"><i class="fa fa-circle text-info" data-toggle="tooltip" data-placement="top" title="Pending"></i></td>
-                                                <td class="text-center">35</td>
-                                                <td class="font-medium text-center">$96K</td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
+                                    <div class="loading text-center"><img src="/assets/images/loading.gif" alt="loading" /><br />Un momento, por favor...</div>'
                                 </div>
                             </div>
                         </div>
@@ -426,18 +334,26 @@ $PendientesPorProcesar = $data["datosIniciales"]['PendientesPorProcesar'];
     <script src="/assets/extra-libs/c3/c3.min.js"></script>
     <script src="/assets/extra-libs/jvector/jquery-jvectormap-2.0.2.min.js"></script>
     <script src="/assets/extra-libs/jvector/jquery-jvectormap-world-mill-en.js"></script>
-    <script src="/dist/js/pages/dashboards/dashboard1.js"></script>
+    <script src="/dist/js/basicFuctions.js"></script>
+
 </body>
 <script>
     $(document).ready(function() {
         getProveedoresSeguimiento('ComplementosMasViejos'); // Cargar la tabla al inicio con el primer tipo de seguimiento
+
+        initDonutChart('graficoDona', '2025'); // Inicializar el gráfico de dona con el año actual
+
+
     });
 
     function getProveedoresSeguimiento($tipoSeguimiento) {
+        loadingBigCarga('tablaProveedoresSeguimiento', 'Un momento, por favor...');
         $.ajax({
             url: 'Inicio/tablaProveedoresSeguimiento',
             type: 'POST',
-            data: { tipoSeguimiento: $tipoSeguimiento },
+            data: {
+                tipoSeguimiento: $tipoSeguimiento
+            },
             success: function(response) {
                 // Manejar la respuesta del servidor
                 $('#tablaProveedoresSeguimiento').html(response);
@@ -448,7 +364,93 @@ $PendientesPorProcesar = $data["datosIniciales"]['PendientesPorProcesar'];
             }
         });
     }
-</script>
-</html>
 
-       
+    function initChartistBar() {
+        new Chartist.Bar('.chart1', {
+            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+            series: [
+                [5, 4, 5, 3, 12, 4, 15, 8, 10, 8, 7, 5],
+                [4, 10, 5, 4, 8, 3, 3, 4, 9, 7, 10, 4]
+            ]
+        }, {
+            stackBars: true,
+            axisY: {
+                labelInterpolationFnc: function(value) {
+                    return (value / 1) + 'k';
+                },
+                scaleMinSpace: 55
+            },
+            axisX: {
+                showGrid: false
+            },
+            plugins: [
+                Chartist.plugins.tooltip()
+            ],
+            seriesBarDistance: 1,
+            chartPadding: {
+                top: 15,
+                right: 15,
+                bottom: 5,
+                left: 0
+            }
+        }).on('draw', function(data) {
+            if (data.type === 'bar') {
+                data.element.attr({
+                    style: 'stroke-width: 25px'
+                });
+            }
+        });
+    }
+
+    function initDonutChart(divId, ajaxParam) {
+        const container = document.getElementById(divId);
+        if (!container) {
+            console.warn('El contenedor con ID "${divId}" no se encontró en el DOM.');
+            return;
+        }
+
+        // Limpiar contenido previo
+        container.innerHTML = "";
+
+        $.ajax({
+            url: 'Inicio/datosGraficoDona',
+            type: 'POST',
+            dataType: 'json',
+            data: {
+                parametro: ajaxParam
+            },
+            success: function(response) {
+                if (response.success === 1) {
+                    const d = response.data;
+                    const chart = c3.generate({
+                        bindto: `#${divId}`,
+                        data: {
+                            columns: d.values,
+                            type: 'donut'
+                        },
+                        donut: {
+                            label: d.labels || {
+                                show: false
+                            },
+                            title: d.title || '',
+                            width: 35
+                        },
+                        legend: d.legends || {
+                            hide: true
+                        },
+                        color: {
+                            pattern: d.colors || ['#137eff', '#5ac146', '#8b5edd']
+                        }
+                    });
+                } else {
+                    console.log(`Error en la respuesta AJAX: ${response.mensaje}`);
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('Error AJAX:', error);
+            }
+        });
+    }
+</script>
+
+</html>

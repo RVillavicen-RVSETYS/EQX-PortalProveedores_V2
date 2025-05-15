@@ -182,7 +182,8 @@ class InicioController extends Controller
                 $valoresComplemento = ['cantCompras', 'sumaTotalFacturado', 'sumaTotalPagado', 'sumaTotalComplementos', 'minFechaPago', 'datosProveedor'];
                 $orden = [
                     'campo' => 'minFechaPago',
-                    'tipo' => 'ASC'];
+                    'tipo' => 'ASC'
+                ];
                 break;
 
             case 'MasComplementos':
@@ -194,7 +195,8 @@ class InicioController extends Controller
                 $valoresComplemento = ['cantCompras', 'sumaTotalFacturado', 'sumaTotalPagado', 'sumaTotalComplementos', 'minFechaPago', 'datosProveedor'];
                 $orden = [
                     'campo' => 'cantCompras',
-                    'tipo' => 'DESC'];
+                    'tipo' => 'DESC'
+                ];
                 break;
 
             case 'InsolutosPendientes':
@@ -206,7 +208,8 @@ class InicioController extends Controller
                 $valoresComplemento = ['cantCompras', 'minFechaPago', 'sumaInsolutos', 'datosProveedor'];
                 $orden = [
                     'campo' => 'totalInsolutos',
-                    'tipo' => 'DESC'];
+                    'tipo' => 'DESC'
+                ];
                 break;
 
             default:
@@ -217,7 +220,6 @@ class InicioController extends Controller
         }
 
         $provCompras_Mdl = new ProveedoresCompras_Mdl();
-        
         $resultCompPago = $provCompras_Mdl->obtenerComprasProveedores($filtrosComplemento, $agrupadoComplemento, $valoresComplemento, $orden, 10);
         if ($this->debug == 1) {
             echo '<br>Resultado de Query:';
@@ -236,6 +238,86 @@ class InicioController extends Controller
             exit(0);
         }
     }
+
+    public function datosGraficoDona()
+    {
+        // Lógica para la vista de tablaProveedoresSeguimiento
+        $data = []; // Aquí puedes pasar datos a la vista si es necesario
+
+        // Obtener el nombre del namespace para identificar el área
+        $namespaceParts = explode('\\', __NAMESPACE__);
+
+        $this->debug = 0;
+
+        //var_dump($_POST);
+        if ($this->debug == 1) {
+            echo '<br>Datos recibidos por POST:'.$_POST['parametro'];
+            echo '<br>';
+        }
+
+        // Simular que recibimos un parámetro por POST
+        $parametro = isset($_POST['parametro']) ? $_POST['parametro'] : null;
+
+        // Validación básica
+        if (empty($parametro)) {
+            echo json_encode([
+                'success' => 0,
+                'mensaje' => 'Parámetro no recibido correctamente.'.$parametro,
+                'data' => null
+            ]);
+            exit;
+        }
+
+        // Datos simulados por año
+        $datos = [
+            '2024' => [
+                'values' => [
+                    ['Pending', 40],
+                    ['Failed', 20],
+                    ['Success', 40]
+                ],
+                'labels' => [
+                    'show' => true
+                ],
+                'title' => 'Estado General 2023',
+                'legends' => [
+                    'hide' => false
+                ],
+                'colors' => ['#FF9800', '#F44336', '#4CAF50']
+            ],
+            '2025' => [
+                'values' => [
+                    ['Pending', 25],
+                    ['Failed', 15],
+                    ['Success', 60]
+                ],
+                'labels' => [
+                    'show' => false
+                ],
+                'title' => 'Estado General 2024',
+                'legends' => [
+                    'hide' => true
+                ],
+                'colors' => ['#03A9F4', '#E91E63', '#8BC34A'],
+            ]
+        ];
+
+        // Verificar si hay datos para el parámetro enviado
+        if (array_key_exists($parametro, $datos)) {
+            echo json_encode([
+                'success' => 1,
+                'mensaje' => 'Datos cargados correctamente.',
+                'data' => $datos[$parametro]
+            ]);
+        } else {
+            echo json_encode([
+                'success' => 0,
+                'mensaje' => 'No se encontraron datos para el parámetro proporcionado.',
+                'data' => null
+            ]);
+        }
+    }
+
 
     public function logout()
     {
