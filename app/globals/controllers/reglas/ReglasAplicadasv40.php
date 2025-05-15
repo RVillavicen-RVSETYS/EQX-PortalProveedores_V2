@@ -460,7 +460,7 @@ class ReglasAplicadasv40
         $filtrosComplemento = [
             'uuids' => $dataXML['TimbreFiscal']['UUID'] ?? null,
         ];
-        $obtenerCompDePago = $cfdis_Mdl->obtenerComplementosDePagoPorUUID($filtrosComplemento);
+        $obtenerCompDePago = $cfdis_Mdl->obtenerComplementosDePago($filtrosComplemento);
         if ($obtenerCompDePago['success']) {
             if ($obtenerCompDePago['cantRes'] > 0) {
                 if($this->debug == 1) {
