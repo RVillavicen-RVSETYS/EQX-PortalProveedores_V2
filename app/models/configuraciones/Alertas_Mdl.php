@@ -93,8 +93,8 @@ class Alertas_Mdl
                         cnp.mensaje AS 'Mensaje',
                         cnp.tipoMensaje AS 'TipoMsj',
                         cnp.periodo AS 'TipoPeriodo',
-                        DATE_FORMAT( cnp.fechaInicio, '%d-%m-%Y' ) AS 'Inicio',
-	                    DATE_FORMAT( cnp.fechaFin, '%d-%m-%Y' ) AS 'Fin',
+                        DATE_FORMAT( cnp.fechaInicio, '%Y-%m-%d' ) AS 'Inicio',
+	                    DATE_FORMAT( cnp.fechaFin, '%Y-%m-%d' ) AS 'Fin',
                         cnp.estatus AS 'Estatus' 
                     FROM
                         conf_notificaProveedor cnp

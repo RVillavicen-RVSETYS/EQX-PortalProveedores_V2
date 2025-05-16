@@ -66,8 +66,8 @@ class HojaEntrada_Mdl
 
             try {
                 $sql = "SELECT *
-                  FROM vw_ext_PortalProveedores_HESporPagar
-                  WHERE OrdenCompra = :ordenCompra AND HES IN ($hesList)";
+                  FROM vw_ext_PortalProveedores_MontosHES
+                  WHERE OC = :ordenCompra AND HES IN ($hesList)";
 
                 if (self::$debug) {
                     $params = [

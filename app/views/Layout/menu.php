@@ -4,7 +4,7 @@
     <!-- Mobile Header -->
     <div class="wsmobileheader clearfix ">
         <a id="wsnavtoggle" class="wsanimated-arrow"><span></span></a>
-        <span class="smllogo"><img src="/assets/menu/images/logo-equinox-gold-Mobil.png" width="80%" alt="" /></span>
+        <span class="smllogo"><img src="/assets/menu/images/logo-SilmeAgro.png" width="80%" alt="" /></span>
     </div>
     <!-- Mobile Header -->
 
