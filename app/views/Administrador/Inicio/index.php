@@ -20,13 +20,18 @@ if ($debug == 1) {
     var_dump($areaLink);
     echo '<br><br>Contenido de _SESSION:';
     var_dump($_SESSION);
-    echo '<br><br>Request-URI: '.$_SERVER['REQUEST_URI'].'<br>Contenido de piezasURL:';
+    echo '<br><br>Request-URI: ' . $_SERVER['REQUEST_URI'] . '<br>Contenido de piezasURL:';
     var_dump($piezasURL);
-    echo '<br><br>Ruta del MenuActual: '.$rutaMenu.'<br><br>Contenido de datosPagina:';
+    echo '<br><br>Ruta del MenuActual: ' . $rutaMenu . '<br><br>Contenido de datosPagina:';
     var_dump($datosPagina);
+    echo '<br><br>Valores pasados del Controller Data:';
+    echo var_dump($data["datosIniciales"]);
 }
 
-
+$InsolutosPendientes = $data["datosIniciales"]['InsolutosPendientes'];
+$ComplementosPendientes = $data["datosIniciales"]['ComplementosPendientes'];
+$PendientesPorPagar = $data["datosIniciales"]['PendientesPorPagar'];
+$PendientesPorProcesar = $data["datosIniciales"]['PendientesPorProcesar'];
 ?>
 
 <!DOCTYPE html>
@@ -35,6 +40,8 @@ if ($debug == 1) {
 <head>
     <?php include '../app/Views/Layout/header.php'; ?>
     <!-- Custom CSS -->
+    <link href="../assets/extra-libs/c3/c3.min.css" rel="stylesheet">
+    <link href="../assets/extra-libs/jvector/jquery-jvectormap-2.0.2.css" rel="stylesheet" />
 
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -66,7 +73,7 @@ if ($debug == 1) {
         <!-- ============================================================== -->
         <!-- End Topbar header -->
         <!-- ============================================================== -->
-  
+
 
         <!-- ============================================================== -->
         <!-- Page wrapper  -->
@@ -94,11 +101,11 @@ if ($debug == 1) {
                                 <div class="col-md-12">
                                     <div class="d-flex no-block align-items-center">
                                         <div>
-                                            <i class="mdi mdi-emoticon font-20 text-muted"></i>
-                                            <p class="font-16 m-b-5">New Clients</p>
+                                            <i class="fas fa-file font-20 text-muted"></i>
+                                            <p class="font-16 m-b-5">Facturas por Procesar</p>
                                         </div>
                                         <div class="ml-auto">
-                                            <h1 class="font-light text-right">23</h1>
+                                            <h1 class="font-light text-right"><?= $PendientesPorProcesar; ?></h1>
                                         </div>
                                     </div>
                                 </div>
@@ -118,11 +125,11 @@ if ($debug == 1) {
                                 <div class="col-md-12">
                                     <div class="d-flex no-block align-items-center">
                                         <div>
-                                            <i class="mdi mdi-image font-20  text-muted"></i>
-                                            <p class="font-16 m-b-5">New Projects</p>
+                                            <i class="fas fa-dollar-sign font-20  text-muted"></i>
+                                            <p class="font-16 m-b-5">Pendientes por Pagar</p>
                                         </div>
                                         <div class="ml-auto">
-                                            <h1 class="font-light text-right">169</h1>
+                                            <h1 class="font-light text-right"><?= $PendientesPorPagar; ?></h1>
                                         </div>
                                     </div>
                                 </div>
@@ -142,11 +149,11 @@ if ($debug == 1) {
                                 <div class="col-md-12">
                                     <div class="d-flex no-block align-items-center">
                                         <div>
-                                            <i class="mdi mdi-currency-eur font-20 text-muted"></i>
-                                            <p class="font-16 m-b-5">New Invoices</p>
+                                            <i class="fas fa-copy font-20 text-muted"></i>
+                                            <p class="font-16 m-b-5">Complementos Pendientes</p>
                                         </div>
                                         <div class="ml-auto">
-                                            <h1 class="font-light text-right">157</h1>
+                                            <h1 class="font-light text-right"><?= $ComplementosPendientes; ?></h1>
                                         </div>
                                     </div>
                                 </div>
@@ -166,11 +173,11 @@ if ($debug == 1) {
                                 <div class="col-md-12">
                                     <div class="d-flex no-block align-items-center">
                                         <div>
-                                            <i class="mdi mdi-poll font-20 text-muted"></i>
-                                            <p class="font-16 m-b-5">New Sales</p>
+                                            <i class="fas fa-donate font-20 text-muted"></i>
+                                            <p class="font-16 m-b-5">Insolutos Pendientes</p>
                                         </div>
                                         <div class="ml-auto">
-                                            <h1 class="font-light text-right">236</h1>
+                                            <h1 class="font-light text-right"><?= $InsolutosPendientes; ?></h1>
                                         </div>
                                     </div>
                                 </div>
@@ -185,6 +192,91 @@ if ($debug == 1) {
                 </div>
                 <!-- ============================================================== -->
                 <!-- Sales chart -->
+                <!-- ============================================================== -->
+                <div class="row">
+                    <div class="col-sm-12 col-lg-4">
+                        <div class="card">
+                            <div class="card-body">
+                                <h4 class="card-title">Estatus Facturas <?= date('Y'); ?></h4>
+                                <div id="graficoDona" class="status m-t-30" style="height:300px; width:100%"></div>
+
+                                <div class="row">
+                                    <div class="col-4 border-right">
+                                        <i class="fa fa-circle text-primary"></i>
+                                        <h4 class="mb-0 font-medium">5489</h4>
+                                        <span>Success</span>
+                                    </div>
+                                    <div class="col-4 border-right p-l-20">
+                                        <i class="fa fa-circle text-info"></i>
+                                        <h4 class="mb-0 font-medium">954</h4>
+                                        <span>Pending</span>
+                                    </div>
+                                    <div class="col-4 p-l-20">
+                                        <i class="fa fa-circle text-success"></i>
+                                        <h4 class="mb-0 font-medium">736</h4>
+                                        <span>Failed</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-12 col-lg-8">
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="d-flex align-items-center">
+                                    <div>
+                                        <h4 class="card-title">Comparasión Anual</h4>
+                                    </div>
+                                    <div class="ml-auto">
+                                        <div class="dl m-b-10">
+                                            <select class="custom-select border-0 text-muted">
+                                                <option value="0" selected="">2018</option>
+                                                <option value="1">2015</option>
+                                                <option value="2">2016</option>
+                                                <option value="3">2017</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="chart1 m-t-40" style="position: relative; height:250px;"></div>
+                                <ul class="list-inline m-t-30 text-center font-12">
+                                    <li class="list-inline-item text-muted"><i class="fa fa-circle text-info m-r-5"></i> Pagado <br>$0000</li>
+                                    <li class="list-inline-item text-muted"><i class="fa fa-circle text-light m-r-5"></i> Facturado <br> $0000</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- ============================================================== -->
+                <!-- Table -->
+                <!-- ============================================================== -->
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="card">
+                            <div class="card-body scrollable">
+                                <div class="d-flex align-items-center">
+                                    <div>
+                                        <h4 class="card-title">Top 10 de Proveedores en Seguimiento.</h4>
+                                    </div>
+                                    <div class="ml-auto">
+                                        <div class="dl m-b-10">
+                                            <select class="custom-select border-0 text-muted" onchange="getProveedoresSeguimiento(this.value);">
+                                                <option value="ComplementosMasViejos" selected="">Complementos mas viejos</option>
+                                                <option value="MasComplementos">Cantidad de Complementos</option>
+                                                <option value="InsolutosPendientes">Insolutos Pendientes</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="table-responsive" id="tablaProveedoresSeguimiento">
+                                    <div class="loading text-center"><img src="/assets/images/loading.gif" alt="loading" /><br />Un momento, por favor...</div>'
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- ============================================================== -->
+                <!-- Table -->
                 <!-- ============================================================== -->
             </div>
             <!-- ============================================================== -->
@@ -242,8 +334,123 @@ if ($debug == 1) {
     <script src="/assets/extra-libs/c3/c3.min.js"></script>
     <script src="/assets/extra-libs/jvector/jquery-jvectormap-2.0.2.min.js"></script>
     <script src="/assets/extra-libs/jvector/jquery-jvectormap-world-mill-en.js"></script>
-    <script src="/dist/js/pages/dashboards/dashboard1.js"></script>
+    <script src="/dist/js/basicFuctions.js"></script>
+
 </body>
+<script>
+    $(document).ready(function() {
+        getProveedoresSeguimiento('ComplementosMasViejos'); // Cargar la tabla al inicio con el primer tipo de seguimiento
+
+        initDonutChart('graficoDona', '2025'); // Inicializar el gráfico de dona con el año actual
+
+
+    });
+
+    function getProveedoresSeguimiento($tipoSeguimiento) {
+        loadingBigCarga('tablaProveedoresSeguimiento', 'Un momento, por favor...');
+        $.ajax({
+            url: 'Inicio/tablaProveedoresSeguimiento',
+            type: 'POST',
+            data: {
+                tipoSeguimiento: $tipoSeguimiento
+            },
+            success: function(response) {
+                // Manejar la respuesta del servidor
+                $('#tablaProveedoresSeguimiento').html(response);
+            },
+            error: function(xhr, status, error) {
+                // Manejar el error
+                console.error(error);
+            }
+        });
+    }
+
+    function initChartistBar() {
+        new Chartist.Bar('.chart1', {
+            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+            series: [
+                [5, 4, 5, 3, 12, 4, 15, 8, 10, 8, 7, 5],
+                [4, 10, 5, 4, 8, 3, 3, 4, 9, 7, 10, 4]
+            ]
+        }, {
+            stackBars: true,
+            axisY: {
+                labelInterpolationFnc: function(value) {
+                    return (value / 1) + 'k';
+                },
+                scaleMinSpace: 55
+            },
+            axisX: {
+                showGrid: false
+            },
+            plugins: [
+                Chartist.plugins.tooltip()
+            ],
+            seriesBarDistance: 1,
+            chartPadding: {
+                top: 15,
+                right: 15,
+                bottom: 5,
+                left: 0
+            }
+        }).on('draw', function(data) {
+            if (data.type === 'bar') {
+                data.element.attr({
+                    style: 'stroke-width: 25px'
+                });
+            }
+        });
+    }
+
+    function initDonutChart(divId, ajaxParam) {
+        const container = document.getElementById(divId);
+        if (!container) {
+            console.warn('El contenedor con ID "${divId}" no se encontró en el DOM.');
+            return;
+        }
+
+        // Limpiar contenido previo
+        container.innerHTML = "";
+
+        $.ajax({
+            url: 'Inicio/datosGraficoDona',
+            type: 'POST',
+            dataType: 'json',
+            data: {
+                parametro: ajaxParam
+            },
+            success: function(response) {
+                if (response.success === 1) {
+                    const d = response.data;
+                    const chart = c3.generate({
+                        bindto: `#${divId}`,
+                        data: {
+                            columns: d.values,
+                            type: 'donut'
+                        },
+                        donut: {
+                            label: d.labels || {
+                                show: false
+                            },
+                            title: d.title || '',
+                            width: 35
+                        },
+                        legend: d.legends || {
+                            hide: true
+                        },
+                        color: {
+                            pattern: d.colors || ['#137eff', '#5ac146', '#8b5edd']
+                        }
+                    });
+                } else {
+                    console.log(`Error en la respuesta AJAX: ${response.mensaje}`);
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('Error AJAX:', error);
+            }
+        });
+    }
+</script>
 
 </html>
-       

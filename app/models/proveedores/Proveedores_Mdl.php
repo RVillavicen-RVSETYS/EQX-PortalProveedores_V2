@@ -292,7 +292,7 @@ class Proveedores_Mdl
                             dtcomp.idCompra AS 'DtIdCompra' 
                         FROM
                             silmeagro_erpV1.vw_ext_PortalProveedores_MontosHES erpHes
-                            LEFT JOIN EQX_PortalProveedoresV2.detcompras dtcomp ON erpHes.idCompra = dtcomp.idCompra 
+                            LEFT JOIN EQX_PortalProveedoresV2.detcompras dtcomp ON erpHes.HES = dtcomp.noRecepcion
                         WHERE
                             erpHes.idProveedor = :idProveedor
                         GROUP BY
