@@ -71,7 +71,7 @@ class InicioController extends Controller
         $valoresCompras = ['cantCompras'];
         $resultCompPago = $comprasAgrupadas_Mdl->ComprasAgrupadas($filtrosCompras, $agrupadoCompras, $valoresCompras);
         if ($resultCompPago['success']) {
-            $data['datosIniciales']['ComplementosPendientes'] = $resultCompPago['data'][0]['cantCompras'];
+            $data['datosIniciales']['ComplementosPendientes'] = (empty($resultCompPago['data'][0]['cantCompras'])) ? 0 : $resultCompPago['data'][0]['cantCompras'];
         } else {
             $timestamp = date("Y-m-d H:i:s");
             error_log("[$timestamp] app\controllers\Administrador\InicioController ->Error al buscar los Complementos Pendientes: " . PHP_EOL, 3, LOG_FILE);
@@ -87,7 +87,7 @@ class InicioController extends Controller
         $valoresCompras = ['cantCompras'];
         $resultCompPago = $comprasAgrupadas_Mdl->ComprasAgrupadas($filtrosCompras, $agrupadoCompras, $valoresCompras);
         if ($resultCompPago['success']) {
-            $data['datosIniciales']['PendientesPorPagar'] = $resultCompPago['data'][0]['cantCompras'];
+            $data['datosIniciales']['PendientesPorPagar'] = (empty($resultCompPago['data'][0]['cantCompras'])) ? 0 : $resultCompPago['data'][0]['cantCompras'];
         } else {
             $timestamp = date("Y-m-d H:i:s");
             error_log("[$timestamp] app\controllers\Administrador\InicioController ->Error al buscar los Complementos Pendientes: " . PHP_EOL, 3, LOG_FILE);
@@ -251,7 +251,7 @@ class InicioController extends Controller
 
         //var_dump($_POST);
         if ($this->debug == 1) {
-            echo '<br>Datos recibidos por POST:'.$_POST['parametro'];
+            echo '<br>Datos recibidos por POST:' . $_POST['parametro'];
             echo '<br>';
         }
 
@@ -262,7 +262,7 @@ class InicioController extends Controller
         if (empty($parametro)) {
             echo json_encode([
                 'success' => 0,
-                'mensaje' => 'Parámetro no recibido correctamente.'.$parametro,
+                'mensaje' => 'Parámetro no recibido correctamente.' . $parametro,
                 'data' => null
             ]);
             exit;
