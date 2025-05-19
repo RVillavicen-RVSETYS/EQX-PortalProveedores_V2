@@ -466,9 +466,9 @@ class cfdisv40
         // Agregar información de depuración
         $debugMessages[] = "Estado: $estado";
         $debugMessages[] = "Código Estatus: $codigoEstatus";
-        $debugMessages[] = "Es Cancelable: $esCancelable";
+        $debugMessages[] = "Es Cancelable: " . (is_object($esCancelable) ? json_encode($esCancelable) : $esCancelable);
         $debugMessages[] = "Estatus Cancelación: $estatusCancelacion";
-        $debugMessages[] = "Validación EFOS: $validacionEFOS";
+        $debugMessages[] = "Validación EFOS: " . (is_object($validacionEFOS) ? json_encode($validacionEFOS) : $validacionEFOS);
 
         // Interpretar el estado del CFDI
         switch ($estado) {
@@ -501,7 +501,7 @@ class cfdisv40
         } elseif ($validacionEFOS === '200') {
             $debugMessages[] = "El emisor no está en la lista de EFOS.";
         } else {
-            $debugMessages[] = "El estado de la validación EFOS es desconocido: $validacionEFOS.";
+            $debugMessages[] = "El estado de la validación EFOS es desconocido: " . (is_object($validacionEFOS) ? json_encode($validacionEFOS) : $validacionEFOS);
         }
 
         // Generar mensajes finales
