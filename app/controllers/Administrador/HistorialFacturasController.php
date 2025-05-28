@@ -84,7 +84,7 @@ class HistorialFacturasController extends Controller
 
         if (!empty($_POST['fechaInicial']) and !empty($_POST['fechaFinal'])) {
             $filtros['entreFechasRecepcion'] = $_POST['fechaInicial'] . ',' . $_POST['fechaFinal'];
-        }else {
+        } else {
             $filtros['entreFechasRecepcion'] = date('Y-m-1') . ',' . date('Y-m-t');
         }
 
@@ -156,6 +156,12 @@ class HistorialFacturasController extends Controller
                     'message' => $errorMessage
                 ]);
             }
+        } else {
+            $errorMessage = $resultPagos['message'];
+            echo json_encode([
+                'success' => false,
+                'message' => $errorMessage
+            ]);
         }
     }
 
