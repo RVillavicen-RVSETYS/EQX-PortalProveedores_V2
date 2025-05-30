@@ -169,18 +169,15 @@ class HistorialFacturas_Mdl
                     cpd.idSatMonedas AS 'Moneda',
                     cp.idSatFormaPago AS 'FormaPago',
                     cpd.fechaPago AS 'FechaPago',
-                    cpd.idAcuse AS 'IdAcuse',
-                    cpd.idAcuseAnticipo AS 'IdAcuseAnticipo',
-                    cp.idCuentaBancaria AS 'IdCuentaBancaria',
-                    cp.referenciaBancaria AS 'ReferenciaBancaria'
+                    cpd.idAcuse AS 'IdAcuse'
                 FROM
                     compras_PagosDet cpd
                     INNER JOIN compras_Pagos cp ON cpd.idPagoCompra = cp.id
                     INNER JOIN compras com ON cpd.idCompra = com.id
-                    INNER JOIN recepciones rec ON cpd.idRecepcion = rec.id
+                    LEFT JOIN recepciones rec ON cpd.idRecepcion = rec.id
                 WHERE
                     DATE_FORMAT( cp.fechaPago, '%Y-%m-%d' ) BETWEEN :fechaInicial
-                    AND :fechaFinal";
+                    AND :fechaFinal AND cpd.idAcuse IS NOT NULL";
 
             // Modo debug para imprimir consulta con parámetros
             if (self::$debug) {
@@ -197,6 +194,7 @@ class HistorialFacturas_Mdl
             $stmt->execute();
 
             $dataResul = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            $cantResult = count($dataResul);
 
             if (self::$debug) {
                 echo '<br>Resultado de Query:';
@@ -205,7 +203,7 @@ class HistorialFacturas_Mdl
             }
 
             if ($dataResul) {
-                return ['success' => true, 'data' => $dataResul];
+                return ['success' => true, 'cantResul' => $cantResult, 'data' => $dataResul];
             } else {
                 if (self::$debug) {
                     echo "Error Al Buscar Pagos.<br>";
@@ -227,8 +225,8 @@ class HistorialFacturas_Mdl
         }
         try {
 
-            $sql = "INSERT IGNORE INTO pagos_compras (idPago, idDetPago, OC, HES, montoPagado, saldoInsoluto, moneda, formaPago, fechaPago, idAcuse, idAcuseAnticipo, idCuentaBancaria, referenciaBancaria)
-                    VALUES ( :idPago, :idDetPago, :OC, :HES, :montoPagado, :saldoInsoluto, :moneda, :formaPago, :fechaPago, :idAcuse, :idAcuseAnticipo, :idCuentaBancaria, :referenciaBancaria);";
+            $sql = "INSERT IGNORE INTO pagos_compras (idPago, idDetPago, OC, HES, montoPagado, saldoInsoluto, moneda, formaPago, fechaPago, idAcuse)
+                    VALUES ( :idPago, :idDetPago, :OC, :HES, :montoPagado, :saldoInsoluto, :moneda, :formaPago, :fechaPago, :idAcuse);";
 
             // Modo debug para imprimir consulta con parámetros
             if (self::$debug) {
@@ -245,9 +243,7 @@ class HistorialFacturas_Mdl
                         ':formaPago' => $pago['FormaPago'],
                         ':fechaPago' => $pago['FechaPago'],
                         ':idAcuse' => $pago['IdAcuse'],
-                        ':idAcuseAnticipo' => $pago['IdAcuseAnticipo'],
-                        ':idCuentaBancaria' => $pago['IdCuentaBancaria'],
-                        ':referenciaBancaria' => $pago['ReferenciaBancaria']
+                        ':idAcuseAnticipo' => $pago['IdAcuseAnticipo']
                     ];
                     $this->db->imprimirConsulta($sql, $params, 'Actualizar Los Pagos:');
                 }
@@ -266,9 +262,6 @@ class HistorialFacturas_Mdl
                 $stmt->bindValue(':formaPago', $pago['FormaPago'], PDO::PARAM_INT);
                 $stmt->bindValue(':fechaPago', $pago['FechaPago'], PDO::PARAM_STR);
                 $stmt->bindValue(':idAcuse', $pago['IdAcuse'], PDO::PARAM_INT);
-                $stmt->bindValue(':idAcuseAnticipo', $pago['IdAcuseAnticipo'], PDO::PARAM_INT);
-                $stmt->bindValue(':idCuentaBancaria', $pago['IdCuentaBancaria'], PDO::PARAM_INT);
-                $stmt->bindValue(':referenciaBancaria', $pago['ReferenciaBancaria'], PDO::PARAM_STR);
 
                 $stmt->execute();
 
