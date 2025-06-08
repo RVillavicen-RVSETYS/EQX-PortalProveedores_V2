@@ -242,8 +242,7 @@ class HistorialFacturas_Mdl
                         ':moneda' => $pago['Moneda'],
                         ':formaPago' => $pago['FormaPago'],
                         ':fechaPago' => $pago['FechaPago'],
-                        ':idAcuse' => $pago['IdAcuse'],
-                        ':idAcuseAnticipo' => $pago['IdAcuseAnticipo']
+                        ':idAcuse' => $pago['IdAcuse']
                     ];
                     $this->db->imprimirConsulta($sql, $params, 'Actualizar Los Pagos:');
                 }
