@@ -608,7 +608,7 @@ if ($debug == 1) {
                     arrayNotasCredito.forEach(nc => {
                         // Solo añade la opción si NO ha sido seleccionada ya en otro select
                         if (!selectedNoteCreditIds.has(nc.IdNotaCredito)) {
-                            const optionText = `${nc.IdNotaCredito} - ${nc.Monto} ${nc.Moneda}`;
+                            const optionText = `${nc.Descripcion}`;
                             const option = new Option(optionText, nc.IdNotaCredito, false, false);
                             $select.append(option);
                         }

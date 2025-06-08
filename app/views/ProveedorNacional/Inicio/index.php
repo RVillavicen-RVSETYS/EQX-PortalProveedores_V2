@@ -510,7 +510,7 @@ if ($notificaciones['success'] && !empty($notificaciones['data'])) {
                     // Re-inicializa select2 después de insertar el HTML
                     const $select = $(`#notaCredito_${contadorFormNotas}`);
                     arrayNotasCredito.forEach(nc => {
-                        const optionText = `${nc.IdNotaCredito} - ${nc.Monto} ${nc.Moneda}`;
+                        const optionText = `${nc.Descripcion}`;
                         const option = new Option(optionText, nc.IdNotaCredito, false, false);
                         $select.append(option);
                     });
