@@ -305,15 +305,7 @@ $cantCompras = $data['datosIniciales']['cantCompras'];
     <script src="/assets/libs/jquery/dist/jquery.min.js"></script>
     <script src="/assets/libs/fancybox/dist/index.umd.js"></script>
     <script src="/assets/libs/fancybox/dist/fancybox/fancybox.umd.js"></script>
-    <script src="/assets/libs/fancybox/dist/carousel/carousel.umd.js"></script>
-    <script src="/assets/libs/fancybox/dist/carousel/carousel.autoplay.umd.js"></script>
-    <script src="/assets/libs/fancybox/dist/carousel/carousel.thumbs.umd.js"></script>
-    <script src="/assets/libs/fancybox/dist/panzoom/panzoom.umd.js"></script>
-    <script src="/assets/libs/fancybox/dist/panzoom/panzoom.toolbar.umd.js"></script>
-    <script src="/assets/libs/fancybox/dist/panzoom/panzoom.pins.umd.js"></script>
-    <script src="/assets/libs/fancybox/dist/fancybox/l10n/es.umd.js"></script>
-    <script src="/assets/libs/fancybox/dist/panzoom/l10n/es.umd.js"></script>   
-    <script src="/assets/libs/fancybox/dist/carousel/l10n/es.umd.js"></script>   
+    <script src="/assets/libs/fancybox/dist/fancybox/l10n/es.umd.js"></script>  
 
     <!-- Bootstrap tether Core JavaScript -->
     <script src="/assets/libs/popper.js/dist/umd/popper.min.js"></script>
@@ -335,8 +327,9 @@ $cantCompras = $data['datosIniciales']['cantCompras'];
     <script src="/dist/js/sidebarmenu.js"></script>
     <!--Custom JavaScript -->
     <script src="/dist/js/custom.js"></script>
-    <script src="/dist/js/basicFuctions.js"></script>
     <script src="/assets/libs/toastr/build/toastr.min.js"></script>
+    <script src="/assets/libs/sweetalert2/dist/sweetalert2.js"></script>
+    <script src="/assets/libs/sweetalert2/dist/sweetalert2.all.js"></script>
 
     <script src="/assets/extra-libs/datatables.net/js/jquery.dataTables.min-ESP.js"></script>
     <script src="/dist/js/pages/datatable/datatable-basic.init.js"></script>
@@ -357,6 +350,8 @@ $cantCompras = $data['datosIniciales']['cantCompras'];
     <script src="/assets/libs/moment/moment.js"></script>
     <script src="/assets/libs/bootstrap-datepicker/dist/js/bootstrap-datepicker.js"></script>
     <script src="/assets/libs/bootstrap-datepicker/dist/locales/bootstrap-datepicker.es.min.js"></script>
+    <script src="/assets/libs/sweetalert2/sweet-alert.init.js"></script>
+    <script src="/dist/js/basicFuctions.js"></script>
 
     <script>
         $(document).ready(function() {

@@ -97,8 +97,8 @@ class DocumentosController extends Controller
         // Preparar la ruta base
         $currentYear = date('Y'); // Año actual
         $currentYearMonth = date('Y-m'); // Mes actual
-        $destinationDir = $this->basePath . DIRECTORY_SEPARATOR . $empresa . DIRECTORY_SEPARATOR . $tipoDoctoNombre . DIRECTORY_SEPARATOR . $currentYear . DIRECTORY_SEPARATOR . $idProveedor . DIRECTORY_SEPARATOR . $currentYearMonth;
         $destinationDirSinBasePath = $empresa . DIRECTORY_SEPARATOR . $tipoDoctoNombre . DIRECTORY_SEPARATOR . $currentYear . DIRECTORY_SEPARATOR . $idProveedor . DIRECTORY_SEPARATOR . $currentYearMonth;
+        $destinationDir = $this->basePath . DIRECTORY_SEPARATOR . $destinationDirSinBasePath;
 
         if ($this->debug == 1) {
             echo "Directorio de Destino: {$destinationDir}<br>";
@@ -139,7 +139,7 @@ class DocumentosController extends Controller
 
         // Preparar la respuesta
         $response['success'] = true;
-        $response['message'] = 'El archivo se almacenó temporalmente con éxito.';
+        $response['message'] = 'El archivo se almacenó con éxito.';
         $response['data'] = [
             'absolutePath' => $destinationPath,
             'relativePath' => $relativePath,
@@ -408,9 +408,9 @@ class DocumentosController extends Controller
         }
 
         // Validar que el archivo tenga un tamaño mínimo
-        $minimumFileSize = 50; // Tamaño mínimo en bytes
+        $minimumFileSize = 0; // Tamaño mínimo en bytes
         if ($fileToValidate['size'] < $minimumFileSize) {
-            $response['message'] = 'El archivo parece estar dañado o es demasiado pequeño.';
+            $response['message'] = 'El archivo parece estar dañado o es demasiado pequeño.'.$fileToValidate['size'];
             return $response;
         }
 

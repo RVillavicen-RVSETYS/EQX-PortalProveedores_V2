@@ -1,6 +1,7 @@
 <?php
 
 use App\Globals\FuncionesBasicas\FuncionesBasicasController;
+
 $funcionesBase = new FuncionesBasicasController();
 
 $debug = 0;
@@ -22,62 +23,69 @@ if ($debug == 1) {
     var_dump($datosRecepcionesSinFactura);
 }
 
+if ($datosRecepcionesSinFactura['success'] == false) {
+    echo '<div class="row"><div class="col-12 py-3 alert alert-info">' . $datosRecepcionesSinFactura['message'] . '</div></div>';
+} else {
 ?>
 
-<h3 class="mt-3">RECEPCIONES POR FACTURAR</h3>
-<h5 class="mb-3">Listado de recepciones pendientes por Facturar de parte del Proveedor</h5>
+    <h3 class="mt-3">RECEPCIONES POR FACTURAR</h3>
+    <h5 class="mb-3">Listado de recepciones pendientes por Facturar de parte del Proveedor</h5>
 
-<table class="table table-sm" id="tableRecSinFact">
-    <thead>
-        <tr>
-            <th>#</th>
-            <th>Orden De Compra</th>
-            <th>No. Recepción</th>
-            <th>Compromiso Pago</th>
-            <th>Monto</th>
-            <th>Moneda</th>
-            <th>SubTotal</th>
-        </tr>
-    </thead>
-    <tbody>
-        <?php
-        $count = 1;
-        $subTotal = 0;
-        $ultimaCompra = null;
-
-        $totalRegistros = count($datosRecepcionesSinFactura['data']);
-
-        foreach ($datosRecepcionesSinFactura['data'] as $index => $recepciones) {
-            if ($recepciones['ErpIdCompra'] != $ultimaCompra) {
-                $subTotal = 0;
-            }
-
-            $subTotal += $recepciones['Monto'];
-
-            $esUltimoDeCompra = false;
-            if ($index == $totalRegistros - 1 || $datosRecepcionesSinFactura['data'][$index + 1]['ErpIdCompra'] != $recepciones['ErpIdCompra']) {
-                $esUltimoDeCompra = true;
-            }
-
-            $partesCP = explode("-", $recepciones['CP']);
-            $compromisoPago = $funcionesBase->convertirCompromisoPago($partesCP[0], $partesCP[1]);
-
-        ?>
+    <table class="table table-sm" id="tableRecSinFact">
+        <thead>
             <tr>
-                <td><?= $count++; ?></td>
-                <td><?= $recepciones['OC']; ?></td>
-                <td><?= $recepciones['HES']; ?></td>
-                <td class="text-right"><?= $compromisoPago['data']; ?></td>
-                <td class="text-right">$ <?= number_format($recepciones['Monto'], 2, '.', ','); ?></td>
-                <td><?= $recepciones['Moneda']; ?></td>
-                <td class="text-right"><?= $esUltimoDeCompra ? '$ ' . number_format($subTotal, 2, '.', ',') : '-'; ?></td>
+                <th>#</th>
+                <th>Orden De Compra</th>
+                <th>No. Recepción</th>
+                <th>Compromiso Pago</th>
+                <th>Monto</th>
+                <th>Moneda</th>
+                <th>SubTotal</th>
             </tr>
-        <?php
-            $ultimaCompra = $recepciones['ErpIdCompra'];
-        }
-        ?>
-    </tbody>
-</table>
+        </thead>
+        <tbody>
+            <?php
+            $count = 1;
+            $subTotal = 0;
+            $ultimaCompra = null;
+
+            $totalRegistros = count($datosRecepcionesSinFactura['data']);
+
+            foreach ($datosRecepcionesSinFactura['data'] as $index => $recepciones) {
+                if ($recepciones['ErpIdCompra'] != $ultimaCompra) {
+                    $subTotal = 0;
+                }
+
+                $subTotal += $recepciones['Monto'];
+
+                $esUltimoDeCompra = false;
+                if ($index == $totalRegistros - 1 || $datosRecepcionesSinFactura['data'][$index + 1]['ErpIdCompra'] != $recepciones['ErpIdCompra']) {
+                    $esUltimoDeCompra = true;
+                }
+
+                $partesCP = explode("-", $recepciones['CP']);
+                $compromisoPago = $funcionesBase->convertirCompromisoPago($partesCP[0], $partesCP[1]);
+
+            ?>
+                <tr>
+                    <td><?= $count++; ?></td>
+                    <td><?= $recepciones['OC']; ?></td>
+                    <td><?= $recepciones['HES']; ?></td>
+                    <td class="text-right"><?= $compromisoPago['data']; ?></td>
+                    <td class="text-right">$ <?= number_format($recepciones['Monto'], 2, '.', ','); ?></td>
+                    <td><?= $recepciones['Moneda']; ?></td>
+                    <td class="text-right"><?= $esUltimoDeCompra ? '$ ' . number_format($subTotal, 2, '.', ',') : '-'; ?></td>
+                </tr>
+            <?php
+                $ultimaCompra = $recepciones['ErpIdCompra'];
+            }
+            ?>
+        </tbody>
+    </table>
+
+<?php
+}
+?>
 
 <script>
     /*Este Se Queda Aquí*/

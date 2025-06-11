@@ -104,7 +104,10 @@ class HistoricoController extends Controller
             if ($configuracionGral['success']) {
 
                 $MDL_compras = new Compras_Mdl();
-                $comprasPorProveedor = $MDL_compras->cantComprasPorProveedor($noProveedor);
+                $filtrosCompras = [
+                    'idProveedor' => $noProveedor
+                ];
+                $comprasPorProveedor = $MDL_compras->dataCompras($filtrosCompras);
                 if ($this->debug == 1) {
                     echo '<br><br>Resultado de Compras por Proveedor: ' . PHP_EOL;
                     var_dump($comprasPorProveedor);
@@ -217,7 +220,7 @@ class HistoricoController extends Controller
     public function registraComplementoPago()
     {
         $data = []; // Aquí puedes pasar datos a la vista si es necesario
-        $this->debug = 1;
+        $this->debug = 0;
 
         if ($this->debug == 1) {
             echo '<br>----SESSION<br>';
@@ -262,8 +265,6 @@ class HistoricoController extends Controller
             if ($ComplementoXML['success']) {
                 $doctos['complementoXML'] = $ComplementoXML['data'];
 
-                echo 'Complemento Valido.....';
-
                 //3.- Verificar Complemento, aplicar Reglas de Negocio, Fiscales y Carga de CFDI desde el Controlador Global para Proveedores Nacionales
                 $Ctrl_FactNacionales = new FacturasNacionalesController();
                 $verificaComplemento = $Ctrl_FactNacionales->verificaNuevoComplementoPago($_FILES['complementoPDF'], $_FILES['complementoXML'], $noProveedor);
@@ -273,18 +274,21 @@ class HistoricoController extends Controller
                 }
 
                 if ($verificaComplemento['success']) {
-                    echo '<br><h1>Hasta aqui ya se verifico el Complemento de Pago y vamos OK';
-                    exit(0);
-                    //7.- Registrar Factura de Ingreso
-                    $registraComplemento = $Ctrl_FactNacionales->registraNuevoComplementoPago($_FILES['complementoPDF'], $_FILES['complementoXML'], $noProveedor);
+                    if ($this->debug == 1) {
+                        echo '<br><h1>Hasta aqui ya se verifico el Complemento de Pago y pasamos al registro</h1>';
+                    } 
+                    
+                    //7.- Registrar Complemento de Pago
+                    $registraComplemento = $Ctrl_FactNacionales->registraNuevoComplementoPago($verificaComplemento['data']);
                     if ($this->debug == 1) {
                         echo '<br><br>Registro de Complemento: ' . PHP_EOL;
                         var_dump($registraComplemento);
                     }
 
                     if ($registraComplemento['success']) {
-
-                        echo '<br><h1>Hasta aqui ya se verifico el Complemento de Pago y vamos OK';
+                        if ($this->debug == 1) {
+                        echo '<br><h1>Hasta aqui ya se registro el Complemento de Pago todo OK</h1>';
+                        }
 
                     } else {
                         echo json_encode([
@@ -296,12 +300,23 @@ class HistoricoController extends Controller
                 } else {
                     echo json_encode([
                         'success' => false,
-                        'message' => 'Problemas al Validar el Complemento: ' . $verificaComplemento['message']
+                        'message' => $verificaComplemento['message']
                     ]);
                 }
 
-            }
-        }
+            } else {
+                    echo json_encode([
+                        'success' => false,
+                        'message' => $ComplementoXML['message']
+                    ]);
+                }
+            
+        } else {
+                    echo json_encode([
+                        'success' => false,
+                        'message' => $complementoPDF['message']
+                    ]);
+                }
 
 
 

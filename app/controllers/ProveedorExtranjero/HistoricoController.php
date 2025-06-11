@@ -101,7 +101,10 @@ class HistoricoController extends Controller
             if ($configuracionGral['success']) {
 
                 $MDL_compras = new Compras_Mdl();
-                $comprasPorProveedor = $MDL_compras->cantComprasPorProveedor($noProveedor);
+                $filtrosCompras = [
+                    'idProveedor' => $noProveedor
+                ];
+                $comprasPorProveedor = $MDL_compras->dataCompras($filtrosCompras);
                 if ($this->debug == 1) {
                     echo '<br><br>Resultado de Compras por Proveedor: ' . PHP_EOL;
                     var_dump($comprasPorProveedor);
