@@ -738,7 +738,7 @@ if ($debug == 1) {
 
                         // Limpiar los campos Inputs
                         resetFormulario("Form_CargaFactura");
-                        window.location.reload();
+                        //window.location.reload();
                         //cargaTablaUltimasFacturas();
                     }
                 });
