@@ -2,7 +2,7 @@
 
 namespace App\Models\PagosProveedores;
 
-use PDO; 
+use PDO;
 use BD_Connect;
 
 // Incluye conección a la BD
@@ -23,6 +23,177 @@ class Pagos_Mdl
         }
 
         $this->db = new BD_Connect();
+    }
+
+    public function listarPagosRealizados($filtros = [], INT $cantMaxRes = 0, $orden = 'DESC')
+    {
+        if (self::$debug) {
+            echo '<br><br>Filtros Recibidos: ';
+            var_dump($filtros);
+        }
+        $filtrosDisponibles = [
+            'idProveedor1' => ['tipoDato' => 'INT', 'sqlFiltro' => 'com.idProveedor = :idProveedor1'],
+            'idProveedor2' => ['tipoDato' => 'INT', 'sqlFiltro' => 'com.idProveedor = :idProveedor2'],
+            'entreFechasPago1' => ['tipoDato' => 'STRING', 'sqlFiltro' => '(pc.fechaPago BETWEEN :fechaInicial1 AND :fechaFinal1)'],
+            'entreFechasPago2' => ['tipoDato' => 'STRING', 'sqlFiltro' => '(pc.fechaPago BETWEEN :fechaInicial2 AND :fechaFinal2)'],
+        ];
+
+        $filtrosSQL = '';
+        $filtrosSQL2 = '';
+        $params = [];
+
+        try {
+            if (!is_int($cantMaxRes)) {
+                throw new \Exception('El valor de $cantMaxRes debe ser un entero.');
+            }
+            $limiteResult = ($cantMaxRes == 0) ? '' : 'LIMIT ' . $cantMaxRes;
+
+            if (!in_array($orden, ['DESC', 'ASC'])) {
+                throw new \Exception('El orden debe ser DESC o ASC.');
+            } else {
+                $orden = strtoupper($orden);
+            }
+
+            foreach ($filtros as $nombreFiltro => $valorFiltro) {
+                if (isset($filtrosDisponibles[$nombreFiltro]) && $valorFiltro !== null) {
+                    if ($nombreFiltro == 'entreFechasPago1') {
+                        list($fechaInicial, $fechaFinal) = explode(',', $valorFiltro);
+                        if (!strtotime($fechaInicial) || !strtotime($fechaFinal)) {
+                            throw new \Exception('Las fechas proporcionadas no son válidas.');
+                        }
+                        $filtrosSQL .= ' AND ' . $filtrosDisponibles[$nombreFiltro]['sqlFiltro'];
+                        $params[':fechaInicial1'] = $fechaInicial;
+                        $params[':fechaFinal1'] = $fechaFinal;
+                    } elseif ($nombreFiltro == 'entreFechasPago2') {
+                        list($fechaInicial, $fechaFinal) = explode(',', $valorFiltro);
+                        if (!strtotime($fechaInicial) || !strtotime($fechaFinal)) {
+                            throw new \Exception('Las fechas proporcionadas no son válidas.');
+                        }
+                        $filtrosSQL2 .= ' AND ' . $filtrosDisponibles[$nombreFiltro]['sqlFiltro'];
+                        $params[':fechaInicial2'] = $fechaInicial;
+                        $params[':fechaFinal2'] = $fechaFinal;
+                    } elseif ($nombreFiltro == 'idProveedor1') {
+                        if (!empty($valorFiltro)) {
+                            $filtrosSQL .= ' AND ' . $filtrosDisponibles[$nombreFiltro]['sqlFiltro'];
+                        }
+                    } elseif ($nombreFiltro == 'idProveedor2') {
+                        if (!empty($valorFiltro)) {
+                            $filtrosSQL2 .= ' AND ' . $filtrosDisponibles[$nombreFiltro]['sqlFiltro'];
+                        }
+                    } else {
+                        $filtrosSQL .= ' AND ' . $filtrosDisponibles[$nombreFiltro]['sqlFiltro'];
+                        $params[':' . $nombreFiltro] = $valorFiltro;
+                    }
+                }
+            }
+
+            if (empty($filtrosSQL)) {
+                throw new \Exception('No se encontró ningún parámetro válido.');
+            }
+            if (empty($filtrosSQL2)) {
+                throw new \Exception('No se encontró ningún parámetro válido.');
+            }
+            $filtrosSQL = ltrim($filtrosSQL, ' AND');
+            $filtrosSQL2 = ltrim($filtrosSQL2, ' AND');
+
+            if (self::$debug) {
+                echo '<br><br>Parametros: ';
+                var_dump($params);
+                echo '<br><br>';
+            }
+
+            $sql = "SELECT
+                        Pagos.IdCompra AS 'Acuse',
+                        CONCAT( cf.serie, cf.folio ) AS 'Serie',
+                        cf.razonSocialEm AS 'Emisor',
+                        Pagos.OrdenCompra AS 'OC',
+                        GROUP_CONCAT( Pagos.Recepcion ) AS 'HES',
+                        GROUP_CONCAT( Pagos.FormaPago ) AS 'FormaPago',
+                        SUM( Pagos.MontoPagado ) AS 'MontoPagado' 
+                    FROM
+                        (
+                        SELECT
+                            dc.idCompra AS 'IdCompra',
+                            pc.OC AS 'OrdenCompra',
+                            pc.HES AS 'Recepcion',
+                            pc.montoPagado AS 'MontoPagado',
+                            fp.nombre AS 'FormaPago'
+                        FROM
+                            pagos_compras pc
+                            LEFT JOIN detcompras dc ON pc.OC = dc.ordenCompra
+                            INNER JOIN sat_catFormaPago fp ON pc.formaPago = fp.id
+                            LEFT JOIN compras com ON dc.idCompra = com.id
+                        WHERE
+                            $filtrosSQL
+                        GROUP BY
+                            pc.HES 
+                        ) Pagos
+                        INNER JOIN cfdi_facturas cf ON Pagos.IdCompra = cf.idCompra 
+                    WHERE
+                        Pagos.IdCompra > 0
+                    GROUP BY
+                        Pagos.OrdenCompra UNION
+                    SELECT
+                        Pagos.IdCompra AS 'Acuse',
+                        '' AS 'Serie',
+                        '' AS 'Emisor',
+                        Pagos.OrdenCompra AS 'OC',
+                        Pagos.Recepcion AS 'HES',
+                        GROUP_CONCAT( Pagos.FormaPago ) AS 'FormaPago',
+                        SUM( Pagos.MontoPagado ) AS 'MontoPagado' 
+                    FROM
+                        (
+                        SELECT
+                            dc.idCompra AS 'IdCompra',
+                            pc.OC AS 'OrdenCompra',
+                            pc.HES AS 'Recepcion',
+                            pc.montoPagado AS 'MontoPagado',
+                            fp.nombre AS 'FormaPago' 
+                        FROM
+                            pagos_compras pc
+                            LEFT JOIN detcompras dc ON pc.OC = dc.ordenCompra
+                            INNER JOIN sat_catFormaPago fp ON pc.formaPago = fp.id
+                            LEFT JOIN compras com ON dc.idCompra = com.id
+                        WHERE
+                            $filtrosSQL2
+                            AND ISNULL( dc.idCompra ) 
+                        GROUP BY
+                            pc.HES 
+                        ) Pagos
+                        LEFT JOIN cfdi_facturas cf ON Pagos.IdCompra = cf.idCompra 
+                    GROUP BY
+                        Pagos.OrdenCompra,
+                        Pagos.Recepcion
+                    ORDER BY Acuse $orden
+                    $limiteResult";
+            if (self::$debug) {
+                $this->db->imprimirConsulta($sql, $params, 'Lista De Pagos Realizados: ');
+            }
+            $stmt = $this->db->prepare($sql);
+            foreach ($params as $param => $value) {
+                $stmt->bindValue($param, $value, is_int($value) ? PDO::PARAM_INT : PDO::PARAM_STR);
+            }
+            $stmt->execute();
+            $pagosresult = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            // Obtener la cantidad de registros
+            $cantPagos = $stmt->rowCount();
+
+            if (self::$debug) {
+                echo '<br>Resultado de Query:';
+                var_dump($pagosresult);
+                echo '<br><br>';
+            }
+
+            return ['success' => true, 'cantRes' => $cantPagos, 'data' => $pagosresult];
+        } catch (\Exception $e) {
+            $timestamp = date("Y-m-d H:i:s");
+            error_log("[$timestamp] app/Models/PagosProveedores/Pagos_Mdl.php ->Error buscar Compras por Proveedor: " . $e->getMessage() . PHP_EOL, 3, LOG_FILE_BD);
+            if (self::$debug) {
+                echo "<br>Error al listar Pagos Realizados: " . $e->getMessage(); // Mostrar error en modo depuración
+            }
+            return ['success' => false, 'message' => 'Problemas al listar los Pagos Realizados, Notifica a tu administrador.'];
+        }
     }
 
     public function dataPagosDesdeFacturas($filtros = [], INT $cantMaxRes = 0)
@@ -75,7 +246,7 @@ class Pagos_Mdl
                     }
                 }
             }
-            
+
             if (empty($filtrosSQL)) {
                 throw new \Exception('No se encontró ningún parámetro válido.');
             }

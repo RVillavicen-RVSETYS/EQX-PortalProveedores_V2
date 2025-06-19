@@ -112,16 +112,18 @@ class RegistrarPagoController extends Controller
             $pago['SaldoInsoluto'],
             $pago['Moneda'],
             $pago['FormaPago'],
-            $pago['FechaPago']
+            $pago['FechaPago'],
+            $pago['IdAcuse'] // Nuevo campo requerido
         )
             && is_numeric($pago['IdPago'])
             && is_numeric($pago['IdDetPago'])
             && !empty($pago['OrdenCompra'])
             && !empty($pago['HojaEntrada'])
-            && !empty($pago['MontoPago'])
-            && !empty($pago['SaldoInsoluto'])
+            && is_numeric($pago['MontoPago'])
+            && is_numeric($pago['SaldoInsoluto']) // ✅ permite 0
             && !empty($pago['Moneda'])
             && is_numeric($pago['FormaPago'])
+            && is_numeric($pago['IdAcuse']) // ✅ validar numérico
             && preg_match('/^\d{4}-\d{2}-\d{2}$/', $pago['FechaPago']);
     }
 

@@ -153,31 +153,31 @@ class HistorialFacturas_Mdl
 
     public function buscaPagoSilme($fechaInicial, $fechaFinal)
     {
+        self::$debug = 0;
         if (self::$debug) {
             echo "Ya entro a la función para actualizar los Pagos.<br>";
         }
         try {
 
             $sql = "SELECT
-                    pc.id AS 'IdPago',
-                    pc.idOperacion AS 'IdDetPago',
-                    cmp.folio AS 'OrdenCompra',
-                    rec.folio AS 'HojaEntrada',
-                    pc.monto AS 'MontoPago',
-                    ph.residual AS 'SaldoInsoluto',
-                    pc.idSatMoneda AS 'Moneda',
-                    pc.idSatFormaPago AS 'FormaPago',
-                    pc.fechaPago AS 'FechaPago',
-                    ph.referencia AS 'Referencia',
-                    ph.idCuentaBancaria AS 'CuentaBancaria' 
+                    cp.id AS 'IdPago',
+                    cpd.id AS 'IdDetPago',
+                    com.folio AS 'OC',
+                    rec.folio AS 'HES',
+                    cpd.montoPagado AS 'MontoPagado',
+                    cpd.residual AS 'SaldoInsoluto',
+                    cpd.idSatMonedas AS 'Moneda',
+                    cp.idSatFormaPago AS 'FormaPago',
+                    cpd.fechaPago AS 'FechaPago',
+                    cpd.idAcuse AS 'IdAcuse'
                 FROM
-                    pagosCompras pc
-                    INNER JOIN pagos_hes ph ON pc.idOperacion = ph.id
-                    INNER JOIN recepciones rec ON ph.idRecepcion = rec.id
-                    INNER JOIN compras cmp ON rec.idCompra = cmp.id
+                    compras_PagosDet cpd
+                    INNER JOIN compras_Pagos cp ON cpd.idPagoCompra = cp.id
+                    INNER JOIN compras com ON cpd.idCompra = com.id
+                    LEFT JOIN recepciones rec ON cpd.idRecepcion = rec.id
                 WHERE
-                    DATE_FORMAT( pc.fechaPago, '%Y-%m-%d' ) BETWEEN :fechaInicial 
-                    AND :fechaFinal";
+                    DATE_FORMAT( cp.fechaPago, '%Y-%m-%d' ) BETWEEN :fechaInicial
+                    AND :fechaFinal AND cpd.idAcuse IS NOT NULL";
 
             // Modo debug para imprimir consulta con parámetros
             if (self::$debug) {
@@ -194,6 +194,7 @@ class HistorialFacturas_Mdl
             $stmt->execute();
 
             $dataResul = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            $cantResult = count($dataResul);
 
             if (self::$debug) {
                 echo '<br>Resultado de Query:';
@@ -202,7 +203,7 @@ class HistorialFacturas_Mdl
             }
 
             if ($dataResul) {
-                return ['success' => true, 'data' => $dataResul];
+                return ['success' => true, 'cantResul' => $cantResult, 'data' => $dataResul];
             } else {
                 if (self::$debug) {
                     echo "Error Al Buscar Pagos.<br>";
@@ -224,8 +225,8 @@ class HistorialFacturas_Mdl
         }
         try {
 
-            $sql = "INSERT INTO pagos_compras (idPago, idDetPago, OC, HES, montoPagado, saldoInsoluto, moneda, formaPago, fechaPago)
-                VALUES (:idPago, :idDetPago, :OC, :HES, :montoPagado, :saldoInsoluto, :moneda, :formaPago, :fechaPago) ON DUPLICATE KEY UPDATE idPago = idPago;";
+            $sql = "INSERT IGNORE INTO pagos_compras (idPago, idDetPago, OC, HES, montoPagado, saldoInsoluto, moneda, formaPago, fechaPago, idAcuse)
+                    VALUES ( :idPago, :idDetPago, :OC, :HES, :montoPagado, :saldoInsoluto, :moneda, :formaPago, :fechaPago, :idAcuse);";
 
             // Modo debug para imprimir consulta con parámetros
             if (self::$debug) {
@@ -234,13 +235,14 @@ class HistorialFacturas_Mdl
                     $params = [
                         ':idPago' => $pago['IdPago'],
                         ':idDetPago' => $pago['IdDetPago'],
-                        ':OC' => $pago['OrdenCompra'],
-                        ':HES' => $pago['HojaEntrada'],
-                        ':montoPagado' => $pago['MontoPago'],
+                        ':OC' => $pago['OC'],
+                        ':HES' => $pago['HES'],
+                        ':montoPagado' => $pago['MontoPagado'],
                         ':saldoInsoluto' => $pago['SaldoInsoluto'],
                         ':moneda' => $pago['Moneda'],
                         ':formaPago' => $pago['FormaPago'],
-                        ':fechaPago' => $pago['FechaPago']
+                        ':fechaPago' => $pago['FechaPago'],
+                        ':idAcuse' => $pago['IdAcuse']
                     ];
                     $this->db->imprimirConsulta($sql, $params, 'Actualizar Los Pagos:');
                 }
@@ -251,13 +253,14 @@ class HistorialFacturas_Mdl
             foreach ($dataPagos as $pago) {
                 $stmt->bindValue(':idPago', $pago['IdPago'], PDO::PARAM_INT);
                 $stmt->bindValue(':idDetPago', $pago['IdDetPago'], PDO::PARAM_INT);
-                $stmt->bindValue(':OC', $pago['OrdenCompra'], PDO::PARAM_STR);
-                $stmt->bindValue(':HES', $pago['HojaEntrada'], PDO::PARAM_STR);
-                $stmt->bindValue(':montoPagado', $pago['MontoPago'], PDO::PARAM_STR);
+                $stmt->bindValue(':OC', $pago['OC'], PDO::PARAM_STR);
+                $stmt->bindValue(':HES', $pago['HES'], PDO::PARAM_STR);
+                $stmt->bindValue(':montoPagado', $pago['MontoPagado'], PDO::PARAM_STR);
                 $stmt->bindValue(':saldoInsoluto', $pago['SaldoInsoluto'], PDO::PARAM_STR);
                 $stmt->bindValue(':moneda', $pago['Moneda'], PDO::PARAM_STR);
                 $stmt->bindValue(':formaPago', $pago['FormaPago'], PDO::PARAM_INT);
                 $stmt->bindValue(':fechaPago', $pago['FechaPago'], PDO::PARAM_STR);
+                $stmt->bindValue(':idAcuse', $pago['IdAcuse'], PDO::PARAM_INT);
 
                 $stmt->execute();
 

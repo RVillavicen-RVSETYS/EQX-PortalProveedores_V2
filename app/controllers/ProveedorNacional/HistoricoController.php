@@ -220,7 +220,7 @@ class HistoricoController extends Controller
     public function registraComplementoPago()
     {
         $data = []; // Aquí puedes pasar datos a la vista si es necesario
-        //$this->debug = 1;
+        $this->debug = 0;
 
         if ($this->debug == 1) {
             echo '<br>----SESSION<br>';
@@ -304,8 +304,19 @@ class HistoricoController extends Controller
                     ]);
                 }
 
-            }
-        }
+            } else {
+                    echo json_encode([
+                        'success' => false,
+                        'message' => $ComplementoXML['message']
+                    ]);
+                }
+            
+        } else {
+                    echo json_encode([
+                        'success' => false,
+                        'message' => $complementoPDF['message']
+                    ]);
+                }
 
 
 

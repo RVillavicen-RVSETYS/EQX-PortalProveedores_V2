@@ -28,15 +28,14 @@ class FacturasNacionalesController extends Controller
      *  - Este Controlador trabajara con Transacciones en la BD.
      * NOTA: Antes de llegar Aqui los PDF's y XML ya deben estar verificados, validadas las HES y la OC.
      */
-    public function verificaNuevaFacturaIngresos($reqNotaCredito, $OC, $HES, $doctos, $isAdmin = 0, $reglasAdmin = [])
+    public function verificaNuevaFacturaIngresos($reqNotaCredito, $OC, $HES, $doctos, $isAdmin, $reglasAdmin, $noProveedor)
     {
         $response = [
             'success' => false,
             'message' => '',
             'data' => []
         ];
-
-        $noProveedor = ($isAdmin == 1 && isset($_POST['admin_noProveedor'])) ? $_POST['admin_noProveedor'] : $_SESSION['EQXnoProveedor'];
+        //$noProveedor = ($isAdmin == 1 && isset($_POST['admin_noProveedor'])) ? $_POST['admin_noProveedor'] : $_SESSION['EQXnoProveedor'];
         if ($this->debug == 1) {
             echo '<br>Valores para la carga:';
             echo '<br> * Requiere Nota de Credito:' . $reqNotaCredito;
@@ -52,9 +51,12 @@ class FacturasNacionalesController extends Controller
         }
 
         //Verificamos los Archivos de la Nota de Credito
+        $dataNotaCredXML['data'] = '';
         if ($reqNotaCredito > 0) {
-            if (empty($doctos['NotaCreditoPDF']) || empty($doctos['NotaCreditoXML'])) {
-                return ['success' => false, 'message' => 'No se recibio correctamente la nota de Credito.'];
+            foreach ($doctos['NotaCreditoPDF'] as $id => $pdf) {
+                if (empty($pdf) || empty($doctos['NotaCreditoXML'][$id])) {
+                    return ['success' => false, 'message' => "Faltan archivos en la plantilla $id de Nota de Crédito."];
+                }
             }
         } else {
             $dataNotaCredXML['data'] = '';
@@ -396,7 +398,7 @@ class FacturasNacionalesController extends Controller
                 if (!$dataPagosProv['success']) {
                     return ['success' => false, 'message' => $dataPagosProv['message']];
                 }
-                
+
                 //Obtener datos de la empresa para las validaciones
                 $MDL_Empresas = new Empresas_Mdl();
                 $dataEmpresa = $MDL_Empresas->empresaPorId($idEmpresa);
@@ -430,7 +432,7 @@ class FacturasNacionalesController extends Controller
                     return ['success' => false, 'message' => "El archivo para las Reglas de Negocio de la versión $versionDocto no existe."];
                 }
                 require_once $archivoVersion;
-                
+
                 if (!class_exists($claseValidacion)) {
                     if ($this->debug == 1) {
                         echo '<br><br>La Clase de Validación no está definida: ' . $claseValidacion . '<br>';
@@ -454,7 +456,7 @@ class FacturasNacionalesController extends Controller
                 $configParaValidaciones = array();
                 $configParaValidaciones['Excepciones']['NoValidarFechasPago'] = 1;
                 $configParaValidaciones['Excepciones']['NoValidarFormasPago'] = 1;
-                
+
                 $reglasNegocio = $class_Validaciones->validarReglasNegocioNacional_Pagos($dataCFDIXML['data'], $comprasPorFacturas['data'], $dataPagosProv['data'], $configParaValidaciones);
                 if ($this->debug == 1) {
                     echo '<br><br>Resultado de validarReglasNegocioNacional_Pagos: ' . PHP_EOL;
@@ -484,7 +486,7 @@ class FacturasNacionalesController extends Controller
                     if ($this->debug == 1) {
                         echo '<br><br> ****** PASAMOS LA VALIDACION FISCAL <br>';
                     }
-                    
+
                     //14. Retornamos el resultado de las validaciónes del Complemento de Pago
                     $response = [
                         'success' => true,
@@ -504,7 +506,6 @@ class FacturasNacionalesController extends Controller
                             ]
                         ]
                     ];
-                    
                 } else {
                     if ($this->debug == 1) {
                         echo '<br><br> ****** NO PASAMOS LA VALIDACION FISCAL <br>';
