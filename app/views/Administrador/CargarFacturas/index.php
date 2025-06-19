@@ -274,7 +274,7 @@ if ($debug == 1) {
                         </div>
 
 
-                        <!--<div class="row">
+                        <div class="row">
                             <div class="col-md-12 col-lg-12">
                                 <div class="card border">
                                     <div class="card-header bg-pyme-primary">
@@ -342,8 +342,7 @@ if ($debug == 1) {
                                     </div>
                                 </div>
                             </div>
-                        </div>-->
-
+                        </div>
 
                     </div>
 
@@ -446,119 +445,64 @@ if ($debug == 1) {
         let lastNotasCredito = [];
 
         function validaOrdCompra(ordenCompra, tipo) {
+            const isFactura = tipo === 'FACT';
+            const prefix = isFactura ? '' : 'NC';
 
-            switch (tipo) {
-                case 'FACT':
-                    var noProveedor = $('#noProveedor').val();
+            const noProveedor = $(`#noProveedor${prefix}`).val();
+            if (!noProveedor) {
+                notificaBad('Selecciona un proveedor');
+            }
 
-                    if (!noProveedor) {
-                        notificaBad('Selecciona un proveedor');
-                    }
+            const $inputOC = $(`#ordenCompra${prefix}`);
+            const $invalidMsg = $(`#invalid_ordenCompra${prefix}`);
+            const $contentNota = $(`#contentNotaCredito${prefix}`);
+            const $btnNota = $(`#btnNotaCredito${prefix}`);
 
-                    $("#ordenCompra").removeClass("is-invalid is-valid");
-                    $("#invalid_ordenCompra").html("");
+            $inputOC.removeClass("is-invalid is-valid");
+            $invalidMsg.html("");
 
-                    oc = validarEstructuraOC(ordenCompra);
-                    console.log(validarEstructuraOC(ordenCompra));
-                    console.log(oc.valor);
+            const oc = validarEstructuraOC(ordenCompra);
+            console.log(validarEstructuraOC(ordenCompra));
+            console.log(oc.valor);
 
-                    $("#ordenCompra").val(oc.valor);
-                    if (oc.valido) {
-                        $.ajax({
-                            type: 'POST',
-                            url: 'CargarFacturas/validaOrdenCompra',
-                            data: {
-                                ordenCompra: oc.valor,
-                                noProveedor: noProveedor
-                            },
-                            dataType: 'json',
-                            success: function(response) {
-                                if (response.success) {
-                                    validOC = true;
-                                    $("#ordenCompra").addClass("is-valid");
-                                    $('#contentNotaCredito').empty();
-                                    $("#btnNotaCredito").addClass("d-none");
-                                    contadorFormNotas = 0;
-                                    if (response.anticipo) {
-                                        lastNotasCredito = response.NC;
-                                        cargarFormNotaCredito(lastNotasCredito, 'FACT');
-                                        $("#btnNotaCredito").removeClass("d-none");
-                                        //$("#contentNotaCredito").html(response.solicitaNotaCredito);
-                                    }
-                                } else {
-                                    validOC = false;
-                                    $("#ordenCompra").addClass("is-invalid");
-                                    $("#invalid_ordenCompra").html(response.message);
-                                }
-                            },
-                            error: function() {
-                                notificaBad('Error al validar la Orden de Compra. Consulta a tu administrador');
-                                validOC = false;
+            $inputOC.val(oc.valor);
+
+            if (oc.valido) {
+                $.ajax({
+                    type: 'POST',
+                    url: 'CargarFacturas/validaOrdenCompra',
+                    data: {
+                        ordenCompra: oc.valor,
+                        noProveedor: noProveedor
+                    },
+                    dataType: 'json',
+                    success: function(response) {
+                        if (response.success) {
+                            validOC = true;
+                            $inputOC.addClass("is-valid");
+                            $contentNota.empty();
+                            $btnNota.addClass("d-none");
+                            contadorFormNotas = 0;
+                            if (response.anticipo) {
+                                lastNotasCredito = response.NC;
+                                cargarFormNotaCredito(lastNotasCredito, tipo);
+                                $btnNota.removeClass("d-none");
                             }
-                        });
-                    } else {
-                        $("#ordenCompra").addClass("is-invalid");
-                        $("#invalid_ordenCompra").html("Estructura: COM-XXX-######");
+                        } else {
+                            validOC = false;
+                            $inputOC.addClass("is-invalid");
+                            $invalidMsg.html(response.message);
+                        }
+                    },
+                    error: function() {
+                        notificaBad('Error al validar la Orden de Compra. Consulta a tu administrador');
                         validOC = false;
                     }
-                    break;
-                case 'NC':
-                    var noProveedor = $('#noProveedorNC').val();
-
-                    if (!noProveedor) {
-                        notificaBad('Selecciona un proveedor');
-                    }
-
-                    $("#ordenCompraNC").removeClass("is-invalid is-valid");
-                    $("#invalid_ordenCompraNC").html("");
-
-                    oc = validarEstructuraOC(ordenCompra);
-                    console.log(validarEstructuraOC(ordenCompra));
-                    console.log(oc.valor);
-
-                    $("#ordenCompraNC").val(oc.valor);
-                    if (oc.valido) {
-                        $.ajax({
-                            type: 'POST',
-                            url: 'CargarFacturas/validaOrdenCompra',
-                            data: {
-                                ordenCompra: oc.valor,
-                                noProveedor: noProveedor
-                            },
-                            dataType: 'json',
-                            success: function(response) {
-                                if (response.success) {
-                                    validOC = true;
-                                    $("#ordenCompraNC").addClass("is-valid");
-                                    $('#contentNotaCreditoNC').empty();
-                                    $("#btnNotaCreditoNC").addClass("d-none");
-                                    contadorFormNotas = 0;
-                                    if (response.anticipo) {
-                                        lastNotasCredito = response.NC;
-                                        cargarFormNotaCredito(lastNotasCredito, 'NC');
-                                        $("#btnNotaCreditoNC").removeClass("d-none");
-                                        //$("#contentNotaCredito").html(response.solicitaNotaCredito);
-                                    }
-                                } else {
-                                    validOC = false;
-                                    $("#ordenCompraNC").addClass("is-invalid");
-                                    $("#invalid_ordenCompraNC").html(response.message);
-                                }
-                            },
-                            error: function() {
-                                notificaBad('Error al validar la Orden de Compra. Consulta a tu administrador');
-                                validOC = false;
-                            }
-                        });
-                    } else {
-                        $("#ordenCompraNC").addClass("is-invalid");
-                        $("#invalid_ordenCompraNC").html("Estructura: COM-XXX-######");
-                        validOC = false;
-                    }
-                    break;
-
-                default:
-                    break;
+                });
+            } else {
+                $inputOC.addClass("is-invalid");
+                $invalidMsg.html("Estructura: COM-XXX-######");
+                validOC = false;
             }
         }
 
@@ -608,8 +552,10 @@ if ($debug == 1) {
                     arrayNotasCredito.forEach(nc => {
                         // Solo añade la opción si NO ha sido seleccionada ya en otro select
                         if (!selectedNoteCreditIds.has(nc.IdNotaCredito)) {
-                            const optionText = `${nc.Descripcion}`;
+                            const esObligatoria = nc.Obligatoria == "1";
+                            const optionText = esObligatoria ? `🔴 ${nc.Descripcion}` : nc.Descripcion;
                             const option = new Option(optionText, nc.IdNotaCredito, false, false);
+                            $(option).attr('data-obligatoria', nc.Obligatoria);
                             $select.append(option);
                         }
                     });
@@ -667,39 +613,93 @@ if ($debug == 1) {
             // Verifica cuántos bloques hay antes de eliminar
             const totalBloques = $('.formulario-nota').length;
 
-            if (totalBloques <= 1) {
-                // Evitar borrar el último bloque
-                Swal.fire({
-                    type: 'warning',
-                    title: 'Al menos una nota es obligatoria',
-                    text: 'No puedes eliminar todas las notas de crédito.',
-                    confirmButtonText: 'Entendido'
-                });
-                return; // Cancelar la eliminación
-            }
-
             const $bloque = $(this).closest('.formulario-nota');
             const $selectInBlock = $bloque.find('.select2');
 
-            if ($selectInBlock.length > 0) {
-                const currentSelections = $selectInBlock.val();
+            if (totalBloques <= 1) {
 
-                if (currentSelections && currentSelections.length > 0) {
-                    currentSelections.forEach(id => {
-                        selectedNoteCreditIds.delete(id);
+                let contieneObligatorias = false;
 
-                        $('.formulario-nota .select2').not($selectInBlock).each(function() {
-                            $(this).find(`option[value="${id}"]`).prop('disabled', false);
-                        });
+                $selectInBlock.find('option').each(function() {
+                    if ($(this).data('obligatoria') == "1") {
+                        contieneObligatorias = true;
+                        return false; // break
+                    }
+                });
+
+                // Evitar borrar el último bloque
+                if (contieneObligatorias == true) {
+                    Swal.fire({
+                        type: 'warning',
+                        title: 'No puedes eliminar este bloque',
+                        text: 'Contiene al menos una nota de crédito obligatoria.',
+                        confirmButtonText: 'Entendido'
                     });
-
-                    $('.formulario-nota .select2').select2();
+                    return; // No se elimina
                 }
+
+                if (contieneObligatorias == false) {
+
+                    Swal.fire({
+                        title: 'Seguro que quieres eliminar este bloque?',
+                        text: "Esta acción no se puede deshacer.",
+                        type: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#3085d6',
+                        cancelButtonColor: '#d33',
+                        confirmButtonText: 'Yes, delete it!'
+                    }).then((result) => {
+                        if (result.value) {
+                            if ($selectInBlock.length > 0) {
+                                const currentSelections = $selectInBlock.val();
+
+                                if (currentSelections && currentSelections.length > 0) {
+                                    currentSelections.forEach(id => {
+                                        selectedNoteCreditIds.delete(id);
+
+                                        $('.formulario-nota .select2').not($selectInBlock).each(function() {
+                                            $(this).find(`option[value="${id}"]`).prop('disabled', false);
+                                        });
+                                    });
+
+                                    $('.formulario-nota .select2').select2();
+                                }
+                            }
+
+                            $bloque.remove();
+
+                            Swal.fire(
+                                'Bloque Eliminado',
+                                'El bloque ha sido eliminado correctamente.',
+                                'success'
+                            )
+                        }
+                    })
+
+                }
+
+            } else {
+                if ($selectInBlock.length > 0) {
+                    const currentSelections = $selectInBlock.val();
+
+                    if (currentSelections && currentSelections.length > 0) {
+                        currentSelections.forEach(id => {
+                            selectedNoteCreditIds.delete(id);
+
+                            $('.formulario-nota .select2').not($selectInBlock).each(function() {
+                                $(this).find(`option[value="${id}"]`).prop('disabled', false);
+                            });
+                        });
+
+                        $('.formulario-nota .select2').select2();
+                    }
+                }
+                $bloque.remove();
             }
 
-            $bloque.remove();
 
-            // Ya no es necesario ocultar los botones porque nunca quedarán 0 bloques
+
+
         });
 
         $(document).ready(function() {
