@@ -631,7 +631,7 @@ if ($debug == 1) {
                 if (contieneObligatorias == true) {
                     Swal.fire({
                         type: 'warning',
-                        title: 'No puedes eliminar este bloque',
+                        title: 'No puedes eliminar esta Nota de Crédito',
                         text: 'Contiene al menos una nota de crédito obligatoria.',
                         confirmButtonText: 'Entendido'
                     });
@@ -641,13 +641,14 @@ if ($debug == 1) {
                 if (contieneObligatorias == false) {
 
                     Swal.fire({
-                        title: 'Seguro que quieres eliminar este bloque?',
+                        title: 'Seguro que quieres eliminar esta Nota de Crédito?',
                         text: "Esta acción no se puede deshacer.",
                         type: 'warning',
                         showCancelButton: true,
                         confirmButtonColor: '#3085d6',
                         cancelButtonColor: '#d33',
-                        confirmButtonText: 'Yes, delete it!'
+                        confirmButtonText: 'Sí, eliminar',
+                        cancelButtonText: 'Cancelar'
                     }).then((result) => {
                         if (result.value) {
                             if ($selectInBlock.length > 0) {
@@ -669,8 +670,8 @@ if ($debug == 1) {
                             $bloque.remove();
 
                             Swal.fire(
-                                'Bloque Eliminado',
-                                'El bloque ha sido eliminado correctamente.',
+                                'Nota de Crédito Eliminada',
+                                'La Nota de Crédito ha sido eliminada correctamente.',
                                 'success'
                             )
                         }
