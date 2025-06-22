@@ -11,6 +11,7 @@ use App\Globals\Controllers\DocumentosController;
 use App\Globals\Controllers\FacturasNacionalesController;
 use App\Models\Proveedores\Proveedores_Mdl;
 use App\Globals\Controllers\SubirFacturaController;
+use App\Models\DatosCompra\NotasCredito_Mdl;
 
 class CargarFacturasController extends Controller
 {
@@ -208,20 +209,20 @@ class CargarFacturasController extends Controller
 
         $MDL_ordenCompra = new OrdenCompra_Mdl();
         $validOrdenCompra = $MDL_ordenCompra->verificaOrdenCompra($ordenCompra, $noProveedor);
-        $MDL_anticipos = new Anticipos_Mdl();
+        $MDL_notasCredito = new NotasCredito_Mdl();
         $filtros['folioCompra'] = $ordenCompra;
-        $verificaDebeAnticipo = $MDL_anticipos->verificaAnticipoDeOrdenCompra($filtros);
+        $verificaNotaCredito = $MDL_notasCredito->verificaNotaCreditoDeOrdenCompra($filtros);
         if ($validOrdenCompra['success']) {
             $Message = $validOrdenCompra['data']['cantHES'];
 
             // Verifica si debe Anticipos la OC
-            if ($verificaDebeAnticipo['success']) {
-                if ($verificaDebeAnticipo['cantAnticipos'] > 0) {
+            if ($verificaNotaCredito['success']) {
+                if ($verificaNotaCredito['cantAnticipos'] > 0) {
                     echo json_encode([
                         'success' => true,
                         'message' => $Message,
                         'anticipo' => true,
-                        'NC' => $verificaDebeAnticipo['data']
+                        'NC' => $verificaNotaCredito['data']
                     ]);
                 } else {
                     echo json_encode([
@@ -231,7 +232,7 @@ class CargarFacturasController extends Controller
                     ]);
                 }
             } else {
-                $errorMessage = $verificaDebeAnticipo['message'];
+                $errorMessage = $verificaNotaCredito['message'];
                 echo json_encode([
                     'success' => false,
                     'message' => $errorMessage,
