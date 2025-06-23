@@ -697,10 +697,6 @@ if ($debug == 1) {
                 }
                 $bloque.remove();
             }
-
-
-
-
         });
 
         $(document).ready(function() {

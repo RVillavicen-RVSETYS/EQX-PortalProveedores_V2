@@ -16,6 +16,7 @@ use App\Globals\Controllers\SubirFacturaController;
 use App\Globals\Controllers\DocumentosController;
 use App\Globals\Controllers\FacturasNacionalesController;
 use App\Globals\Controllers\CfdisController;
+use App\Models\DatosCompra\NotasCredito_Mdl;
 
 class InicioController extends Controller
 {
@@ -205,21 +206,21 @@ class InicioController extends Controller
 
         $MDL_ordenCompra = new OrdenCompra_Mdl();
         $validOrdenCompra = $MDL_ordenCompra->verificaOrdenCompra($ordenCompra, $noProveedor);
-        $MDL_anticipos = new Anticipos_Mdl();
+        $MDL_notasCredito = new NotasCredito_Mdl();
         $filtros['folioCompra'] = $ordenCompra;
-        $verificaDebeAnticipo = $MDL_anticipos->verificaAnticipoDeOrdenCompra($filtros);
+        $verificaNotaCredito = $MDL_notasCredito->verificaNotaCreditoDeOrdenCompra($filtros);
 
         if ($validOrdenCompra['success']) {
             $Message = $validOrdenCompra['data']['cantHES'];
 
             // Verifica si debe Anticipos la OC
-            if ($verificaDebeAnticipo['success']) {
-                if ($verificaDebeAnticipo['cantAnticipos'] > 0) {
+            if ($verificaNotaCredito['success']) {
+                if ($verificaNotaCredito['cantAnticipos'] > 0) {
                     echo json_encode([
                         'success' => true,
                         'message' => $Message,
                         'anticipo' => true,
-                        'NC' => $verificaDebeAnticipo['data']
+                        'NC' => $verificaNotaCredito['data']
                     ]);
                 } else {
                     echo json_encode([
@@ -229,7 +230,7 @@ class InicioController extends Controller
                     ]);
                 }
             } else {
-                $errorMessage = $verificaDebeAnticipo['message'];
+                $errorMessage = $verificaNotaCredito['message'];
                 echo json_encode([
                     'success' => false,
                     'message' => $errorMessage,
@@ -378,7 +379,7 @@ class InicioController extends Controller
         // Si viene como texto con saltos de línea, normalizamos
         $hes = implode(',', array_filter(array_map('trim', preg_split('/[\r\n]+/', $hes_raw))));
 
-        
+
         // NotasCredito
         $notasCreditoPost = $_POST['notaCredito'] ?? [];           // Array multidimensional: notaCredito[id] = array de notas
         $archivosNotas = $_FILES['notaCreditoArchivo'] ?? [];     // Archivos: notaCreditoArchivo[name|tmp_name][id][pdf|xml]

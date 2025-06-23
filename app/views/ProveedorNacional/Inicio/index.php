@@ -510,8 +510,10 @@ if ($notificaciones['success'] && !empty($notificaciones['data'])) {
                     // Re-inicializa select2 después de insertar el HTML
                     const $select = $(`#notaCredito_${contadorFormNotas}`);
                     arrayNotasCredito.forEach(nc => {
-                        const optionText = `${nc.Descripcion}`;
+                        const esObligatoria = nc.Obligatoria == "1";
+                        const optionText = esObligatoria ? `🔴 ${nc.Descripcion}` : nc.Descripcion;
                         const option = new Option(optionText, nc.IdNotaCredito, false, false);
+                        $(option).attr('data-obligatoria', nc.Obligatoria);
                         $select.append(option);
                     });
 
@@ -565,39 +567,90 @@ if ($notificaciones['success'] && !empty($notificaciones['data'])) {
             // Verifica cuántos bloques hay antes de eliminar
             const totalBloques = $('.formulario-nota').length;
 
-            if (totalBloques <= 1) {
-                // Evitar borrar el último bloque
-                Swal.fire({
-                    type: 'warning',
-                    title: 'Al menos una nota es obligatoria',
-                    text: 'No puedes eliminar todas las notas de crédito.',
-                    confirmButtonText: 'Entendido'
-                });
-                return; // Cancelar la eliminación
-            }
-
             const $bloque = $(this).closest('.formulario-nota');
             const $selectInBlock = $bloque.find('.select2');
 
-            if ($selectInBlock.length > 0) {
-                const currentSelections = $selectInBlock.val();
+            if (totalBloques <= 1) {
 
-                if (currentSelections && currentSelections.length > 0) {
-                    currentSelections.forEach(id => {
-                        selectedNoteCreditIds.delete(id);
+                let contieneObligatorias = false;
 
-                        $('.formulario-nota .select2').not($selectInBlock).each(function() {
-                            $(this).find(`option[value="${id}"]`).prop('disabled', false);
-                        });
+                $selectInBlock.find('option').each(function() {
+                    if ($(this).data('obligatoria') == "1") {
+                        contieneObligatorias = true;
+                        return false; // break
+                    }
+                });
+
+                // Evitar borrar el último bloque
+                if (contieneObligatorias == true) {
+                    Swal.fire({
+                        type: 'warning',
+                        title: 'No puedes eliminar esta Nota de Crédito',
+                        text: 'Contiene al menos una nota de crédito obligatoria.',
+                        confirmButtonText: 'Entendido'
                     });
-
-                    $('.formulario-nota .select2').select2();
+                    return; // No se elimina
                 }
+
+                if (contieneObligatorias == false) {
+
+                    Swal.fire({
+                        title: 'Seguro que quieres eliminar esta Nota de Crédito?',
+                        text: "Esta acción no se puede deshacer.",
+                        type: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#3085d6',
+                        cancelButtonColor: '#d33',
+                        confirmButtonText: 'Sí, eliminar',
+                        cancelButtonText: 'Cancelar'
+                    }).then((result) => {
+                        if (result.value) {
+                            if ($selectInBlock.length > 0) {
+                                const currentSelections = $selectInBlock.val();
+
+                                if (currentSelections && currentSelections.length > 0) {
+                                    currentSelections.forEach(id => {
+                                        selectedNoteCreditIds.delete(id);
+
+                                        $('.formulario-nota .select2').not($selectInBlock).each(function() {
+                                            $(this).find(`option[value="${id}"]`).prop('disabled', false);
+                                        });
+                                    });
+
+                                    $('.formulario-nota .select2').select2();
+                                }
+                            }
+
+                            $bloque.remove();
+
+                            Swal.fire(
+                                'Nota de Crédito Eliminada',
+                                'La Nota de Crédito ha sido eliminada correctamente.',
+                                'success'
+                            )
+                        }
+                    })
+
+                }
+
+            } else {
+                if ($selectInBlock.length > 0) {
+                    const currentSelections = $selectInBlock.val();
+
+                    if (currentSelections && currentSelections.length > 0) {
+                        currentSelections.forEach(id => {
+                            selectedNoteCreditIds.delete(id);
+
+                            $('.formulario-nota .select2').not($selectInBlock).each(function() {
+                                $(this).find(`option[value="${id}"]`).prop('disabled', false);
+                            });
+                        });
+
+                        $('.formulario-nota .select2').select2();
+                    }
+                }
+                $bloque.remove();
             }
-
-            $bloque.remove();
-
-            // Ya no es necesario ocultar los botones porque nunca quedarán 0 bloques
         });
 
 
