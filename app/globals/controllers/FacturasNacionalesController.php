@@ -5,6 +5,7 @@ namespace App\Globals\Controllers;
 use Core\Controller;
 use App\Models\Compras\Compras_Mdl;
 use App\Models\DatosCompra\HojaEntrada_Mdl;
+use App\Models\DatosCompra\NotasCredito_Mdl;
 use App\Models\Configuraciones\RecepcionCFDIs_Mdl;
 use App\Models\Empresas\Empresas_Mdl;
 use App\Models\Proveedores\Proveedores_Mdl;
@@ -35,6 +36,7 @@ class FacturasNacionalesController extends Controller
             'message' => '',
             'data' => []
         ];
+        $debug = 1;
         //$noProveedor = ($isAdmin == 1 && isset($_POST['admin_noProveedor'])) ? $_POST['admin_noProveedor'] : $_SESSION['EQXnoProveedor'];
         if ($this->debug == 1) {
             echo '<br>Valores para la carga:';
@@ -137,12 +139,24 @@ class FacturasNacionalesController extends Controller
                 return ['success' => false, 'message' => $exepcionesProv['message']];
             }
 
+            //Para SilmeAgro se configura que se sumen los porcentajes de las notas de credito.
+            $MDL_notasCredito = new NotasCredito_Mdl();
+            $filtroNotas = [
+                'folioCompra' => $OC,
+            ];
+            $notasCredito = $MDL_notasCredito->verificaNotaCreditoDeOrdenCompra($filtroNotas);
+            if ($this->debug == 1) {
+                echo '<br><br>Resultado de verificaNotaCreditoDeOrdenCompra: ' . PHP_EOL;
+                var_dump($notasCredito);
+            }
+
             // 8. Generar arreglo de Configuración para Validaciones
             $configParaValidaciones = array();
             $configParaValidaciones['datosRecepciones'] = $dataMontosHES['data'];
             $configParaValidaciones['configCFDI'] = $configCFDI['data'];
             $configParaValidaciones['diferenciaMontos'] = $configMontos['data'];
             $configParaValidaciones['excepcionesProveedor'] = $exepcionesProv['data'];
+            $configParaValidaciones['notasCreditos'] = $notasCredito['data'] ?? [];
             if ($this->debug == 1) {
                 echo '<br><br>Resultado de configuraciones para la Recepción del CFDI: ' . PHP_EOL;
                 var_dump($configParaValidaciones);

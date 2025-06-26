@@ -300,4 +300,5 @@ class Pagos_Mdl
             return ['success' => false, 'message' => 'Problemas al listar Facturas por UUID, Notifica a tu administrador.'];
         }
     }
+    
 }
