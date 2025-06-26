@@ -330,6 +330,37 @@ class ReglasAplicadasv40
             $subtotalXML = $subtotalXML - $descuentoXML;
         }
 
+        // Preparación de Subtotal para SilmeAgro donde al subtotal le restamos los porcentaje promocionales aplicables para comparar con el valor de la OC
+        if (isset($configParaValidaciones['notasCreditos']) && is_array($configParaValidaciones['notasCreditos'])) {
+            $sumaMontoDescuentos = 0;
+            foreach ($configParaValidaciones['notasCreditos'] as $notaCredito) {
+                if ($notaCredito['idPoliticaComercial'] > 0) {
+                    if ($this->debug == 1) {
+                        echo "<br>Aplicando nota de crédito: " . $notaCredito['IdNotaCredito']. " por ". $notaCredito['Descripcion'];
+                    }
+                    if ($notaCredito['TipoDescuento'] == 'AMOUNT') {
+                        // Aplicar descuento por monto
+                        $montoDescuento = $notaCredito['ValorDescuento'] ?? 0;
+                        $subtotalXML -= $montoDescuento;
+                        $debugMessages[] = "<br>* OK - $ Descuento aplicado $ $montoDescuento por nota de crédito: <b>$ $montoDescuento</b> al subtotal <b>$subtotalXML</b>.";
+                        $sumaMontoDescuentos += $montoDescuento;
+                    
+                    } elseif ($notaCredito['TipoDescuento'] == 'PERCENT') {
+                        // Aplicar descuento porcentual
+                        $porcentajeDescuento = $notaCredito['ValorDescuento'] ?? 0;
+                        $montoDescuento = ($subtotalXML * ($porcentajeDescuento / 100));
+                        $subtotalXML -= $montoDescuento;
+                        if ($this->debug == 1) {
+                            echo "<br>Aplicando descuento $porcentajeDescuento %: $" . $montoDescuento;
+                        }
+                        $debugMessages[] = "<br>* OK - % Descuento aplicado $porcentajeDescuento % por nota de crédito: <b>$ $montoDescuento</b> al subtotal <b>$subtotalXML</b>.";
+                        $sumaMontoDescuentos += $montoDescuento;
+                    }
+                }
+            }
+        }
+        $debugMessages[] = "<br>* Subtotal XML después de aplicar descuentos: <b>$subtotalXML</b>.";
+
         $subtotalConfig = $configParaValidaciones['datosRecepciones']['Subtotal'] ?? 0;
         $bloqDiferencia = $configParaValidaciones['excepcionesProveedor']['BloqDiferenciaMonto'] ?? false;
         $tipoRegla = $configParaValidaciones['diferenciaMontos']['tipoRegla'] ?? 1;
@@ -364,7 +395,9 @@ class ReglasAplicadasv40
                 $maximo = $maximoPorcentaje;
             }
 
-            if ($subtotalXML < $minimo || $subtotalXML > $maximo) {
+
+
+            if ($subtotalXML <= $minimo || $subtotalXML >= $maximo) {
 
                 $response["isValid"] = false;
                 $errorMessages[] = "* El subtotal <b>$ $subtXML</b> es incorrecto.<br>";

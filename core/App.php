@@ -70,7 +70,7 @@ class App
                 echo "Controlador no encontrado: $this->controller <br>Redirigiendo a 404.<br>";
                 exit();
             }
-            $this->logAndRedirect404("Controlador como archivo no encontrado", $url[0] ?? 'N/A');
+            $this->logAndRedirect404("Controlador como archivo no encontrado para la ruta '$url': ", $url[0] ?? 'N/A');
         }
 
         // Incluir y crear una instancia del controlador
