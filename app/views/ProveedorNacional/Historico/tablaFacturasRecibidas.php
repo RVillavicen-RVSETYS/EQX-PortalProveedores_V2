@@ -1,5 +1,5 @@
 <?php
-$debug = 1;
+$debug = 0;
 
 if ($debug == 1) {
     echo 'Contenido de areaData:' . PHP_EOL;

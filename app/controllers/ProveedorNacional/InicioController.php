@@ -12,7 +12,7 @@ use App\Models\DatosCompra\Anticipos_Mdl;
 use App\Models\DatosCompra\HojaEntrada_Mdl;
 use App\Models\DatosCompra\Configuraciones_Mdl;
 use App\Models\Proveedores\Proveedores_Mdl;
-
+use App\Globals\Controllers\SubirFacturaController;
 use App\Globals\Controllers\DocumentosController;
 use App\Globals\Controllers\FacturasNacionalesController;
 use App\Globals\Controllers\CfdisController;
@@ -157,7 +157,7 @@ class InicioController extends Controller
         } else {
             echo '
             <div class="alert alert-warning alert-rounded"> 
-                <i class="ti-user"></i> '.$listaCompras['message'].'.
+                <i class="ti-user"></i> ' . $listaCompras['message'] . '.
                 <button type="button" class="close" data-dismiss="alert" aria-label="Close"> <span aria-hidden="true">×</span> </button>
             </div>';
         }
@@ -206,7 +206,8 @@ class InicioController extends Controller
         $MDL_ordenCompra = new OrdenCompra_Mdl();
         $validOrdenCompra = $MDL_ordenCompra->verificaOrdenCompra($ordenCompra, $noProveedor);
         $MDL_anticipos = new Anticipos_Mdl();
-        $verificaDebeAnticipo = $MDL_anticipos->verificaAnticipoDeOrdenCompra($ordenCompra);
+        $filtros['folioCompra'] = $ordenCompra;
+        $verificaDebeAnticipo = $MDL_anticipos->verificaAnticipoDeOrdenCompra($filtros);
 
         if ($validOrdenCompra['success']) {
             $Message = $validOrdenCompra['data']['cantHES'];
@@ -214,35 +215,11 @@ class InicioController extends Controller
             // Verifica si debe Anticipos la OC
             if ($verificaDebeAnticipo['success']) {
                 if ($verificaDebeAnticipo['cantAnticipos'] > 0) {
-                    $solicitaNotaCredito = '
-                        <div class="form-group">
-                            <label>Nota de Credito</label>
-                            <div class="input-group">
-                                <div class="input-group-prepend">
-                                    <span class="input-group-text"><i class="far fa-file-pdf"></i> PDF</span>
-                                </div>
-                                <div class="custom-file">
-                                    <input type="file" class="custom-file-input" id="notaCredPDF" name="notaCredPDF" required>
-                                    <label class="custom-file-label" for="notaCredPDF">Elegir PDF de Nota de Credito..</label>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <div class="input-group">
-                                <div class="input-group-prepend">
-                                    <span class="input-group-text"><i class="far fa-file-code"></i> XML</span>
-                                </div>
-                                <div class="custom-file">
-                                    <input type="file" class="custom-file-input" id="notaCredXML" name="notaCredXML" required>
-                                    <label class="custom-file-label" for="notaCredXML">Elegir XML de Nota de Credito..</label>
-                                </div>
-                            </div>
-                        </div>';
                     echo json_encode([
                         'success' => true,
                         'message' => $Message,
                         'anticipo' => true,
-                        'solicitaNotaCredito' => $solicitaNotaCredito,
+                        'NC' => $verificaDebeAnticipo['data']
                     ]);
                 } else {
                     echo json_encode([
@@ -266,6 +243,29 @@ class InicioController extends Controller
                 'message' => $errorMessage
             ]);
         }
+    }
+
+    public function cargaFormNotaCredito()
+    {
+        $data = []; // Aquí puedes pasar datos a la vista si es necesario
+        //$noProveedor = $_SESSION['EQXnoProveedor'];
+        //$acuse = (empty($_POST['acuse'])) ? '' : $_POST['acuse'];
+
+        //$MDL_compras = new Compras_Mdl();
+        //$dataCompra = $MDL_compras->dataCompraPorAcuse($noProveedor, $acuse);
+
+        //$data['noProveedor'] = $noProveedor;
+        //$data['acuse'] =  $acuse;
+        //$data['dataCompra'] =  $dataCompra;
+
+        if ($this->debug == 1) {
+            echo 'Variables enviadas:' . PHP_EOL;
+            var_dump($data);
+            echo '<br><br>';
+        }
+
+        // Cargar la vista correspondiente
+        $this->view('VistasCompartidas/NotasCredito_Form', $data);
     }
 
     public function validaHojaEntrada()
@@ -361,7 +361,6 @@ class InicioController extends Controller
     public function registraNuevaFactura()
     {
         $data = []; // Aquí puedes pasar datos a la vista si es necesario
-
         if ($this->debug == 1) {
             echo '<br>----SESSION<br>';
             print_r($_SESSION);
@@ -371,173 +370,103 @@ class InicioController extends Controller
             print_r($_FILES);
         }
 
-        $noProveedor = $_SESSION['EQXnoProveedor'] ?? '';
         $ordenCompra = $_POST['ordenCompra'] ?? '';
-        $listaHES = $_POST['listaHES'] ?? '';
-        $doctos = []; //Variable para paso de documentos Validados
+        $noProveedor = $_SESSION['EQXnoProveedor'] ?? '';
 
-        if ($ordenCompra == '' || $listaHES == '') {
-            if ($this->debug == 1) {
-                echo "<br>Faltan datos:<br> * NoProv: $noProveedor<br> * OC: $ordenCompra<br> * Lista HES: $listaHES<br>";
-            }
-        }
+        // HES separado por comas
+        $hes_raw = $_POST['listaHES'] ?? '';
+        // Si viene como texto con saltos de línea, normalizamos
+        $hes = implode(',', array_filter(array_map('trim', preg_split('/[\r\n]+/', $hes_raw))));
 
-        //1.- Validamos la Orden de Compra
-        $MDL_ordenCompra = new OrdenCompra_Mdl();
-        $validOrdenCompra = $MDL_ordenCompra->verificaOrdenCompra($ordenCompra, $noProveedor);
-        if ($this->debug == 1) {
-            echo '<br><br>Resultado de verificaOrdenCompra: ' . PHP_EOL;
-            var_dump($validOrdenCompra);
-        }
+        
+        // NotasCredito
+        $notasCreditoPost = $_POST['notaCredito'] ?? [];           // Array multidimensional: notaCredito[id] = array de notas
+        $archivosNotas = $_FILES['notaCreditoArchivo'] ?? [];     // Archivos: notaCreditoArchivo[name|tmp_name][id][pdf|xml]
 
-        if ($validOrdenCompra['success']) {
-            $Message = $validOrdenCompra['data']['cantHES'];
+        // Construcción del arreglo NotasCredito
+        $notasCredito = [];
 
-            //2.- Verificamos si esta Orden de Compra debe algun anticipo para procesar la nota de credito
-            $MDL_anticipos = new Anticipos_Mdl();
-            $verificaDebeAnticipo = $MDL_anticipos->verificaAnticipoDeOrdenCompra($ordenCompra);
-            if ($this->debug == 1) {
-                echo '<br><br>Resultado de verificaAnticipoDeOrdenCompra: ' . PHP_EOL;
-                var_dump($verificaDebeAnticipo);
-            }
-            if ($verificaDebeAnticipo['success']) {
+        foreach ($notasCreditoPost as $id => $notasArray) {
+            // Unir notas en string separado por comas
+            $identNotasCred = implode(',', $notasArray);
 
-                //3.- Verificamos que las HES sean Correctas
-                $MDL_hojaEntrada = new HojaEntrada_Mdl();
-                $validHES = $MDL_hojaEntrada->verificaHojaEntrada($ordenCompra, $listaHES);
-                if ($this->debug == 1) {
-                    echo '<br><br>Resultado de verificaHojaEntrada: ' . PHP_EOL;
-                    var_dump($validHES);
-                }
-                if ($validHES['success']) {
-                    $Ctrl_Documentos = new DocumentosController();
+            // Obtener archivos PDF y XML para este bloque
+            $pdfArray = [];
+            $xmlArray = [];
 
-                    //4.- Verificamos si requiere nota de credito
-                    $reqNotaCredito = ($verificaDebeAnticipo['cantAnticipos'] == 0) ? 0 : 1;
-                    if ($reqNotaCredito > 0) {
-                        //4.1.- Revisamos y cargamos OBLIGATORIO la Nota de Credito
-                        if ($this->debug == 1) {
-                            echo '<br><br>Si requiere Nota de Credito' . PHP_EOL;
-                        }
-
-                        //4.1.1- Revisamos el PDF la Nota de Credito
-                        $notaCredPDF = $Ctrl_Documentos->verificadorDeDocumentoARecibir($_FILES['notaCredPDF'], 'pdf');
-                        if ($this->debug == 1) {
-                            echo '<br><br>Resultado de verificadorDeDocumentoARecibir NotaCreditoPDF: ' . PHP_EOL;
-                            var_dump($notaCredPDF);
-                        }
-                        if ($notaCredPDF['success']) {
-                            $doctos['NotaCreditoPDF'] = $notaCredPDF['data'];
-
-                            //4.1.2- Revisamos el XML la Nota de Credito
-                            $notaCredXML = $Ctrl_Documentos->verificadorDeDocumentoARecibir($_FILES['notaCredXML'], 'xml');
-                            if ($this->debug == 1) {
-                                echo '<br><br>Resultado de verificadorDeDocumentoARecibir NotaCreditoXML: ' . PHP_EOL;
-                                var_dump($notaCredXML);
-                            }
-                            if ($notaCredXML['success']) {
-                                $doctos['NotaCreditoXML'] = $notaCredXML['data'];
-                            }
-                        } else {
-                            echo 'Horror: El PDF de la Nota de Credito tiene problemas: ' . $notaCredPDF['message'];
-                        }
-
-                        echo 'Deberiamos comenzar a Exigir recibir una nota de credito.';
-                        echo 'Validar la relación de la factura con la factura del Anticipo.';
-                        echo 'Validar los Documentos y cargarlos a la variable $Docto.';
-                    } else {
-                        //4.2.- Aqui ya estamos seguros de que no requiere Nota de Credito
-                        if ($this->debug == 1) {
-                            echo '<br><br><b1>No requiere Nota de Credito</b1>' . PHP_EOL;
-                        }
-                    }
-
-                    //5.- Verificamos el PDF de la Factura antes de subirlo
-                    $factPDF = $Ctrl_Documentos->verificadorDeDocumentoARecibir($_FILES['facturaPDF'], 'pdf');
-                    if ($this->debug == 1) {
-                        echo '<br><br>Resultado de verificadorDeDocumentoARecibir facturaPDF: ' . PHP_EOL;
-                        var_dump($factPDF);
-                    }
-                    if ($factPDF['success']) {
-                        $doctos['FacturaPDF'] = $factPDF['data'];
-
-                        //5.- Verificamos el XML de la Factura antes de subirlo
-                        $factXML = $Ctrl_Documentos->verificadorDeDocumentoARecibir($_FILES['facturaXML'], 'xml');
-                        if ($this->debug == 1) {
-                            echo '<br><br>Resultado de verificadorDeDocumentoARecibir facturaXML: ' . PHP_EOL;
-                            var_dump($factXML);
-                        }
-                        if ($factXML['success']) {
-                            $doctos['FacturaXML'] = $factXML['data'];
-
-                            //6.- Aplicar Reglas de Negocio, Fiscales y Carga de CFDI desde el Controlador Global para Proveedores Nacionales
-                            $Ctrl_ProcesaFacturas = new FacturasNacionalesController();
-                            $facturaProcesada = $Ctrl_ProcesaFacturas->verificaNuevaFacturaIngresos($reqNotaCredito, $ordenCompra, $validHES['hesOK'], $doctos);
-                            if ($this->debug == 1) {
-                                echo '<br><br>Resultado de FacturasNacionalesController: ' . PHP_EOL;
-                                var_dump($facturaProcesada);
-                            }
-
-                            if ($facturaProcesada['success']) {
-                                //7.- Registrar Factura de Ingreso
-                                $facturaRegistrada = $Ctrl_ProcesaFacturas->registraNuevaFacturaIngresos($facturaProcesada['data']);
-                                if ($this->debug == 1) {
-                                    echo '<br><br>Registro de Factura: ' . PHP_EOL;
-                                    var_dump($facturaRegistrada);
-                                }
-
-                                if ($facturaRegistrada['success']) {
-                                    if ($this->debug == 1) {
-                                        echo '<br><h1>Factura Registrada correctamente</h1>Mensaje:' . $facturaRegistrada['message'] . '<br>Debug:' . $facturaRegistrada['debug'] . '<br>';
-                                    } else {
-                                        echo json_encode([
-                                            'success' => true,
-                                            'message' => $facturaRegistrada['message'],
-                                            'debug' => $facturaRegistrada['debug']
-                                        ]);
-                                    }
-                                } else {
-                                    echo json_encode([
-                                        'success' => false,
-                                        'message' => 'Problemas al Registrar la Factura: ' . $facturaRegistrada['message'],
-                                        'debug' => $facturaRegistrada['debug']
-                                    ]);
-                                }
-                            } else {
-                                echo json_encode([
-                                    'success' => false,
-                                    'message' => 'Problemas al Validar el XML: ' . $facturaProcesada['message']
-                                ]);
-                            }
-                        } else {
-                            echo json_encode([
-                                'success' => false,
-                                'message' => 'El XML de la Factura tiene problemas: ' . $factXML['message']
-                            ]);
-                        }
-                    } else {
-                        echo json_encode([
-                            'success' => false,
-                            'message' => 'El PDF de la Factura tiene problemas: ' . $factPDF['message']
-                        ]);
-                    }
-                } else {
-                    echo json_encode([
-                        'success' => false,
-                        'message' => 'Una o mas HES no son validas: ' . $validHES['message']
-                    ]);
+            if (isset($archivosNotas['name'][$id]['pdf']) && is_array($archivosNotas['name'][$id]['pdf'])) {
+                // Si varios archivos PDF (por ejemplo)
+                foreach ($archivosNotas['name'][$id]['pdf'] as $idx => $namePdf) {
+                    $pdfArray[] = [
+                        'name' => $namePdf,
+                        'tmp_name' => $archivosNotas['tmp_name'][$id]['pdf'][$idx] ?? null,
+                        // Otros datos como tipo, error, tamaño si quieres
+                    ];
                 }
             } else {
-                echo json_encode([
-                    'success' => false,
-                    'message' => 'No pudimos verificar si debe Anticipo para exigir la Nota de Credito: ' . $verificaDebeAnticipo['message']
-                ]);
+                // Un solo archivo PDF
+                $pdfArray[] = [
+                    'name' => $archivosNotas['name'][$id]['pdf'] ?? '',
+                    'tmp_name' => $archivosNotas['tmp_name'][$id]['pdf'] ?? null,
+                ];
             }
-        } else {
-            echo json_encode([
-                'success' => false,
-                'message' => 'La Orden de Compra no es Valida: ' . $validOrdenCompra['message']
-            ]);
+
+            if (isset($archivosNotas['name'][$id]['xml']) && is_array($archivosNotas['name'][$id]['xml'])) {
+                foreach ($archivosNotas['name'][$id]['xml'] as $idx => $nameXml) {
+                    $xmlArray[] = [
+                        'name' => $nameXml,
+                        'tmp_name' => $archivosNotas['tmp_name'][$id]['xml'][$idx] ?? null,
+                    ];
+                }
+            } else {
+                $xmlArray[] = [
+                    'name' => $archivosNotas['name'][$id]['xml'] ?? '',
+                    'tmp_name' => $archivosNotas['tmp_name'][$id]['xml'] ?? null,
+                ];
+            }
+
+            // Aquí asignas con índice explícito $id (puede ser 0,1,2...)
+            $notasCredito[$id] = [
+                'identNotasCred' => $identNotasCred,
+                'documentos' => [
+                    'PDF' => $pdfArray,
+                    'XML' => $xmlArray,
+                ],
+            ];
         }
+
+        // Archivos Factura
+        $facturaPDF = [];
+        $facturaXML = [];
+
+        if (isset($_FILES['facturaPDF'])) {
+            $facturaPDF[] = [
+                'name' => $_FILES['facturaPDF']['name'],
+                'tmp_name' => $_FILES['facturaPDF']['tmp_name'],
+            ];
+        }
+
+        if (isset($_FILES['facturaXML'])) {
+            $facturaXML[] = [
+                'name' => $_FILES['facturaXML']['name'],
+                'tmp_name' => $_FILES['facturaXML']['tmp_name'],
+            ];
+        }
+
+        // Construcción arreglo final
+        $valores = [
+            'ordenCompra' => $ordenCompra,
+            'noProveedor' => $noProveedor,
+            'listaHES' => $hes,
+            'NotasCredito' => $notasCredito,
+            'Factura' => [
+                'FactPDF' => $facturaPDF,
+                'FactXML' => $facturaXML,
+            ],
+            'isAdmin' => false,
+        ];
+
+        $Ctrl_SubirFacturas = new SubirFacturaController();
+        $cargaFactura = $Ctrl_SubirFacturas->cargarFacturas($valores);
     }
 }

@@ -169,7 +169,7 @@ if ($debug == 1) {
                                                     <span><i class="fas fa-info-circle font-12"></i></span>
                                                     <div class="tooltip-text">
                                                         <strong>Ignorar Descuento</strong>
-                                                        <p></p>
+                                                        <p>Al estar en esta lista los montos de las facturas se comparan sin incluir el descuento.</p>
                                                     </div>
                                                 </div>
                                             </span>
@@ -184,7 +184,7 @@ if ($debug == 1) {
                                                     <span><i class="fas fa-info-circle font-12"></i></span>
                                                     <div class="tooltip-text">
                                                         <strong>Exento Año Fiscal</strong>
-                                                        <p></p>
+                                                        <p>Esta opción habilita la carga de facturas emitidas en años fiscales anteriores al actual.</p>
                                                     </div>
                                                 </div>
                                             </span>
@@ -199,7 +199,7 @@ if ($debug == 1) {
                                                     <span><i class="fas fa-info-circle font-12"></i></span>
                                                     <div class="tooltip-text">
                                                         <strong>Exento Tiempo Emisión</strong>
-                                                        <p></p>
+                                                        <p>Esta opción habilita la carga de facturas emitidas con una antigüedad mayor a seis meses.</p>
                                                     </div>
                                                 </div>
                                             </span>
@@ -214,7 +214,7 @@ if ($debug == 1) {
                                                     <span><i class="fas fa-info-circle font-12"></i></span>
                                                     <div class="tooltip-text">
                                                         <strong>Uso CFDI Distinto</strong>
-                                                        <p></p>
+                                                        <p>Esta opción habilita la carga de facturas con un uso de CFDI diferente al estándar.</p>
                                                     </div>
                                                 </div>
                                             </span>
@@ -229,7 +229,7 @@ if ($debug == 1) {
                                                     <span><i class="fas fa-info-circle font-12"></i></span>
                                                     <div class="tooltip-text">
                                                         <strong>Bloquear Diferencias</strong>
-                                                        <p></p>
+                                                        <p>No se permiten diferencias de montos entre la factura y la orden de compra para estos proveedores.</p>
                                                     </div>
                                                 </div>
                                             </span>

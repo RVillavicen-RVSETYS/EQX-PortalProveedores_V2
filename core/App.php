@@ -70,11 +70,11 @@ class App
                 echo "Controlador no encontrado: $this->controller <br>Redirigiendo a 404.<br>";
                 exit();
             }
-            $this->logAndRedirect404("Controlador como archivo no encontrado", $url[0] ?? 'N/A');
+            $this->logAndRedirect404("Controlador como archivo no encontrado para la ruta '$url': ", $url[0] ?? 'N/A');
         }
 
         // Incluir y crear una instancia del controlador
-        require_once "../app/Controllers/" . $this->controller . ".php";
+        require_once "../app/Controllers/" . str_replace('\\', '/', $this->controller) . ".php";
         $controllerClass = "App\\Controllers\\" . str_replace('/', '\\', $this->controller);
         $this->controller = new $controllerClass;
 

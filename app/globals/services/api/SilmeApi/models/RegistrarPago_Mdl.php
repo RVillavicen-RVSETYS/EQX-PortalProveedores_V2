@@ -35,13 +35,13 @@ class RegistrarPago_Mdl
         }
 
         try {
-            $sql = "INSERT INTO pagos_compras (idPago, idDetPago, OC, HES, montoPagado, saldoInsoluto, moneda, formaPago, fechaPago) VALUES ";
+            $sql = "INSERT INTO pagos_compras (idPago, idDetPago, OC, HES, montoPagado, saldoInsoluto, moneda, formaPago, fechaPago, idAcuse) VALUES ";
 
             $values = [];
             $index = 0;
 
             foreach ($pagos as $pago) {
-                $sql .= "(?, ?, ?, ?, ?, ?, ?, ?, ?),";
+                $sql .= "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?),";
 
                 $values[] = $pago['IdPago'];
                 $values[] = $pago['IdDetPago'];
@@ -52,6 +52,7 @@ class RegistrarPago_Mdl
                 $values[] = $pago['Moneda'];
                 $values[] = $pago['FormaPago'];
                 $values[] = $pago['FechaPago'];
+                $values[] = $pago['IdAcuse'];
 
                 if (self::$debug) {
                     echo "Registro $index: " . json_encode($pago) . "<br>";
