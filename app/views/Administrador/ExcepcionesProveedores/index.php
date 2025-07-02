@@ -104,6 +104,21 @@ if ($debug == 1) {
             opacity: 1;
             transform: translateX(-50%) translateY(-5px);
         }
+
+        .select2-container--default .select2-selection--multiple {
+            min-height: 35px;
+            max-height: none;
+            height: auto;
+            overflow-y: auto;
+            padding-bottom: 5px;
+        }
+
+        .select2-selection__rendered {
+            display: flex;
+            flex-wrap: wrap;
+            max-height: none;
+            overflow-y: auto;
+        }
     </style>
 
 </head>
@@ -236,6 +251,21 @@ if ($debug == 1) {
                                         </a>
                                     </li>
 
+                                    <li class="nav-item">
+                                        <a class="nav-link" data-toggle="tab" href="#bloqueoDeCfdis" role="tab" onclick="cargarBloqueoDeCFDIs();">
+                                            <span class="hidden-xs-down">Bloquear Uso De CFDis</span>
+                                            <span class="hidden-sm-up">
+                                                <div class="tooltip-container">
+                                                    <span><i class="fas fa-info-circle font-12"></i></span>
+                                                    <div class="tooltip-text">
+                                                        <strong>Bloquear Uso De CFDis</strong>
+                                                        <p>Configurar Usos de CFDI con los que los proveedores pueden cargar facturas.</p>
+                                                    </div>
+                                                </div>
+                                            </span>
+                                        </a>
+                                    </li>
+
                                 </ul>
                                 <!-- Tab panes -->
                                 <div class="tab-content">
@@ -244,6 +274,7 @@ if ($debug == 1) {
                                     <div class="tab-pane p-20" id="fechaEm" role="tabpanel"></div>
                                     <div class="tab-pane p-20" id="usoCFDI" role="tabpanel"></div>
                                     <div class="tab-pane p-20" id="bloqueoDif" role="tabpanel"></div>
+                                    <div class="tab-pane p-20" id="bloqueoDeCfdis" role="tabpanel"></div>
                                 </div>
                             </div>
                         </div>

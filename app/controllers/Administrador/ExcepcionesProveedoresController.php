@@ -5,6 +5,7 @@ namespace App\Controllers\Administrador;
 use Core\Controller;
 use App\Models\Menu_Mdl;
 use App\Models\Configuraciones\ExcepcionesProveedores_Mdl;
+use App\Models\Proveedores\Proveedores_Mdl;
 
 class ExcepcionesProveedoresController extends Controller
 {
@@ -332,6 +333,62 @@ class ExcepcionesProveedoresController extends Controller
         }
     }
 
+    public function cfdisPorProveedor()
+    {
+        $data = []; // Aquí puedes pasar datos a la vista si es necesario
+        $tabla = "conf_provCfdisPermitidos";
+        // Obtener el nombre del namespace para identificar el área
+        $namespaceParts = explode('\\', __NAMESPACE__);
+        $areaLink = end($namespaceParts); // Obtiene el ultimo parametro del NameSpace
+
+        $menuModel = new Menu_Mdl();
+        $resultIdArea = $menuModel->obtenerIdAreaPorLink($areaLink);
+
+        $excepcionesModel = new ExcepcionesProveedores_Mdl();
+        $resultExcepciones = $excepcionesModel->obtenerCfdisPermitidos();
+        $cfdisPermitidos = $excepcionesModel->cfdisPermitidosGeneral();
+
+        $proveedoresModel = new Proveedores_Mdl();
+        $obetenerProveedores = $proveedoresModel->obtenerProveedores();
+
+        if ($resultIdArea['success']) {
+            $idArea = $resultIdArea['data'];
+        } else {
+            $timestamp = date("Y-m-d H:i:s");
+            error_log("[$timestamp] app\controllers\Administrador\ExcepcionesProveedoresController ->Error al buscar Id del Area (nombre: $areaLink): " . PHP_EOL, 3, LOG_FILE);
+            echo 'No pudimos traer el id del Area:' . $resultIdArea['message'];
+            exit(0);
+        }
+
+        $menuData = $menuModel->obtenerEstructuraMenu($_SESSION['EQXidNivel'], $idArea);
+        $areaData = $menuModel->listarAreasDisponibles($_SESSION['EQXidNivel']);
+
+        if ($menuData['success']) {
+            if ($areaData['success']) {
+                // Enviar datos a la Vista
+                $data['menuData'] =  $menuData;
+                $data['areaData'] =  $areaData;
+                $data['areaLink'] =  $areaLink;
+                $data['cfdisPermitidosProv'] =  $resultExcepciones;
+                $data['listaProveedores'] = $obetenerProveedores;
+                $data['cfdisPermitidosGeneral'] = $cfdisPermitidos;
+
+                // Cargar la vista correspondiente
+                $this->view('Administrador/ExcepcionesProveedores/cfdisProveedor', $data);
+            } else {
+                $timestamp = date("Y-m-d H:i:s");
+                error_log("[$timestamp] app\controllers\Administrador\ExcepcionesProveedoresController ->Error al listar las Areas: " . PHP_EOL, 3, LOG_FILE);
+                echo 'Problemas con las Areas de Acceso:' . $resultIdArea['message'];
+                exit(0);
+            }
+        } else {
+            $timestamp = date("Y-m-d H:i:s");
+            error_log("[$timestamp] app\controllers\Administrador\ExcepcionesProveedoresController ->Error al buscar Id del Area (nombre: $areaLink): " . PHP_EOL, 3, LOG_FILE);
+            echo 'No pudimos traer el detallado del Menu:' . $resultIdArea['message'];
+            exit(0);
+        }
+    }
+
     public function cambiarEstatus()
     {
         $data = []; // Aquí puedes pasar datos a la vista si es necesario
@@ -382,6 +439,36 @@ class ExcepcionesProveedoresController extends Controller
 
         $excepcionesModel = new ExcepcionesProveedores_Mdl();
         $resultExcepciones = $excepcionesModel->eliminarReg($identificador);
+
+        if ($resultExcepciones['success']) {
+            $Message = $resultExcepciones['data'];
+            echo json_encode([
+                'success' => true,
+                'message' => $Message
+            ]);
+        } else {
+            $errorMessage = $resultExcepciones['message'];
+            echo json_encode([
+                'success' => false,
+                'message' => $errorMessage
+            ]);
+        }
+    }
+
+    public function eliminarCfdiPermitido()
+    {
+        $data = []; // Aquí puedes pasar datos a la vista si es necesario
+
+        $identificador = $_POST['ident'] ?? '';
+
+        if ($this->debug == 1) {
+            echo "<br>Contenido de data:<br>";
+            var_dump($data);
+            echo "<br>Contenido de Identificador: $identificador <br>";
+        }
+
+        $excepcionesModel = new ExcepcionesProveedores_Mdl();
+        $resultExcepciones = $excepcionesModel->eliminarCfdiPermitido($identificador);
 
         if ($resultExcepciones['success']) {
             $Message = $resultExcepciones['data'];
@@ -535,6 +622,38 @@ class ExcepcionesProveedoresController extends Controller
 
         $excepcionesModel = new ExcepcionesProveedores_Mdl();
         $resultExcepciones = $excepcionesModel->registraProveedorBD($idProveedor, $motivo);
+
+        if ($resultExcepciones['success']) {
+            $Message = $resultExcepciones['data'];
+            echo json_encode([
+                'success' => true,
+                'message' => $Message
+            ]);
+        } else {
+            $errorMessage = $resultExcepciones['message'];
+            echo json_encode([
+                'success' => false,
+                'message' => $errorMessage
+            ]);
+        }
+    }
+
+    public function agregarProveedorBUC()
+    {
+        $data = []; // Aquí puedes pasar datos a la vista si es necesario
+        $idProveedor = $_POST['idProveedorBUC'] ?? '';
+        $listaCfdis = $_POST['idUsoCfdiPermitido'] ?? '';
+
+        if ($this->debug == 1) {
+            echo "<br>Contenido de data:<br>";
+            var_dump($data);
+            echo "<br>Contenido de IdProveedor: $idProveedor <br>";
+            echo "<br>Contenido de listaCfdis: <br>";
+            var_dump($listaCfdis);
+        }
+
+        $excepcionesModel = new ExcepcionesProveedores_Mdl();
+        $resultExcepciones = $excepcionesModel->registraCfdisPorProveedor($idProveedor, $listaCfdis);
 
         if ($resultExcepciones['success']) {
             $Message = $resultExcepciones['data'];

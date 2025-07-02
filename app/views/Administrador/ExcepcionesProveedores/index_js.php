@@ -92,6 +92,23 @@
         });
     }
 
+    function cargarBloqueoDeCFDIs() {
+        $.ajax({
+            type: 'POST',
+            url: 'ExcepcionesProveedores/cfdisPorProveedor',
+            data: {},
+            success: function(response) {
+                $('#bloqueoDeCfdis').html(response);
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+                $('#bloqueoDeCfdis').html('Error en el inicio de sesión.Consulta a tu administrador');
+            },
+            beforeSend: function() {
+                $('#bloqueoDeCfdis').html('<div class="loading text-center"><img src="../assets/images/loading.gif" alt="loading" /><br/>Un momento, por favor...</div>');
+            }
+        });
+    }
+
     function cambiarEstatus(estatus, ident, tabla, idProveedor) {
 
         $.ajax({
@@ -154,6 +171,27 @@
             },
             beforeSend: function() {
                 bloqueoBtn('bloquear-btnEstatus5' + ident, 1);
+            }
+        });
+    }
+
+    function eliminarCfdiPermitido(ident) {
+        $.ajax({
+            url: 'ExcepcionesProveedores/eliminarCfdiPermitido',
+            type: 'POST',
+            data: {
+                ident: ident,
+            },
+            success: function(response) {
+                const respuesta = JSON.parse(response);
+                if (respuesta.success) {
+                    notificaSuc(respuesta.message);
+                    cargarBloqueoDeCFDIs();
+                } else {
+                    notificaBad(respuesta.message);
+                }
+            },
+            beforeSend: function() {
             }
         });
     }

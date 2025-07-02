@@ -282,6 +282,111 @@ class ExcepcionesProveedores_Mdl
         }
     }
 
+    public function obtenerCfdisPermitidos()
+    {
+        if (self::$debug) {
+            echo "Ya entro a la función para obtener los cfdis permitidos por proveedor.<br>";
+        }
+        try {
+
+            $sql = "SELECT
+                        pcp.id AS 'IdBloq',
+                        prov.id AS 'IdProveedor',
+                        prov.nombre AS 'Proveedor',
+                        prov.razonSocial AS 'RazonSocial',
+                        CONCAT( scf.id, ' - ', scf.descripcion ) AS 'UsoCfdi' 
+                    FROM
+                        conf_provCfdisPermitidos pcp
+                        INNER JOIN proveedores prov ON pcp.idProveedor = prov.id
+                        INNER JOIN sat_catUsoCFDI scf ON pcp.usoDeCfdi = scf.id";
+
+            // Modo debug para imprimir consulta con parámetros
+            if (self::$debug) {
+                $params = [];
+                $this->db->imprimirConsulta($sql, $params, 'Obtener Lista De Proveedores con CFDIS permitidos:');
+            }
+
+            $stmt = $this->db->prepare($sql);
+            //$stmt->bindParam('', $nivel, \PDO::PARAM_INT);
+            $stmt->execute();
+
+            $dataResul = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            if (self::$debug) {
+                echo '<br>Resultado de Query:';
+                var_dump($dataResul);
+                echo '<br><br>';
+            }
+
+            if ($dataResul) {
+                return ['success' => true, 'data' => $dataResul];
+            } else {
+                if (self::$debug) {
+                    echo "Error Al Obtener Proveedores con Uso De CFDI permitidos.<br>";
+                }
+                return ['success' => false, 'message' => 'No Se Obtuvieron Proveedores con Uso De CFDI permitidos.'];
+            }
+        } catch (\PDOException $e) {
+            // Captura de errores y almacenamiento en el log
+            $timestamp = date("Y-m-d H:i:s");
+            error_log("[$timestamp] app/Models/ExcepcionesProveedores_Mdl.php -> Error Al Obtener Proveedores con Uso De CFDI permitidos: " . $e->getMessage(), 3, LOG_FILE_BD);
+            return ['success' => false, 'message' => 'Error Al Obtener Proveedores con Uso De CFDI permitidos. Notifica a tu administrador'];
+        }
+    }
+
+    public function cfdisPermitidosGeneral()
+    {
+        if (self::$debug) {
+            echo "Ya entro a la función para obtener la lista general de los CFDis permitidos.<br>";
+        }
+        try {
+
+            $sql = "SELECT
+                        cu.descripcion AS UsoCfdi,
+                        cu.id AS ClaveUsoCFDI 
+                    FROM
+                        configuracionCFDIs cg
+                        JOIN sat_catUsoCFDI cu ON FIND_IN_SET( cu.id, cg.usosCFDI ) > 0 
+                    WHERE
+                        cg.estatus = 1 
+                        AND cg.idEmpresa = :idEmpresa";
+
+            // Modo debug para imprimir consulta con parámetros
+            if (self::$debug) {
+                $params = [
+                    ':idEmpresa' => $_SESSION['EQXidEmpresa']
+                ];
+                $this->db->imprimirConsulta($sql, $params, 'Obtener Lista General De CFDIS permitidos:');
+            }
+
+            $stmt = $this->db->prepare($sql);
+            $stmt->bindParam(':idEmpresa', $_SESSION['EQXidEmpresa'], \PDO::PARAM_INT);
+            $stmt->execute();
+
+            $dataResul = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            if (self::$debug) {
+                echo '<br>Resultado de Query:';
+                var_dump($dataResul);
+                echo '<br><br>';
+            }
+
+            if ($dataResul) {
+                return ['success' => true, 'data' => $dataResul];
+            } else {
+                if (self::$debug) {
+                    echo "Error Al Obtener Lista General De Usos De CFDI permitidos.<br>";
+                }
+                return ['success' => false, 'message' => 'No Se Obtuvo La Lista General De CFDI Permitidos.'];
+            }
+        } catch (\PDOException $e) {
+            // Captura de errores y almacenamiento en el log
+            $timestamp = date("Y-m-d H:i:s");
+            error_log("[$timestamp] app/Models/ExcepcionesProveedores_Mdl.php -> Error Al Obtener La Lista General De CFDI Permitidos: " . $e->getMessage() . PHP_EOL, 3, LOG_FILE_BD);
+            return ['success' => false, 'message' => 'Error Al Obtener La Lista General De CFDI Permitidos. Notifica a tu administrador'];
+        }
+    }
+
     public function getProveedores($tabla)
     {
         if (self::$debug) {
@@ -496,6 +601,48 @@ class ExcepcionesProveedores_Mdl
             error_log("[$timestamp] app/Models/ExcepcionesProveedores_Mdl.php ->Error Al Eliminar Proveedor: " . $e->getMessage(), 3, LOG_FILE_BD);
             if (self::$debug) {
                 echo "Error Al Eliminar Proveedor: " . $e->getMessage();
+            }
+            return ['success' => false, 'message' => 'Problemas Con Las Excepciones, Notifica a tu administrador.'];
+        }
+    }
+
+    public function eliminarCfdiPermitido($identificador)
+    {
+        try {
+
+            $sql = "DELETE FROM conf_provCfdisPermitidos WHERE id = :identificador";
+
+            if (self::$debug) {
+                $params = [
+                    ':identificador' => $identificador,
+
+                ];
+                $this->db->imprimirConsulta($sql, $params, 'Eliminar CFDI Permitido Del Proveedor.<br>');
+            }
+            $stmt = $this->db->prepare($sql);
+            $stmt->bindParam(':identificador', $identificador, PDO::PARAM_INT);
+            $stmt->execute();
+            $filasAfectadas = $stmt->rowCount();
+
+            if (self::$debug) {
+                echo '<br>Resultado de Query:';
+                var_dump($filasAfectadas);
+                echo '<br><br>';
+            }
+
+            if ($filasAfectadas == 1) {
+                return ['success' => true, 'data' => 'CFDI Permitido Eliminado Correctamente.'];
+            } else {
+                if (self::$debug) {
+                    echo "Error Al Eliminar CFDI Permitido.<br>";
+                }
+                return ['success' => false, 'message' => 'Error Al Eliminar CFDI Permitido.'];
+            }
+        } catch (\Exception $e) {
+            $timestamp = date("Y-m-d H:i:s");
+            error_log("[$timestamp] app/Models/ExcepcionesProveedores_Mdl.php ->Error Al Eliminar CFDI Permitido: " . $e->getMessage(), 3, LOG_FILE_BD);
+            if (self::$debug) {
+                echo "Error Al Eliminar CFDI Permitido: " . $e->getMessage();
             }
             return ['success' => false, 'message' => 'Problemas Con Las Excepciones, Notifica a tu administrador.'];
         }
@@ -753,6 +900,80 @@ class ExcepcionesProveedores_Mdl
                 }
                 $logFile = $logDir . '/bloqueoDeDiferencias.log';
                 error_log("[$timestamp] app/Models/ExcepcionesProveedores_Mdl.php -> Se Agregó El Proveedor: " . $idProveedor . " Con Motivo: '$motivo', IdUserReg: " . $_SESSION['EQXident'] . PHP_EOL, 3, $logFile);
+
+                return ['success' => true, 'data' => 'Proveedor Agregado Correctamente.'];
+            } else {
+                if (self::$debug) {
+                    echo "Error Al Agregar Proveedor.<br>";
+                }
+                return ['success' => false, 'message' => 'Error Al Agregar Proveedor.'];
+            }
+        } catch (\Exception $e) {
+            $timestamp = date("Y-m-d H:i:s");
+            error_log("[$timestamp] app/Models/ExcepcionesProveedores_Mdl.php ->Error Al Agregar Proveedor: " . $e->getMessage(), 3, LOG_FILE_BD);
+            if (self::$debug) {
+                echo "Error Al Agregar Proveedor: " . $e->getMessage();
+            }
+            return ['success' => false, 'message' => 'Problemas Con Las Excepciones, Notifica a tu administrador.'];
+        }
+    }
+
+    public function registraCfdisPorProveedor($idProveedor, $listaCfdis)
+    {
+        $filasAfectadas = 0;
+        self::$debug = 0; // Habilitar modo debug para imprimir consultas
+        try {
+
+            $sql = "INSERT INTO conf_provCfdisPermitidos (idProveedor, usoDeCfdi, idUserReg, fechaReg)
+                VALUES (:idProveedor, :usoDeCfdi, :idUserReg, NOW())";
+
+            if (self::$debug) {
+                $params = [
+                    ':idProveedor' => $idProveedor,
+                    ':idUserReg' => $_SESSION['EQXident']
+                ];
+                $this->db->imprimirConsulta($sql, $params, 'Registrar Proveedor Exento Fecha Emisión.<br>');
+            }
+
+            $stmt = $this->db->prepare($sql);
+            foreach ($listaCfdis as $usoCfdi) {
+                if (self::$debug) {
+                    echo "<br>Insertando CFDI: $usoCfdi<br>";
+                }
+
+                $stmt->bindParam(':idProveedor', $idProveedor, PDO::PARAM_INT);
+                $stmt->bindParam(':usoDeCfdi', $usoCfdi, PDO::PARAM_STR);
+                $stmt->bindParam(':idUserReg', $_SESSION['EQXident'], PDO::PARAM_INT);
+
+                if (self::$debug) {
+                    $this->db->imprimirConsulta($sql, [
+                        ':idProveedor' => $idProveedor,
+                        ':usoDeCfdi' => $usoCfdi,
+                        ':idUserReg' => $_SESSION['EQXident']
+                    ], 'Insertar CFDI permitido');
+                }
+
+                $filasAfectadas++;
+                $stmt->execute();
+            }
+
+            if (self::$debug) {
+                echo '<br>Resultado de Query:';
+                var_dump($filasAfectadas);
+                echo '<br><br>';
+            }
+
+            if ($filasAfectadas >= 1) {
+
+                $timestamp = date("Y-m-d H:i:s");
+                $year = date("Y");
+                $logDir = LOG_SYSTEM . 'excepciones/' . $year;
+                if (!file_exists($logDir)) {
+                    mkdir($logDir, 0777, true);
+                }
+                $listaCfdis = implode(', ', $listaCfdis);
+                $logFile = $logDir . '/usosDeCfdiPermitidos.log';
+                error_log("[$timestamp] app/Models/ExcepcionesProveedores_Mdl.php -> Se Agregó El Proveedor: " . $idProveedor . " Con Uso De CFDI: '$listaCfdis', IdUserReg: " . $_SESSION['EQXident'] . PHP_EOL, 3, $logFile);
 
                 return ['success' => true, 'data' => 'Proveedor Agregado Correctamente.'];
             } else {
