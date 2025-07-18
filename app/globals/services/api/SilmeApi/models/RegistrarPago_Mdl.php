@@ -26,6 +26,7 @@ class RegistrarPago_Mdl
 
     public function insertaPagos($pagos)
     {
+
         if (self::$debug) {
             echo "Entrando a la función para insertar múltiples pagos.<br>";
         }
@@ -35,24 +36,23 @@ class RegistrarPago_Mdl
         }
 
         try {
-            $sql = "INSERT INTO pagos_compras (idPago, idDetPago, OC, HES, montoPagado, saldoInsoluto, moneda, formaPago, fechaPago, idAcuse) VALUES ";
+            $sql = "INSERT INTO pagos_compras (idPagoDet, idAcuse, OC, HES, montoPagado, saldoInsoluto, moneda, formaPago, fechaPago) VALUES ";
 
             $values = [];
             $index = 0;
 
             foreach ($pagos as $pago) {
-                $sql .= "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?),";
+                $sql .= "(?, ?, ?, ?, ?, ?, ?, ?, ?),";
 
-                $values[] = $pago['IdPago'];
-                $values[] = $pago['IdDetPago'];
-                $values[] = $pago['OrdenCompra'];
-                $values[] = $pago['HojaEntrada'];
-                $values[] = $pago['MontoPago'];
+                $values[] = $pago['IdPagoDet'];
+                $values[] = $pago['IdAcuse'];
+                $values[] = $pago['OC'];
+                $values[] = $pago['HES'];
+                $values[] = $pago['MontoPagado'];
                 $values[] = $pago['SaldoInsoluto'];
                 $values[] = $pago['Moneda'];
                 $values[] = $pago['FormaPago'];
                 $values[] = $pago['FechaPago'];
-                $values[] = $pago['IdAcuse'];
 
                 if (self::$debug) {
                     echo "Registro $index: " . json_encode($pago) . "<br>";

@@ -19,40 +19,77 @@ class RegistrarPagoController extends Controller
 
     public function registraPagoMultiple()
     {
-        if ($this->debug == 1) {
-            echo "<h2>Ya estamos dentro de services\api\SilmeApi\RegistrarPagoController/registraPago.php.</h2>";
-        }
-
         header("Access-Control-Allow-Origin: *");
         header("Content-Type: application/json; charset=UTF-8");
 
-        /* Obtener los headers */
+        // Obtener los headers enviados por el cliente
         $headers = getallheaders();
-        $ApiKey = $headers['ApiKey'] ?? '';
-        $SecretKey = $headers['SecretKey'] ?? '';
+        $apiKey = $headers['X-API-KEY'] ?? '';
+        $timestamp = $headers['X-TIMESTAMP'] ?? '';
+        $firmaRecibida = $headers['X-SIGNATURE'] ?? '';
 
-        /* Verificar Credenciales */
-        if ($ApiKey !== API_KEY || $SecretKey !== SECRET_KEY) {
-            http_response_code(HTTP_BAD_REQUEST);
+        // Validar presencia de headers
+        if (empty($apiKey) || empty($timestamp) || empty($firmaRecibida)) {
+            http_response_code(HTTP_FORBIDDEN);
             echo json_encode([
-                'code' => HTTP_BAD_REQUEST,
+                'code' => HTTP_FORBIDDEN,
                 'status' => 'error',
-                'message' => 'Las credenciales son incorrectas.'
+                'message' => 'Error De Autenticación.'
             ]);
             exit;
         }
 
-        if ($this->debug == 1) {
-            http_response_code(HTTP_GOOD_REQUEST);
+        // Validar API Key
+        if ($apiKey !== API_KEY) {
+            http_response_code(HTTP_FORBIDDEN);
             echo json_encode([
-                'code' => HTTP_GOOD_REQUEST,
-                'status' => 'success',
-                'message' => 'Las credenciales son correctas.'
+                'code' => HTTP_FORBIDDEN,
+                'status' => 'error',
+                'message' => 'API Key no válida.'
             ]);
+            exit;
         }
 
-        /* Recibir y validar JSON */
-        $inputData = json_decode(file_get_contents("php://input"), true);
+        // Validar que el timestamp sea un número
+        if (!ctype_digit($timestamp)) {
+            http_response_code(HTTP_FORBIDDEN);
+            echo json_encode([
+                'code' => HTTP_FORBIDDEN,
+                'status' => 'error',
+                'message' => 'Timestamp no válido.'
+            ]);
+            exit;
+        }
+
+        // Validar que el timestamp no esté fuera de rango (por ejemplo 5 min)
+        if (abs(time() - (int)$timestamp) > API_TIMESTAMP_TOLERANCE) {
+            http_response_code(HTTP_FORBIDDEN);
+            echo json_encode([
+                'code' => HTTP_FORBIDDEN,
+                'status' => 'error',
+                'message' => 'La solicitud ha expirado.'
+            ]);
+            exit;
+        }
+
+        // Leer cuerpo del request
+        $rawPayload = file_get_contents("php://input");
+
+        // Calcular la firma esperada (con el SecretKey conocido)
+        $firmaEsperada = hash_hmac('sha256', $rawPayload . $timestamp, SECRET_KEY);
+
+        if (!hash_equals($firmaEsperada, $firmaRecibida)) {
+            http_response_code(HTTP_FORBIDDEN);
+            echo json_encode([
+                'code' => HTTP_FORBIDDEN,
+                'status' => 'error',
+                'message' => 'Firma no válida.'
+            ]);
+            exit;
+        }
+
+        // Si pasa todo, continuar con la lógica existente...
+        $inputData = json_decode($rawPayload, true);
 
         if (!is_array($inputData)) {
             http_response_code(HTTP_BAD_REQUEST);
@@ -76,19 +113,16 @@ class RegistrarPagoController extends Controller
             }
         }
 
-        /* Insertar el pago */
         $registrarPagoModel = new RegistrarPago_Mdl();
         $registraPagos = $registrarPagoModel->insertaPagos($inputData);
 
         if ($registraPagos['success'] == true) {
-            http_response_code(HTTP_GOOD_REQUEST);
-
+            http_response_code(HTTP_OK);
             echo json_encode([
-                'code' => HTTP_GOOD_REQUEST,
+                'code' => HTTP_OK,
                 'status' => 'success',
                 'message' => 'Datos Insertados Correctamente.'
             ]);
-            exit;
         } else {
             http_response_code(HTTP_BAD_REQUEST);
             echo json_encode([
@@ -96,140 +130,42 @@ class RegistrarPagoController extends Controller
                 'status' => 'error',
                 'message' => 'Error Al Insertar Datos.'
             ]);
-            exit;
         }
     }
 
     /* Función para validar cada pago */
     private function validarPago($pago)
     {
-        return isset(
-            $pago['IdPago'],
-            $pago['IdDetPago'],
-            $pago['OrdenCompra'],
-            $pago['HojaEntrada'],
-            $pago['MontoPago'],
-            $pago['SaldoInsoluto'],
-            $pago['Moneda'],
-            $pago['FormaPago'],
-            $pago['FechaPago'],
-            $pago['IdAcuse'] // Nuevo campo requerido
-        )
-            && is_numeric($pago['IdPago'])
-            && is_numeric($pago['IdDetPago'])
-            && !empty($pago['OrdenCompra'])
-            && !empty($pago['HojaEntrada'])
-            && is_numeric($pago['MontoPago'])
-            && is_numeric($pago['SaldoInsoluto']) // ✅ permite 0
-            && !empty($pago['Moneda'])
-            && is_numeric($pago['FormaPago'])
-            && is_numeric($pago['IdAcuse']) // ✅ validar numérico
-            && preg_match('/^\d{4}-\d{2}-\d{2}$/', $pago['FechaPago']);
-    }
-
-
-    public function registraPago()
-    {
-        if ($this->debug == 1) {
-            echo "<h2>Ya estamos dentro de services\api\SilmeApi\RegistrarPagoController/registraPago.php.</h2>";
+        if (
+            !isset(
+                $pago['IdPagoDet'],
+                $pago['IdAcuse'],
+                $pago['OC'],
+                $pago['HES'],
+                $pago['MontoPagado'],
+                $pago['SaldoInsoluto'],
+                $pago['Moneda'],
+                $pago['FormaPago'],
+                $pago['FechaPago']
+            )
+        ) {
+            return false;
         }
+        if (!is_numeric($pago['IdPagoDet']) || (int)$pago['IdPagoDet'] <= 0) return false;
+        if (!is_numeric($pago['IdAcuse']) || (int)$pago['IdAcuse'] <= 0) return false;
+        if (empty($pago['OC']) || !is_string($pago['OC'])) return false;
+        if (empty($pago['HES']) || !is_string($pago['HES'])) return false;
+        if (!is_numeric($pago['MontoPagado']) || $pago['MontoPagado'] < 0) return false;
+        if (!is_numeric($pago['SaldoInsoluto']) || $pago['SaldoInsoluto'] < 0) return false;
+        if (empty($pago['Moneda']) || !is_string($pago['Moneda'])) return false;
+        if (!is_numeric($pago['FormaPago']) || (int)$pago['FormaPago'] <= 0) return false;
 
-        header("Access-Control-Allow-Origin: *");
-        header("Content-Type: application/json; charset=UTF-8");
+        // Validar formato y validez de fecha
+        $fecha = $pago['FechaPago'];
+        if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $fecha)) return false;
+        $partes = explode('-', $fecha);
+        if (!checkdate((int)$partes[1], (int)$partes[2], (int)$partes[0])) return false;
 
-        /* Obtener los headers */
-        $headers = getallheaders();
-
-        $ApiKey = $headers['ApiKey'] ?? '';
-        $SecretKey = $headers['SecretKey'] ?? '';
-
-        /* Verificar Credenciales */
-        if ($ApiKey !== API_KEY || $SecretKey !== SECRET_KEY) {
-            http_response_code(HTTP_BAD_REQUEST);
-            echo json_encode([
-                'code' => HTTP_BAD_REQUEST,
-                'status' => 'error',
-                'message' => 'Las credenciales son incorrectas.'
-            ]);
-            exit;
-        }
-
-        if ($this->debug == 1) {
-            echo json_encode([
-                'code' => HTTP_GOOD_REQUEST,
-                'status' => 'success',
-                'message' => 'Las credenciales son correctas.'
-            ]);
-        }
-
-        /* Recibir y validar JSON */
-        $inputData = json_decode(file_get_contents("php://input"), true);
-
-        if (!is_array($inputData)) {
-            http_response_code(400);
-            echo json_encode([
-                'code' => 400,
-                'status' => 'error',
-                'message' => 'El formato de datos enviado no es válido.'
-            ]);
-            exit;
-        }
-
-        $campos = [
-            'IdPago',
-            'IdDetPago',
-            'OrdenCompra',
-            'HojaEntrada',
-            'MontoPago',
-            'SaldoInsoluto',
-            'Moneda',
-            'FormaPago',
-            'FechaPago'
-        ];
-
-        $datos = [];
-        foreach ($campos as $campo) {
-            $datos[$campo] = $inputData[$campo] ?? $_POST[$campo] ?? '';
-        }
-
-        // Verificar si algún campo está vacío
-        if (in_array('', $datos, true)) {
-            http_response_code(HTTP_BAD_REQUEST);
-            echo json_encode([
-                'code' => HTTP_BAD_REQUEST,
-                'status' => 'error',
-                'message' => 'Faltan datos por enviar.'
-            ]);
-            exit;
-        }
-
-        if ($this->debug == 1) {
-            echo json_encode([
-                'code' => HTTP_GOOD_REQUEST,
-                'status' => 'success',
-                'message' => 'Datos recibidos correctamente.'
-            ]);
-        }
-
-        /* Insertar el pago */
-        $registrarPagoModel = new RegistrarPago_Mdl();
-        $verificarPago = $registrarPagoModel->insertaPago(...array_values($datos));
-
-        /* Responder según el resultado */
-        if (isset($verificarPago['success']) && $verificarPago['success'] == true) {
-            http_response_code(HTTP_GOOD_REQUEST);
-            echo json_encode([
-                'code' => HTTP_GOOD_REQUEST,
-                'status' => 'success',
-                'message' => $verificarPago['data']
-            ]);
-        } else {
-            http_response_code(HTTP_BAD_REQUEST);
-            echo json_encode([
-                'code' => HTTP_BAD_REQUEST,
-                'status' => 'error',
-                'message' => $verificarPago['message'] ?? 'Error desconocido al registrar el pago.'
-            ]);
-        }
+        return true;
     }
 }

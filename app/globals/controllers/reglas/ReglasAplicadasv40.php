@@ -323,7 +323,7 @@ class ReglasAplicadasv40
 
 
         // Validación de Montos
-        $subtotalXML = $dataXML['Comprobante']['SubTotal'] ?? 0;
+        $subtotalXML = $dataXML['Comprobante']['Total'] ?? 0; //Validación de total por solicitud SilmeAgro
         $descuentoXML = $dataXML['Comprobante']['Descuento'] ?? 0;
         $ignoraDescuento = $configParaValidaciones['excepcionesProveedor']['IgnoraDescuento'] ?? false;
         if (!$ignoraDescuento) {
@@ -334,7 +334,7 @@ class ReglasAplicadasv40
         if (isset($configParaValidaciones['notasCreditos']) && is_array($configParaValidaciones['notasCreditos'])) {
             $sumaMontoDescuentos = 0;
             foreach ($configParaValidaciones['notasCreditos'] as $notaCredito) {
-                if ($notaCredito['idPoliticaComercial'] > 0) {
+                if ($notaCredito['idPoliticaComercial'] > 0 && $notaCredito['FormaCobro'] == 'NC') {
                     if ($this->debug == 1) {
                         echo "<br>Aplicando nota de crédito: " . $notaCredito['IdNotaCredito']. " por ". $notaCredito['Descripcion'];
                     }

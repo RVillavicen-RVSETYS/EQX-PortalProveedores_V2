@@ -17,12 +17,6 @@ class ApiController extends Controller
         }
     }
 
-    public function registrarPago()
-    {
-        $registrarPago = new RegistrarPagoController();
-        $registrarPago->registraPago();
-    }
-
     public function registrarPagoMultiple(){
         $registrarPago = new RegistrarPagoController();
         $registrarPago->registraPagoMultiple();
