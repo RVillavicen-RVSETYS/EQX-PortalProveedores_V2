@@ -25,6 +25,242 @@ class Pagos_Mdl
         $this->db = new BD_Connect();
     }
 
+    public function listarComplementosPago($filtros = [], INT $cantMaxRes = 0, $orden = 'DESC')
+    {
+        self::$debug = 0;
+        if (self::$debug) {
+            echo '<br><br>Filtros Recibidos: ';
+            var_dump($filtros);
+        }
+        $filtrosDisponibles = [
+            'idProveedor' => ['tipoDato' => 'INT', 'sqlFiltro' => 'com.idProveedor = :idProveedor'],
+            'entreFechas' => ['tipoDato' => 'STRING', 'sqlFiltro' => '(com.fechaReg BETWEEN :fechaInicial AND :fechaFinal)'],
+            'complementosPendientes' => ['tipoDato' => 'STRING', 'sqlFiltro' => ''],
+            'estatus' => ['tipoDato' => 'INT', 'sqlFiltro' => 'com.estatus = :estatus'],
+        ];
+
+        $filtrosSQL = '';
+        $params = [];
+
+        try {
+            if (!is_int($cantMaxRes)) {
+                throw new \Exception('El valor de $cantMaxRes debe ser un entero.');
+            }
+            $limiteResult = ($cantMaxRes == 0) ? '' : 'LIMIT ' . $cantMaxRes;
+
+            if (!in_array($orden, ['DESC', 'ASC'])) {
+                throw new \Exception('El orden debe ser DESC o ASC.');
+            } else {
+                $orden = strtoupper($orden);
+            }
+
+            foreach ($filtros as $nombreFiltro => $valorFiltro) {
+                if (isset($filtrosDisponibles[$nombreFiltro]) && $valorFiltro !== null) {
+
+                    switch ($nombreFiltro) {
+                        case 'entreFechas':
+                            list($fechaInicial, $fechaFinal) = explode(',', $valorFiltro);
+                            if (!strtotime($fechaInicial) || !strtotime($fechaFinal)) {
+                                throw new \Exception('Las fechas proporcionadas no son válidas.');
+                            }
+                            $filtrosSQL .= ' AND ' . $filtrosDisponibles[$nombreFiltro]['sqlFiltro'];
+                            $params[':fechaInicial'] = $fechaInicial;
+                            $params[':fechaFinal'] = $fechaFinal;
+                            break;
+                        case 'complementosPendientes':
+                            if (!in_array($valorFiltro, ['true', 'false'])) {
+                                throw new \Exception('El valor de insolutoPendiente debe ser true o false.');
+                            }
+                            if ($valorFiltro == 'true') {
+                                $filtrosSQL .= ' AND com.totalPagos > com.totalComplementos';
+                            } else {
+                                $filtrosSQL .= ' AND com.totalPagos <= com.totalComplementos';
+                            }
+                            break;
+                        default:
+                            $filtrosSQL .= ' AND ' . $filtrosDisponibles[$nombreFiltro]['sqlFiltro'];
+                            $params[':' . $nombreFiltro] = $valorFiltro;
+                            break;
+                    }
+                }
+            }
+
+            if (empty($filtrosSQL)) {
+                throw new \Exception('No se encontró ningún parámetro válido.');
+            }
+
+            $filtrosSQL = ltrim($filtrosSQL, ' AND');
+
+            if (self::$debug) {
+                echo '<br><br>Parametros: ';
+                var_dump($params);
+                echo '<br><br>';
+            }
+
+            $sql = "SELECT
+                        prov.id AS NoProveedor,
+                        prov.razonSocial AS Proveedor,
+                        prov.correo AS Correo,
+                        com.id AS Acuse,
+                        cf.uuid AS UUID,
+                        cf.serie AS Serie,
+                        cf.folio AS Folio,
+                        com.insolutoPendiente AS Insoluto,
+                        com.totalComplementos AS Complemento,
+                        com.totalPagos AS Pagos
+                    FROM
+                        compras com
+                        INNER JOIN proveedores prov ON com.idProveedor = prov.id
+                        INNER JOIN cfdi_facturas cf ON com.id = cf.idCompra 
+                    WHERE
+                        $filtrosSQL";
+            if (self::$debug) {
+                $this->db->imprimirConsulta($sql, $params, 'Lista De Pagos Realizados: ');
+            }
+            $stmt = $this->db->prepare($sql);
+            foreach ($params as $param => $value) {
+                $stmt->bindValue($param, $value, is_int($value) ? PDO::PARAM_INT : PDO::PARAM_STR);
+            }
+            $stmt->execute();
+            $pagosresult = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            // Obtener la cantidad de registros
+            $cantPagos = $stmt->rowCount();
+
+            if (self::$debug) {
+                echo '<br>Resultado de Query:';
+                var_dump($pagosresult);
+                echo '<br><br>';
+            }
+
+            return ['success' => true, 'cantRes' => $cantPagos, 'data' => $pagosresult];
+        } catch (\Exception $e) {
+            $timestamp = date("Y-m-d H:i:s");
+            error_log("[$timestamp] app/Models/PagosProveedores/Pagos_Mdl.php ->Error buscar Compras por Proveedor: " . $e->getMessage() . PHP_EOL, 3, LOG_FILE_BD);
+            if (self::$debug) {
+                echo "<br>Error al listar Pagos Realizados: " . $e->getMessage(); // Mostrar error en modo depuración
+            }
+            return ['success' => false, 'message' => 'Problemas al listar los Pagos Realizados, Notifica a tu administrador.'];
+        }
+    }
+
+    public function listarPagosInsolutos($filtros = [], INT $cantMaxRes = 0, $orden = 'DESC')
+    {
+        self::$debug = 0;
+        if (self::$debug) {
+            echo '<br><br>Filtros Recibidos: ';
+            var_dump($filtros);
+        }
+        $filtrosDisponibles = [
+            'idProveedor' => ['tipoDato' => 'INT', 'sqlFiltro' => 'com.idProveedor = :idProveedor'],
+            'entreFechas' => ['tipoDato' => 'STRING', 'sqlFiltro' => '(com.fechaReg BETWEEN :fechaInicial AND :fechaFinal)'],
+            'insoluto' => ['tipoDato' => 'STRING', 'sqlFiltro' => ''],
+            'estatus' => ['tipoDato' => 'INT', 'sqlFiltro' => 'com.estatus = :estatus'],
+        ];
+
+        $filtrosSQL = '';
+        $params = [];
+
+        try {
+            if (!is_int($cantMaxRes)) {
+                throw new \Exception('El valor de $cantMaxRes debe ser un entero.');
+            }
+            $limiteResult = ($cantMaxRes == 0) ? '' : 'LIMIT ' . $cantMaxRes;
+
+            if (!in_array($orden, ['DESC', 'ASC'])) {
+                throw new \Exception('El orden debe ser DESC o ASC.');
+            } else {
+                $orden = strtoupper($orden);
+            }
+
+            foreach ($filtros as $nombreFiltro => $valorFiltro) {
+                if (isset($filtrosDisponibles[$nombreFiltro]) && $valorFiltro !== null) {
+
+                    switch ($nombreFiltro) {
+                        case 'entreFechas':
+                            list($fechaInicial, $fechaFinal) = explode(',', $valorFiltro);
+                            if (!strtotime($fechaInicial) || !strtotime($fechaFinal)) {
+                                throw new \Exception('Las fechas proporcionadas no son válidas.');
+                            }
+                            $filtrosSQL .= ' AND ' . $filtrosDisponibles[$nombreFiltro]['sqlFiltro'];
+                            $params[':fechaInicial'] = $fechaInicial;
+                            $params[':fechaFinal'] = $fechaFinal;
+                            break;
+                        case 'insoluto':
+                            if (!in_array($valorFiltro, ['true', 'false'])) {
+                                throw new \Exception('El valor de insolutoPendiente debe ser true o false.');
+                            }
+                            if ($valorFiltro == 'true') {
+                                $filtrosSQL .= ' AND com.insolutoPendiente > 0';
+                            } else {
+                                $filtrosSQL .= ' AND (ISNULL(com.insolutoPendiente) OR com.insolutoPendiente = 0)';
+                            }
+                            break;
+                        default:
+                            $filtrosSQL .= ' AND ' . $filtrosDisponibles[$nombreFiltro]['sqlFiltro'];
+                            $params[':' . $nombreFiltro] = $valorFiltro;
+                            break;
+                    }
+                }
+            }
+
+            if (empty($filtrosSQL)) {
+                throw new \Exception('No se encontró ningún parámetro válido.');
+            }
+
+            $filtrosSQL = ltrim($filtrosSQL, ' AND');
+
+            if (self::$debug) {
+                echo '<br><br>Parametros: ';
+                var_dump($params);
+                echo '<br><br>';
+            }
+
+            $sql = "SELECT
+                        prov.id AS NoProveedor,
+                        prov.razonSocial AS Proveedor,
+                        prov.correo AS Correo,
+                        com.id AS Acuse,
+                        cf.uuid AS UUID,
+                        cf.serie AS Serie,
+                        cf.folio AS Folio,
+                        com.insolutoPendiente AS Insoluto 
+                    FROM
+                        compras com
+                        INNER JOIN proveedores prov ON com.idProveedor = prov.id
+                        INNER JOIN cfdi_facturas cf ON com.id = cf.idCompra 
+                    WHERE
+                        $filtrosSQL";
+            if (self::$debug) {
+                $this->db->imprimirConsulta($sql, $params, 'Lista De Pagos Realizados: ');
+            }
+            $stmt = $this->db->prepare($sql);
+            foreach ($params as $param => $value) {
+                $stmt->bindValue($param, $value, is_int($value) ? PDO::PARAM_INT : PDO::PARAM_STR);
+            }
+            $stmt->execute();
+            $pagosresult = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            // Obtener la cantidad de registros
+            $cantPagos = $stmt->rowCount();
+
+            if (self::$debug) {
+                echo '<br>Resultado de Query:';
+                var_dump($pagosresult);
+                echo '<br><br>';
+            }
+
+            return ['success' => true, 'cantRes' => $cantPagos, 'data' => $pagosresult];
+        } catch (\Exception $e) {
+            $timestamp = date("Y-m-d H:i:s");
+            error_log("[$timestamp] app/Models/PagosProveedores/Pagos_Mdl.php ->Error buscar Compras por Proveedor: " . $e->getMessage() . PHP_EOL, 3, LOG_FILE_BD);
+            if (self::$debug) {
+                echo "<br>Error al listar Pagos Realizados: " . $e->getMessage(); // Mostrar error en modo depuración
+            }
+            return ['success' => false, 'message' => 'Problemas al listar los Pagos Realizados, Notifica a tu administrador.'];
+        }
+    }
+
     public function listarPagosRealizados($filtros = [], INT $cantMaxRes = 0, $orden = 'DESC')
     {
         if (self::$debug) {
@@ -300,5 +536,4 @@ class Pagos_Mdl
             return ['success' => false, 'message' => 'Problemas al listar Facturas por UUID, Notifica a tu administrador.'];
         }
     }
-    
 }

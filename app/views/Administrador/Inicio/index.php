@@ -42,6 +42,8 @@ $PendientesPorProcesar = $data["datosIniciales"]['PendientesPorProcesar'];
     <!-- Custom CSS -->
     <link href="../assets/extra-libs/c3/c3.min.css" rel="stylesheet">
     <link href="../assets/extra-libs/jvector/jquery-jvectormap-2.0.2.css" rel="stylesheet" />
+    <link href="../assets/libs/chartist/dist/chartist.min.css" rel="stylesheet">
+    <link href="../dist/js/pages/chartist/chartist-init.css" rel="stylesheet">
 
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -201,20 +203,20 @@ $PendientesPorProcesar = $data["datosIniciales"]['PendientesPorProcesar'];
                                 <div id="graficoDona" class="status m-t-30" style="height:300px; width:100%"></div>
 
                                 <div class="row">
-                                    <div class="col-4 border-right">
-                                        <i class="fa fa-circle text-primary"></i>
-                                        <h4 class="mb-0 font-medium">5489</h4>
-                                        <span>Success</span>
-                                    </div>
                                     <div class="col-4 border-right p-l-20">
-                                        <i class="fa fa-circle text-info"></i>
-                                        <h4 class="mb-0 font-medium">954</h4>
-                                        <span>Pending</span>
+                                        <i class="fa fa-circle" style="color: #03A9F4;"></i>
+                                        <h4 class="mb-0 font-medium" id="valorPendientes">0</h4>
+                                        <span>Pendientes</span>
+                                    </div>
+                                    <div class="col-4 border-right">
+                                        <i class="fa fa-circle" style="color: #8BC34A;"></i>
+                                        <h4 class="mb-0 font-medium" id="valorAceptadas"></h4>
+                                        <span>Aceptadas</span>
                                     </div>
                                     <div class="col-4 p-l-20">
-                                        <i class="fa fa-circle text-success"></i>
-                                        <h4 class="mb-0 font-medium">736</h4>
-                                        <span>Failed</span>
+                                        <i class="fa fa-circle" style="color: #E91E63"></i>
+                                        <h4 class="mb-0 font-medium" id="valorCanceladas"></h4>
+                                        <span>Canceladas</span>
                                     </div>
                                 </div>
                             </div>
@@ -223,27 +225,13 @@ $PendientesPorProcesar = $data["datosIniciales"]['PendientesPorProcesar'];
                     <div class="col-sm-12 col-lg-8">
                         <div class="card">
                             <div class="card-body">
-                                <div class="d-flex align-items-center">
-                                    <div>
-                                        <h4 class="card-title">Comparasión Anual</h4>
-                                    </div>
-                                    <div class="ml-auto">
-                                        <div class="dl m-b-10">
-                                            <select class="custom-select border-0 text-muted">
-                                                <option value="0" selected="">2018</option>
-                                                <option value="1">2015</option>
-                                                <option value="2">2016</option>
-                                                <option value="3">2017</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="chart1 m-t-40" style="position: relative; height:250px;"></div>
-                                <ul class="list-inline m-t-30 text-center font-12">
-                                    <li class="list-inline-item text-muted"><i class="fa fa-circle text-info m-r-5"></i> Pagado <br>$0000</li>
-                                    <li class="list-inline-item text-muted"><i class="fa fa-circle text-light m-r-5"></i> Facturado <br> $0000</li>
-                                </ul>
+                                <h4 class="card-title">Comparasión Anual</h4>
+                                <div id="graficaLine" class="ct-sm-line-chart" style="height: 300px;"></div>
                             </div>
+                            <ul class="list-inline m-t-30 text-center font-12">
+                                <li class="list-inline-item text-muted"><i class="fa fa-circle text-info m-r-5"></i> Pagado <br> <span id="totalPagado">$0000</span></li>
+                                <li class="list-inline-item text-muted"><i class="fa fa-circle text-danger m-r-5"></i> Facturado <br> <span id="totalFacturado">$0000</span></li>
+                            </ul>
                         </div>
                     </div>
                 </div>
@@ -336,6 +324,8 @@ $PendientesPorProcesar = $data["datosIniciales"]['PendientesPorProcesar'];
     <script src="/assets/extra-libs/jvector/jquery-jvectormap-world-mill-en.js"></script>
     <script src="/dist/js/basicFuctions.js"></script>
 
+    <script src="../assets/libs/chartist/dist/chartist.min.js"></script>
+    <script src="../dist/js/pages/chartist/chartist-plugin-tooltip.js"></script>
 </body>
 <script>
     $(document).ready(function() {
@@ -343,8 +333,59 @@ $PendientesPorProcesar = $data["datosIniciales"]['PendientesPorProcesar'];
 
         initDonutChart('graficoDona', '2025'); // Inicializar el gráfico de dona con el año actual
 
-
+        initChartistLine('graficaLine', '2025');
     });
+
+    function initChartistLine(divId, ajaxParam) {
+
+        $.ajax({
+            url: 'Inicio/datosGraficaLine',
+            type: 'POST',
+            dataType: 'json',
+            data: {
+                parametro: ajaxParam
+            },
+            success: function(response) {
+                if (response.success === 1) {
+                    const facturado = response.series.facturado;
+                    const pagado = response.series.pagado;
+
+                    const totalFacturado = facturado.reduce((sum, val) => sum + val, 0);
+                    const totalPagado = pagado.reduce((sum, val) => sum + val, 0);
+
+                    $('#totalPagado').text(
+                        '$' + totalPagado.toLocaleString('es-MX', {
+                            minimumFractionDigits: 2
+                        })
+                    );
+
+                    $('#totalFacturado').text(
+                        '$' + totalFacturado.toLocaleString('es-MX', {
+                            minimumFractionDigits: 2
+                        })
+                    );
+
+                    new Chartist.Line(`#${divId}`, {
+                        labels: ['Ene.', 'Feb.', 'Mar.', 'Abr.', 'May.', 'Jun.', 'Jul.', 'Ago.', 'Sep.', 'Oct.', 'Nov.', 'Dic.'],
+                        series: [
+                            pagado,
+                            facturado
+                        ]
+                    }, {
+                        fullWidth: true,
+
+                        plugins: [
+                            Chartist.plugins.tooltip()
+                        ],
+                        chartPadding: {
+                            right: 20,
+                            left: 20
+                        }
+                    });
+                }
+            }
+        });
+    }
 
     function getProveedoresSeguimiento($tipoSeguimiento) {
         loadingBigCarga('tablaProveedoresSeguimiento', 'Un momento, por favor...');
@@ -365,7 +406,7 @@ $PendientesPorProcesar = $data["datosIniciales"]['PendientesPorProcesar'];
         });
     }
 
-    function initChartistBar() {
+    /*function initChartistBar() {
         new Chartist.Bar('.chart1', {
             labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
             series: [
@@ -400,7 +441,7 @@ $PendientesPorProcesar = $data["datosIniciales"]['PendientesPorProcesar'];
                 });
             }
         });
-    }
+    }*/
 
     function initDonutChart(divId, ajaxParam) {
         const container = document.getElementById(divId);
@@ -439,7 +480,20 @@ $PendientesPorProcesar = $data["datosIniciales"]['PendientesPorProcesar'];
                             hide: true
                         },
                         color: {
-                            pattern: d.colors || ['#137eff', '#5ac146', '#8b5edd']
+                            pattern: d.colors || ['#03A9F4', '#8BC34A', '#E91E63']
+                        }
+                    });
+
+                    d.values.forEach(([nombre, valor]) => {
+                        const id = {
+                            'Pendientes': 'valorPendientes',
+                            'Aceptadas': 'valorAceptadas',
+                            'Canceladas': 'valorCanceladas'
+                        } [nombre];
+
+                        if (id) {
+                            const el = document.getElementById(id);
+                            if (el) el.textContent = valor;
                         }
                     });
                 } else {

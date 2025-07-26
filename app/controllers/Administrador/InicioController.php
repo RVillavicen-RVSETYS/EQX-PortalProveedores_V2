@@ -239,6 +239,70 @@ class InicioController extends Controller
         }
     }
 
+    public function datosGraficaLine()
+    {
+        // Lógica para la vista de tablaProveedoresSeguimiento
+        $data = []; // Aquí puedes pasar datos a la vista si es necesario
+
+        // Obtener el nombre del namespace para identificar el área
+        $namespaceParts = explode('\\', __NAMESPACE__);
+
+        $this->debug = 0;
+
+        //var_dump($_POST);
+        if ($this->debug == 1) {
+            echo '<br>Datos recibidos por POST:' . $_POST['parametro'];
+            echo '<br>';
+        }
+
+        // Simular que recibimos un parámetro por POST
+        $parametro = isset($_POST['parametro']) ? $_POST['parametro'] : null;
+
+        // Validación básica
+        if (empty($parametro)) {
+            echo json_encode([
+                'success' => 0,
+                'mensaje' => 'Parámetro no recibido correctamente.' . $parametro,
+                'data' => null
+            ]);
+            exit;
+        }
+
+        $cfdi_Mdl = new CFDIs_Mdl();
+        $filtros = [
+            'year' => $parametro
+        ];
+        $datosGrafica = $cfdi_Mdl->obtenerDatosGraficaLine($filtros, 0, 'DESC');
+
+        if (!$datosGrafica['success']) {
+            echo json_encode([
+                'success' => 0,
+                'mensaje' => 'Error al obtener datos de la gráfica.',
+                'data' => null
+            ]);
+            exit;
+        }
+
+        // Inicializa arrays con 12 posiciones en 0 (enero a diciembre)
+        $facturado = array_fill(0, 12, 0);
+        $pagado = array_fill(0, 12, 0);
+
+        foreach ($datosGrafica['data'] as $fila) {
+            $mesIndex = (int)$fila['Mes'] - 1;
+            $facturado[$mesIndex] = round((float)$fila['TotalFacturado'], 2);
+            $pagado[$mesIndex] = round((float)$fila['TotalPagado'], 2);
+        }
+
+        echo json_encode([
+            'success' => 1,
+            'mensaje' => 'Datos obtenidos correctamente.',
+            'series' => [
+                'facturado' => $facturado,
+                'pagado' => $pagado
+            ]
+        ]);
+    }
+
     public function datosGraficoDona()
     {
         // Lógica para la vista de tablaProveedoresSeguimiento
@@ -268,37 +332,42 @@ class InicioController extends Controller
             exit;
         }
 
+        $cfdi_Mdl = new CFDIs_Mdl();
+        $filtros = [
+            'year' => $parametro
+        ];
+        $datosGrafica = $cfdi_Mdl->obtenerDatosGraficaDona($filtros, 0, 'DESC');
+
         // Datos simulados por año
+
+        $values = [];
+        $colores = [
+            'Pendientes' => '#03A9F4',
+            'Aceptadas' => '#8BC34A',
+            'Canceladas' => '#E91E63'
+        ];
+
+        foreach ($datosGrafica['data'] as $row) {
+            $nombre = $row['nombre_estatus'];
+            $total = (int) $row['total'];
+            $values[] = [$nombre, $total];
+        }
+
+        $coloresFinales = array_map(function ($row) use ($colores) {
+            return $colores[$row[0]] ?? '#999999';
+        }, $values);
+
         $datos = [
-            '2024' => [
-                'values' => [
-                    ['Pending', 40],
-                    ['Failed', 20],
-                    ['Success', 40]
-                ],
-                'labels' => [
-                    'show' => true
-                ],
-                'title' => 'Estado General 2023',
-                'legends' => [
-                    'hide' => false
-                ],
-                'colors' => ['#FF9800', '#F44336', '#4CAF50']
-            ],
-            '2025' => [
-                'values' => [
-                    ['Pending', 25],
-                    ['Failed', 15],
-                    ['Success', 60]
-                ],
+            $parametro => [
+                'values' => $values,
                 'labels' => [
                     'show' => false
                 ],
-                'title' => 'Estado General 2024',
+                'title' => 'Compras ' . $parametro,
                 'legends' => [
                     'hide' => true
                 ],
-                'colors' => ['#03A9F4', '#E91E63', '#8BC34A'],
+                'colors' => $coloresFinales,
             ]
         ];
 

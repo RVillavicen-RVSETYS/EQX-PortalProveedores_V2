@@ -70,4 +70,46 @@ class ComplementosController extends Controller
             exit(0);
         }
     }
+
+    public function complementosPendientes()
+    {
+        $data = []; // Aquí puedes pasar datos a la vista si es necesario
+        $filtros = [];
+        if (!empty($_POST['idProveedor'])) {
+            $filtros['idProveedor'] = $_POST['idProveedor'];
+        }
+
+        if (!empty($_POST['fechaInicial']) and !empty($_POST['fechaFinal'])) {
+            $filtros['entreFechas'] = $_POST['fechaInicial'] . ',' . $_POST['fechaFinal'];
+        } else {
+            $filtros['entreFechas'] = date('Y-m-1') . ',' . date('Y-m-t');
+        }
+        $filtros['estatus'] = 2;
+        $filtros['complementosPendientes'] = true;
+
+        $MDL_pagos = new Pagos_Mdl();
+        $complementos = $MDL_pagos->listarComplementosPago($filtros, 0, 'ASC');
+
+        if ($this->debug == 1) {
+            echo '<br><br>Resultado de listaPagosRealizados: ' . PHP_EOL;
+            var_dump($complementos);
+        }
+
+        if ($complementos['success']) {
+            if ($complementos['cantRes'] > 0) {
+                $data['listaComplementos'] =  $complementos['data'];
+            } else {
+                $data['listaComplementos'] = [];
+            }
+        } else {
+            echo '
+            <div class="alert alert-warning alert-rounded"> 
+                <i class="ti-user"></i> ' . $complementos['message'] . '.
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close"> <span aria-hidden="true">×</span> </button>
+            </div>';
+        }
+
+        // Cargar la vista correspondiente
+        $this->view('Administrador/Complementos/complementosPendientes', $data);
+    }
 }

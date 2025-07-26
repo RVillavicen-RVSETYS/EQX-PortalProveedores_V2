@@ -5,7 +5,7 @@
 
     function listarComplementos() {
         $.ajax({
-            url: 'PagosRealizados/listarPagosRealizados',
+            url: 'Complementos/complementosPendientes',
             type: 'POST',
             data: {},
             success: function(response) {
@@ -25,7 +25,7 @@
         event.preventDefault();
 
         $.ajax({
-            url: 'PagosRealizados/listarPagosRealizados',
+            url: 'Complementos/complementosPendientes',
             type: 'POST',
             data: $(this).serialize(),
             success: function(response) {

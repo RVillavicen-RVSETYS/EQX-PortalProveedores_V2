@@ -80,7 +80,7 @@ class CFDIs_Mdl
                     }
                 }
             }
-            
+
             if (empty($filtrosSQL)) {
                 throw new \Exception('No se encontró ningún parámetro válido.');
             }
@@ -135,7 +135,7 @@ class CFDIs_Mdl
             echo '<br><br>Filtros Recibidos: ';
             var_dump($filtros);
             echo '<br><br>Valores a Retornar: ';
-            var_dump($valoresRetornar); 
+            var_dump($valoresRetornar);
             echo '<br><br>Valores a Agrupar: ';
             var_dump($agrupar);
         }
@@ -176,7 +176,7 @@ class CFDIs_Mdl
                 throw new \Exception('El valor de $cantMaxRes debe ser un entero.');
             }
             $limiteResult = ($cantMaxRes == 0) ? '' : 'LIMIT ' . $cantMaxRes;
-            
+
             if (!in_array($orden, ['DESC', 'ASC'])) {
                 throw new \Exception('El orden debe ser DESC o ASC.');
             } else {
@@ -212,7 +212,7 @@ class CFDIs_Mdl
                             $filtrosSQL1 .= ' AND ' . $filtrosDisponibles[$nombreFiltro]['sqlFiltro'];
                             $params[':uuidFacts'] = implode(',', $uuidFacts); // Convertir a cadena separada por comas
                             break;
-                        
+
                         case 'saldoInsoluto':
                             // Validar que el valor sea true o false
                             if (!in_array($valorFiltro, ['true', 'false'])) {
@@ -223,7 +223,7 @@ class CFDIs_Mdl
                             } else {
                                 $filtrosSQL .= ' AND ' . $filtrosDisponibles[$nombreFiltro]['sqlFiltro'] . ' = 0';
                             }
-                            
+
                             break;
 
                         default:
@@ -238,7 +238,7 @@ class CFDIs_Mdl
                 throw new \Exception('No se encontró ningún parámetro válido.');
             }
             $filtrosSQL = ltrim($filtrosSQL, ' AND');
-            $filtrosSQL1 = (empty($filtrosSQL1)) ? '' : 'WHERE '.ltrim($filtrosSQL1, ' AND');
+            $filtrosSQL1 = (empty($filtrosSQL1)) ? '' : 'WHERE ' . ltrim($filtrosSQL1, ' AND');
 
             // Filtros de agrupación
             foreach ($agrupar as $nombreAgrupado) {
@@ -250,7 +250,7 @@ class CFDIs_Mdl
                 throw new \Exception('No se encontró ningún parámetro válido para agrupar.');
             }
             $agrupadosSQL = ltrim($agrupadosSQL, ', ');
-            
+
             // Valores a retornar
             foreach ($valoresRetornar as $nombreValor) {
                 if (isset($valoresRetornarDisponibles[$nombreValor])) {
@@ -365,7 +365,7 @@ class CFDIs_Mdl
                     }
                 }
             }
-            
+
             if (empty($filtrosSQL)) {
                 throw new \Exception('No se encontró ningún parámetro válido.');
             }
@@ -413,4 +413,210 @@ class CFDIs_Mdl
         }
     }
 
+    public function obtenerDatosGraficaDona($filtros = [], INT $cantMaxRes = 0, $orden = 'DESC')
+    {
+        self::$debug = 0; // Cambiar a 0 para desactivar mensajes de depuración
+        if (self::$debug) {
+            echo '<br><br>Filtros Recibidos: ';
+            var_dump($filtros);
+        }
+        $filtrosDisponibles = [
+            'year' => ['tipoDato' => 'INT', 'sqlFiltro' => ''],
+        ];
+
+        $filtrosSQL = '';
+        $params = [];
+
+        try {
+            if (!is_int($cantMaxRes)) {
+                throw new \Exception('El valor de $cantMaxRes debe ser un entero.');
+            }
+            $limiteResult = ($cantMaxRes == 0) ? '' : 'LIMIT ' . $cantMaxRes;
+
+            if (!in_array($orden, ['DESC', 'ASC'])) {
+                throw new \Exception('El orden debe ser DESC o ASC.');
+            } else {
+                $orden = strtoupper($orden);
+            }
+
+            foreach ($filtros as $nombreFiltro => $valorFiltro) {
+                if (isset($filtrosDisponibles[$nombreFiltro]) && $valorFiltro !== null) {
+                    switch ($nombreFiltro) {
+
+                        case 'year':
+                            $filtrosSQL .= ' AND com.fechaReg BETWEEN :inicioFecha AND :finFecha';
+                            $params[':inicioFecha'] = $valorFiltro . '-01-01';
+                            $params[':finFecha'] = $valorFiltro . '-12-31';
+                            break;
+
+                        default:
+                            $filtrosSQL .= ' AND ' . $filtrosDisponibles[$nombreFiltro]['sqlFiltro'];
+                            $params[':' . $nombreFiltro] = $valorFiltro;
+                            break;
+                    }
+                }
+            }
+
+            if (empty($filtrosSQL)) {
+                throw new \Exception('No se encontró ningún parámetro válido.');
+            }
+            $filtrosSQL = ltrim($filtrosSQL, ' AND');
+
+            if (self::$debug) {
+                echo '<br><br>Parametros: ';
+                var_dump($params);
+                echo '<br><br>';
+            }
+
+            $sql = "SELECT
+                        estatuses.nombre_estatus,
+                        IFNULL(t.total, 0) AS total
+                    FROM (
+                        SELECT 1 AS estatus, 'Pendientes' AS nombre_estatus
+                        UNION
+                        SELECT 2, 'Aceptadas'
+                        UNION
+                        SELECT 4, 'Canceladas'
+                    ) AS estatuses
+                    LEFT JOIN (
+                        SELECT
+                            com.estatus,
+                            COUNT(*) AS total
+                        FROM
+                            compras com
+                        WHERE
+                            $filtrosSQL
+                        GROUP BY
+                            com.estatus
+                    ) AS t ON t.estatus = estatuses.estatus;";
+            if (self::$debug) {
+                $this->db->imprimirConsulta($sql, $params, 'Datos Para La Grafica: ');
+            }
+            $stmt = $this->db->prepare($sql);
+            foreach ($params as $param => $value) {
+                $stmt->bindValue($param, $value, is_int($value) ? PDO::PARAM_INT : PDO::PARAM_STR);
+            }
+            $stmt->execute();
+            $comprasresult = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            // Obtener la cantidad de registros
+            $cantCompras = $stmt->rowCount();
+
+            if (self::$debug) {
+                echo '<br>Resultado de Query:';
+                var_dump($comprasresult);
+                echo '<br><br>';
+            }
+
+            return ['success' => true, 'cantRes' => $cantCompras, 'data' => $comprasresult];
+        } catch (\Exception $e) {
+            $timestamp = date("Y-m-d H:i:s");
+            error_log("[$timestamp] app/Models/compras/Compras_Mdl.php ->Error buscar Datos Para La Grafica: " . $e->getMessage(), 3, LOG_FILE_BD);
+            if (self::$debug) {
+                echo "<br>Error al listar Datos Para La Grafica: " . $e->getMessage(); // Mostrar error en modo depuración
+            }
+            return ['success' => false, 'message' => 'Problemas al listar Datos Para La Grafica, Notifica a tu administrador.'];
+        }
+    }
+
+    public function obtenerDatosGraficaLine($filtros = [], INT $cantMaxRes = 0, $orden = 'DESC')
+    {
+        self::$debug = 0; // Cambiar a 0 para desactivar mensajes de depuración
+        if (self::$debug) {
+            echo '<br><br>Filtros Recibidos: ';
+            var_dump($filtros);
+        }
+        $filtrosDisponibles = [
+            'year' => ['tipoDato' => 'INT', 'sqlFiltro' => ''],
+        ];
+
+        $filtrosSQL = '';
+        $params = [];
+
+        try {
+            if (!is_int($cantMaxRes)) {
+                throw new \Exception('El valor de $cantMaxRes debe ser un entero.');
+            }
+            $limiteResult = ($cantMaxRes == 0) ? '' : 'LIMIT ' . $cantMaxRes;
+
+            if (!in_array($orden, ['DESC', 'ASC'])) {
+                throw new \Exception('El orden debe ser DESC o ASC.');
+            } else {
+                $orden = strtoupper($orden);
+            }
+
+            foreach ($filtros as $nombreFiltro => $valorFiltro) {
+                if (isset($filtrosDisponibles[$nombreFiltro]) && $valorFiltro !== null) {
+                    switch ($nombreFiltro) {
+
+                        case 'year':
+                            $filtrosSQL .= ' AND cf.fechaFac BETWEEN :inicioFecha AND :finFecha';
+                            $params[':inicioFecha'] = $valorFiltro . '-01-01';
+                            $params[':finFecha'] = $valorFiltro . '-12-31';
+                            break;
+
+                        default:
+                            $filtrosSQL .= ' AND ' . $filtrosDisponibles[$nombreFiltro]['sqlFiltro'];
+                            $params[':' . $nombreFiltro] = $valorFiltro;
+                            break;
+                    }
+                }
+            }
+
+            if (empty($filtrosSQL)) {
+                throw new \Exception('No se encontró ningún parámetro válido.');
+            }
+            $filtrosSQL = ltrim($filtrosSQL, ' AND');
+
+            if (self::$debug) {
+                echo '<br><br>Parametros: ';
+                var_dump($params);
+                echo '<br><br>';
+            }
+
+            $sql = "SELECT
+                        YEAR(cf.fechaFac) AS Año,
+                        MONTH(cf.fechaFac) AS Mes,
+                        SUM(cf.monto) AS TotalFacturado,
+                        SUM(CASE WHEN pc.fechaPago IS NOT NULL THEN pc.montoPagado ELSE 0 END) AS TotalPagado
+                    FROM
+                        cfdi_facturas cf
+                        INNER JOIN compras com ON cf.idCompra = com.id
+                        LEFT JOIN pagos_compras pc ON com.id = pc.idAcuse
+                    WHERE
+                        $filtrosSQL
+                    GROUP BY
+                        YEAR(cf.fechaFac),
+                        MONTH(cf.fechaFac)
+                    ORDER BY
+                        Año, Mes;";
+            if (self::$debug) {
+                $this->db->imprimirConsulta($sql, $params, 'Datos Para La Grafica: ');
+            }
+            $stmt = $this->db->prepare($sql);
+            foreach ($params as $param => $value) {
+                $stmt->bindValue($param, $value, is_int($value) ? PDO::PARAM_INT : PDO::PARAM_STR);
+            }
+            $stmt->execute();
+            $comprasresult = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            // Obtener la cantidad de registros
+            $cantCompras = $stmt->rowCount();
+
+            if (self::$debug) {
+                echo '<br>Resultado de Query:';
+                var_dump($comprasresult);
+                echo '<br><br>';
+            }
+
+            return ['success' => true, 'cantRes' => $cantCompras, 'data' => $comprasresult];
+        } catch (\Exception $e) {
+            $timestamp = date("Y-m-d H:i:s");
+            error_log("[$timestamp] app/Models/compras/Compras_Mdl.php ->Error buscar Datos Para La Grafica: " . $e->getMessage(), 3, LOG_FILE_BD);
+            if (self::$debug) {
+                echo "<br>Error al listar Datos Para La Grafica: " . $e->getMessage(); // Mostrar error en modo depuración
+            }
+            return ['success' => false, 'message' => 'Problemas al listar Datos Para La Grafica, Notifica a tu administrador.'];
+        }
+    }
 }

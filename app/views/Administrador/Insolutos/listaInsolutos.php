@@ -6,23 +6,17 @@ if ($debug == 1) {
     var_dump($listaPagos);
 }
 
-if (empty($listaPagos)) {
-    echo '<div class="alert alert-info">No se encontraron pagos, por favor filtre por otro rango de fechas. </div>';
-    exit(0);
-}
-
 ?>
 
 <table class="table table-sm" id="tablaPagosRealizados">
     <thead>
         <tr>
-            <th>Acuse</th>
-            <th>Serie</th>
             <th>Proveedor</th>
-            <th>Orden Compra</th>
-            <th>Recepción</th>
-            <th>Forma Pago</th>
-            <th>Monto Pagado</th>
+            <th>Correo</th>
+            <th>Acuse</th>
+            <th>UUID</th>
+            <th>Serie Y Folio</th>
+            <th>Insoluto</th>
         </tr>
     </thead>
     <tbody>
@@ -30,13 +24,12 @@ if (empty($listaPagos)) {
         foreach ($listaPagos as $pago) {
         ?>
             <tr>
+                <th><?= $pago['NoProveedor']; ?> - <?= $pago['Proveedor']; ?></th>
+                <th><?= $pago['Correo']; ?></th>
                 <th class="text-center"><?= $pago['Acuse']; ?></th>
-                <th><?= $pago['Serie']; ?></th>
-                <th><?= $pago['Emisor']; ?></th>
-                <th><?= $pago['OC']; ?></th>
-                <th><?= $pago['HES']; ?></th>
-                <th><?= $pago['FormaPago']; ?></th>
-                <th class="text-right">$ <?= number_format($pago['MontoPagado'], 2, '.', ','); ?></th>
+                <th><?= $pago['UUID']; ?></th>
+                <th class="text-right"><?= $pago['Serie']; ?> <?= $pago['Folio']; ?></th>
+                <th class="text-right">$<?= $pago['Insoluto']; ?></th>
             </tr>
         <?php
         }

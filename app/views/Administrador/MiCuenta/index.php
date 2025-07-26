@@ -108,7 +108,7 @@ if ($debug == 1) {
                                 <h6><?= $datosAdmin[0]['Nombre']; ?></h6>
                                 <small class="text-muted p-t-30 db">Apellido Paterno:</small>
                                 <h6><?= $datosAdmin[0]['ApPat']; ?></h6>
-                                <small class="text-muted p-t-30 db">Pais</small>
+                                <small class="text-muted p-t-30 db">Apellido Materno</small>
                                 <h6><?= $datosAdmin[0]['ApMat']; ?></h6>
                             </div>
                         </div>

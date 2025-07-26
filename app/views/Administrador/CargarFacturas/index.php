@@ -327,11 +327,11 @@ if ($debug == 1) {
                                                     <div class="row">
                                                         <div class="col-md-6 text-right"></div>
 
-                                                        <div id="desbloquear-btn1">
+                                                        <div id="desbloquear-btnNC">
                                                             <button type="reset" class="btn btn-danger waves-effect" onclick="resetForm()"><i class="far fa-trash-alt text-white"></i> Limpiar</button>
                                                             <button type="submit" class="btn btn-success waves-effect waves-light">Carga Factura</button>
                                                         </div>
-                                                        <div id="bloquear-btn1" style="display: none;">
+                                                        <div id="bloquear-btnNC" style="display: none;">
                                                             <div class="loading text-center"><img src="../assets/images/loadingHorizontal.gif" alt="loading..." /></div>
                                                         </div>
                                                     </div>
@@ -442,6 +442,42 @@ if ($debug == 1) {
     <script src="/dist/js/pages/forms/select2/select2.init.js"></script>
 
     <script>
+        $("#Form_CargaNotaCredito").submit(function(e) {
+            e.preventDefault();
+            var formData = new FormData(this);
+            bloquearBtn('btnNC');
+            $.ajax({
+                type: 'POST',
+                url: 'CargarFacturas/registraNuevaNotaCredito',
+                data: formData,
+                dataType: 'json',
+                processData: false,
+                contentType: false,
+                success: function(response) {
+                    desbloquearBtn('btnNC');
+                    if (response.success) {
+                        resetFormulario("Form_CargaNotaCredito");
+                        notificaSucSweet("Excelente!!", response.message);
+                    } else {
+                        notificaBadSweet("Lo sentimos!!", response.message); // Muestra el mensaje de error
+                    }
+                },
+                error: function() {
+                    notificaBad('Error al querer cargar factura. Consulta a tu administrador');
+                    desbloquearBtn('btnNC');
+                },
+                complete: function() {
+                    // Rehabilitar el botón
+                    desbloquearBtn('btnNC');
+
+                    // Limpiar los campos Inputs
+                    resetFormulario("Form_CargaNotaCredito");
+                    //window.location.reload();
+                    //cargaTablaUltimasFacturas();
+                }
+            });
+        });
+
         let lastNotasCredito = [];
 
         function validaOrdCompra(ordenCompra, tipo) {

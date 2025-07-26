@@ -80,10 +80,12 @@ class InsolutosController extends Controller
         }
 
         if (!empty($_POST['fechaInicial']) and !empty($_POST['fechaFinal'])) {
-            $filtros['entreFechasPago'] = $_POST['fechaInicial'] . ',' . $_POST['fechaFinal'];
+            $filtros['entreFechas'] = $_POST['fechaInicial'] . ',' . $_POST['fechaFinal'];
         } else {
-            $filtros['entreFechasPago'] = date('Y-m-1') . ',' . date('Y-m-t');
+            $filtros['entreFechas'] = date('Y-m-1') . ',' . date('Y-m-t');
         }
+        $filtros['estatus'] = 2;
+        $filtros['insoluto'] = true;
 
         $MDL_pagos = new Pagos_Mdl();
         $listaPagos = $MDL_pagos->listarPagosInsolutos($filtros, 0, 'ASC');
@@ -97,11 +99,7 @@ class InsolutosController extends Controller
             if ($listaPagos['cantRes'] > 0) {
                 $data['listaPagos'] =  $listaPagos['data'];
             } else {
-                echo '
-            <div class="alert alert-info alert-rounded"> 
-                <i class="ti-user"></i> No Hubo Resultados.
-                <button type="button" class="close" data-dismiss="alert" aria-label="Close"> <span aria-hidden="true">×</span> </button>
-            </div>';
+                $data['listaPagos'] = [];
             }
         } else {
             echo '

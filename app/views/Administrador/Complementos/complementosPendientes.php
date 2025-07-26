@@ -3,12 +3,7 @@ $debug = 0;
 
 if ($debug == 1) {
     echo '<br><br>Contenido de datosPagina:';
-    var_dump($listaPagos);
-}
-
-if (empty($listaPagos)) {
-    echo '<div class="alert alert-info">No se encontraron pagos, por favor filtre por otro rango de fechas. </div>';
-    exit(0);
+    var_dump($listaComplementos);
 }
 
 ?>
@@ -16,27 +11,28 @@ if (empty($listaPagos)) {
 <table class="table table-sm" id="tablaPagosRealizados">
     <thead>
         <tr>
-            <th>Acuse</th>
-            <th>Serie</th>
             <th>Proveedor</th>
-            <th>Orden Compra</th>
-            <th>Recepción</th>
-            <th>Forma Pago</th>
-            <th>Monto Pagado</th>
+            <th>Correo</th>
+            <th>Acuse</th>
+            <th>UUID</th>
+            <th>Serie Y Folio</th>
+            <th>Complemento Pendiente</th>
         </tr>
     </thead>
     <tbody>
         <?php
-        foreach ($listaPagos as $pago) {
+        foreach ($listaComplementos as $complemento) {
+
+            $totalComplemento = $complemento['Pagos'] - $complemento['Complemento'];
+
         ?>
             <tr>
-                <th class="text-center"><?= $pago['Acuse']; ?></th>
-                <th><?= $pago['Serie']; ?></th>
-                <th><?= $pago['Emisor']; ?></th>
-                <th><?= $pago['OC']; ?></th>
-                <th><?= $pago['HES']; ?></th>
-                <th><?= $pago['FormaPago']; ?></th>
-                <th class="text-right">$ <?= number_format($pago['MontoPagado'], 2, '.', ','); ?></th>
+                <th><?= $complemento['NoProveedor']; ?> - <?= $complemento['Proveedor']; ?></th>
+                <th><?= $complemento['Correo']; ?></th>
+                <th class="text-center"><?= $complemento['Acuse']; ?></th>
+                <th><?= $complemento['UUID']; ?></th>
+                <th class="text-right"><?= $complemento['Serie']; ?> <?= $complemento['Folio']; ?></th>
+                <th class="text-right">$<?= number_format($totalComplemento, 4, '.', ','); ?></th>
             </tr>
         <?php
         }

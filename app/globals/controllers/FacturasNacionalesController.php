@@ -36,7 +36,6 @@ class FacturasNacionalesController extends Controller
             'message' => '',
             'data' => []
         ];
-        $debug = 1;
         //$noProveedor = ($isAdmin == 1 && isset($_POST['admin_noProveedor'])) ? $_POST['admin_noProveedor'] : $_SESSION['EQXnoProveedor'];
         if ($this->debug == 1) {
             echo '<br>Valores para la carga:';
