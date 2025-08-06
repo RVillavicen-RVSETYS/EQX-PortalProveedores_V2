@@ -329,11 +329,12 @@ $PendientesPorProcesar = $data["datosIniciales"]['PendientesPorProcesar'];
 </body>
 <script>
     $(document).ready(function() {
+        const anioActual = new Date().getFullYear();
         getProveedoresSeguimiento('ComplementosMasViejos'); // Cargar la tabla al inicio con el primer tipo de seguimiento
 
-        initDonutChart('graficoDona', '2025'); // Inicializar el gráfico de dona con el año actual
+        initDonutChart('graficoDona', anioActual); // Inicializar el gráfico de dona con el año actual
 
-        initChartistLine('graficaLine', '2025');
+        initChartistLine('graficaLine', anioActual);
     });
 
     function initChartistLine(divId, ajaxParam) {
