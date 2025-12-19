@@ -167,6 +167,7 @@ class HistorialFacturas_Mdl
                     cpd.totalPagado AS TotalPagado,
                     ( cpd.montoTotal - cpd.totalPagado ) AS SaldoInsoluto,
                     cpd.idSatMonedas AS Moneda,
+                    res.TipoCambio AS TipoCambio,
                     cpa.idSatFormaPago AS FormaPago,
                     cpd.fechaPago AS FechaPago
                 FROM
@@ -175,6 +176,7 @@ class HistorialFacturas_Mdl
                     INNER JOIN compras_PagosRecepcion cpr ON cpd.id = cpr.idComprasPagosDet
                     INNER JOIN recepciones rec ON cpr.idRecepcion = rec.id
                     INNER JOIN compras_PagosAplicados cpa ON cpd.id = cpa.idComprasPagosDet
+                    LEFT JOIN (SELECT cp.id, cp.tipoCambio AS TipoCambio FROM compras_Pagos cp ) res ON cpa.idComprasPagos = res.id
                 WHERE
                     DATE_FORMAT( cpd.fechaPago, '%Y-%m-%d' ) BETWEEN :fechaInicial AND :fechaFinal
                     AND cpd.estatus = 1
@@ -227,8 +229,8 @@ class HistorialFacturas_Mdl
         }
         try {
 
-            $sql = "INSERT IGNORE INTO pagos_compras ( idPagoDet, idAcuse, OC, HES, montoPagado, saldoInsoluto, moneda, formaPago, fechaPago)
-                    VALUES ( :idPagoDet, :idAcuse, :OC, :HES, :montoPagado, :saldoInsoluto, :moneda, :formaPago, :fechaPago);";
+            $sql = "INSERT IGNORE INTO pagos_compras ( idPagoDet, idAcuse, OC, HES, montoPagado, saldoInsoluto, moneda, tipoCambio, formaPago, fechaPago)
+                    VALUES ( :idPagoDet, :idAcuse, :OC, :HES, :montoPagado, :saldoInsoluto, :moneda, :tipoCambio, :formaPago, :fechaPago);";
 
             // Modo debug para imprimir consulta con parámetros
             if (self::$debug) {
@@ -242,6 +244,7 @@ class HistorialFacturas_Mdl
                         ':montoPagado' => $pago['TotalPagado'],
                         ':saldoInsoluto' => $pago['SaldoInsoluto'],
                         ':moneda' => $pago['Moneda'],
+                        ':tipoCambio' => $pago['TipoCambio'],
                         ':formaPago' => $pago['FormaPago'],
                         ':fechaPago' => $pago['FechaPago']
                     ];
@@ -259,6 +262,7 @@ class HistorialFacturas_Mdl
                 $stmt->bindValue(':montoPagado', $pago['TotalPagado'], PDO::PARAM_STR);
                 $stmt->bindValue(':saldoInsoluto', $pago['SaldoInsoluto'], PDO::PARAM_STR);
                 $stmt->bindValue(':moneda', $pago['Moneda'], PDO::PARAM_STR);
+                $stmt->bindValue(':tipoCambio', $pago['TipoCambio'], PDO::PARAM_STR);
                 $stmt->bindValue(':formaPago', $pago['FormaPago'], PDO::PARAM_INT);
                 $stmt->bindValue(':fechaPago', $pago['FechaPago'], PDO::PARAM_STR);
 

@@ -10,6 +10,10 @@ if ($debug == 1) {
 $puedeAutorizar = (isset($data['puedeAutorizar']) && $data['dataCompra']['data']['CpaEstatus'] == '1') ? $data['puedeAutorizar'] : 0;
 $puedeRechazar = (isset($data['puedeRechazar']) && $data['dataCompra']['data']['totalComplementos'] == 0 && $data['dataCompra']['data']['totalPagos'] == 0) ? $data['puedeRechazar'] : 0;
 $fechaMin = date('Y-m-d', strtotime('-1 day'));
+
+$totalImpuestos = 0;
+$totalImpuestos = $data['dataCompra']['data']['totalImpuestosTrasladados'] + $data['dataCompra']['data']['totalImpuestosRetenidos'];
+
 ?>
 <div class="card border">
     <div class="card-header bg-pyme-primary">
@@ -214,6 +218,8 @@ $fechaMin = date('Y-m-d', strtotime('-1 day'));
             <div class="col-xs-6 col-md-4">
                 <span class="text-muted">Subtotal </span>
                 <h6><?= (empty($data['dataCompra']['data']['FacSubtotal'])) ? 0 : '$ ' . number_format(abs($data['dataCompra']['data']['FacSubtotal']), 2, '.', ','); ?> <?= $data['dataCompra']['data']['FacTipoMoneda']; ?></h6>
+                <span class="text-muted">Impuestos </span>
+                <h6>$ <?= number_format($totalImpuestos, 2, '.', ','); ?> <?= $data['dataCompra']['data']['idCatTipoMoneda']; ?></h6>
                 <span class="text-muted">Total </span>
                 <h6><?= (empty($data['dataCompra']['data']['FacMonto'])) ? 0 : '$ ' . number_format(abs($data['dataCompra']['data']['FacMonto']), 2, '.', ','); ?> <?= $data['dataCompra']['data']['FacTipoMoneda']; ?></h6>
             </div>

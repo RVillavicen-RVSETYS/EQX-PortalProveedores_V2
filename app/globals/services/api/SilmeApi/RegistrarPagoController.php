@@ -145,6 +145,7 @@ class RegistrarPagoController extends Controller
                 $pago['MontoPagado'],
                 $pago['SaldoInsoluto'],
                 $pago['Moneda'],
+                $pago['TipoCambio'],
                 $pago['FormaPago'],
                 $pago['FechaPago']
             )
@@ -158,6 +159,7 @@ class RegistrarPagoController extends Controller
         if (!is_numeric($pago['MontoPagado']) || $pago['MontoPagado'] < 0) return false;
         if (!is_numeric($pago['SaldoInsoluto']) || $pago['SaldoInsoluto'] < 0) return false;
         if (empty($pago['Moneda']) || !is_string($pago['Moneda'])) return false;
+        if (!is_numeric($pago['TipoCambio']) || $pago['TipoCambio'] < 0) return false;
         if (!is_numeric($pago['FormaPago']) || (int)$pago['FormaPago'] <= 0) return false;
 
         // Validar formato y validez de fecha

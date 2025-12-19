@@ -36,7 +36,7 @@ class RegistrarPago_Mdl
         }
 
         try {
-            $sql = "INSERT INTO pagos_compras (idPagoDet, idAcuse, OC, HES, montoPagado, saldoInsoluto, moneda, formaPago, fechaPago) VALUES ";
+            $sql = "INSERT INTO pagos_compras (idPagoDet, idAcuse, OC, HES, montoPagado, saldoInsoluto, moneda, tipoCambio, formaPago, fechaPago) VALUES ";
 
             $values = [];
             $index = 0;
@@ -50,7 +50,8 @@ class RegistrarPago_Mdl
                 $values[] = $pago['HES'];
                 $values[] = $pago['MontoPagado'];
                 $values[] = $pago['SaldoInsoluto'];
-                $values[] = $pago['Moneda'];
+                $values[] = $pago['Moneda'];   
+                $values[] = $pago['TipoCambio'];   
                 $values[] = $pago['FormaPago'];
                 $values[] = $pago['FechaPago'];
 

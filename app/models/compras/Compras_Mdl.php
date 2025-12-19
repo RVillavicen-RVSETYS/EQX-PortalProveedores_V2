@@ -285,7 +285,7 @@ class Compras_Mdl
 
                 $sql = "SELECT c.id AS acuse, c.claseDocto, c.estatus AS CpaEstatus, c.fechaVal, c.comentRegresa, c.subTotal, c.idCatTipoMoneda AS CpaTipoMoneda,
                             c.idProveedor, c.notaCredito, c.totalPagos,	c.totalComplementos, c.fechaReg, c.referencia, c.fechaVence AS 'FechaVence', c.fechaProbablePago AS 'FechaProbablePago',
-                            dcp.ordenCompra, dcp.noRecepcion,
+                            dcp.ordenCompra, dcp.noRecepcion, cf.totalImpuestosTrasladados, cf.totalImpuestosRetenidos,
                             cf.urlPDF AS FacUrlPDF, cf.urlXML AS FacUrlXML, cf.subtotal AS FacSubtotal, cf.monto AS FacMonto, cf.idCatTipoMoneda AS FacTipoMoneda, 
                             cf.idCatMetodoPago AS FacMetodoPago, cf.idCatFormaPago AS FacFormaPago, cf.usoCfdi AS FacUsoCfdi,cuc.descripcion AS nameUsoCfdi, 
                             cf.uuid AS FacUUID, cf.fechaFac, cf.serie AS FacSerie, cf.folio AS FacFolio, cf.razonSocialEm, cf.version AS FacVersion,
