@@ -1,0 +1,1 @@
+"id"	"uuid"	"rfcEmisor"	"RazonSocialEmisor"	"rfcReceptor"	"RazonSocialReceptor"	"fechaEmision"	"fechaTimbre"	"total"	"TipoComprobante"	"estatus"	"fechaCancelacion"

@@ -1,0 +1,1 @@
+"id"	"OC"	"HES"	"tipo"	"motivo"	"estatus"	"idUserReg"	"fechaReg (DateTime)"

@@ -283,7 +283,7 @@ class Compras_Mdl
                     $validaUsuario = "AND c.idProveedor = $idUser";
                 }
 
-                $sql = "SELECT c.id AS acuse, c.claseDocto, c.estatus AS CpaEstatus, c.fechaVal, c.comentRegresa, c.subTotal, c.idCatTipoMoneda AS CpaTipoMoneda,
+                $sql = "SELECT c.id AS acuse, c.sociedad, c.claseDocto, c.estatus AS CpaEstatus, c.fechaVal, c.comentRegresa, c.subTotal, c.idCatTipoMoneda AS CpaTipoMoneda,
                             c.idProveedor, c.notaCredito, c.totalPagos,	c.totalComplementos, c.fechaReg, c.referencia, c.fechaVence AS 'FechaVence', c.fechaProbablePago AS 'FechaProbablePago',
                             dcp.ordenCompra, dcp.noRecepcion,
                             cf.urlPDF AS FacUrlPDF, cf.urlXML AS FacUrlXML, cf.subtotal AS FacSubtotal, cf.monto AS FacMonto, cf.idCatTipoMoneda AS FacTipoMoneda, 
@@ -614,6 +614,89 @@ class Compras_Mdl
             $timestamp = date("Y-m-d H:i:s");
             error_log("[$timestamp] app/Models/compras/Compras_Mdl.php ->Error Al Actualizar Datos De La Factura: " . $e->getMessage() . PHP_EOL, 3, LOG_FILE_BD);
             return ['success' => false, 'message' => 'Error: ' . $e->getMessage()];
+        }
+    }
+
+    public function buscarFacturasPorOC($ordenCompra, $idsNotaCredito = [])
+    {
+        self::$debug = 0;
+        if (self::$debug) {
+            echo "Buscando facturas para la OC: $ordenCompra";
+            echo "<br>Ids de Notas de Crédito a filtrar: ";
+            var_dump($idsNotaCredito);
+        }
+
+        try {
+            if (empty($ordenCompra)) {
+                throw new \Exception('El número de Orden de Compra no puede estar vacío.');
+            }
+
+            // Construir la consulta base
+            $sql = "SELECT DISTINCT
+                        cf.idCompra,
+                        cf.serie,
+                        cf.folio
+                    FROM
+                        detcompras AS dc
+                    INNER JOIN
+                        cfdi_facturas AS cf ON dc.idCompra = cf.idCompra
+                    WHERE
+                        dc.ordenCompra = :ordenCompra AND cf.estatus > 0";
+
+            $params = [':ordenCompra' => $ordenCompra];
+
+            // Si hay políticas de NC disponibles, excluir facturas que ya tienen NC registrada con esos IdNotaCredito
+            // IMPORTANTE: idNCExterno puede contener múltiples IDs separados por coma (ej: "1,2,3")
+            if (!empty($idsNotaCredito) && is_array($idsNotaCredito)) {
+                // Filtrar valores válidos
+                $idsNotaCredito = array_filter(array_map('intval', $idsNotaCredito));
+                
+                if (!empty($idsNotaCredito)) {
+                    // Construir condiciones para cada ID usando FIND_IN_SET
+                    // FIND_IN_SET busca un valor dentro de una lista separada por comas
+                    $findInSetConditions = [];
+                    foreach ($idsNotaCredito as $index => $id) {
+                        $placeholder = ":idNC_" . $index;
+                        $params[$placeholder] = $id;
+                        $findInSetConditions[] = "FIND_IN_SET(" . $placeholder . ", nc.idNCExterno) > 0";
+                    }
+                    
+                    // Excluir facturas que tienen una NC activa con idNCExterno que contiene alguno de los IdNotaCredito
+                    // Usamos NOT EXISTS para verificar que no existe ninguna NC activa con esos idNCExterno
+                    // FIND_IN_SET permite buscar valores dentro de campos que contienen listas separadas por coma
+                    $sql .= " AND NOT EXISTS (
+                        SELECT 1 
+                        FROM cfdi_notasCreditos AS nc 
+                        WHERE nc.idCompra = cf.idCompra 
+                            AND nc.estatus = 1 
+                            AND nc.idNCExterno IS NOT NULL
+                            AND nc.idNCExterno != ''
+                            AND (" . implode(' OR ', $findInSetConditions) . ")
+                    )";
+                }
+            }
+
+            $sql .= " ORDER BY cf.idCompra ASC";
+
+            if (self::$debug) {
+                $this->db->imprimirConsulta($sql, $params, 'Buscar Facturas por OC (filtradas por NC)');
+            }
+
+            $stmt = $this->db->prepare($sql);
+            foreach ($params as $param => $value) {
+                $stmt->bindValue($param, $value, is_int($value) ? PDO::PARAM_INT : PDO::PARAM_STR);
+            }
+            $stmt->execute();
+            $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            return ['success' => true, 'data' => $result];
+        } catch (\Exception $e) {
+            $timestamp = date("Y-m-d H:i:s");
+            error_log("[$timestamp] app/Models/compras/Compras_Mdl.php -> Error en buscarFacturasPorOC: " . $e->getMessage(), 3, LOG_FILE_BD);
+            if (self::$debug) {
+                echo "<br>Error al buscar facturas por OC: " . $e->getMessage();
+            }
+            return ['success' => false, 'message' => 'Problemas al buscar las facturas por OC, notifica a tu administrador.'];
         }
     }
 }

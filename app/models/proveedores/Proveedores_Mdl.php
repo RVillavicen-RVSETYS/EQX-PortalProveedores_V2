@@ -435,6 +435,7 @@ class Proveedores_Mdl
             $sql = "
                 SELECT 
                     p.id AS ProveedorID, 
+                    p.descontarPromocionesAplicables,
                     IFNULL(iDesc.idProveedor, 0) AS IgnoraDescuento, 
                     IFNULL(exanio.idProveedor, 0) AS AnioFiscal, 
                     IFNULL(exemi.idProveedor, 0) AS FechaEmision, 
@@ -484,7 +485,8 @@ class Proveedores_Mdl
                 'FechaEmision' => $result['FechaEmision'] == $idProveedor,
                 'UsoCfdiDistinto' => $result['UsoCfdiDistinto'] == $idProveedor,
                 'UsoCfdi' => $result['UsoCfdi'] ?? null,
-                'BloqDiferenciaMonto' => $result['BloqDiferenciaMonto'] == $idProveedor
+                'BloqDiferenciaMonto' => $result['BloqDiferenciaMonto'] == $idProveedor,
+                'DescontarPromocionesAplicables' => $result['descontarPromocionesAplicables'] == 1
             ];
 
             return ['success' => true, 'message' => 'Todo OK', 'data' => $responseData];

@@ -316,6 +316,17 @@ if ($debug == 1) {
                                                         </div>
                                                     </div>
 
+                                                    <!-- Factura Ingresada (Nuevo campo) -->
+                                                    <div class="form-group row" id="campoFacturaIngresada" style="display: none;">
+                                                        <label for="idCompraNC" class="col-3 col-form-label">Factura Ingresada</label>
+                                                        <div class="col-9">
+                                                            <select class="form-control custom-select" id="idCompraNC" name="idCompraNC" style="width: 100%; height:36px;" required>
+                                                                <option value="">Seleccione una factura...</option>
+                                                            </select>
+                                                            <div class="invalid-feedback" id="invalid_idCompraNC"></div>
+                                                        </div>
+                                                    </div>
+
                                                     <div id="contentNotaCreditoNC">
 
                                                     </div>
@@ -329,7 +340,7 @@ if ($debug == 1) {
 
                                                         <div id="desbloquear-btn1">
                                                             <button type="reset" class="btn btn-danger waves-effect" onclick="resetForm()"><i class="far fa-trash-alt text-white"></i> Limpiar</button>
-                                                            <button type="submit" class="btn btn-success waves-effect waves-light">Carga Factura</button>
+                                                            <button type="submit" class="btn btn-success waves-effect waves-light">Carga Nota de Credito</button>
                                                         </div>
                                                         <div id="bloquear-btn1" style="display: none;">
                                                             <div class="loading text-center"><img src="../assets/images/loadingHorizontal.gif" alt="loading..." /></div>
@@ -444,6 +455,49 @@ if ($debug == 1) {
     <script>
         let lastNotasCredito = [];
 
+        function obtenerFacturas(ordenCompra, politicasNC = []) {
+            const $campoFactura = $('#campoFacturaIngresada');
+            const $selectFactura = $('#idCompraNC');
+            const $invalidMsg = $('#invalid_idCompraNC');
+
+            $selectFactura.empty().append('<option value="">Cargando...</option>');
+            $invalidMsg.html('');
+
+            // Extraer los IdNotaCredito de las políticas disponibles
+            const idsNotaCredito = politicasNC.map(nc => nc.IdNotaCredito || nc.idNotaCredito).filter(id => id);
+
+            $.ajax({
+                type: 'POST',
+                url: 'CargarFacturas/obtenerFacturasPorOC',               
+                data: { 
+                    ordenCompra: ordenCompra,
+                    idsNotaCredito: idsNotaCredito
+                },
+                dataType: 'json',
+                success: function(response) {
+                    $selectFactura.empty(); // Limpiar opciones
+                    if (response.success && response.data.length > 0) {
+                        $selectFactura.append('<option value="">Seleccione una factura...</option>');
+                        response.data.forEach(function(factura) {
+                            // Formato: Acuse: 123 - Folio: A-456
+                            const texto = `Acuse: ${factura.idCompra} - Folio: ${factura.serie || ''}${factura.folio}`;
+                            $selectFactura.append(new Option(texto, factura.idCompra));
+                        });
+                        $campoFactura.show(); // Mostrar el campo
+                    } else {
+                        $selectFactura.append('<option value="">No se encontraron facturas</option>');
+                        $invalidMsg.html(response.message || 'No hay facturas para esta OC.');
+                        $campoFactura.show();
+                    }
+                },
+                error: function() {
+                    $selectFactura.empty().append('<option value="">Error al cargar</option>');
+                    $invalidMsg.html('Error de comunicación con el servidor.');
+                    $campoFactura.hide();
+                }
+            });
+        }
+
         function validaOrdCompra(ordenCompra, tipo) {
             const isFactura = tipo === 'FACT';
             const prefix = isFactura ? '' : 'NC';
@@ -483,10 +537,22 @@ if ($debug == 1) {
                             $contentNota.empty();
                             $btnNota.addClass("d-none");
                             contadorFormNotas = 0;
-                            if (response.anticipo) {
+
+                            // Siempre almacenamos las posibles NC que devuelve la OC
+                            if (response.NC) {
                                 lastNotasCredito = response.NC;
-                                cargarFormNotaCredito(lastNotasCredito, tipo);
-                                $btnNota.removeClass("d-none");
+                            }
+
+                            if (tipo === 'NC') {
+                                // Para Carga de Notas de Crédito, solo obtenemos las facturas.
+                                // El formulario de NC se cargará al seleccionar una factura.
+                                obtenerFacturas(oc.valor, lastNotasCredito);
+                            } else { // tipo === 'FACT'
+                                // Para Carga de Factura normal, verificamos si requiere una NC por anticipo.
+                                if (response.anticipo) {
+                                    cargarFormNotaCredito(lastNotasCredito, tipo);
+                                    $btnNota.removeClass("d-none");
+                                }
                             }
                         } else {
                             validOC = false;
@@ -703,6 +769,25 @@ if ($debug == 1) {
 
         });
 
+        $(document).on('change', '#idCompraNC', function() {
+            const selectedInvoice = $(this).val();
+            const $contentNota = $('#contentNotaCreditoNC');
+            const $btnNota = $('#btnNotaCreditoNC');
+
+            // Limpiar formularios de NC previos
+            $contentNota.empty();
+            $btnNota.addClass("d-none");
+            contadorFormNotas = 0;
+            selectedNoteCreditIds.clear();
+
+            if (selectedInvoice && lastNotasCredito.length > 0) {
+                // Si se selecciona una factura válida y hay políticas de NC disponibles para la OC,
+                // se carga el primer formulario para aplicar la nota de crédito.
+                cargarFormNotaCredito(lastNotasCredito, 'NC');
+                $btnNota.removeClass("d-none");
+            }
+        });
+
         $(document).ready(function() {
             $('.select2').select2();
             let validOC = false;
@@ -723,7 +808,7 @@ if ($debug == 1) {
                     success: function(response) {
                         desbloquearBtn('btn1');
                         if (response.success) {
-                            resetFormulario("Form_CargaFactura");
+                            //resetFormulario("Form_CargaFactura");
                             notificaSucSweet("Excelente!!", response.message);
                         } else {
                             notificaBadSweet("Lo sentimos!!", response.message); // Muestra el mensaje de error
@@ -738,7 +823,7 @@ if ($debug == 1) {
                         desbloquearBtn('btn1');
 
                         // Limpiar los campos Inputs
-                        resetFormulario("Form_CargaFactura");
+                        //resetFormulario("Form_CargaFactura");
                         //window.location.reload();
                         //cargaTablaUltimasFacturas();
                     }
@@ -768,6 +853,54 @@ if ($debug == 1) {
                 }
             });
         }
+
+        $("#Form_CargaNotaCredito").submit(function(e) {
+            e.preventDefault();
+            var formData = new FormData(this);
+            bloquearBtn('btnNC');
+            $.ajax({
+                type: 'POST',
+                url: 'CargarFacturas/registraNuevaNotaCredito',
+                data: formData,
+                dataType: 'json',
+                processData: false,
+                contentType: false,
+                success: function(response) {
+                    desbloquearBtn('btnNC');
+                    if (response.success) {
+                        notificaSucSweet("Excelente!!", response.message);
+                        
+                        // 1. Limpiar formulario estándar
+                        resetFormulario("Form_CargaNotaCredito");
+
+                        // 2. Ocultar y vaciar contenedores dinámicos
+                        $('#campoFacturaIngresada').hide();
+                        $('#contentNotaCreditoNC').empty();
+                        $('#btnNotaCreditoNC').addClass('d-none');
+
+                        // 3. Resetear Select2 y otros campos manualmente
+                        $('#noProveedorNC').val(null).trigger('change');
+                        $('#idCompraNC').empty().append('<option value="">Seleccione una factura...</option>');
+
+                    } else {
+                        notificaBadSweet("Lo sentimos!!", response.message);
+                    }
+                },
+                error: function() {
+                    notificaBad('Error al querer cargar factura. Consulta a tu administrador');
+                    desbloquearBtn('btnNC');
+                },
+                complete: function() {
+                    // Rehabilitar el botón
+                    desbloquearBtn('btnNC');
+
+                    // Limpiar los campos Inputs
+                    resetFormulario("Form_CargaNotaCredito");
+                    //window.location.reload();
+                    //cargaTablaUltimasFacturas();
+                }
+            });
+        });
 
         function cargaTablaUltimasFacturas() {
             $('#cajaResultados').html('<div class="loading text-center"><img src="../assets/images/loading.gif" alt="loading" /><br/>Un momento, por favor...</div>');

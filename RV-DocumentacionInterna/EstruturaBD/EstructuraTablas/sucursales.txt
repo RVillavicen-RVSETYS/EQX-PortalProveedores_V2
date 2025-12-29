@@ -1,0 +1,2 @@
+"id"	"nombre"	"correoSuc"	"codPostal"	"direccion"	"estatus"	"idEmpresa"	"nameCorto"	"nameFact"	"telefono"	"telefono2"
+"1"	"SilmeAgro Bodega"	"ricardo.villavicencio.lpz@gmail.com"	"62740"	"Axochiapan Mor."	"1"	"1"	"Bodega"	"Silme"		

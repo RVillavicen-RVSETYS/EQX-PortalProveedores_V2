@@ -115,4 +115,55 @@ class NotasCredito_Mdl
             return ['success' => false, 'message' => 'Problemas al listar las Notas De Credito, Notifica a tu administrador.'];
         }
     }
+
+    public function obtenerPoliticaPorIdNotaCredito(int $idNotaCredito)
+    {
+        self::$debug = 0; // Silencioso por defecto
+        if (self::$debug) {
+            echo "<br>Buscando política de Nota de Crédito con ID: $idNotaCredito<br>";
+        }
+
+        try {
+            if (empty($idNotaCredito)) {
+                throw new \Exception('El ID de la política no puede estar vacío.');
+            }
+
+            // Usamos la vista del ERP para obtener los datos de la política
+            $sql = "SELECT * FROM vw_ext_PortalProveedores_NotasCredito WHERE IdNotaCredito = :idNotaCredito LIMIT 1";
+            
+            $params = [':idNotaCredito' => $idNotaCredito];
+
+            if (self::$debug) {
+                $this->dbHES->imprimirConsulta($sql, $params, 'Obtener Política NC por ID');
+            }
+
+            $stmt = $this->dbHES->prepare($sql);
+            $stmt->bindValue(':idNotaCredito', $idNotaCredito, PDO::PARAM_INT);
+            $stmt->execute();
+            
+            $politicaResult = $stmt->fetch(PDO::FETCH_ASSOC);
+            $cantResult = $stmt->rowCount();
+
+            if ($cantResult > 0) {
+                if (self::$debug) {
+                    echo '<br>Política encontrada:';
+                    var_dump($politicaResult);
+                }
+                return ['success' => true, 'data' => $politicaResult];
+            } else {
+                if (self::$debug) {
+                    echo '<br>No se encontró la política.';
+                }
+                return ['success' => false, 'message' => 'No se encontró una política de nota de crédito con el ID proporcionado.'];
+            }
+
+        } catch (\Exception $e) {
+            $timestamp = date("Y-m-d H:i:s");
+            error_log("[$timestamp] app/Models/DatosCompra/NotasCredito_Mdl.php -> Error en obtenerPoliticaPorId: " . $e->getMessage(), 3, LOG_FILE_BD);
+            if (self::$debug) {
+                echo "<br>Error al obtener la política de NC: " . $e->getMessage();
+            }
+            return ['success' => false, 'message' => 'Problemas al obtener la política de Nota de Crédito, notifica a tu administrador.'];
+        }
+    }
 }

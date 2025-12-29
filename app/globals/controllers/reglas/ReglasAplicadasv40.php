@@ -1,4 +1,5 @@
 <?php
+
 use App\Models\DatosCFDIs\CFDIs_Mdl;
 
 class ReglasAplicadasv40
@@ -21,7 +22,7 @@ class ReglasAplicadasv40
             return $response;
         }
 
-        if($this->debug == 1) {
+        if ($this->debug == 1) {
             echo "<br>UUID del Timbre Fiscal: " . $dataXML['TimbreFiscal']['UUID'];
             echo "<br>Validamos si la Factura ya existe en la base de datos...";
         }
@@ -32,7 +33,7 @@ class ReglasAplicadasv40
         $obtenerFacturas = $cfdis_Mdl->obtenerFacturasPorUUID($filtrosFact);
         if ($obtenerFacturas['success']) {
             if ($obtenerFacturas['cantRes'] > 0) {
-                if($this->debug == 1) {
+                if ($this->debug == 1) {
                     echo "<br> * ERROR -- El UUID de la Factura ya existe en la base de datos.";
                 }
                 $acuse = $obtenerFacturas['data'][0]['acuse'] ?? 'N/A';
@@ -41,12 +42,12 @@ class ReglasAplicadasv40
                 $response["debug"] = " * ERROR - El UUID dla Factura ya existe en la base de datos.";
                 return $response;
             } else {
-                if($this->debug == 1) {
+                if ($this->debug == 1) {
                     echo "<br> * El UUID de la Factura no existe en la base de datos.";
                 }
             }
         } else {
-            if($this->debug == 1) {
+            if ($this->debug == 1) {
                 echo "<br> * ERROR -- Problemas al verificar si existe el UUID. Notifica a tu Administrador.";
             }
             $response["success"] = false;
@@ -323,43 +324,54 @@ class ReglasAplicadasv40
 
 
         // Validación de Montos
-        $subtotalXML = $dataXML['Comprobante']['SubTotal'] ?? 0;
+        $subtotalXML = $dataXML['Comprobante']['Total'] ?? 0;
         $descuentoXML = $dataXML['Comprobante']['Descuento'] ?? 0;
         $ignoraDescuento = $configParaValidaciones['excepcionesProveedor']['IgnoraDescuento'] ?? false;
         if (!$ignoraDescuento) {
             $subtotalXML = $subtotalXML - $descuentoXML;
         }
 
-        // Preparación de Subtotal para SilmeAgro donde al subtotal le restamos los porcentaje promocionales aplicables para comparar con el valor de la OC
-        if (isset($configParaValidaciones['notasCreditos']) && is_array($configParaValidaciones['notasCreditos'])) {
-            $sumaMontoDescuentos = 0;
-            foreach ($configParaValidaciones['notasCreditos'] as $notaCredito) {
-                if ($notaCredito['idPoliticaComercial'] > 0) {
-                    if ($this->debug == 1) {
-                        echo "<br>Aplicando nota de crédito: " . $notaCredito['IdNotaCredito']. " por ". $notaCredito['Descripcion'];
-                    }
-                    if ($notaCredito['TipoDescuento'] == 'AMOUNT') {
-                        // Aplicar descuento por monto
-                        $montoDescuento = $notaCredito['ValorDescuento'] ?? 0;
-                        $subtotalXML -= $montoDescuento;
-                        $debugMessages[] = "<br>* OK - $ Descuento aplicado $ $montoDescuento por nota de crédito: <b>$ $montoDescuento</b> al subtotal <b>$subtotalXML</b>.";
-                        $sumaMontoDescuentos += $montoDescuento;
-                    
-                    } elseif ($notaCredito['TipoDescuento'] == 'PERCENT') {
-                        // Aplicar descuento porcentual
-                        $porcentajeDescuento = $notaCredito['ValorDescuento'] ?? 0;
-                        $montoDescuento = ($subtotalXML * ($porcentajeDescuento / 100));
-                        $subtotalXML -= $montoDescuento;
+        // Aplicar descuentos por notas de crédito si aplica. NOTA IMPORTANTE: Esto es sólo para SilmeAgro vimos que hay facturas donde 
+        //   descuentan el valor de las notas de credito y hay veces que no como el caso de INNOVAK que la factura entra normal .
+        if (isset($configParaValidaciones['descontarPromocionesAplicables']) && $configParaValidaciones['descontarPromocionesAplicables']) {
+            $debugMessages[] = "<br>* Proveedor con configuración para descontar promociones aplicables.";
+
+            // Preparación de Subtotal para SilmeAgro donde al subtotal le restamos los porcentaje promocionales aplicables para comparar con el valor de la OC
+            if (isset($configParaValidaciones['notasCreditos']) && is_array($configParaValidaciones['notasCreditos'])) {
+                $sumaMontoDescuentos = 0;
+                foreach ($configParaValidaciones['notasCreditos'] as $notaCredito) {
+
+                    if ($notaCredito['idPoliticaComercial'] > 0 && $notaCredito['FormaCobro'] == 'NC') {
                         if ($this->debug == 1) {
-                            echo "<br>Aplicando descuento $porcentajeDescuento %: $" . $montoDescuento;
+                            echo "<br>Aplicando nota de crédito: " . $notaCredito['IdNotaCredito'] . " por " . $notaCredito['Descripcion'];
                         }
-                        $debugMessages[] = "<br>* OK - % Descuento aplicado $porcentajeDescuento % por nota de crédito: <b>$ $montoDescuento</b> al subtotal <b>$subtotalXML</b>.";
-                        $sumaMontoDescuentos += $montoDescuento;
+                        if ($notaCredito['TipoDescuento'] == 'AMOUNT') {
+                            // Aplicar descuento por monto
+                            $montoDescuento = $notaCredito['ValorDescuento'] ?? 0;
+                            $subtotalXML -= $montoDescuento;
+                            $debugMessages[] = "<br>* OK - $ Descuento aplicado $ $montoDescuento por nota de crédito: <b>$ $montoDescuento</b> al subtotal <b>$subtotalXML</b>.";
+                            $sumaMontoDescuentos += $montoDescuento;
+                        } elseif ($notaCredito['TipoDescuento'] == 'PERCENT') {
+                            // Aplicar descuento porcentual
+                            $porcentajeDescuento = $notaCredito['ValorDescuento'] ?? 0;
+                            $montoDescuento = ($subtotalXML * ($porcentajeDescuento / 100));
+                            $subtotalXML -= $montoDescuento;
+                            if ($this->debug == 1) {
+                                echo "<br>Aplicando descuento $porcentajeDescuento %: $" . $montoDescuento;
+                            }
+                            $debugMessages[] = "<br>* OK - % Descuento aplicado $porcentajeDescuento % por nota de crédito: <b>$ $montoDescuento</b> al subtotal <b>$subtotalXML</b>.";
+                            $sumaMontoDescuentos += $montoDescuento;
+                        }
                     }
                 }
             }
+            $debugMessages[] = "<br>* Subtotal XML después de aplicar descuentos: <b>$subtotalXML</b>.";
+            
+        } else {
+            $debugMessages[] = "<br>* Proveedor sin configuración para descontar promociones aplicables.";
         }
-        $debugMessages[] = "<br>* Subtotal XML después de aplicar descuentos: <b>$subtotalXML</b>.";
+
+        
 
         $subtotalConfig = $configParaValidaciones['datosRecepciones']['Subtotal'] ?? 0;
         $bloqDiferencia = $configParaValidaciones['excepcionesProveedor']['BloqDiferenciaMonto'] ?? false;
@@ -416,7 +428,6 @@ class ReglasAplicadasv40
 
     public function validarReglasInternasNacional_Pagos($dataProveedor, $dataEmpresa, $dataXML, $dataCompras, $configParaValidaciones = [])
     {
-        $this->debug = 1; // Cambia esto a 0 para desactivar el modo de depuración
         $response = [
             "success" => true,
             "message" => "",
@@ -485,7 +496,7 @@ class ReglasAplicadasv40
             return $response;
         }
 
-        if($this->debug == 1) {
+        if ($this->debug == 1) {
             echo "<br>UUID del Timbre Fiscal: " . $dataXML['TimbreFiscal']['UUID'];
             echo "<br>Validamos si el Complemento de Pago ya existe en la base de datos...";
         }
@@ -496,7 +507,7 @@ class ReglasAplicadasv40
         $obtenerCompDePago = $cfdis_Mdl->obtenerComplementosDePago($filtrosComplemento);
         if ($obtenerCompDePago['success']) {
             if ($obtenerCompDePago['cantRes'] > 0) {
-                if($this->debug == 1) {
+                if ($this->debug == 1) {
                     echo "<br> * ERROR -- El UUID del complemento de pago ya existe en la base de datos.";
                 }
                 $fechaRegistro = $obtenerCompDePago['data'][0]['fechaReg'] ?? 'N/A';
@@ -505,12 +516,12 @@ class ReglasAplicadasv40
                 $response["debug"] = " * ERROR - El UUID del complemento de pago ya existe en la base de datos.";
                 return $response;
             } else {
-                if($this->debug == 1) {
+                if ($this->debug == 1) {
                     echo "<br> * El UUID del complemento de pago no existe en la base de datos.";
                 }
             }
         } else {
-            if($this->debug == 1) {
+            if ($this->debug == 1) {
                 echo "<br> * ERROR -- Problemas al verificar si existe el UUID. Notifica a tu Administrador.";
             }
             $response["success"] = false;
@@ -671,23 +682,21 @@ class ReglasAplicadasv40
         return $response;
     }
 
-    public function validarReglasNegocioNacional_Pagos($dataXML, $dataCompras, $dataPagos, $configParaValidaciones = []) 
+    public function validarReglasNegocioNacional_Pagos($dataXML, $dataCompras, $dataPagos, $configParaValidaciones = [])
     {
-        $this->debug = 1; // Cambia esto a 0 para desactivar el modo de depuración
-        
         $response = [
             "success" => false,
             "message" => "",
             "isValid" => false,
             "debug"   => ""
         ];
-    
+
         $excepcionesDisponibles = [
             'NoValidarPagos',
             'NoValidarFechasPago',
             'NoValidarFormasPago'
         ];
-    
+
         // Validar que las excepciones estén definidas
         if (isset($configParaValidaciones['Excepciones']) && is_array($configParaValidaciones['Excepciones'])) {
             foreach ($configParaValidaciones['Excepciones'] as $excepcion => $valor) {
@@ -698,14 +707,14 @@ class ReglasAplicadasv40
                 }
             }
         }
-    
+
         $errores = [];
-    
+
         // Debug inicio de validación
         if ($this->debug == 1) {
             echo "<br>=== Inicia Validación de Reglas de Negocio Nacional - Pagos ===<br>";
         }
-    
+
         // 1) Agrupar $dataPagos por uuid
         if ($this->debug == 1) {
             echo "<br>Agrupando \$dataPagos por uuid...";
@@ -733,7 +742,7 @@ class ReglasAplicadasv40
         if ($this->debug == 1) {
             echo "<br> * Pagos agrupados: " . count($pagosGrouped) . " uuid(s).<br>";
         }
-    
+
         // 2) Agrupar XML por IdDocumento
         if ($this->debug == 1) {
             echo "<br>Agrupando datos del XML por IdDocumento...";
@@ -766,7 +775,7 @@ class ReglasAplicadasv40
         if ($this->debug == 1) {
             echo "<br> * XML agrupado: " . count($xmlGrouped) . " documento(s).<br>";
         }
-    
+
         // 3) Comparar cada documento
         if ($this->debug == 1) {
             echo "<br> Inicia Comparación por Documento...<br>";
@@ -791,23 +800,23 @@ class ReglasAplicadasv40
                     'fechas' => false,
                 ],
             ];
-    
+
             if (isset($pagosGrouped[$docId])) {
                 $pagoData = $pagosGrouped[$docId];
                 $out['montoPago']  = round($pagoData['monto'], 2);
                 $out['monedaPago'] = $pagoData['moneda'];
                 $out['formasPago'] = $pagoData['formas'];
                 $out['fechasPago'] = $pagoData['fechas'];
-    
+
                 if ($this->debug == 1) {
                     echo " * Monto XML: {$out['montoXML']} vs Pago: {$out['montoPago']}<br>";
                     echo " * Moneda XML: {$out['monedaXML']} vs Pago: {$out['monedaPago']}<br>";
                     echo " * Formas XML: [" . implode(',', $out['formasXML']) . "] vs Pago: [" . implode(',', $out['formasPago']) . "]" .
-                     (!empty($configParaValidaciones['Excepciones']['NoValidarFormasPago']) ? " <b>*** Aplica Excepción</b>" : "") . "<br>";
+                        (!empty($configParaValidaciones['Excepciones']['NoValidarFormasPago']) ? " <b>*** Aplica Excepción</b>" : "") . "<br>";
                     echo " * Fechas XML: [" . implode(',', $out['fechasXML']) . "] vs Pago: [" . implode(',', $out['fechasPago']) . "]" .
-                     (!empty($configParaValidaciones['Excepciones']['NoValidarFechasPago']) ? " <b>*** Aplica Excepción</b>" : "") . "<br>";
+                        (!empty($configParaValidaciones['Excepciones']['NoValidarFechasPago']) ? " <b>*** Aplica Excepción</b>" : "") . "<br>";
                 }
-    
+
                 // Validaciones
                 $out['coincide']['monto']  = ($out['montoPago']  === $out['montoXML']);
                 $out['coincide']['moneda'] = ($out['monedaPago'] === $out['monedaXML']);
@@ -817,19 +826,21 @@ class ReglasAplicadasv40
                 sort($out['fechasPago']);
                 sort($out['fechasXML']);
                 $out['coincide']['fechas'] = ($out['fechasPago'] === $out['fechasXML']);
-    
+
                 if (!$out['coincide']['monto']) {
                     $errores[] = "* UUID {$docId}: monto XML ({$out['montoXML']}) ≠ pago ({$out['montoPago']}).";
                 }
                 if (!$out['coincide']['moneda']) {
                     $errores[] = "* UUID {$docId}: moneda XML ({$out['monedaXML']}) ≠ pago ({$out['monedaPago']}).";
                 }
-                if (!$out['coincide']['formas'] 
+                if (
+                    !$out['coincide']['formas']
                     && empty($configParaValidaciones['Excepciones']['NoValidarFormasPago'])
                 ) {
                     $errores[] = "* UUID {$docId}: formas diferentes: XML=[" . implode(',', $out['formasXML']) . "] vs pago=[" . implode(',', $out['formasPago']) . "].";
                 }
-                if (!$out['coincide']['fechas'] 
+                if (
+                    !$out['coincide']['fechas']
                     && empty($configParaValidaciones['Excepciones']['NoValidarFechasPago'])
                 ) {
                     $errores[] = "* UUID {$docId}: fechas diferentes: XML=[" . implode(',', $out['fechasXML']) . "] vs pago=[" . implode(',', $out['fechasPago']) . "].";
@@ -841,7 +852,7 @@ class ReglasAplicadasv40
                 $errores[] = "* UUID {$docId} presente en XML pero sin pagos asociados.";
             }
         }
-    
+
         // 4) Detectar UUID extras en dataPagos
         if ($this->debug == 1) {
             echo "<br>--> Detectando UUID en pagos no presentes en XML...<br>";
@@ -853,7 +864,7 @@ class ReglasAplicadasv40
             }
             $errores[] = " * UUID {$uuidExtra} presente en pagos pero no en el XML.";
         }
-    
+
         // 5) Fin validación
         if ($this->debug == 1) {
             echo "<br>=== Fin Validación de Pagos. Errores encontrados: " . count($errores) . " ===<br>";
@@ -863,18 +874,18 @@ class ReglasAplicadasv40
         if ($this->debug == 1) {
             echo "<br>=== Inicia Validación de XML - Facturas ===<br>";
         }
-        
+
         // Aquí podrías iniciar la validación del complemento contra los datos de las facturas
         // que vienen en $dataCompras.
-        
+
         foreach ($dataCompras as $factura) {
             $uuidFactura = $factura['uuid'];
             $monedaFactura = $factura['idCatTipoMoneda'];
-        
+
             if ($this->debug == 1) {
                 echo "<br>---- Validando Factura UUID: $uuidFactura ----<br>";
             }
-        
+
             if (!isset($xmlGrouped[$uuidFactura])) {
                 $errores[] = "* La factura con UUID $uuidFactura no está presente en el XML del complemento de pago.";
                 if ($this->debug == 1) {
@@ -882,11 +893,11 @@ class ReglasAplicadasv40
                 }
             } else {
                 $xmlMoneda = $xmlGrouped[$uuidFactura]['moneda'];
-        
+
                 if ($this->debug == 1) {
                     echo " * Moneda en Factura: $monedaFactura vs Moneda en XML: $xmlMoneda<br>";
                 }
-        
+
                 if ($monedaFactura !== $xmlMoneda) {
                     $errores[] = "* La moneda de la factura UUID $uuidFactura no coincide con la del complemento. Factura: $monedaFactura, XML: $xmlMoneda.";
                     if ($this->debug == 1) {
@@ -895,7 +906,7 @@ class ReglasAplicadasv40
                 }
             }
         }
-        
+
         // Validar si algún UUID en el XML no existe en las facturas cargadas
         $uuidsFacturas = array_column($dataCompras, 'uuid');
         foreach (array_keys($xmlGrouped) as $uuidXML) {
@@ -915,7 +926,7 @@ class ReglasAplicadasv40
         if ($this->debug == 1) {
             echo "<br>=== Fin Validación de Reglas de Negocio Nacional - Facturas. Errores encontrados: " . count($errores) . " ===<br>";
         }
-    
+
         // Generar mensaje final
         if (count($errores) > 0) {
             $response['success'] = false;
@@ -926,9 +937,289 @@ class ReglasAplicadasv40
             $response['message'] = "Todo OK";
             $response['debug']   = "No se encontraron errores.";
         }
-    
+
         return $response;
     }
-    
-    
+
+    public function validarReglasInternasNacional_Egresos($dataProveedor, $dataEmpresa, $dataXML)
+    {
+        $response = [
+            "success" => true,
+            "message" => "",
+            "isValid" => true,
+            "debug" => ""
+        ];
+
+        if ($this->debug == 1) {
+            echo "<br>=======================<br>Inicia Validación de Reglas Internas Nacional Egresos...<br>";
+        }
+
+        // Validaciones de los arreglos de entrada
+        if (!is_array($dataProveedor) || empty($dataProveedor)) {
+            $response["success"] = false;
+            $response["message"] = "No hay datos del proveedor.";
+            $response["isValid"] = false;
+            return $response;
+        }
+
+        if (!is_array($dataEmpresa) || empty($dataEmpresa)) {
+            $response["success"] = false;
+            $response["message"] = "No hay datos de la empresa.";
+            $response["isValid"] = false;
+            return $response;
+        }
+
+        if (!is_array($dataXML) || empty($dataXML)) {
+            $response["success"] = false;
+            $response["message"] = "No hay datos del XML.";
+            $response["isValid"] = false;
+            return $response;
+        }
+
+        // 1. VALIDAR QUE EL UUID DE LA NOTA DE CRÉDITO NO EXISTA EN LA BD
+        if (empty($dataXML['TimbreFiscal']['UUID'])) {
+            $response["message"] = "El nodo UUID del Timbre Fiscal no existe o está vacío en la Nota de Crédito.";
+            $response["isValid"] = false;
+            return $response;
+        }
+
+        if ($this->debug == 1) {
+            echo "<br> * Verifica si el UUID de la Nota de Crédito ya esta en la BD: " . $dataXML['TimbreFiscal']['UUID'];
+        }
+
+        $cfdis_Mdl = new CFDIs_Mdl();
+        $filtrosNC = [
+            'uuids' => $dataXML['TimbreFiscal']['UUID'] ?? null,
+        ];
+        // Llamamos a la nueva función correcta
+        $obtenerNC = $cfdis_Mdl->obtenerNotasCredito($filtrosNC);
+
+        if ($obtenerNC['success']) {
+            if ($obtenerNC['cantRes'] > 0) {
+                if ($this->debug == 1) {
+                    echo "<br> <b>* ERROR -- El UUID de la Nota de Crédito ya existe en la base de datos.</b>";
+                }
+                // Línea corregida según tu solicitud
+                $acuse = $obtenerNC['data'][0]['idCompra'] ?? 'N/A';
+                $identificadorNc = $obtenerNC['data'][0]['id'] ?? 'N/A';
+                $response["success"] = false;
+                $response["isValid"] = false;
+                $response["message"] = "Esta Nota de Crédito ya fue registrada previamente en el acuse: {$acuse}. Identificador: {$identificadorNc}.";
+                return $response;
+            } else {
+                if ($this->debug == 1) {
+                    echo "<br> * OK - El UUID de la Nota de Crédito no existe en la base de datos. Se puede continuar.";
+                }
+            }
+        } else {
+            $response["success"] = false;
+            $response["isValid"] = false;
+            $response["message"] = "Problemas al verificar si existe el UUID de la Nota de Crédito. Notifica a tu Administrador.";
+            return $response;
+        }
+
+        // 2. VALIDACIONES DE DATOS (PROVEEDOR, EMPRESA, XML)
+        $errorMessages = [];
+
+        // Validar Emisor RFC
+        $rfcEmisor = mb_strtoupper($dataXML['Emisor']['Rfc'] ?? '', 'UTF-8');
+        $rfcProveedor = mb_strtoupper($dataProveedor['RFC'] ?? '', 'UTF-8');
+        if ($rfcEmisor !== $rfcProveedor) {
+            if ($this->debug == 1) {
+                echo "<br> <b>* ERROR -- RFC Emisor: $rfcEmisor vs Proveedor: $rfcProveedor</b>";
+            }
+            $response["isValid"] = false;
+            $errorMessages[] = "* El RFC del emisor no coincide. Se esperaba <b>$rfcProveedor</b>, pero se recibió <b> $rfcEmisor</b>.<br>";
+        } elseif ($this->debug == 1) {
+            echo "<br> * OK - RFC Emisor: $rfcEmisor vs Proveedor: $rfcProveedor";
+        }
+
+        // Validar Emisor RazonSocial
+        $razonEmisor = mb_strtoupper($dataXML['Emisor']['Nombre'] ?? '', 'UTF-8');
+        $razonProveedor = mb_strtoupper($dataProveedor['RazonSocial'] ?? '', 'UTF-8');
+        if ($razonEmisor !== $razonProveedor) {
+            if ($this->debug == 1) {
+                echo "<br> <b>* ERROR -- Razon Social Emisor: $razonEmisor vs Proveedor: $razonProveedor</b>";
+            }
+            $response["isValid"] = false;
+            $errorMessages[] = "* La Razón Social del emisor no coincide. Se esperaba <b>$razonProveedor</b>, pero se recibió <b>$razonEmisor</b>.<br>";
+        } elseif ($this->debug == 1) {
+            echo "<br> * OK - Razon Social Emisor: $razonEmisor vs Proveedor: $razonProveedor";
+        }
+
+        // Validar Receptor RFC
+        $rfcReceptor = mb_strtoupper($dataXML['Receptor']['Rfc'] ?? '', 'UTF-8');
+        $rfcEmpresa = mb_strtoupper($dataEmpresa['rfc'] ?? '', 'UTF-8');
+        if ($rfcReceptor !== $rfcEmpresa) {
+            if ($this->debug == 1) {
+                echo "<br> <b>* ERROR -- RFC Receptor: $rfcReceptor vs Empresa: $rfcEmpresa</b>";
+            }
+            $response["isValid"] = false;
+            $errorMessages[] = "* El RFC del receptor no coincide. Se esperaba <b>$rfcEmpresa</b>, pero se recibió <b> $rfcReceptor</b>.<br>";
+        } elseif ($this->debug == 1) {
+            echo "<br> * OK - RFC Receptor: $rfcReceptor vs Empresa: $rfcEmpresa";
+        }
+
+        // Validar Receptor Razón Social
+        $razonReceptor = mb_strtoupper($dataXML['Receptor']['Nombre'] ?? '', 'UTF-8');
+        $razonEmpresa = mb_strtoupper($dataEmpresa['razonSocial'] ?? '', 'UTF-8');
+        if ($razonReceptor !== $razonEmpresa) {
+            if ($this->debug == 1) {
+                echo "<br> <b>* ERROR -- Razon Social Receptor: $razonReceptor vs Empresa: $razonEmpresa</b>";
+            }
+            $response["isValid"] = false;
+            $errorMessages[] = "* La Razón Social del receptor no coincide. Se esperaba <b>$razonEmpresa</b>, pero se recibió <b>$razonReceptor</b>.<br>";
+        } elseif ($this->debug == 1) {
+            echo "<br> * OK - Razon Social Receptor: $razonReceptor vs Empresa: $razonEmpresa";
+        }
+
+        // Generar mensaje final
+        if (!empty($errorMessages)) {
+            $response["message"] = implode("", $errorMessages);
+        } else {
+            $response["message"] = "Validaciones internas de la Nota de Crédito OK.";
+        }
+
+        return $response;
+    }
+
+    public function validarReglasNegocioNacional_Egresos($dataXML, $configParaValidaciones)
+    {
+        $response = [
+            "success" => false, // Se inicia en false. Solo se pondrá en true al final.
+            "message" => "La función de validación de negocio no se completó.", // Mensaje por defecto
+            "isValid" => false, // Se inicia en false por seguridad
+            "debug" => ""
+        ];
+
+        if ($this->debug == 1) {
+            echo "<br><br>=======================<br>Inicia Validación de Reglas Internas Nacional Egresos...<br>";
+        }
+
+        // Validar entradas
+        if (!is_array($dataXML) || empty($dataXML)) {
+            $response["message"] = "* No hay datos del XML de la Nota de Crédito.";
+            return $response;
+        }
+
+        if (!is_array($configParaValidaciones) || empty($configParaValidaciones)) {
+            $response["message"] = "* La configuración para las validaciones no está disponible.";
+            return $response;
+        }
+
+        $errorMessages = [];
+        $debugMessages = [];
+
+        // 1. Validar el Tipo de CFDI
+        $tipoDeComprobante = $dataXML['Comprobante']['TipoDeComprobante'] ?? '';
+        if ($tipoDeComprobante !== 'E') {
+            if ($this->debug == 1) {
+                echo "<br> <b>* ERROR -- El CFDI no es de Egreso, es tipo $tipoDeComprobante.</b>";
+            }
+            $errorMessages[] = "* El CFDI no es de Egreso, es tipo <b>$tipoDeComprobante</b>.<br>";
+        } else {
+            if ($this->debug == 1) {
+                echo "<br> * OK - El CFDI es de Egreso. Tipo <b>$tipoDeComprobante</b>.";
+            }
+            $debugMessages[] = "OK - Tipo de Comprobante: <b>$tipoDeComprobante</b>.";
+        }
+
+        // 2. Validar el Uso de CFDI
+        $usoCFDI = $dataXML['Receptor']['UsoCFDI'] ?? '';
+        if ($usoCFDI !== 'G02') {
+            if ($this->debug == 1) {
+                echo "<br> <b>* ERROR -- El Uso del CFDI debe ser 'G02', pero se recibió $usoCFDI.</b>";
+            }
+            $errorMessages[] = "* El Uso del CFDI debe ser 'G02' (Devoluciones, descuentos o bonificaciones), pero se recibió <b>$usoCFDI</b>.<br>";
+        } else {
+            if ($this->debug == 1) {
+                echo "<br> * OK - El Uso del CFDI es correcto: <b>$usoCFDI</b>.";
+            }
+            $debugMessages[] = "OK - Uso de CFDI: <b>$usoCFDI</b>.";
+        }
+
+        // 3. Validar CFDI Relacionado
+        $uuidFacturaOriginal = $configParaValidaciones['facturaOriginal']['FacUUID'] ?? null;
+        $relacionEncontrada = false;
+
+        if (empty($dataXML['CfdiRelacionados']) || !is_array($dataXML['CfdiRelacionados'])) {
+            $errorMessages[] = "* La Nota de Crédito no tiene una sección 'CfdiRelacionados', la cual es obligatoria.<br>";
+        } else {
+            // Recorremos todos los nodos de 'CfdiRelacionados'
+            foreach ($dataXML['CfdiRelacionados'] as $relacion) {
+                // Buscamos específicamente el tipo de relación '01'
+                if (isset($relacion['TipoRelacion']) && $relacion['TipoRelacion'] === '01') {
+                    // Verificamos si el UUID de la factura original está en la lista de UUIDs de esta relación
+                    // Convertir todos los UUIDs relacionados a mayúsculas para una comparación case-insensitive
+                    $uuidsRelacionadosMayusculas = array_map('strtoupper', $relacion['UUIDs']);
+                    if (!empty($uuidsRelacionadosMayusculas) && is_array($uuidsRelacionadosMayusculas) && in_array(strtoupper($uuidFacturaOriginal), $uuidsRelacionadosMayusculas)) {
+                        $relacionEncontrada = true;
+                        break; // Salimos del bucle una vez que encontramos la relación correcta
+                    }
+                }
+            }
+
+            if ($relacionEncontrada) {
+                if ($this->debug == 1) {
+                    echo "<br> * OK - La Nota de Crédito está correctamente relacionada (<b>Tipo 01</b>) con la factura original (<b>$uuidFacturaOriginal</b>).";
+                }
+                $debugMessages[] = "OK - CFDI Relacionado: La NC apunta correctamente a la factura <b>$uuidFacturaOriginal</b>.";
+            } else {
+                if ($this->debug == 1) {
+                    echo "<br> <b>* ERROR -- No se encontró la relación de Tipo '01' con el UUID de la factura original ($uuidFacturaOriginal).</b>";
+                }
+                $errorMessages[] = "* La Nota de Crédito no está relacionada correctamente con la factura original (UUID: <b>$uuidFacturaOriginal</b>, Tipo de Relación: <b>01</b>).<br>";
+            }
+        }
+
+        // 4. Validar Montos
+        $totalNC = (float)($dataXML['Comprobante']['Total'] ?? 0);
+        $idCompraOriginal = $configParaValidaciones['facturaOriginal']['acuse'];
+
+        // Obtener los totales actualizados de la compra
+        $cfdis_Mdl = new CFDIs_Mdl();
+        $totalesCompra = $cfdis_Mdl->obtenerTotalesPorCompra($idCompraOriginal);
+
+        if (!$totalesCompra['success']) {
+            if ($this->debug == 1) {
+                echo "<br> <b>* ERROR -- No se pudo calcular el saldo de la factura original para validar la Nota de Crédito.</b>";
+            }
+            $errorMessages[] = "* No se pudo calcular el saldo de la factura original para validar la Nota de Crédito.<br>";
+        } else {
+            if ($this->debug == 1) {
+                echo "<br> * OK - Totales de la factura original obtenidos correctamente.";
+            }
+            $saldoReal = (float)($totalesCompra['data']['saldoCalculado'] ?? 0);
+            $saldoReal_f = number_format($saldoReal, 2);
+            $debugMessages[] = "OK - Saldo Real de la Factura: $ $saldoReal_f (<b>Total: {$totalesCompra['data']['totalFactura']} - NCs: {$totalesCompra['data']['totalNotasCredito']} - Pagos: {$totalesCompra['data']['totalPagado']}</b>).";
+
+            if ($totalNC > $saldoReal) {
+                $totalNC_f = number_format($totalNC, 2);
+                $saldoReal_f = number_format($saldoReal, 2);
+                if ($this->debug == 1) {
+                    echo "<br> <b>* ERROR -- El total de la Nota de Crédito ($$totalNC_f) es mayor al saldo pendiente de la factura original ($$saldoReal_f).</b>";
+                }
+                $errorMessages[] = "* El total de la Nota de Crédito (<b>$$totalNC_f</b>) no puede ser mayor al saldo pendiente de la factura original (<b>$$saldoReal_f</b>).<br>";
+            } else {
+                if ($this->debug == 1) {
+                    echo "<br> * OK - El total de la Nota de Crédito (<b>$$totalNC</b>) es válido contra el saldo de la factura (<b>$$saldoReal_f</b>).";
+                }
+                $debugMessages[] = "OK - Montos: El total de la NC es válido contra el saldo de la factura.";
+            }
+        }
+
+        // --- Evaluación Final ---
+        if (empty($errorMessages)) {
+            // Solo si no hubo errores, la validación es exitosa
+            $response["isValid"] = true;
+            $response["message"] = "Validaciones de negocio de la Nota de Crédito OK.";
+        } else {
+            // Si hubo errores, se mantiene isValid = false y se listan los problemas
+            $response["message"] = implode("", $errorMessages);
+        }
+        
+        $response["debug"] = implode("<br>", $debugMessages);
+        $response["success"] = true; // La función se ejecutó completamente
+        return $response;
+    }
 }

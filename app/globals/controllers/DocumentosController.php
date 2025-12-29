@@ -44,9 +44,9 @@ class DocumentosController extends Controller
             'message' => '',
             'data' => []
         ];
-        $this->debug = 0;
 
         if ($this->debug == 1) {
+            echo "<br> ================================= <br>Iniciando almacenaCFDI en DocumentosController<br>";
             echo "<br>Temporal Name Recibido: {$tmpName}<br>";
             echo "Empresa: {$empresa}<br>";
             echo "Tipo de Documento: {$tipoDocto}<br>";

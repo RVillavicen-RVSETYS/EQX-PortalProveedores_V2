@@ -1,0 +1,2 @@
+"IdFactura"	"Acuse"	"UUID"	"Serie"	"Folio"	"OC"	"TotalOC"	"HES"	"TotalHes"	"Tipo"	"Proveedor"	"FechaLimite"	"Factura"	"FechaRecepcion"	"TotalFactura"	"Moneda"	"IdProveedor"	"EstatusFinal"
+"4"	"4"	"3899B561-E8CB-443B-B8F6-CB4992F5ADE6"	"A"	"1952"	"COM-BDG-003185"	"523500"	"HES-BDG-003156"	"523500"	"WE"	"DESARROLLADORA AGRICOLA DE ORIENTE"	"26/10/2025"	"A1952"	"2025-07-28"	"523500"	"MXN"	"100144"	"0"

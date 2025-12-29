@@ -1,0 +1,8 @@
+"id"	"corto"	"descripcion"	"color"	"estatus"
+"1"	"08"	"08 Dias"	"danger"	"1"
+"2"	"15"	"15 Dias"	"primary-light"	"1"
+"3"	"21"	"21 Dias"	"warning"	"1"
+"4"	"30"	"30 Dias"	"accent-dark"	"1"
+"5"	"45"	"45 Dias"	"primary-dark"	"1"
+"6"	"Devueltos"	"Devueltos"	"accent-light"	"1"
+"7"	"Pendiente"	"Pendiente"	"default-light"	"1"
