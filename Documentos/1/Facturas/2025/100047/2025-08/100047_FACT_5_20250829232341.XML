@@ -1,0 +1,37 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<cfdi:Comprobante xmlns:cfdi="http://www.sat.gob.mx/cfd/4" xmlns:tfd="http://www.sat.gob.mx/TimbreFiscalDigital" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" Certificado="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" CondicionesDePago="With 8.5% Cash discount" Descuento="0" Exportacion="01" Fecha="2025-06-20T15:01:21" Folio="0061316935" FormaPago="99" LugarExpedicion="03920" MetodoPago="PPD" Moneda="MXN" NoCertificado="00001000000516596258" Sello="nXqz5FOk06HBDwlv1kr6bQBDj5/BG9XzPrGIr91AhaKWt2FmX4D5mn/GNkjZQlYmQBPRNQd2ztl1ZK2xtRwxseujAoTVWO5lXyow/WdowLrnnzI/kJBIiEJR8OArTnKK6SfwmEsEQKeP7SnMm6evZamz6JtuTDDxN/jJUyHm4OuiaWkjL1XIrJgYp53CK7CTwgp7ZBdRWySePjHOGfkJRPVk7XzxPz570mDhBLThQqZWN6GwYtSiDeaMfLfbJLdHUjc3bKfEWuP8VbXUmtWx1d5qyr6izMS8EL1WcKmEJosxLF0WGiG93J7+sjk88aVJHk0nDY3aa2a8XvORlNuGQQ==" Serie="A" SubTotal="234356.48" TipoDeComprobante="I" Total="248417.87" Version="4.0" xsi:schemaLocation="http://www.sat.gob.mx/cfd/4 http://www.sat.gob.mx/sitio_internet/cfd/4/cfdv40.xsd">
+    <cfdi:Emisor Nombre="SYNGENTA AGRO" RegimenFiscal="601" Rfc="SAG9704042R4" />
+    <cfdi:Receptor DomicilioFiscalReceptor="62950" Nombre="FERTYAGRO DE MORELOS" RegimenFiscalReceptor="601" Rfc="FMO2111062N8" UsoCFDI="G01" />
+    <cfdi:Conceptos>
+        <cfdi:Concepto Cantidad="14" ClaveProdServ="10171700" ClaveUnidad="XBX" Descripcion="GESAPRIM COMBI 12X1 L MXA" Descuento="0.00" Importe="48193.04" NoIdentificacion="72948" ObjetoImp="02" Unidad="BX" ValorUnitario="3442.36">
+            <cfdi:Impuestos>
+                <cfdi:Traslados>
+                    <cfdi:Traslado Base="48193.04" Importe="2891.58" Impuesto="003" TasaOCuota="0.060000" TipoFactor="Tasa" />
+                    <cfdi:Traslado Base="51084.62" Importe="0.00" Impuesto="002" TasaOCuota="0.000000" TipoFactor="Tasa" />
+                </cfdi:Traslados>
+            </cfdi:Impuestos>
+        </cfdi:Concepto>
+        <cfdi:Concepto Cantidad="88" ClaveProdServ="10171700" ClaveUnidad="XBX" Descripcion="HIERBAMINA 47.9% WS 12X0.95 L MXA" Descuento="0.00" Importe="109804.64" NoIdentificacion="68779" ObjetoImp="02" Unidad="BX" ValorUnitario="1247.78">
+            <cfdi:Impuestos>
+                <cfdi:Traslados>
+                    <cfdi:Traslado Base="109804.64" Importe="6588.28" Impuesto="003" TasaOCuota="0.060000" TipoFactor="Tasa" />
+                    <cfdi:Traslado Base="116392.92" Importe="0.00" Impuesto="002" TasaOCuota="0.000000" TipoFactor="Tasa" />
+                </cfdi:Traslados>
+            </cfdi:Impuestos>
+        </cfdi:Concepto>
+        <cfdi:Concepto Cantidad="35" ClaveProdServ="10171700" ClaveUnidad="XBX" Descripcion="GESAPRIM AUTOSUSPENSIBLE 48% SL 12X1 LT" Descuento="0.00" Importe="76358.80" NoIdentificacion="19191" ObjetoImp="02" Unidad="BX" ValorUnitario="2181.68">
+            <cfdi:Impuestos>
+                <cfdi:Traslados>
+                    <cfdi:Traslado Base="76358.8" Importe="4581.53" Impuesto="003" TasaOCuota="0.060000" TipoFactor="Tasa" />
+                    <cfdi:Traslado Base="80940.33" Importe="0.00" Impuesto="002" TasaOCuota="0.000000" TipoFactor="Tasa" />
+                </cfdi:Traslados>
+            </cfdi:Impuestos>
+        </cfdi:Concepto>
+    </cfdi:Conceptos>
+    <cfdi:Impuestos TotalImpuestosTrasladados="14061.39">
+        <cfdi:Traslados>
+            <cfdi:Traslado Base="234356.48" Importe="14061.39" Impuesto="003" TasaOCuota="0.060000" TipoFactor="Tasa" />
+            <cfdi:Traslado Base="248417.87" Importe="0.00" Impuesto="002" TasaOCuota="0.000000" TipoFactor="Tasa" />
+        </cfdi:Traslados>
+    </cfdi:Impuestos>
+    <cfdi:Complemento><tfd:TimbreFiscalDigital xsi:schemaLocation="http://www.sat.gob.mx/TimbreFiscalDigital http://www.sat.gob.mx/sitio_internet/cfd/TimbreFiscalDigital/TimbreFiscalDigitalv11.xsd" Version="1.1" UUID="B79AA6E9-4E19-11F0-9FC4-E5CC284732A6" FechaTimbrado="2025-06-20T15:08:20" SelloCFD="nXqz5FOk06HBDwlv1kr6bQBDj5/BG9XzPrGIr91AhaKWt2FmX4D5mn/GNkjZQlYmQBPRNQd2ztl1ZK2xtRwxseujAoTVWO5lXyow/WdowLrnnzI/kJBIiEJR8OArTnKK6SfwmEsEQKeP7SnMm6evZamz6JtuTDDxN/jJUyHm4OuiaWkjL1XIrJgYp53CK7CTwgp7ZBdRWySePjHOGfkJRPVk7XzxPz570mDhBLThQqZWN6GwYtSiDeaMfLfbJLdHUjc3bKfEWuP8VbXUmtWx1d5qyr6izMS8EL1WcKmEJosxLF0WGiG93J7+sjk88aVJHk0nDY3aa2a8XvORlNuGQQ==" NoCertificadoSAT="00001000000700047508" SelloSAT="s5d5tytqvFGfigWz2fUOe+/2IQotbQM8cV+dIlXwjok2zk1kaJC8cXdOqZhwv7SzVq03zInjueqPEO4YM8ORQnydygTAsl2hJuknT9UqC6PO68nK5U5wasUvajNX1PPFrlBnO4IiIWbCtzmOxEVMW3uD5URrShnhSlsmP2B6cE2V636GoUwDtWRqAVIAA235gQeMT3IIy1F2o4fryD1nuyjzQGrsew1+6ZQqG4G7cMcAsfLV+rv7euQeE/Tsq34u6kAadjfKjrf3c9Hf6CJKthKoIDQBdqHtfobmX+jIzHjP5eduSsp1HK2bd+rcrGOoGTvyaQQ+e9bxMFqc2k28hQ==" RfcProvCertif="EME000602QR9" /></cfdi:Complemento></cfdi:Comprobante>

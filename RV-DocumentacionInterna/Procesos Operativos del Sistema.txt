@@ -1,0 +1,28 @@
+# *********   DOCUMENTACIÓN DE LOS PROCESOS IMPLEMENTADO EN EL SISTEMA   *********
+
+# Para un correcto llenado y una facil identificación y lectura vamos a llenar aqui como si fueran funciones para poder desplegar o reducir la información como si fuera un segmento de codigo. Se usaran 3 grupos para el registro que son Proceso en el que se usa, referencia y función.
+
+1.- Recepcion de CFDI's Nacionales e Internacionales.
+{
+    * Recepcion de CFDI's Nacionales 
+    [
+        ** Recepcion de Facturas - CFDI_Ingresos(
+            1.- El proceso inicia en el controlador 'SubirFacturaController.php', en el método 'cargarFacturas'. Este recibe los datos del formulario, incluyendo los archivos XML y PDF.
+            2.- Se realizan validaciones iniciales en el siguiente orden:
+                2.1.- Se verifica que la Orden de Compra sea válida para el proveedor ('OrdenCompra_Mdl->verificaOrdenCompra').
+                2.2.- Se consulta si la Orden de Compra tiene anticipos para determinar si se requerirá una Nota de Crédito ('Anticipos_Mdl->verificaAnticipoDeOrdenCompra').
+                2.3.- Se validan los números de Hoja de Entrada de Servicio (HES) o recepciones de material ('HojaEntrada_Mdl->verificaHojaEntrada').
+            3.- Se procesan los documentos adjuntos:
+                3.1.- Si se requiere Nota de Crédito, se validan sus archivos (XML y PDF) usando 'DocumentosController'.
+                3.2.- Se validan los archivos de la factura principal (XML y PDF) usando 'DocumentosController'.
+            4.- Se delega el procesamiento principal al controlador 'FacturasNacionalesController.php'.
+                4.1.- Se ejecuta el método 'verificaNuevaFacturaIngresos', que aplica todas las reglas de negocio, fiscales y de validación de contenido del CFDI.
+                4.2.- Si todas las validaciones son correctas, se llama al método 'registraNuevaFacturaIngresos' para guardar la información de la factura en la base de datos.
+        )
+    ]
+}
+
+2.- Verificación de documentos recibidos.
+{
+    *
+}

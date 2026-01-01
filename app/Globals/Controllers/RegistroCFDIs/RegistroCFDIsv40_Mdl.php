@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Models\DatosCFDIs;
+namespace App\Globals\Controllers\RegistroCFDIs;
 
 use PDO;
 use BD_Connect;
@@ -10,7 +10,7 @@ use App\Globals\Controllers\DocumentosController;
 if (!defined('INCLUDE_CHECK')) {
     define('INCLUDE_CHECK', true);
 }
-require_once __DIR__ . '/../../../config/BD_Connect.php';
+require_once __DIR__ . '/../../../../config/BD_Connect.php';
 
 class RegistroCFDIsv40_Mdl
 {
@@ -595,5 +595,284 @@ class RegistroCFDIsv40_Mdl
 
         return $response;
 
+    }
+
+    /**
+     * @param array $dataDeValidacion Contiene los datos validados del XML de la Nota de Crédito y las rutas de los archivos.
+     * @return array Resultado de la operación con 'success', 'message' y 'debug'.
+     * 
+     * Registra una Nota de Crédito (CFDI de Egreso) en la base de datos.
+     * Inserta en cfdi_notasCreditos y actualiza compras.totalNotasCredito y compras.notaCredito.
+     */
+    public function registrarCFDI_Egresosv40($dataDeValidacion)
+    {
+        $response = ["success" => true, "message" => "", "debug" => ""];
+
+        try {
+            // Iniciar transacción
+            BD_Connect::beginTransaction();
+
+            if (self::$debug) {
+                $response["debug"] .= "\n* Iniciando transacción para registro de Nota de Crédito...<br>";
+                echo "<br> * Iniciando transacción para registro de Nota de Crédito...<br>";
+                echo "<br> * Datos de validación recibidos: <br>";
+                var_dump($dataDeValidacion);
+                $response["debug"] .= "\n* Datos de validación recibidos: " . print_r($dataDeValidacion, true) . "<br>";
+            }
+
+            // Extraer datos necesarios
+            $idCompra = $dataDeValidacion['idCompra'] ?? null;
+            $idProveedor = $dataDeValidacion['dataProv']['IdProveedor'] ?? null;
+            $dataNotaCredXML = $dataDeValidacion['dataNotaCredXML'] ?? [];
+            $validFiscal = $dataDeValidacion['ValidFiscal'] ?? [];
+            $urlPDF = $dataDeValidacion['urlPDF'] ?? null;
+            $urlXML = $dataDeValidacion['urlXML'] ?? null;
+
+            // Validaciones iniciales
+            if (empty($idCompra)) {
+                throw new \Exception("El idCompra es requerido para registrar la Nota de Crédito.");
+            }
+
+            if (empty($idProveedor)) {
+                throw new \Exception("El idProveedor es requerido para registrar la Nota de Crédito.");
+            }
+
+            if (empty($dataNotaCredXML)) {
+                throw new \Exception("Los datos del XML de la Nota de Crédito son requeridos.");
+            }
+
+            if (empty($urlPDF) || empty($urlXML)) {
+                throw new \Exception("Las rutas de los archivos PDF y XML son requeridas.");
+            }
+
+            if (self::$debug) {
+                echo "<br> * ID Compra: $idCompra <br>";
+                echo "<br> * ID Proveedor: $idProveedor <br>";
+                echo "<br> * URL PDF: $urlPDF <br>";
+                echo "<br> * URL XML: $urlXML <br>";
+                $response["debug"] .= "\n* ID Compra: $idCompra<br>";
+                $response["debug"] .= "\n* ID Proveedor: $idProveedor<br>";
+            }
+
+            // Obtener UUID relacionado (de la factura original) desde CfdiRelacionados tipo 01
+            $uuidRelacionado = null;
+            if (!empty($dataNotaCredXML['CfdiRelacionados']) && is_array($dataNotaCredXML['CfdiRelacionados'])) {
+                foreach ($dataNotaCredXML['CfdiRelacionados'] as $relacion) {
+                    if (isset($relacion['TipoRelacion']) && $relacion['TipoRelacion'] === '01') {
+                        if (!empty($relacion['UUIDs']) && is_array($relacion['UUIDs'])) {
+                            $uuidRelacionado = strtoupper($relacion['UUIDs'][0]); // Tomar el primer UUID
+                            if (self::$debug) {
+                                echo "<br> * UUID Relacionado encontrado (Tipo 01): $uuidRelacionado <br>";
+                                $response["debug"] .= "\n* UUID Relacionado encontrado (Tipo 01): $uuidRelacionado<br>";
+                            }
+                            break;
+                        }
+                    }
+                }
+            }
+
+            if (empty($uuidRelacionado)) {
+                $errorMsg = "No se pudo obtener el UUID relacionado de la factura original (Tipo 01) desde CfdiRelacionados.";
+                if (self::$debug) {
+                    echo "<br> * ERROR: $errorMsg <br>";
+                    $response["debug"] .= "\n* ERROR: $errorMsg<br>";
+                }
+                throw new \Exception($errorMsg);
+            }
+
+            // Insertar en cfdi_notasCreditos
+            $sqlNotaCredito = "INSERT INTO cfdi_notasCreditos (
+                idCompra, idProveedor, tipoComprobante, uuid, estatus, total, subtotal, 
+                idCatTipoMoneda, serie, folio, version, tipoFactura, rfcEmisor, rfcReceptor, 
+                uuidRelacionado, fechaPago, selloCFDI, selloSAT, formaDePago, numOperacion, 
+                urlPDF, urlXML, validacionEFOS, detalleValidaciónEFOS, codigoEstatusValida, 
+                estadoValida, idUserReg, fechaReg, idNCExterno
+            ) VALUES (
+                :idCompra, :idProveedor, :tipoComprobante, :uuid, :estatus, :total, :subtotal, 
+                :idCatTipoMoneda, :serie, :folio, :version, :tipoFactura, :rfcEmisor, :rfcReceptor, 
+                :uuidRelacionado, :fechaPago, :selloCFDI, :selloSAT, :formaDePago, :numOperacion, 
+                :urlPDF, :urlXML, :validacionEFOS, :detalleValidacionEFOS, :codigoEstatusValida, 
+                :estadoValida, :idUserReg, NOW(), :idNCExterno
+            )";
+
+            $paramsNotaCredito = [
+                ":idCompra" => $idCompra,
+                ":idProveedor" => $idProveedor,
+                ":tipoComprobante" => $dataNotaCredXML['Comprobante']['TipoDeComprobante'] ?? 'E',
+                ":uuid" => strtoupper($dataNotaCredXML['TimbreFiscal']['UUID'] ?? ''),
+                ":estatus" => 1, // Activa
+                ":total" => $dataNotaCredXML['Comprobante']['Total'] ?? 0,
+                ":subtotal" => $dataNotaCredXML['Comprobante']['SubTotal'] ?? 0,
+                ":idCatTipoMoneda" => $dataNotaCredXML['Comprobante']['Moneda'] ?? '',
+                ":serie" => $dataNotaCredXML['Comprobante']['Serie'] ?? '',
+                ":folio" => $dataNotaCredXML['Comprobante']['Folio'] ?? '',
+                ":version" => $dataNotaCredXML['Comprobante']['Version'] ?? '4.0',
+                ":tipoFactura" => $dataNotaCredXML['Comprobante']['TipoDeComprobante'] ?? 'E',
+                ":rfcEmisor" => $dataNotaCredXML['Emisor']['Rfc'] ?? '',
+                ":rfcReceptor" => $dataNotaCredXML['Receptor']['Rfc'] ?? '',
+                ":uuidRelacionado" => $uuidRelacionado,
+                ":fechaPago" => $dataNotaCredXML['Comprobante']['Fecha'] ?? null,
+                ":selloCFDI" => null, // No disponible en la estructura actual
+                ":selloSAT" => null, // No disponible en la estructura actual
+                ":formaDePago" => $dataNotaCredXML['Comprobante']['FormaPago'] ?? '',
+                ":numOperacion" => null, // No disponible en la estructura actual
+                ":urlPDF" => $urlPDF,
+                ":urlXML" => $urlXML,
+                ":validacionEFOS" => $validFiscal['ValidacionEFOS'] ?? '',
+                ":detalleValidacionEFOS" => null, // Campo adicional, no disponible por ahora
+                ":codigoEstatusValida" => $validFiscal['CodigoEstatus'] ?? '',
+                ":estadoValida" => $validFiscal['Estado'] ?? '',
+                ":idUserReg" => $_SESSION['EQXident'] ?? null,
+                ":idNCExterno" => $dataDeValidacion['idNotaCredito'] ?? null
+            ];
+
+            if (self::$debug) {
+                $this->db->imprimirConsulta($sqlNotaCredito, $paramsNotaCredito, "Registro de Nota de Crédito");
+            }
+
+            $stmt = $this->db->prepare($sqlNotaCredito);
+            $resultado = $stmt->execute($paramsNotaCredito);
+
+            if (!$resultado) {
+                $errorInfo = $stmt->errorInfo();
+                $errorMsg = "Error al ejecutar el INSERT de Nota de Crédito: " . ($errorInfo[2] ?? 'Error desconocido');
+                if (self::$debug) {
+                    echo "<br> * ERROR en ejecución: " . print_r($errorInfo, true) . "<br>";
+                    $response["debug"] .= "\n* ERROR en ejecución: " . print_r($errorInfo, true) . "<br>";
+                }
+                throw new \Exception($errorMsg);
+            }
+
+            $idNotaCredito = $this->db->getConnection()->lastInsertId();
+            if (!$idNotaCredito) {
+                $errorMsg = "No se pudo obtener el ID de la Nota de Crédito registrada (lastInsertId retornó 0 o false).";
+                if (self::$debug) {
+                    echo "<br> * ERROR: $errorMsg <br>";
+                    $response["debug"] .= "\n* ERROR: $errorMsg<br>";
+                }
+                throw new \Exception($errorMsg);
+            }
+
+            if (self::$debug) {
+                echo "<br> * Nota de Crédito registrada con ID: $idNotaCredito <br>";
+                $response["debug"] .= "\n* Nota de Crédito registrada con ID: $idNotaCredito<br>";
+            }
+
+            // Actualizar compras.totalNotasCredito con la sumatoria de NC activas
+            $sqlUpdateTotalNC = "UPDATE compras 
+                SET totalNotasCredito = (
+                    SELECT COALESCE(SUM(total), 0) 
+                    FROM cfdi_notasCreditos 
+                    WHERE idCompra = :idCompra1 AND estatus = 1
+                )
+                WHERE id = :idCompra2";
+            
+            $paramsUpdateTotalNC = [
+                ":idCompra1" => $idCompra,
+                ":idCompra2" => $idCompra
+            ];
+            
+            if (self::$debug) {
+                $this->db->imprimirConsulta($sqlUpdateTotalNC, $paramsUpdateTotalNC, "Actualización de totalNotasCredito");
+            }
+            
+            $stmt = $this->db->prepare($sqlUpdateTotalNC);
+            $resultadoUpdateTotal = $stmt->execute($paramsUpdateTotalNC);
+            
+            if (!$resultadoUpdateTotal) {
+                $errorInfo = $stmt->errorInfo();
+                $errorMsg = "Error al actualizar totalNotasCredito: " . ($errorInfo[2] ?? 'Error desconocido');
+                if (self::$debug) {
+                    echo "<br> * ERROR al actualizar totalNotasCredito: " . print_r($errorInfo, true) . "<br>";
+                    $response["debug"] .= "\n* ERROR al actualizar totalNotasCredito: " . print_r($errorInfo, true) . "<br>";
+                }
+                throw new \Exception($errorMsg);
+            }
+
+            if (self::$debug) {
+                echo "<br> * totalNotasCredito actualizado correctamente. <br>";
+                $response["debug"] .= "\n* totalNotasCredito actualizado correctamente.<br>";
+            }
+
+            // Actualizar compras.notaCredito (1 si hay NC activa, 0 si no)
+            $sqlUpdateNotaCredito = "UPDATE compras 
+                SET notaCredito = IF(
+                    EXISTS(
+                        SELECT 1 
+                        FROM cfdi_notasCreditos 
+                        WHERE idCompra = :idCompra1 AND estatus = 1
+                    ), 
+                    1, 
+                    0
+                )
+                WHERE id = :idCompra2";
+            
+            $paramsUpdateNotaCredito = [
+                ":idCompra1" => $idCompra,
+                ":idCompra2" => $idCompra
+            ];
+            
+            if (self::$debug) {
+                $this->db->imprimirConsulta($sqlUpdateNotaCredito, $paramsUpdateNotaCredito, "Actualización de notaCredito");
+            }
+            
+            $stmt = $this->db->prepare($sqlUpdateNotaCredito);
+            $resultadoUpdateNotaCredito = $stmt->execute($paramsUpdateNotaCredito);
+            
+            if (!$resultadoUpdateNotaCredito) {
+                $errorInfo = $stmt->errorInfo();
+                $errorMsg = "Error al actualizar notaCredito: " . ($errorInfo[2] ?? 'Error desconocido');
+                if (self::$debug) {
+                    echo "<br> * ERROR al actualizar notaCredito: " . print_r($errorInfo, true) . "<br>";
+                    $response["debug"] .= "\n* ERROR al actualizar notaCredito: " . print_r($errorInfo, true) . "<br>";
+                }
+                throw new \Exception($errorMsg);
+            }
+
+            if (self::$debug) {
+                echo "<br> * notaCredito actualizado correctamente. <br>";
+                $response["debug"] .= "\n* notaCredito actualizado correctamente.<br>";
+                echo "<br> * Todos los campos de compras actualizados correctamente. <br>";
+                $response["debug"] .= "\n* Todos los campos de compras actualizados correctamente.<br>";
+            }
+
+            // Commit final si todo salió bien
+            BD_Connect::commit();
+            $response["message"] = "La Nota de Crédito se ha registrado correctamente con el ID: $idNotaCredito.";
+            $response["debug"] .= "\n* Nota de Crédito registrada correctamente.";
+
+        } catch (\Exception $e) {
+            // Rollback de la transacción
+            BD_Connect::rollBack();
+            
+            $timestamp = date("Y-m-d H:i:s");
+            $errorMessage = $e->getMessage();
+            $errorLogMessage = "[$timestamp] app/Globals/Controllers/RegistroCFDIs/RegistroCFDIsv40_Mdl.php -> Error al registrar la Nota de Crédito: $errorMessage";
+            
+            // Registrar error en log de base de datos (LOG_FILE_BD)
+            error_log($errorLogMessage . PHP_EOL, 3, LOG_FILE_BD);
+            
+            if (self::$debug) {
+                echo "<br><br> * ERROR AL REGISTRAR NOTA DE CRÉDITO: $errorMessage <br>";
+                echo "<br> * Transacción revertida (rollback). <br>";
+                echo "<br> * Error registrado en: " . LOG_FILE_BD . "<br>";
+                $response["debug"] .= "\n* ERROR AL REGISTRAR NOTA DE CRÉDITO: $errorMessage<br>";
+                $response["debug"] .= "\n* Transacción revertida (rollback).<br>";
+                $response["debug"] .= "\n* Error registrado en log de base de datos.<br>";
+            }
+            
+            $response["success"] = false;
+            $response["message"] = "Ocurrió un error al registrar la Nota de Crédito. Por favor, notifica al administrador del sistema.";
+            $response["debug"] .= "\n* Detalles del error: " . $errorMessage;
+        }
+
+        if (self::$debug) {
+            echo "<br><br> * Resultado final del registro: " . ($response["success"] ? "ÉXITO" : "ERROR") . "<br>";
+            echo "<br> * Respuesta completa: <br>";
+            var_dump($response);
+            $response["debug"] .= "\n* Resultado final: " . ($response["success"] ? "ÉXITO" : "ERROR") . "<br>";
+        }
+
+        return $response;
     }
 }

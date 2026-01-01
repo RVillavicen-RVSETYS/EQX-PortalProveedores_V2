@@ -23,12 +23,12 @@ if (isset($_SESSION['error_message'])) {
     <meta name="description" content="Portal de Proveedores.">
     <meta name="author" content="Ricardo Villavicencio">
     <!-- Favicon icon -->
-    <link rel="icon" type="image/ico" sizes="16x16" href="/../assets/images/SilmeAgro.ico">
+    <link rel="icon" type="image/ico" sizes="16x16" href="/assets/images/SilmeAgro.ico">
     <title>Portal de Proveedores.</title>
 
     <!-- Custom CSS -->
     <link href="/dist/css/style.min.css" rel="stylesheet">
-    <link href="/../assets/libs/toastr/build/toastr.min.css" rel="stylesheet">
+    <link href="/assets/libs/toastr/build/toastr.min.css" rel="stylesheet">
     <!-- Custom CSS -->
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -62,11 +62,11 @@ if (isset($_SESSION['error_message'])) {
           }
           ============================================================== -->
         </style>
-        <div class="auth-wrapper d-flex no-block justify-content-center align-items-center" style="background:url(../assets/images/fondoSilmeAdmin.jpg) no-repeat center center;background-size:cover; background-color: #141516;">
+        <div class="auth-wrapper d-flex no-block justify-content-center align-items-center" style="background:url(/assets/images/fondoSilmeAdmin.jpg) no-repeat center center;background-size:cover; background-color: #141516;">
             <div class="auth-box capaPrincipal" style="opacity:.6;">
                 <div id="loginform">
                     <div class="logo">
-                        <span class="db"><img src="../assets/images/logo-Silmeagro.png" alt="logo" width="80%" id="imgLogo" /></span>
+                        <span class="db"><img src="/assets/images/logo-Silmeagro.png" alt="logo" width="80%" id="imgLogo" /></span>
                         <h3 class="font-medium m-b-20"><br><br>Administrador Portal de Proveedores.<br></h3>
                     </div>
                     <!-- Form -->
@@ -118,7 +118,7 @@ if (isset($_SESSION['error_message'])) {
                 </div>
                 <div id="recoverform" class="capaPrincipal">
                     <div class="logo">
-                        <span class="db"><img src="../assets/images/logo-equinox-gold3.png" alt="logo" width="80%" id="imgLogo" /></span>
+                        <span class="db"><img src="/assets/images/logo-SilmeAgro.png" alt="logo" width="80%" id="imgLogo" /></span>
                         <h5 class="font-medium m-b-20"><br>Recuperar tu Contraseña</h5>
                         <span>Comunícate con el Area de TI!</span>
                     </div>
@@ -156,12 +156,12 @@ if (isset($_SESSION['error_message'])) {
     <!-- ============================================================== -->
     <!-- All Required js -->
     <!-- ============================================================== -->
-    <script src="/../assets/libs/jquery/dist/jquery.min.js"></script>
+    <script src="/assets/libs/jquery/dist/jquery.min.js"></script>
     <!-- Bootstrap tether Core JavaScript -->
-    <script src="/../assets/libs/popper.js/dist/umd/popper.min.js"></script>
-    <script src="/../assets/libs/bootstrap/dist/js/bootstrap.min.js"></script>
+    <script src="/assets/libs/popper.js/dist/umd/popper.min.js"></script>
+    <script src="/assets/libs/bootstrap/dist/js/bootstrap.min.js"></script>
     <!--Custom JavaScript -->
-    <script src="/../assets/libs/toastr/build/toastr.min.js"></script>
+    <script src="/assets/libs/toastr/build/toastr.min.js"></script>
     <!-- ============================================================== -->
     <!-- This page plugin js -->
     <!-- ============================================================== -->

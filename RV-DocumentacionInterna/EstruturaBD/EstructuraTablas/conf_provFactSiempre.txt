@@ -1,0 +1,1 @@
+"id"	"idProveedor"	"nombre"	"estatus"	"grupo"	"idUserReg"	"fechaReg (DateTime)"

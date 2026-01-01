@@ -1,0 +1,8 @@
+"id"	"idFactura"	"idCompra"	"tipo"	"impuesto"	"TipoFactor"	"TasaOCuota"	"Base"	"Importe"
+"1"	"1"	"1"	"Traslado"	"002"	"Tasa"	"0"	"9250"	"0"
+"2"	"2"	"2"	"Traslado"	"002"	"Tasa"	"0"	"13750"	"0"
+"4"	"4"	"4"	"Traslado"	"002"	"Tasa"	"0"	"100512"	"0"
+"5"	"5"	"5"	"Traslado"	"003"	"Tasa"	"0.06"	"48193.04"	"2891.58"
+"6"	"5"	"5"	"Traslado"	"002"	"Tasa"	"0"	"51084.62"	"0"
+"7"	"6"	"6"	"Traslado"	"002"	"Tasa"	"0"	"240000"	"0"
+"8"	"7"	"7"	"Traslado"	"002"	"Tasa"	"0"	"12765"	"0"
