@@ -279,6 +279,7 @@ class RegistroCFDIsv40_Mdl
             BD_Connect::commit();
             $response["message"] = "La Factura se ha agregado correctamente con el Acuse: $idCompra.";
             $response["debug"] .= "\n* Impuestos Registrados correctamente.";
+            $response["idCompra"] = $idCompra; // Retornar idCompra explícitamente
         } catch (\Exception $e) {
             BD_Connect::rollBack();
             $timestamp = date("Y-m-d H:i:s");

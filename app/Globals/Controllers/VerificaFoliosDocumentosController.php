@@ -47,6 +47,13 @@ class VerificaFoliosDocumentosController extends Controller
             if ($verificaSecundaria['success'] && $verificaSecundaria['cantAnticipos'] > 0) {
                  $response['anticipo'] = true;
                  $response['NC'] = $verificaSecundaria['data'];
+            } else {
+                // Si falla la verificación de notas de crédito, no es crítico
+                // Solo registramos el error pero continuamos con la validación de la OC
+                if (!$verificaSecundaria['success']) {
+                    $timestamp = date("Y-m-d H:i:s");
+                    error_log("[$timestamp] app/Globals/Controllers/VerificaFoliosDocumentosController.php -> Advertencia al verificar notas de crédito: " . ($verificaSecundaria['message'] ?? 'Error desconocido'), 3, LOG_FILE_BD);
+                }
             }
         } else { // 'proveedor' context
             $MDL_anticipos = new Anticipos_Mdl();
@@ -54,19 +61,18 @@ class VerificaFoliosDocumentosController extends Controller
              if ($verificaSecundaria['success'] && $verificaSecundaria['cantAnticipos'] > 0) {
                  $response['anticipo'] = true;
                  $response['NC'] = $verificaSecundaria['data'];
+            } else {
+                // Si falla la verificación de anticipos, no es crítico
+                // Solo registramos el error pero continuamos con la validación de la OC
+                if (!$verificaSecundaria['success']) {
+                    $timestamp = date("Y-m-d H:i:s");
+                    error_log("[$timestamp] app/Globals/Controllers/VerificaFoliosDocumentosController.php -> Advertencia al verificar anticipos: " . ($verificaSecundaria['message'] ?? 'Error desconocido'), 3, LOG_FILE_BD);
+                }
             }
         }
         
-        // If the secondary check failed, it should be reported, otherwise the success response is sent.
-        if (isset($verificaSecundaria) && !$verificaSecundaria['success']) {
-             echo json_encode([
-                'success' => false,
-                'message' => $verificaSecundaria['message'],
-                'anticipo' => false
-            ]);
-        } else {
-            echo json_encode($response);
-        }
+        // La validación de la OC es exitosa, las notas de crédito/anticipos son opcionales
+        echo json_encode($response);
     }
 
     public function validaHojaEntrada($ordenCompra, $hojaEntrada)

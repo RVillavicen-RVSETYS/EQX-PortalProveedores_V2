@@ -330,6 +330,44 @@ class Compras_Mdl
                     echo '<br><br>';
                 }
 
+                // Obtener todas las notas de crédito relacionadas a esta compra
+                $notasCredito = [];
+                if (!empty($comprasresult['acuse'])) {
+                    $sqlNotas = "SELECT 
+                                    nc.id,
+                                    nc.uuid,
+                                    nc.serie,
+                                    nc.folio,
+                                    nc.urlPDF,
+                                    nc.urlXML,
+                                    nc.estatus,
+                                    nc.total,
+                                    nc.subtotal,
+                                    nc.idCatTipoMoneda AS moneda,
+                                    nc.fechaReg,
+                                    nc.fechaPago,
+                                    nc.formaDePago,
+                                    nc.numOperacion,
+                                    nc.uuidRelacionado
+                                FROM cfdi_notasCreditos nc
+                                WHERE nc.idCompra = :idCompra AND nc.estatus > 0
+                                ORDER BY nc.fechaReg DESC";
+                    
+                    $stmtNotas = $this->db->prepare($sqlNotas);
+                    $stmtNotas->bindParam(':idCompra', $acuse, PDO::PARAM_INT);
+                    $stmtNotas->execute();
+                    $notasCredito = $stmtNotas->fetchAll(PDO::FETCH_ASSOC);
+
+                    if (self::$debug) {
+                        echo '<br>Resultado de Notas de Crédito:';
+                        var_dump($notasCredito);
+                        echo '<br><br>';
+                    }
+                }
+
+                // Agregar el array de notas de crédito al resultado
+                $comprasresult['notasCredito'] = $notasCredito;
+
                 return ['success' => true, 'data' => $comprasresult];
             } catch (\Exception $e) {
                 $timestamp = date("Y-m-d H:i:s");

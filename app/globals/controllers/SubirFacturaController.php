@@ -9,7 +9,10 @@ use App\Models\DatosCompra\Anticipos_Mdl;
 use App\Models\DatosCompra\HojaEntrada_Mdl;
 use App\Globals\Controllers\DocumentosController;
 use App\Globals\Controllers\FacturasNacionalesController;
+use App\Globals\Controllers\CfdisController;
 use App\Models\Proveedores\Proveedores_Mdl;
+use BD_Connect;
+use PDO;
 
 class SubirFacturaController extends Controller
 {
@@ -180,14 +183,55 @@ class SubirFacturaController extends Controller
                                 }
 
                                 if ($facturaRegistrada['success']) {
-                                    if ($this->debug == 1) {
-                                        echo '<br><h1>Factura Registrada correctamente</h1>Mensaje:' . $facturaRegistrada['message'] . '<br>Debug:' . $facturaRegistrada['debug'] . '<br>';
+                                    $idCompra = $facturaRegistrada['idCompra'] ?? null;
+                                    
+                                    // 8.- Procesar Notas de Crédito si existen y la factura se registró correctamente
+                                    if (!empty($arrayNotasCredito) && !empty($idCompra)) {
+                                        $resultadoNC = $this->procesarNotasCreditoConFactura(
+                                            $arrayNotasCredito,
+                                            $idCompra,
+                                            $noProveedor,
+                                            $ordenCompra,
+                                            $isAdmin,
+                                            $facturaRegistrada
+                                        );
+                                        
+                                        if (!$resultadoNC['success']) {
+                                            // Si alguna NC falla, hacer rollback de la factura
+                                            $this->rollbackFacturaRegistrada($idCompra, $facturaRegistrada);
+                                            
+                                            echo json_encode([
+                                                'success' => false,
+                                                'message' => 'La factura se registró pero hubo problemas con las Notas de Crédito. Todo fue revertido: ' . $resultadoNC['message'],
+                                                'debug' => $facturaRegistrada['debug'] . '<br>Error en NC: ' . $resultadoNC['message']
+                                            ]);
+                                            return;
+                                        }
+                                        
+                                        // Si todas las NC se procesaron correctamente
+                                        if ($this->debug == 1) {
+                                            echo '<br><h1>Factura y Notas de Crédito Registradas correctamente</h1>';
+                                            echo 'Mensaje Factura: ' . $facturaRegistrada['message'] . '<br>';
+                                            echo 'Mensaje NC: ' . $resultadoNC['message'] . '<br>';
+                                            echo 'Debug: ' . $facturaRegistrada['debug'] . '<br>';
+                                        } else {
+                                            echo json_encode([
+                                                'success' => true,
+                                                'message' => $facturaRegistrada['message'] . '<br>' . $resultadoNC['message'],
+                                                'debug' => $facturaRegistrada['debug']
+                                            ]);
+                                        }
                                     } else {
-                                        echo json_encode([
-                                            'success' => true,
-                                            'message' => $facturaRegistrada['message'],
-                                            'debug' => $facturaRegistrada['debug']
-                                        ]);
+                                        // No hay NC o no se obtuvo idCompra, solo retornar éxito de factura
+                                        if ($this->debug == 1) {
+                                            echo '<br><h1>Factura Registrada correctamente</h1>Mensaje:' . $facturaRegistrada['message'] . '<br>Debug:' . $facturaRegistrada['debug'] . '<br>';
+                                        } else {
+                                            echo json_encode([
+                                                'success' => true,
+                                                'message' => $facturaRegistrada['message'],
+                                                'debug' => $facturaRegistrada['debug']
+                                            ]);
+                                        }
                                     }
                                 } else {
                                     echo json_encode([
@@ -231,6 +275,209 @@ class SubirFacturaController extends Controller
                 'success' => false,
                 'message' => 'La Orden de Compra no es Valida: ' . $validOrdenCompra['message']
             ]);
+        }
+    }
+
+    /**
+     * Procesa las Notas de Crédito que vienen junto con una factura recién registrada
+     * 
+     * @param array $arrayNotasCredito Array con los datos de las NC desde el formulario
+     * @param int $idCompra ID de la factura recién registrada
+     * @param string $noProveedor Número de proveedor
+     * @param string $ordenCompra Orden de compra
+     * @param string $isAdmin Indica si es administrador
+     * @param array $facturaRegistrada Datos de la factura registrada (para rollback si es necesario)
+     * @return array Resultado del procesamiento
+     */
+    private function procesarNotasCreditoConFactura($arrayNotasCredito, $idCompra, $noProveedor, $ordenCompra, $isAdmin, $facturaRegistrada)
+    {
+        $Ctrl_Documentos = new DocumentosController();
+        $Ctrl_CFDIs = new CfdisController();
+        $Ctrl_ProcesaNotasCredito = new FacturasNacionalesController();
+
+        $resultados = [];
+        $notasParaProcesar = [];
+
+        // 1. Reestructurar datos de las NC para procesamiento
+        foreach ($arrayNotasCredito as $idPlantilla => $nota) {
+            // Verificar que tenga la estructura correcta con documentos
+            if (!isset($nota['documentos']) || empty($nota['documentos']['PDF']) || empty($nota['documentos']['XML'])) {
+                continue;
+            }
+
+            // Si hay múltiples políticas seleccionadas, las unimos con coma
+            // identNotasCred ya viene como string separado por comas desde CargaFacturasGlobalController
+            $identNotasCred = $nota['identNotasCred'] ?? '';
+            $notasSeleccionadas = !empty($identNotasCred) ? explode(',', $identNotasCred) : [];
+            
+            $idNotaCredito = count($notasSeleccionadas) > 1 
+                ? implode(',', array_map('intval', $notasSeleccionadas))
+                : (!empty($notasSeleccionadas) ? (int)$notasSeleccionadas[0] : '');
+
+            // Los archivos ya vienen estructurados desde CargaFacturasGlobalController
+            // Tomar el primer elemento de cada array (PDF y XML)
+            $pdfData = $nota['documentos']['PDF'][0] ?? [];
+            $xmlData = $nota['documentos']['XML'][0] ?? [];
+
+            $notasParaProcesar[] = [
+                'idPlantilla' => $idPlantilla,
+                'idNotaCredito' => $idNotaCredito,
+                'pdf' => [
+                    'name'     => $pdfData['name'] ?? '',
+                    'type'     => 'application/pdf', // Tipo inferido
+                    'tmp_name' => $pdfData['tmp_name'] ?? '',
+                    'error'    => 0,
+                    'size'     => isset($pdfData['tmp_name']) && file_exists($pdfData['tmp_name']) ? filesize($pdfData['tmp_name']) : 0
+                ],
+                'xml' => [
+                    'name'     => $xmlData['name'] ?? '',
+                    'type'     => 'text/xml', // Tipo inferido
+                    'tmp_name' => $xmlData['tmp_name'] ?? '',
+                    'error'    => 0,
+                    'size'     => isset($xmlData['tmp_name']) && file_exists($xmlData['tmp_name']) ? filesize($xmlData['tmp_name']) : 0
+                ]
+            ];
+        }
+
+        if (empty($notasParaProcesar)) {
+            return ['success' => false, 'message' => 'No se encontraron notas de crédito con archivos para procesar.'];
+        }
+
+        // 2. Procesar cada NC
+        foreach ($notasParaProcesar as $nota) {
+            if ($this->debug == 1) {
+                echo "<br>--- Procesando Nota de Crédito de Plantilla #{$nota['idPlantilla']} ---<br>";
+            }
+
+            // 2.1.- Verificar PDF y XML
+            $pdfVerificado = $Ctrl_Documentos->verificadorDeDocumentoARecibir($nota['pdf'], 'pdf');
+            if (!$pdfVerificado['success']) {
+                $resultados[] = ['success' => false, 'message' => "Error en PDF de plantilla #{$nota['idPlantilla']}: " . $pdfVerificado['message']];
+                break;
+            }
+
+            $xmlVerificado = $Ctrl_Documentos->verificadorDeDocumentoARecibir($nota['xml'], 'xml');
+            if (!$xmlVerificado['success']) {
+                $resultados[] = ['success' => false, 'message' => "Error en XML de plantilla #{$nota['idPlantilla']}: " . $xmlVerificado['message']];
+                break;
+            }
+
+            // 2.2.- Leer el XML
+            $dataNotaCredXML = $Ctrl_CFDIs->leerCfdiXML($xmlVerificado['data']['tmp_name'], 'Egreso');
+            if (!$dataNotaCredXML['success']) {
+                $resultados[] = ['success' => false, 'message' => "Error al leer XML de plantilla #{$nota['idPlantilla']}: " . $dataNotaCredXML['message']];
+                break;
+            }
+
+            // 2.3.- Validar la NC
+            $notaValidada = $Ctrl_ProcesaNotasCredito->verificaNuevaNotaCredito(
+                $dataNotaCredXML,
+                $noProveedor,
+                $idCompra,
+                $nota['idNotaCredito'],
+                $isAdmin
+            );
+
+            if (!$notaValidada['success']) {
+                $resultados[] = ['success' => false, 'message' => "Error de validación en NC de plantilla #{$nota['idPlantilla']}: " . $notaValidada['message']];
+                break;
+            }
+
+            // 2.4.- Registrar la NC
+            $datosParaRegistrar = $notaValidada['data'];
+            $datosParaRegistrar['ruta_temporal_pdf'] = $pdfVerificado['data']['tmp_name'];
+            $datosParaRegistrar['ruta_temporal_xml'] = $xmlVerificado['data']['tmp_name'];
+            $datosParaRegistrar['idCompra'] = $idCompra;
+
+            $notaRegistrada = $Ctrl_ProcesaNotasCredito->registraNuevaNotaCredito($datosParaRegistrar);
+
+            if (!$notaRegistrada['success']) {
+                $resultados[] = ['success' => false, 'message' => "Error al registrar NC de plantilla #{$nota['idPlantilla']}: " . $notaRegistrada['message']];
+                break;
+            }
+
+            $resultados[] = ['success' => true, 'message' => "Nota de Crédito #{$nota['idPlantilla']} registrada con éxito."];
+        }
+
+        // 3. Evaluar resultados
+        $todosExitosos = true;
+        $mensajes = [];
+        foreach ($resultados as $res) {
+            $mensajes[] = $res['message'];
+            if (!$res['success']) {
+                $todosExitosos = false;
+            }
+        }
+
+        return [
+            'success' => $todosExitosos,
+            'message' => implode('<br>', $mensajes)
+        ];
+    }
+
+    /**
+     * Hace rollback de una factura registrada eliminándola de la BD y sus archivos
+     * 
+     * @param int $idCompra ID de la compra a eliminar
+     * @param array $facturaRegistrada Datos de la factura registrada
+     * @return void
+     */
+    private function rollbackFacturaRegistrada($idCompra, $facturaRegistrada)
+    {
+        if ($this->debug == 1) {
+            echo "<br>--- Iniciando rollback de factura con idCompra: $idCompra ---<br>";
+        }
+
+        try {
+            // Iniciar transacción para el rollback
+            BD_Connect::beginTransaction();
+
+            // Eliminar registros relacionados en orden inverso a como se crearon
+            // 1. Eliminar impuestos
+            $db = new BD_Connect();
+            $sql = "DELETE FROM cfdi_facturasImpuestos WHERE idCompra = :idCompra";
+            $stmt = $db->prepare($sql);
+            $stmt->execute([':idCompra' => $idCompra]);
+
+            // 2. Eliminar factura
+            $sql = "DELETE FROM cfdi_facturas WHERE idCompra = :idCompra";
+            $stmt = $db->prepare($sql);
+            $stmt->execute([':idCompra' => $idCompra]);
+
+            // 3. Eliminar compra
+            $sql = "DELETE FROM compras WHERE id = :idCompra";
+            $stmt = $db->prepare($sql);
+            $stmt->execute([':idCompra' => $idCompra]);
+
+            BD_Connect::commit();
+
+            // Eliminar archivos físicos - obtener URLs desde la BD antes de eliminar
+            $Ctrl_Documentos = new DocumentosController();
+            $db = new BD_Connect();
+            $sql = "SELECT urlPDF, urlXML FROM cfdi_facturas WHERE idCompra = :idCompra LIMIT 1";
+            $stmt = $db->prepare($sql);
+            $stmt->execute([':idCompra' => $idCompra]);
+            $facturaData = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+            if ($facturaData) {
+                if (!empty($facturaData['urlPDF'])) {
+                    $Ctrl_Documentos->eliminaDocumento($facturaData['urlPDF'], 'FACT');
+                }
+                if (!empty($facturaData['urlXML'])) {
+                    $Ctrl_Documentos->eliminaDocumento($facturaData['urlXML'], 'FACT');
+                }
+            }
+
+            if ($this->debug == 1) {
+                echo "<br>--- Rollback completado exitosamente ---<br>";
+            }
+        } catch (\Exception $e) {
+            BD_Connect::rollBack();
+            $timestamp = date("Y-m-d H:i:s");
+            error_log("[$timestamp] app/Globals/Controllers/SubirFacturaController.php -> Error en rollback de factura: " . $e->getMessage(), 3, LOG_FILE_BD);
+            if ($this->debug == 1) {
+                echo "<br>--- Error en rollback: " . $e->getMessage() . " ---<br>";
+            }
         }
     }
 }

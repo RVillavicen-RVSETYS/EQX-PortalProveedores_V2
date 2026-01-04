@@ -82,8 +82,8 @@ if ($debug == 0) {
             <div class="text-right">
                 <br>
                 Factura:
-                <button type="button" onclick="verFacturaPDF('<?= '/ProveedorNacional/Inicio/verDocumento/PDF/' . $urlPDF; ?>')" class="btn btn-outline-danger"><i class="far fa-file-pdf"></i> Ver PDF</button>
-                <button type="button" onclick="verFacturaXML('<?= '/ProveedorNacional/Inicio/verDocumento/XML/' . $urlXML; ?>')" class="btn btn-outline-info"><i class="far fa-file-code"></i> Ver XML</button>
+                <button data-fancybox type="button" data-type="pdf" data-preloader="true" data-src="<?= '/ProveedorNacional/Inicio/verDocumento/PDF/' . $urlPDF; ?>/#toolbar=0" class="btn btn-outline-danger"><i class="far fa-file-pdf"></i> Ver PDF</button>
+                <button data-fancybox="xml" type="button" data-xml-url="<?= '/ProveedorNacional/Inicio/verDocumento/XML/' . $urlXML; ?>" class="btn btn-outline-info"><i class="far fa-file-code"></i> Ver XML</button>
             </div>
         </div>
     </div>
@@ -114,9 +114,127 @@ if ($debug == 0) {
 
     <hr>
 
-</div>
+    <?php
+    // Obtener todas las notas de crédito relacionadas
+    $notasCredito = $data['dataCompra']['data']['notasCredito'] ?? [];
+    $contNotaCredito = count($notasCredito);
+    
+    if ($contNotaCredito > 0) {
+    ?>
+    <div class="m-t-30">
+        <h4 class="m-b-20"><b>Notas de Crédito</b></h4>
+        
+        <div class="comment-widgets scrollable" style="max-height: 600px; overflow-y: auto;">
+            <?php 
+            $contadorNC = 1;
+            foreach ($notasCredito as $nota) {
+                // Determinar el badge de estatus
+                $estatusBadge = '';
+                $estatusClass = '';
+                $borderClass = ''; // Clase para el borde izquierdo
+                switch ($nota['estatus'] ?? 1) {
+                    case 0:
+                        $estatusBadge = 'Cancelada';
+                        $estatusClass = 'label-danger';
+                        break;
+                    case 1:
+                        $estatusBadge = 'Pendiente';
+                        $estatusClass = 'label-info';
+                        break;
+                    case 2:
+                        $estatusBadge = 'Aceptada';
+                        $estatusClass = 'label-success';
+                        $borderClass = 'border-left border-success';
+                        break;
+                    case 3:
+                        $estatusBadge = 'Rechazada';
+                        $estatusClass = 'label-danger';
+                        $borderClass = 'border-left border-danger';
+                        break;
+                    default:
+                        $estatusBadge = 'Pendiente';
+                        $estatusClass = 'label-info';
+                }
+                
+                $urlPDF = base64_encode($nota['urlPDF'] ?? '');
+                $urlXML = base64_encode($nota['urlXML'] ?? '');
+                $uuid = $nota['uuid'] ?? 'N/A';
+                $serie = $nota['serie'] ?? '';
+                $folio = $nota['folio'] ?? '';
+                $fechaReg = isset($nota['fechaReg']) ? date('d/m/Y', strtotime($nota['fechaReg'])) : 'N/A';
+                $total = isset($nota['total']) ? number_format(abs($nota['total']), 2, '.', ',') : '0.00';
+                $moneda = $nota['moneda'] ?? 'MXN';
+            ?>
+            <!-- Comment Row - Nota de Crédito -->
+            <div class="d-flex flex-row comment-row <?= $contadorNC === 1 ? 'm-t-0' : ''; ?>">
+                <div class="comment-text active w-100 <?= $borderClass; ?>">
+                    <div class="d-flex align-items-center p-b-15">
+                        <div>
+                            <h4 class="font-medium mb-0">
+                                <i class="fas fa-file-invoice text-info mr-2"></i>Nota de Crédito #<?= $contadorNC; ?>
+                            </h4>
+                        </div>
+                    </div>
+                    <div class="m-b-15">
+                        <div class="row">
+                            <div class="col-6 mb-2">
+                                <small class="text-muted d-block mb-1">
+                                    <i class="fas fa-fingerprint text-primary" style="font-size: 10px;"></i> UUID:
+                                </small>
+                                <div style="font-size: 12px; font-weight: 500; word-break: break-all;"><?= htmlspecialchars($uuid); ?></div>
+                            </div>
+                            <div class="col-6 mb-2">
+                                <small class="text-muted d-block mb-1">
+                                    <i class="fas fa-hashtag text-info" style="font-size: 10px;"></i> Serie/Folio:
+                                </small>
+                                <div style="font-size: 12px; font-weight: 500;"><?= htmlspecialchars($serie . $folio); ?></div>
+                            </div>
+                        </div>
+                        <div class="row mt-2" style="border-top: 1px solid #e0e0e0; padding-top: 8px;">
+                            <div class="col-6">
+                                <small class="text-muted d-block mb-1">
+                                    <i class="far fa-calendar-alt text-success" style="font-size: 10px;"></i> Fecha:
+                                </small>
+                                <div style="font-size: 12px; font-weight: 500;"><?= $fechaReg; ?></div>
+                            </div>
+                            <div class="col-6">
+                                <small class="text-muted d-block mb-1">
+                                    <i class="fas fa-dollar-sign text-warning" style="font-size: 10px;"></i> Total:
+                                </small>
+                                <div style="font-size: 13px; font-weight: 600; color: #333;">$ <?= $total; ?> <?= $moneda; ?></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="comment-footer">
+                        <span class="text-muted float-right"><?= $fechaReg; ?></span>
+                        <span class="label label-rounded <?= $estatusClass; ?>"><?= $estatusBadge; ?></span>
+                        <span class="action-icons active">
+                            <a href="javascript:void(0)" 
+                               data-fancybox 
+                               data-type="pdf" 
+                               data-preloader="true" 
+                               data-src="<?= '/ProveedorNacional/Inicio/verDocumento/PDF/' . $urlPDF; ?>/#toolbar=0" 
+                               class="text-danger">
+                                <i class="far fa-file-pdf"></i> Ver PDF
+                            </a>
+                            <a href="javascript:void(0)" 
+                               data-fancybox="xml" 
+                               data-xml-url="<?= '/ProveedorNacional/Inicio/verDocumento/XML/' . $urlXML; ?>"
+                               class="text-info">
+                                <i class="far fa-file-code"></i> Ver XML
+                            </a>
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <?php 
+                $contadorNC++;
+            } 
+            ?>
+        </div>
+    </div>
+    <?php } ?>
 
-<div id="verCFDI" style="padding: 15px; min-height: 200px;">
 </div>
 
 </div>
@@ -124,33 +242,84 @@ if ($debug == 0) {
 </div>
 <script src="/dist/js/custom.js"></script>
 <script>
-    // Botón para cargar el PDF
-    function verFacturaPDF(pdfUrl) {
-        verCFDI = document.getElementById("verCFDI");
-        verCFDI.innerHTML = '<div class="loading text-center"><img src="../assets/images/loading.gif" alt="loading" /><br/>Un momento, por favor...</div>';
-        verCFDI.innerHTML = '<iframe src="' + pdfUrl + '#toolbar=0" width="100%" height="500px" style="border:none;"></iframe>';
-    }
-
-    // Botón para cargar el XML
-    function verFacturaXML(xmlUrl) {
-        verCFDI = document.getElementById("verCFDI");
-        verCFDI.innerHTML = '<div class="loading text-center"><img src="../assets/images/loading.gif" alt="loading" /><br/>Un momento, por favor...</div>';
-        fetch(xmlUrl)
-            .then((response) => {
-                if (!response.ok) {
-                    throw new Error("Error al cargar el XML");
+    $(document).ready(function() {
+        // Inicializar Fancybox
+        Fancybox.bind("[data-fancybox]", {
+            // Opciones generales
+            dragToClose: false,
+            click: "close",
+            // Opciones para PDF
+            pdf: {
+                iframe: {
+                    // Opciones de iframe
+                    preload: false
                 }
-                return response.text();
-            })
-            .then((xmlContent) => {
-                verCFDI.innerHTML = `
-                <pre style="white-space: pre-wrap; word-wrap: break-word; background: #f8f8f8; padding: 10px; border-radius: 5px;">
-                    ${xmlContent.replace(/</g, "&lt;").replace(/>/g, "&gt;")}
-                </pre>
-            `;
-            })
-            .catch((error) => {
-                verCFDI.innerHTML = `<p style="color: red;">Error al cargar el XML: ${error.message}</p>`;
-            });
-    }
+            }
+        });
+
+        // Configurar manejadores para botones XML
+        $("[data-fancybox='xml']").on("click", function(e) {
+            e.preventDefault();
+            const xmlUrl = $(this).attr('data-xml-url');
+            const button = $(this);
+            
+            if (xmlUrl) {
+                // Mostrar indicador de carga
+                Fancybox.show([{
+                    src: '<div style="padding: 40px; text-align: center;"><div class="loading text-center"><img src="/assets/images/loading.gif" alt="loading" /><br/>Cargando XML...</div></div>',
+                    type: 'html'
+                }], {
+                    dragToClose: false,
+                    click: "close"
+                });
+
+                // Cargar el XML
+                fetch(xmlUrl)
+                    .then((response) => {
+                        if (!response.ok) {
+                            throw new Error("Error al cargar el XML");
+                        }
+                        return response.text();
+                    })
+                    .then((xmlContent) => {
+                        // Crear contenido HTML formateado para el XML
+                        const formattedXML = `
+                            <div style="padding: 20px; max-width: 100%; overflow: auto;">
+                                <h4 style="margin-bottom: 15px; color: #333; font-weight: bold;">Contenido XML</h4>
+                                <pre style="white-space: pre-wrap; word-wrap: break-word; background: #f8f9fa; padding: 15px; border-radius: 5px; border: 1px solid #dee2e6; font-family: 'Courier New', monospace; font-size: 12px; line-height: 1.5; max-height: 70vh; overflow: auto; color: #212529;">${xmlContent.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</pre>
+                            </div>
+                        `;
+                        
+                        // Cerrar el modal de carga y abrir el modal con el contenido
+                        Fancybox.close();
+                        Fancybox.show([{
+                            src: formattedXML,
+                            type: 'html'
+                        }], {
+                            dragToClose: false,
+                            click: "close"
+                        });
+                    })
+                    .catch((error) => {
+                        const errorHTML = `
+                            <div style="padding: 40px; text-align: center;">
+                                <p style="color: #dc3545; font-size: 16px; margin-bottom: 20px;">
+                                    <i class="fas fa-exclamation-triangle"></i><br/>
+                                    Error al cargar el XML: ${error.message}
+                                </p>
+                                <button onclick="Fancybox.close()" class="btn btn-primary">Cerrar</button>
+                            </div>
+                        `;
+                        Fancybox.close();
+                        Fancybox.show([{
+                            src: errorHTML,
+                            type: 'html'
+                        }], {
+                            dragToClose: false,
+                            click: "close"
+                        });
+                    });
+            }
+        });
+    });
 </script>

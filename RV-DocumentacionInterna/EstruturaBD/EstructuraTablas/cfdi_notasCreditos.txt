@@ -1,1 +1,14 @@
-"id"	"idCompra"	"idProveedor"	"tipoComprobante"	"uuid"	"estatus"	"total"	"subtotal"	"idCatTipoMoneda"	"serie"	"folio"	"version"	"tipoFactura"	"rfcEmisor"	"rfcReceptor"	"uuidRelacionado"	"fechaPago"	"selloCFDI"	"selloSAT"	"formaDePago"	"numOperacion"	"urlPDF"	"urlXML"	"validacionEFOS"	"detalleValidaciónEFOS"	"codigoEstatusValida"	"estadoValida"	"idUserReg"	"fechaReg (DateTime)"	"idNCExterno"
+"id"	"idCompra"	"idProveedor"	"tipoComprobante"	"uuid"	"estatus"	"total"	"subtotal"	"idCatTipoMoneda"	"serie"	"folio"	"version"	"tipoFactura"	"rfcEmisor"	"rfcReceptor"	"uuidRelacionado"	"fechaPago"	"selloCFDI"	"selloSAT"	"formaDePago"	"numOperacion"	"urlPDF"	"urlXML"	"validacionEFOS"	"detalleValidaciónEFOS"	"codigoEstatusValida"	"estadoValida"	"idUserReg"	"fechaReg (DateTime)"	"idNCExterno"	"idUserValida"	"fechaValida (DateTime)"	"idUserRechaza"	"fechaRechaza (DateTime)"	"motivoRechazo"
+
+Estatus:
+	0 - Cancelada (Cuando se detecte que el CFDI fue cancelado)
+	1 - Pendiente/En espera de verificación (Badge azul - Recibida en espera de verificación)
+	2 - Aceptada (Badge verde - Verificada Visualmente)
+	3 - Rechazada (Badge rojo - Cuando el usuario la rechaza, requiere motivoRechazo)
+
+Campos de Auditoría:
+	idUserValida - ID del usuario que aceptó/validó la nota de crédito (cuando estatus = 2)
+	fechaValida - Fecha y hora cuando se aceptó/validó la nota de crédito (cuando estatus = 2)
+	idUserRechaza - ID del usuario que rechazó la nota de crédito (cuando estatus = 3)
+	fechaRechaza - Fecha y hora cuando se rechazó la nota de crédito (cuando estatus = 3)
+	motivoRechazo - Motivo por el cual se rechazó la nota de crédito (cuando estatus = 3)
