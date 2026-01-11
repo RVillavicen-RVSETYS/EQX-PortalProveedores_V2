@@ -428,6 +428,7 @@ class ReglasAplicadasv40
 
     public function validarReglasInternasNacional_Pagos($dataProveedor, $dataEmpresa, $dataXML, $dataCompras, $configParaValidaciones = [])
     {
+        $this->debug = 1; // Activado temporalmente para debugging
         $response = [
             "success" => true,
             "message" => "",
@@ -489,6 +490,8 @@ class ReglasAplicadasv40
             echo "<br>=======================<br>Inicia Validación de Reglas Internas Nacional Pagos...<br>";
         }
 
+        $errores = [];
+
         // VALIDAR AQUI SI EL UUID DEL COMPLEMENTO DE PAGO YA EXISTE EN LA BD
         if (empty($dataXML['TimbreFiscal']['UUID'])) {
             $response["message"] = "El nodo UUID del Timbre Fiscal no existe o está vacío.";
@@ -498,26 +501,29 @@ class ReglasAplicadasv40
 
         if ($this->debug == 1) {
             echo "<br>UUID del Timbre Fiscal: " . $dataXML['TimbreFiscal']['UUID'];
-            echo "<br>Validamos si el Complemento de Pago ya existe en la base de datos...";
+            echo "<br>Validamos si el Complemento de Pago ya existe en la base de datos (solo activos)...";
         }
         $cfdis_Mdl = new CFDIs_Mdl();
         $filtrosComplemento = [
             'uuids' => $dataXML['TimbreFiscal']['UUID'] ?? null,
+            'soloActivos' => 1 // Solo buscar en complementos activos (estatus 0,1,2), excluyendo rechazados (3)
         ];
         $obtenerCompDePago = $cfdis_Mdl->obtenerComplementosDePago($filtrosComplemento);
         if ($obtenerCompDePago['success']) {
             if ($obtenerCompDePago['cantRes'] > 0) {
                 if ($this->debug == 1) {
-                    echo "<br> * ERROR -- El UUID del complemento de pago ya existe en la base de datos.";
+                    echo "<br> * ERROR -- El UUID del complemento de pago ya existe y está activo en la base de datos.";
                 }
                 $fechaRegistro = $obtenerCompDePago['data'][0]['fechaReg'] ?? 'N/A';
+                $estatus = $obtenerCompDePago['data'][0]['estatus'] ?? 'N/A';
+                $estatusTexto = ['0' => 'Pendiente', '1' => 'En Revisión', '2' => 'Aprobada'][$estatus] ?? "Estatus $estatus";
                 $response["success"] = false;
-                $response["message"] = "Ese complemento de pago ya fue registrado el {$fechaRegistro}.";
-                $response["debug"] = " * ERROR - El UUID del complemento de pago ya existe en la base de datos.";
+                $response["message"] = "Ese complemento de pago ya fue registrado el {$fechaRegistro} con estatus: {$estatusTexto}.";
+                $response["debug"] = " * ERROR - El UUID del complemento de pago ya existe y está activo en la base de datos (estatus: $estatus).";
                 return $response;
             } else {
                 if ($this->debug == 1) {
-                    echo "<br> * El UUID del complemento de pago no existe en la base de datos.";
+                    echo "<br> * El UUID del complemento de pago no existe activo en la base de datos (puede haber sido rechazado antes).";
                 }
             }
         } else {
@@ -665,6 +671,64 @@ class ReglasAplicadasv40
         }
         if ($dataXML['Receptor']['UsoCFDI'] != 'CP01') {
             $errores[] = "* El uso del CFDI no es CP01: " . $dataXML['Receptor']['UsoCFDI'];
+        }
+
+        // Validación de Año Fiscal
+        if ($this->debug == 1) {
+            echo "<br><br>Comienza Validación de Año Fiscal...<br>";
+        }
+        $fechaComprobante = $dataXML['Comprobante']['Fecha'] ?? '';
+        $fechaTimbrado = $dataXML['TimbreFiscal']['FechaTimbrado'] ?? '';
+        $anioActual = date('Y');
+        
+        if (!empty($fechaComprobante) && !empty($fechaTimbrado)) {
+            $fechaFactura = strtotime($fechaComprobante);
+            $fechaTimbradoTimestamp = strtotime($fechaTimbrado);
+            
+            $excepcionAnioFiscal = $configParaValidaciones['excepcionesProveedor']['AnioFiscal'] ?? false;
+            if (!$excepcionAnioFiscal) {
+                if (date('Y', $fechaFactura) !== $anioActual || date('Y', $fechaTimbradoTimestamp) !== $anioActual) {
+                    if ($this->debug == 1) {
+                        echo "<br> * ERROR - El complemento de pago no pertenece al Año Fiscal. Año de Comprobante: " . date('Y', $fechaFactura) . ", Año de Timbrado: " . date('Y', $fechaTimbradoTimestamp);
+                    }
+                    $errores[] = "* El complemento de pago no pertenece al Año Fiscal. Fecha del comprobante: <b>" . date('Y', $fechaFactura) . "</b>, Fecha de timbrado: <b>" . date('Y', $fechaTimbradoTimestamp) . "</b>.";
+                } else {
+                    if ($this->debug == 1) {
+                        echo "<br> * OK - Validación de Año Fiscal: Año del comprobante y timbrado coinciden con el año actual.";
+                    }
+                }
+            } else {
+                if ($this->debug == 1) {
+                    echo "<br> * OK - Validación de Año Fiscal omitida por excepción del proveedor.";
+                }
+            }
+        }
+
+        // Validación de Tiempo de Emisión
+        if ($this->debug == 1) {
+            echo "<br><br>Comienza Validación de Tiempo de Emisión...<br>";
+        }
+        if (!empty($fechaComprobante) && !empty($fechaTimbrado)) {
+            $tiempoVigencia = $configParaValidaciones['configCFDI']['tiempoVigencia'] ?? '6 month';
+            $fechaLimite = strtotime("- $tiempoVigencia");
+            
+            $excepcionFechaEmision = $configParaValidaciones['excepcionesProveedor']['FechaEmision'] ?? false;
+            if (!$excepcionFechaEmision) {
+                if ($fechaFactura < $fechaLimite || $fechaTimbradoTimestamp < $fechaLimite) {
+                    if ($this->debug == 1) {
+                        echo "<br> * ERROR - La fecha del complemento de pago o timbrado excede el tiempo de emisión permitido. Fecha límite: " . date('Y-m-d', $fechaLimite);
+                    }
+                    $errores[] = "* La fecha del complemento de pago o timbrado excede el tiempo de emisión permitido (<b>" . date('Y-m-d', $fechaLimite) . "</b>). Fecha del comprobante: <b>" . date('Y-m-d', $fechaFactura) . "</b>, Fecha de timbrado: <b>" . date('Y-m-d', $fechaTimbradoTimestamp) . "</b>.";
+                } else {
+                    if ($this->debug == 1) {
+                        echo "<br> * OK - Validación de Tiempo de Emisión: Las fechas están dentro del rango permitido.";
+                    }
+                }
+            } else {
+                if ($this->debug == 1) {
+                    echo "<br> * OK - Validación de Tiempo de Emisión omitida por excepción del proveedor.";
+                }
+            }
         }
 
         //Preparar el mensaje de respuesta

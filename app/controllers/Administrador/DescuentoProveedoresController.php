@@ -4,7 +4,7 @@ namespace App\Controllers\Administrador;
 
 use Core\Controller;
 use App\Models\Menu_Mdl;
-use App\Models\Configuraciones\DescuentoProveedores_Mdl;
+use App\Models\Proveedores\Excepciones\DescuentoProveedores_Mdl;
 
 class DescuentoProveedoresController extends Controller
 {
@@ -134,10 +134,17 @@ class DescuentoProveedoresController extends Controller
         }
 
         $descuentoModel = new DescuentoProveedores_Mdl();
-        $resultProvDesc = $descuentoModel->agregarProvDesc($idProveedor);
+        
+        // Preparar campos siguiendo el patrón de consumo
+        $campos = [
+            'idProveedor' => $idProveedor,
+            'estatus' => 1
+        ];
+
+        $resultProvDesc = $descuentoModel->registraDescuentoProveedor($campos);
 
         if ($resultProvDesc['success']) {
-            $Message = $resultProvDesc['data'];
+            $Message = $resultProvDesc['message'];
             echo json_encode([
                 'success' => true,
                 'message' => $Message
@@ -163,12 +170,23 @@ class DescuentoProveedoresController extends Controller
             echo "<br>Contenido de idDescuento: $idDescuento <br>";
             echo "<br>Contenido de Estatus: $estatus <br>";
         }
+
         $nuevoEstatus = ($estatus == 1) ? 0 : 1;
         $descuentoModel = new DescuentoProveedores_Mdl();
-        $resultProvDesc = $descuentoModel->cambiaEstatus($idDescuento, $nuevoEstatus);
+        
+        // Preparar campos y filtros siguiendo el patrón de consumo
+        $campos = [
+            'estatus' => $nuevoEstatus
+        ];
+
+        $filtros = [
+            'id' => $idDescuento
+        ];
+
+        $resultProvDesc = $descuentoModel->actualizarDescuentoProveedor($campos, $filtros);
 
         if ($resultProvDesc['success']) {
-            $Message = $resultProvDesc['data'];
+            $Message = $resultProvDesc['message'];
             echo json_encode([
                 'success' => true,
                 'message' => $Message

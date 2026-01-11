@@ -191,13 +191,14 @@ class InicioController extends Controller
         $this->view('ProveedorNacional/VistasCompartidas/detalladoDeCompra', $data);
     }
 
-    public function validaOrdenCompra()
+    public function verificaOrdenCompraFactura()
     {
         $ordenCompra = $_POST['ordenCompra'] ?? '';
         $noProveedor = $_SESSION['EQXnoProveedor'] ?? '';
         $globalController = new VerificaFoliosDocumentosController();
-        $globalController->validaOrdenCompra($ordenCompra, $noProveedor, 'proveedor');
+        $globalController->verificaOrdenCompraFactura($ordenCompra, $noProveedor);
     }
+
 
     public function cargaFormNotaCredito()
     {

@@ -87,12 +87,20 @@ class CargarFacturasController extends Controller
         $globalController->registraNuevaFactura($_POST, $_FILES, $noProveedor, true);
     }
 
-    public function validaOrdenCompra()
+    public function verificaOrdenCompraFactura()
     {
         $ordenCompra = $_POST['ordenCompra'] ?? '';
         $noProveedor = $_POST['noProveedor'] ?? '';
         $globalController = new VerificaFoliosDocumentosController();
-        $globalController->validaOrdenCompra($ordenCompra, $noProveedor, 'admin');
+        $globalController->verificaOrdenCompraFactura($ordenCompra, $noProveedor);
+    }
+
+    public function verificaOrdenCompraNotaCredito()
+    {
+        $ordenCompra = $_POST['ordenCompra'] ?? '';
+        $noProveedor = $_POST['noProveedor'] ?? '';
+        $globalController = new VerificaFoliosDocumentosController();
+        $globalController->verificaOrdenCompraNotaCredito($ordenCompra, $noProveedor);
     }
 
     public function validaHojaEntrada()
@@ -107,6 +115,14 @@ class CargarFacturasController extends Controller
     {
         $anticipo = $_POST['anticipo'] ?? '';
         $noProveedor = $_POST['noProveedor'] ?? ''; // Asumimos que el noProveedor vendrá en el POST para consistencia
+        $globalController = new VerificaFoliosDocumentosController();
+        $globalController->validaAnticipo($anticipo, $noProveedor);
+    }
+
+    public function validaCodigoAnticipo()
+    {
+        $anticipo = $_POST['anticipo'] ?? '';
+        $noProveedor = $_POST['noProveedor'] ?? '';
         $globalController = new VerificaFoliosDocumentosController();
         $globalController->validaAnticipo($anticipo, $noProveedor);
     }
@@ -128,5 +144,19 @@ class CargarFacturasController extends Controller
     {
         $globalController = new ValidaOcHes();
         $globalController->obtenerFacturasPorOC();
+    }
+
+    public function VerificaSiDebeComplementosPago()
+    {
+        $noProveedor = $_POST['noProveedor'] ?? '';
+        $globalController = new VerificaFoliosDocumentosController();
+        $globalController->VerificaComplementosPendientesPorProveedor($noProveedor);
+    }
+
+    public function registraNuevoComplementoPago()
+    {
+        // El 'true' al final indica que la llamada proviene de un administrador.
+        $globalController = new CargaFacturasGlobalController();
+        $globalController->registraNuevoComplementoPago($_POST, $_FILES, true);
     }
 }

@@ -454,7 +454,7 @@ if ($notificaciones['success'] && !empty($notificaciones['data'])) {
             if (oc.valido) {
                 $.ajax({
                     type: 'POST',
-                    url: 'Inicio/validaOrdenCompra',
+                    url: 'Inicio/verificaOrdenCompraFactura',
                     data: {
                         ordenCompra: oc.valor
                     },
@@ -466,16 +466,25 @@ if ($notificaciones['success'] && !empty($notificaciones['data'])) {
                             $('#contentNotaCredito').empty();
                             $("#btnNotaCredito").addClass("d-none");
                             contadorFormNotas = 0;
-                            if (response.anticipo) {
-                                lastNotasCredito = response.NC;
-                                cargarFormNotaCredito(lastNotasCredito);
-                                $("#btnNotaCredito").removeClass("d-none");
-                                //$("#contentNotaCredito").html(response.solicitaNotaCredito);
+                            
+                            // Verificar si hay HES pendientes
+                            const cantHES = response.cantHES ?? 0;
+                            const cantNC = response.cantNC ?? 0;
+                            
+                            if (cantHES > 0) {
+                                // Hay HES pendientes, puede cargar factura
+                                // Si hay NC pendientes, mostrar información (opcional)
+                                if (cantNC > 0) {
+                                    console.log('Información: Hay notas de crédito pendientes:', response.messageNC);
+                                }
+                                
+                            } else {
+                                $("#invalid_ordenCompra").html(response.messageHES || 'No hay HES pendientes para esta Orden de Compra');
                             }
                         } else {
                             validOC = false;
                             $("#ordenCompra").addClass("is-invalid");
-                            $("#invalid_ordenCompra").html(response.message);
+                            $("#invalid_ordenCompra").html(response.message || 'Error al validar la Orden de Compra');
                         }
                     },
                     error: function() {

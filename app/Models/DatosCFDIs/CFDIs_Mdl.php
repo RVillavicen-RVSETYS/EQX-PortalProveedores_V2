@@ -34,7 +34,8 @@ class CFDIs_Mdl
         }
         $filtrosDisponibles = [
             'uuids' => ['tipoDato' => 'STRING', 'sqlFiltro' => 'cp.uuid IN (:uuids)'],
-            'entreFechas' => ['tipoDato' => 'STRING', 'sqlFiltro' => '(cp.fechaReg BETWEEN :fechaInicial AND :fechaFinal)']
+            'entreFechas' => ['tipoDato' => 'STRING', 'sqlFiltro' => '(cp.fechaReg BETWEEN :fechaInicial AND :fechaFinal)'],
+            'soloActivos' => ['tipoDato' => 'INT', 'sqlFiltro' => 'cp.estatus IN (0, 1, 2)']
         ];
 
         $filtrosSQL = '';
@@ -69,8 +70,23 @@ class CFDIs_Mdl
                             // Validar que el valor sea una cadena de UUIDs separados por comas
                             $uuids = explode(',', $valorFiltro);
                             $uuids = array_map('trim', $uuids); // Limpiar espacios en blanco
-                            $filtrosSQL .= ' AND ' . $filtrosDisponibles[$nombreFiltro]['sqlFiltro'];
-                            $params[':uuids'] = implode(',', $uuids); // Convertir a cadena separada por comas
+                            // Construir la consulta IN manualmente para múltiples UUIDs
+                            $placeholders = [];
+                            foreach ($uuids as $index => $uuid) {
+                                $placeholder = ':uuid_' . $index;
+                                $placeholders[] = $placeholder;
+                                $params[$placeholder] = $uuid;
+                            }
+                            if (!empty($placeholders)) {
+                                $filtrosSQL .= ' AND cp.uuid IN (' . implode(', ', $placeholders) . ')';
+                            }
+                            break;
+
+                        case 'soloActivos':
+                            // Si soloActivos es true, filtrar solo estatus activos (0, 1, 2), excluyendo rechazados (3)
+                            if ($valorFiltro == 1 || $valorFiltro === true) {
+                                $filtrosSQL .= ' AND ' . $filtrosDisponibles[$nombreFiltro]['sqlFiltro'];
+                            }
                             break;
 
                         default:
