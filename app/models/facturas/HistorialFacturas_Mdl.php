@@ -206,13 +206,18 @@ class HistorialFacturas_Mdl
                 echo '<br><br>';
             }
 
-            if ($dataResul) {
+            if ($cantResult > 0) {
                 return ['success' => true, 'cantResul' => $cantResult, 'data' => $dataResul];
             } else {
-                if (self::$debug) {
-                    echo "Error Al Buscar Pagos.<br>";
+
+                if ($cantResult == 0) {
+                    return ['success' => false, 'message' => 'No se encontraron pagos nuevos en este rango de fechas.'];
+                } else {
+                    if (self::$debug) {
+                        echo "Error Al Buscar Pagos.<br>";
+                    }
+                    return ['success' => false, 'message' => 'Error Al Buscar Pagos.'];
                 }
-                return ['success' => false, 'message' => 'Error Al Buscar Pagos.'];
             }
         } catch (\PDOException $e) {
             // Captura de errores y almacenamiento en el log

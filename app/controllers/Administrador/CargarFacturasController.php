@@ -80,30 +80,6 @@ class CargarFacturasController extends Controller
         }
     }
 
-    public function registraNuevaNotaCredito()
-    {
-        $data = []; // Aquí puedes pasar datos a la vista si es necesario
-        if ($this->debug == 1) {
-            echo '<br>----SESSION<br>';
-            print_r($_SESSION);
-            echo '<br>----POST<br>';
-            print_r($_POST);
-            echo '<br>----Files<br>';
-            print_r($_FILES);
-        }
-
-        // Variables básicas
-        $ordenCompra = $_POST['ordenCompra'] ?? '';
-        $noProveedor = $_POST['noProveedor'] ?? '';
-
-        // ExcepcionesAdmin
-        $excepcionesAdmin = $_POST['excepcionesAdmin'] ?? [];
-
-        // NotasCredito
-        $notasCreditoPost = $_POST['notaCredito'] ?? [];           // Array multidimensional: notaCredito[id] = array de notas
-        $archivosNotas = $_FILES['notaCreditoArchivo'] ?? [];     // Archivos: notaCreditoArchivo[name|tmp_name][id][pdf|xml]
-    }
-
     public function registraNuevaFactura()
     {
         $noProveedor = $_POST['noProveedor'] ?? '';
