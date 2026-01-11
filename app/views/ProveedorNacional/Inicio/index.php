@@ -674,23 +674,33 @@ if ($notificaciones['success'] && !empty($notificaciones['data'])) {
                     success: function(response) {
                         desbloquearBtn('btn1');
                         if (response.success) {
+                            // Si todo salió bien, limpiar el formulario
                             resetFormulario("Form_CargaFactura");
+                            // Limpiar también los campos dinámicos de Notas de Crédito
+                            $('#contentNotaCredito').empty();
+                            $('#btnNotaCredito').addClass("d-none");
+                            // Limpiar select2 y otros campos
+                            $('#ordenCompra').val(null).trigger('change');
+                            $('#listaHES').val('');
+                            // Resetear variables globales
+                            contadorFormNotas = 0;
+                            selectedNoteCreditIds.clear();
+                            validOC = false;
+                            validHES = false;
+                            reqAnticipo = false;
+                            lastNotasCredito = [];
                             notificaSucSweet("Excelente!!", response.message);
+                            // Cargar tabla solo si todo fue exitoso
+                            cargaTablaUltimasFacturas();
                         } else {
+                            // Si hubo error, NO limpiar el formulario para que el usuario pueda corregir
                             notificaBadSweet("Lo sentimos!!", response.message); // Muestra el mensaje de error
                         }
                     },
                     error: function() {
+                        desbloquearBtn('btn1');
+                        // Si hay error en la petición, NO limpiar el formulario
                         notificaBad('Error al querer cargar factura. Consulta a tu administrador');
-                        desbloquearBtn('btn1');
-                    },
-                    complete: function() {
-                        // Rehabilitar el botón
-                        desbloquearBtn('btn1');
-
-                        // Limpiar los campos Inputs
-                        resetFormulario("Form_CargaFactura");
-                        cargaTablaUltimasFacturas();
                     }
                 });
             });

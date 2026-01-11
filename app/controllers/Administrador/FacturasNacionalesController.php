@@ -8,6 +8,7 @@ use App\Models\Proveedores\Proveedores_Mdl;
 use App\Models\Compras\Compras_Mdl;
 use App\Globals\Controllers\DocumentosController;
 use App\Models\Facturas\Nacionales_Mdl;
+use App\Models\DatosCompra\NotasCredito_Mdl;
 
 class FacturasNacionalesController extends Controller
 {
@@ -342,6 +343,114 @@ class FacturasNacionalesController extends Controller
             $response = [
                 'success' => false,
                 'message' => 'Error al aceptar factura.'
+            ];
+            echo json_encode($response);
+            exit(0);
+        }
+    }
+
+    public function actualizarEstatusNotaCredito()
+    {
+        $idNC = $_POST['idNC'] ?? '';
+        $uuidNC = $_POST['uuidNC'] ?? '';
+        $estatus = $_POST['estatus'] ?? '';
+
+        if ($this->debug == 1) {
+            echo "<br>Contenido de POST: ";
+            var_dump($_POST);
+            echo "<br>idNC: $idNC<br>";
+            echo "<br>uuidNC: $uuidNC<br>";
+            echo "<br>estatus: $estatus<br>";
+        }
+
+        if (empty($idNC) || empty($estatus)) {
+            $response = [
+                'success' => false,
+                'message' => 'No se recibieron los datos necesarios para actualizar la nota de crédito.'
+            ];
+            echo json_encode($response);
+            exit(0);
+        }
+
+        // Validar que el estatus sea válido (0, 1, 2, o 3)
+        if (!in_array($estatus, ['0', '1', '2', '3'])) {
+            $response = [
+                'success' => false,
+                'message' => 'El estatus proporcionado no es válido.'
+            ];
+            echo json_encode($response);
+            exit(0);
+        }
+
+        try {
+            // Usar el modelo siguiendo el estándar del proyecto
+            $MDL_NotasCredito = new NotasCredito_Mdl();
+            
+            // Preparar campos según el estatus
+            $campos = ['estatus' => $estatus];
+            $idUser = $_SESSION['EQXident'] ?? 0;
+            
+            // Si es aceptada (estatus 2), agregar campos de validación
+            if ($estatus == '2') {
+                $campos['idUserValida'] = $idUser;
+                $campos['fechaValida'] = date('Y-m-d H:i:s');
+                // Limpiar campos de rechazo si existían
+                $campos['idUserRechaza'] = null;
+                $campos['fechaRechaza'] = null;
+                $campos['motivoRechazo'] = null;
+            }
+            
+            // Si es rechazada (estatus 3), agregar campos de rechazo
+            if ($estatus == '3') {
+                $motivoRechazo = $_POST['motivoRechazo'] ?? '';
+                if (empty($motivoRechazo)) {
+                    $response = [
+                        'success' => false,
+                        'message' => 'El motivo del rechazo es obligatorio.'
+                    ];
+                    echo json_encode($response);
+                    exit(0);
+                }
+                $campos['idUserRechaza'] = $idUser;
+                $campos['fechaRechaza'] = date('Y-m-d H:i:s');
+                $campos['motivoRechazo'] = $motivoRechazo;
+                // Limpiar campos de validación si existían
+                $campos['idUserValida'] = null;
+                $campos['fechaValida'] = null;
+            }
+            
+            // Actualizar usando el método genérico del modelo
+            $resultado = $MDL_NotasCredito->actualizarNotaCredito($campos, ['id' => $idNC]);
+
+            if ($resultado['success']) {
+                $mensajesEstatus = [
+                    '0' => 'Nota de crédito marcada como cancelada correctamente.',
+                    '1' => 'Nota de crédito marcada como pendiente correctamente.',
+                    '2' => 'Nota de crédito aceptada correctamente.',
+                    '3' => 'Nota de crédito rechazada correctamente.'
+                ];
+
+                $response = [
+                    'success' => true,
+                    'message' => $mensajesEstatus[$estatus] ?? 'Estatus actualizado correctamente.'
+                ];
+            } else {
+                $response = [
+                    'success' => false,
+                    'message' => $resultado['message'] ?? 'Error al actualizar el estatus de la nota de crédito.'
+                ];
+            }
+
+            echo json_encode($response);
+            exit(0);
+
+        } catch (\Exception $e) {
+            $timestamp = date("Y-m-d H:i:s");
+            error_log("[$timestamp] app/Controllers/Administrador/FacturasNacionalesController.php ->Error al actualizar estatus de nota de crédito: " . $e->getMessage() . PHP_EOL, 3, LOG_FILE);
+            
+            $response = [
+                'success' => false,
+                'message' => 'Error al actualizar el estatus de la nota de crédito.'
             ];
             echo json_encode($response);
             exit(0);

@@ -118,7 +118,9 @@ $totalImpuestos = $data['dataCompra']['data']['totalImpuestosTrasladados'] + $da
 <?php
             }
 
-            $contNotaCredito = $data['dataCompra']['data']['notaCredito'];
+            // Obtener el array de notas de crédito (ahora viene del modelo)
+            $notasCreditoArray = $data['dataCompra']['data']['notasCredito'] ?? [];
+            $contNotaCredito = count($notasCreditoArray); // Contar las notas de crédito reales
             $requiereComplementoPago = ($data['dataCompra']['data']['totalPagos'] > $data['dataCompra']['data']['totalPagos'] and $data['dataCompra']['data']['FacMetodoPago'] == 'PPD') ? 1 : 0;
 ?>
 
@@ -198,7 +200,7 @@ $totalImpuestos = $data['dataCompra']['data']['totalImpuestosTrasladados'] + $da
                     ?>
                     <br><br>
                     <button data-fancybox type="button" data-type="pdf" data-preloader="true" data-src="<?= '/Administrador/FacturasNacionales/verDocumento/PDF/' . $urlFacPDF; ?>/#toolbar=0" class="btn btn-outline-danger"><i class="far fa-file-pdf"></i> Ver PDF</button>
-                    <button type="button" onclick="verFacturaXML('<?= '/Administrador/FacturasNacionales/verDocumento/XML/' . $urlFacXML; ?>')" class="btn btn-outline-info"><i class="far fa-file-code"></i> Ver XML</button>
+                    <button data-fancybox="xml" type="button" data-xml-url="<?= '/Administrador/FacturasNacionales/verDocumento/XML/' . $urlFacXML; ?>" class="btn btn-outline-info"><i class="far fa-file-code"></i> Ver XML</button>
                 </div>
             </div>
         </div>
@@ -233,8 +235,139 @@ $totalImpuestos = $data['dataCompra']['data']['totalImpuestosTrasladados'] + $da
 
     <?php if ($contNotaCredito > 0) { ?>
         <div class="tab-pane fade" id="notaCredito" role="tabpanel" aria-labelledby="nota-credito-tab">
-            <h4 class="m-t-20 m-b-20"><b>Nota de Credito</b></h4>
-
+            <h4 class="m-t-20 m-b-20"><b>Notas de Crédito</b></h4>
+            
+            <?php
+            // Obtener todas las notas de crédito relacionadas (ahora viene del modelo)
+            $notasCredito = $data['dataCompra']['data']['notasCredito'] ?? [];
+            
+            if (empty($notasCredito)) {
+                echo '<div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i> No se encontraron notas de crédito registradas para esta factura.
+                </div>';
+            } else {
+            ?>
+            <div class="comment-widgets scrollable" style="max-height: 600px; overflow-y: auto;">
+                <?php 
+                $contadorNC = 1;
+                foreach ($notasCredito as $nota) {
+                    // Determinar el badge de estatus
+                    $estatusBadge = '';
+                    $estatusClass = '';
+                    $borderClass = ''; // Clase para el borde izquierdo
+                    switch ($nota['estatus'] ?? 1) {
+                        case 0:
+                            $estatusBadge = 'Cancelada';
+                            $estatusClass = 'label-danger';
+                            break;
+                        case 1:
+                            $estatusBadge = 'Pendiente';
+                            $estatusClass = 'label-info';
+                            break;
+                        case 2:
+                            $estatusBadge = 'Aceptada';
+                            $estatusClass = 'label-success';
+                            $borderClass = 'border-left border-success';
+                            break;
+                        case 3:
+                            $estatusBadge = 'Rechazada';
+                            $estatusClass = 'label-danger';
+                            $borderClass = 'border-left border-danger';
+                            break;
+                        default:
+                            $estatusBadge = 'Pendiente';
+                            $estatusClass = 'label-info';
+                    }
+                    
+                    $urlPDF = base64_encode($nota['urlPDF'] ?? '');
+                    $urlXML = base64_encode($nota['urlXML'] ?? '');
+                    $uuid = $nota['uuid'] ?? 'N/A';
+                    $serie = $nota['serie'] ?? '';
+                    $folio = $nota['folio'] ?? '';
+                    $fechaReg = isset($nota['fechaReg']) ? date('d/m/Y', strtotime($nota['fechaReg'])) : 'N/A';
+                    $total = isset($nota['total']) ? number_format(abs($nota['total']), 2, '.', ',') : '0.00';
+                    $moneda = $nota['moneda'] ?? 'MXN';
+                ?>
+                <!-- Comment Row - Nota de Crédito -->
+                <div class="d-flex flex-row comment-row <?= $contadorNC === 1 ? 'm-t-0' : ''; ?>">
+                    <div class="comment-text active w-100 <?= $borderClass; ?>">
+                        <div class="d-flex align-items-center p-b-15">
+                            <div>
+                                <h4 class="font-medium mb-0">
+                                    <i class="fas fa-file-invoice text-info mr-2"></i>Nota de Crédito #<?= $contadorNC; ?>
+                                </h4>
+                            </div>
+                            <div class="ml-auto">
+                                <div class="dl">
+                                    <?php 
+                                    $estatusActual = $nota['estatus'] ?? 1;
+                                    ?>
+                                    <select class="custom-select border-0 text-muted cambiarEstatusNC" data-id-nc="<?= $nota['id'] ?? ''; ?>" data-uuid-nc="<?= htmlspecialchars($uuid); ?>" data-estatus-inicial="<?= $estatusActual; ?>">
+                                        <option value="1" <?= $estatusActual == 1 ? 'selected' : ''; ?>>Pendiente</option>
+                                        <option value="2" <?= $estatusActual == 2 ? 'selected' : ''; ?>>Aceptada</option>
+                                        <option value="3" <?= $estatusActual == 3 ? 'selected' : ''; ?>>Rechazada</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="m-b-15">
+                            <div class="row">
+                                <div class="col-6 mb-2">
+                                    <small class="text-muted d-block mb-1">
+                                        <i class="fas fa-fingerprint text-primary" style="font-size: 10px;"></i> UUID:
+                                    </small>
+                                    <div style="font-size: 12px; font-weight: 500; word-break: break-all;"><?= htmlspecialchars($uuid); ?></div>
+                                </div>
+                                <div class="col-6 mb-2">
+                                    <small class="text-muted d-block mb-1">
+                                        <i class="fas fa-hashtag text-info" style="font-size: 10px;"></i> Serie/Folio:
+                                    </small>
+                                    <div style="font-size: 12px; font-weight: 500;"><?= htmlspecialchars($serie . $folio); ?></div>
+                                </div>
+                            </div>
+                            <div class="row mt-2" style="border-top: 1px solid #e0e0e0; padding-top: 8px;">
+                                <div class="col-6">
+                                    <small class="text-muted d-block mb-1">
+                                        <i class="far fa-calendar-alt text-success" style="font-size: 10px;"></i> Fecha:
+                                    </small>
+                                    <div style="font-size: 12px; font-weight: 500;"><?= $fechaReg; ?></div>
+                                </div>
+                                <div class="col-6">
+                                    <small class="text-muted d-block mb-1">
+                                        <i class="fas fa-dollar-sign text-warning" style="font-size: 10px;"></i> Total:
+                                    </small>
+                                    <div style="font-size: 13px; font-weight: 600; color: #333;">$ <?= $total; ?> <?= $moneda; ?></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="comment-footer">
+                            <span class="text-muted float-right"><?= $fechaReg; ?></span>
+                            <span class="label label-rounded <?= $estatusClass; ?>"><?= $estatusBadge; ?></span>
+                            <span class="action-icons active">
+                                <a href="javascript:void(0)" 
+                                   data-fancybox 
+                                   data-type="pdf" 
+                                   data-preloader="true" 
+                                   data-src="<?= '/Administrador/FacturasNacionales/verDocumento/PDF/' . $urlPDF; ?>/#toolbar=0" 
+                                   class="text-danger">
+                                    <i class="far fa-file-pdf"></i> Ver PDF
+                                </a>
+                                <a href="javascript:void(0)" 
+                                   data-fancybox="xml" 
+                                   data-xml-url="<?= '/Administrador/FacturasNacionales/verDocumento/XML/' . $urlXML; ?>"
+                                   class="text-info">
+                                    <i class="far fa-file-code"></i> Ver XML
+                                </a>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <?php 
+                    $contadorNC++;
+                } 
+                ?>
+            </div>
+            <?php } ?>
         </div>
     <?php
     }
@@ -292,7 +425,7 @@ $totalImpuestos = $data['dataCompra']['data']['totalImpuestosTrasladados'] + $da
                             ?>
                             <br><br>
                             <button data-fancybox type="button" data-type="pdf" data-preloader="true" data-src="<?= '/Administrador/FacturasNacionales/verDocumento/PDF/' . $urlFacPDF; ?>/#toolbar=0" class="btn btn-outline-danger"><i class="far fa-file-pdf"></i> Ver PDF</button>
-                            <button type="button" onclick="verFacturaXML('<?= '/Administrador/FacturasNacionales/verDocumento/XML/' . $urlFacXML; ?>')" class="btn btn-outline-info"><i class="far fa-file-code"></i> Ver XML</button>
+                            <button data-fancybox="xml" type="button" data-xml-url="<?= '/Administrador/FacturasNacionales/verDocumento/XML/' . $urlFacXML; ?>" class="btn btn-outline-info"><i class="far fa-file-code"></i> Ver XML</button>
                         </div>
                     </div>
                 </div>
@@ -303,9 +436,6 @@ $totalImpuestos = $data['dataCompra']['data']['totalImpuestosTrasladados'] + $da
 
 </div>
 </div>
-</div>
-
-<div id="verCFDI" style="padding: 15px; min-height: 200px;">
 </div>
 
 <script src="/dist/js/custom.js"></script>
@@ -325,6 +455,70 @@ $totalImpuestos = $data['dataCompra']['data']['totalImpuestosTrasladados'] + $da
             }
         });
 
+        // Configurar manejadores para botones XML
+        $("[data-fancybox='xml']").on("click", function(e) {
+            e.preventDefault();
+            const xmlUrl = $(this).attr('data-xml-url');
+            const button = $(this);
+            
+            if (xmlUrl) {
+                // Mostrar indicador de carga
+                Fancybox.show([{
+                    src: '<div style="padding: 40px; text-align: center;"><div class="loading text-center"><img src="/assets/images/loading.gif" alt="loading" /><br/>Cargando XML...</div></div>',
+                    type: 'html'
+                }], {
+                    dragToClose: false,
+                    click: "close"
+                });
+
+                // Cargar el XML
+                fetch(xmlUrl)
+                    .then((response) => {
+                        if (!response.ok) {
+                            throw new Error("Error al cargar el XML");
+                        }
+                        return response.text();
+                    })
+                    .then((xmlContent) => {
+                        // Crear contenido HTML formateado para el XML
+                        const formattedXML = `
+                            <div style="padding: 20px; max-width: 100%; overflow: auto;">
+                                <h4 style="margin-bottom: 15px; color: #333; font-weight: bold;">Contenido XML</h4>
+                                <pre style="white-space: pre-wrap; word-wrap: break-word; background: #f8f9fa; padding: 15px; border-radius: 5px; border: 1px solid #dee2e6; font-family: 'Courier New', monospace; font-size: 12px; line-height: 1.5; max-height: 70vh; overflow: auto; color: #212529;">${xmlContent.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</pre>
+                            </div>
+                        `;
+                        
+                        // Cerrar el modal de carga y abrir el modal con el contenido
+                        Fancybox.close();
+                        Fancybox.show([{
+                            src: formattedXML,
+                            type: 'html'
+                        }], {
+                            dragToClose: false,
+                            click: "close"
+                        });
+                    })
+                    .catch((error) => {
+                        const errorHTML = `
+                            <div style="padding: 40px; text-align: center;">
+                                <p style="color: #dc3545; font-size: 16px; margin-bottom: 20px;">
+                                    <i class="fas fa-exclamation-triangle"></i><br/>
+                                    Error al cargar el XML: ${error.message}
+                                </p>
+                                <button onclick="Fancybox.close()" class="btn btn-primary">Cerrar</button>
+                            </div>
+                        `;
+                        Fancybox.close();
+                        Fancybox.show([{
+                            src: errorHTML,
+                            type: 'html'
+                        }], {
+                            dragToClose: false,
+                            click: "close"
+                        });
+                    });
+            }
+        });
     });
 
     function aceptarFactura(acuse) {
@@ -452,26 +646,136 @@ $totalImpuestos = $data['dataCompra']['data']['totalImpuestosTrasladados'] + $da
         });
     }
 
-    // Botón para cargar el XML
-    function verFacturaXML(xmlUrl) {
-        verCFDI = document.getElementById("verCFDI");
-        verCFDI.innerHTML = '<div class="loading text-center"><img src="../assets/images/loading.gif" alt="loading" /><br/>Un momento, por favor...</div>';
-        fetch(xmlUrl)
-            .then((response) => {
-                if (!response.ok) {
-                    throw new Error("Error al cargar el XML");
+    // Manejar cambio de estatus de Nota de Crédito
+    $(document).on('change', '.cambiarEstatusNC', function() {
+        const select = $(this);
+        const idNC = select.attr('data-id-nc');
+        const uuidNC = select.attr('data-uuid-nc');
+        const nuevoEstatus = select.val();
+        
+        // Obtener el estatus inicial desde el atributo data
+        if (!select.data('estatus-anterior')) {
+            const estatusInicial = select.attr('data-estatus-inicial') || select.val();
+            select.data('estatus-anterior', estatusInicial);
+        }
+        const estatusAnterior = select.data('estatus-anterior');
+
+        // Si es rechazada (estatus 3), mostrar input para motivo
+        if (nuevoEstatus == '3') {
+            Swal.fire({
+                title: '¿Rechazar Nota de Crédito?',
+                text: 'Por favor, ingresa el motivo del rechazo:',
+                input: 'text',
+                inputPlaceholder: 'Escribe el motivo aquí...',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Rechazar',
+                cancelButtonText: 'Cancelar',
+                inputValidator: (value) => {
+                    if (!value.trim()) {
+                        return 'Debes ingresar un motivo para rechazar la nota de crédito.';
+                    }
                 }
-                return response.text();
-            })
-            .then((xmlContent) => {
-                verCFDI.innerHTML = `
-                <pre style="white-space: pre-wrap; word-wrap: break-word; background: #f8f8f8; padding: 10px; border-radius: 5px;">
-                    ${xmlContent.replace(/</g, "&lt;").replace(/>/g, "&gt;")}
-                </pre>
-            `;
-            })
-            .catch((error) => {
-                verCFDI.innerHTML = `<p style="color: red;">Error al cargar el XML: ${error.message}</p>`;
+            }).then((result) => {
+                if (result.value && result.value.trim()) {
+                    // Enviar petición con motivo
+                    $.ajax({
+                        url: 'FacturasNacionales/actualizarEstatusNotaCredito',
+                        type: 'POST',
+                        data: {
+                            idNC: idNC,
+                            uuidNC: uuidNC,
+                            estatus: nuevoEstatus,
+                            motivoRechazo: result.value.trim()
+                        },
+                        success: function(response) {
+                            const respuesta = JSON.parse(response);
+                            if (respuesta.success) {
+                                notificaSuc(respuesta.message);
+                                // Recargar el panel para actualizar los datos
+                                location.reload();
+                            } else {
+                                notificaBad(respuesta.message);
+                                // Revertir el select al valor anterior
+                                select.val(estatusAnterior);
+                            }
+                        },
+                        error: function() {
+                            notificaBad('Error al actualizar el estatus de la nota de crédito.');
+                            // Revertir el select al valor anterior
+                            select.val(estatusAnterior);
+                        }
+                    });
+                } else {
+                    // Si cancela o no ingresa motivo, revertir al valor anterior
+                    select.val(estatusAnterior);
+                }
             });
-    }
+            return;
+        }
+
+        // Para otros estatus (1, 2), mostrar confirmación simple
+        let titulo = '';
+        let texto = '';
+        let tipo = 'warning';
+        let confirmColor = '#3085d6';
+
+        switch(nuevoEstatus) {
+            case '1':
+                titulo = '¿Marcar como Pendiente?';
+                texto = '¿Estás seguro de marcar esta nota de crédito como pendiente?';
+                tipo = 'warning';
+                break;
+            case '2':
+                titulo = '¿Aceptar Nota de Crédito?';
+                texto = '¿Estás seguro de aceptar esta nota de crédito?';
+                tipo = 'question';
+                break;
+        }
+
+        Swal.fire({
+            title: titulo,
+            text: texto,
+            type: tipo,
+            showCancelButton: true,
+            confirmButtonColor: confirmColor,
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Confirmar',
+            cancelButtonText: 'Cancelar'
+        }).then((result) => {
+            if (result.value) {
+                $.ajax({
+                    url: 'FacturasNacionales/actualizarEstatusNotaCredito',
+                    type: 'POST',
+                    data: {
+                        idNC: idNC,
+                        uuidNC: uuidNC,
+                        estatus: nuevoEstatus
+                    },
+                    success: function(response) {
+                        const respuesta = JSON.parse(response);
+                        if (respuesta.success) {
+                            notificaSuc(respuesta.message);
+                            // Recargar el panel para actualizar los datos
+                            location.reload();
+                        } else {
+                            notificaBad(respuesta.message);
+                            // Revertir el select al valor anterior
+                            select.val(estatusAnterior);
+                        }
+                    },
+                    error: function() {
+                        notificaBad('Error al actualizar el estatus de la nota de crédito.');
+                        // Revertir el select al valor anterior
+                        select.val(estatusAnterior);
+                    }
+                });
+            } else {
+                // Si cancela, revertir al valor anterior
+                select.val(estatusAnterior);
+            }
+        });
+    });
+
 </script>
