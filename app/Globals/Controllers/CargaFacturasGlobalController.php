@@ -7,7 +7,7 @@ use App\Globals\Controllers\SubirFacturaController;
 
 class CargaFacturasGlobalController extends Controller
 {
-    protected $debug = 0;
+    protected $debug = 1; // Activado temporalmente para debugging
 
     public function __construct()
     {
@@ -284,6 +284,93 @@ class CargaFacturasGlobalController extends Controller
         }
 
         echo json_encode(['success' => $todosExitosos, 'message' => implode('<br>', $mensajes)]);
+        return;
+    }
+
+    public function registraNuevoComplementoPago($postData, $filesData, $isAdmin)
+    {
+        if ($this->debug == 1) {
+            echo '<br>---- CargaFacturasGlobalController -> registraNuevoComplementoPago ----<br>';
+            echo '<br>----postData----<br>';
+            print_r($postData);
+            echo '<br>----filesData----<br>';
+            print_r($filesData);
+            echo "<br>----isAdmin: " . ($isAdmin ? 'true' : 'false') . " ----<br>";
+        }
+
+        // 1.- Validaciones iniciales y obtención de datos
+        $noProveedor = $isAdmin ? ($postData['noProveedorCP'] ?? '') : ($_SESSION['EQXnoProveedor'] ?? '');
+        $complementoPagoPDF = $filesData['complementoPagoPDF'] ?? null;
+        $complementoPagoXML = $filesData['complementoPagoXML'] ?? null;
+
+        if (empty($noProveedor)) {
+            echo json_encode(['success' => false, 'message' => 'Error Crítico: El número de proveedor es obligatorio.']);
+            return;
+        }
+
+        if (empty($complementoPagoPDF) || empty($complementoPagoXML)) {
+            echo json_encode(['success' => false, 'message' => 'Error: Los archivos PDF y XML del Complemento de Pago son obligatorios.']);
+            return;
+        }
+
+        if (empty($complementoPagoPDF['tmp_name']) || empty($complementoPagoXML['tmp_name'])) {
+            echo json_encode(['success' => false, 'message' => 'Error: Los archivos del Complemento de Pago no se recibieron correctamente.']);
+            return;
+        }
+
+        // 2.- Verificar archivos (PDF y XML)
+        $Ctrl_Documentos = new DocumentosController();
+        $Ctrl_CFDIs = new CfdisController();
+        $Ctrl_ProcesaComplementoPago = new FacturasNacionalesController();
+
+        // 2.1.- Verificar PDF
+        $pdfVerificado = $Ctrl_Documentos->verificadorDeDocumentoARecibir($complementoPagoPDF, 'pdf');
+        if (!$pdfVerificado['success']) {
+            echo json_encode(['success' => false, 'message' => 'Error en PDF del Complemento de Pago: ' . $pdfVerificado['message']]);
+            return;
+        }
+
+        // 2.2.- Verificar XML
+        $xmlVerificado = $Ctrl_Documentos->verificadorDeDocumentoARecibir($complementoPagoXML, 'xml');
+        if (!$xmlVerificado['success']) {
+            echo json_encode(['success' => false, 'message' => 'Error en XML del Complemento de Pago: ' . $xmlVerificado['message']]);
+            return;
+        }
+
+        // 3.- Leer el XML para obtener información básica
+        $dataComplementoXML = $Ctrl_CFDIs->leerCfdiXML($xmlVerificado['data']['tmp_name'], 'Pago');
+        if (!$dataComplementoXML['success']) {
+            echo json_encode(['success' => false, 'message' => 'Error al leer XML del Complemento de Pago: ' . $dataComplementoXML['message']]);
+            return;
+        }
+
+        // 4.- Validar el Complemento de Pago (sin requerir facturas relacionadas)
+        $complementoValidado = $Ctrl_ProcesaComplementoPago->verificaNuevoComplementoPago(
+            $complementoPagoPDF,
+            $complementoPagoXML,
+            $noProveedor,
+            $isAdmin ? 1 : 0,
+            [] // reglasAdmin vacío por ahora
+        );
+
+        if (!$complementoValidado['success']) {
+            echo json_encode(['success' => false, 'message' => 'Error de validación del Complemento de Pago: ' . $complementoValidado['message']]);
+            return;
+        }
+
+        // 5.- Registrar el Complemento de Pago
+        $datosParaRegistrar = $complementoValidado['data'];
+        $datosParaRegistrar['ruta_temporal_pdf'] = $pdfVerificado['data']['tmp_name'];
+        $datosParaRegistrar['ruta_temporal_xml'] = $xmlVerificado['data']['tmp_name'];
+
+        $complementoRegistrado = $Ctrl_ProcesaComplementoPago->registraNuevoComplementoPago($datosParaRegistrar);
+
+        if (!$complementoRegistrado['success']) {
+            echo json_encode(['success' => false, 'message' => 'Error al registrar Complemento de Pago: ' . $complementoRegistrado['message']]);
+            return;
+        }
+
+        echo json_encode(['success' => true, 'message' => 'Complemento de Pago registrado con éxito. Se revisará manualmente si hace referencia a las facturas correctas.']);
         return;
     }
 }

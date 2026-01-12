@@ -4,7 +4,7 @@ namespace App\Controllers\Administrador;
 
 use Core\Controller;
 use App\Models\Menu_Mdl;
-use App\Models\Configuraciones\Alertas_Mdl;
+use App\Models\Proveedores\Excepciones\Alertas_Mdl;
 
 class AlertasController extends Controller
 {
@@ -128,7 +128,6 @@ class AlertasController extends Controller
         $fechaInicio = $_POST['fechaInicio'] ?? '';
         $fechaFin = $_POST['fechaFin'] ?? '';
 
-
         if ($this->debug == 1) {
             echo "<br>Contenido de data:<br>";
             var_dump($data);
@@ -142,10 +141,31 @@ class AlertasController extends Controller
         }
 
         $alertasModel = new Alertas_Mdl();
-        $resultAlertas = $alertasModel->nuevasAlertas($titulo, $descripcion, $tipoMensaje, $tipoProveedor, $tipoPeriodo, $fechaInicio, $fechaFin);
+        
+        // Preparar campos siguiendo el patrón de consumo
+        $campos = [
+            'tipoProveedor' => $tipoProveedor,
+            'titulo' => $titulo,
+            'mensaje' => $descripcion,
+            'tipoMensaje' => $tipoMensaje,
+            'periodo' => $tipoPeriodo,
+            'estatus' => 1,
+            'idUserReg' => $_SESSION['EQXident'] ?? 0
+        ];
+
+        // Si el periodo es 1 (sin fechas), establecer fechas como NULL
+        if ($tipoPeriodo == 1) {
+            $campos['fechaInicio'] = null;
+            $campos['fechaFin'] = null;
+        } else {
+            $campos['fechaInicio'] = $fechaInicio;
+            $campos['fechaFin'] = $fechaFin;
+        }
+
+        $resultAlertas = $alertasModel->registraNotificaProveedor($campos);
 
         if ($resultAlertas['success']) {
-            $Message = $resultAlertas['data'];
+            $Message = $resultAlertas['message'];
             echo json_encode([
                 'success' => true,
                 'message' => $Message
@@ -171,12 +191,23 @@ class AlertasController extends Controller
             echo "<br>Contenido de IdNotificacion: $idNotificacion <br>";
             echo "<br>Contenido de Estatus: $estatus <br>";
         }
+
         $nuevoEstatus = ($estatus == 1) ? 0 : 1;
         $alertasModel = new Alertas_Mdl();
-        $resultAlertas = $alertasModel->cambiaEstatus($idNotificacion, $nuevoEstatus);
+        
+        // Preparar campos y filtros siguiendo el patrón de consumo
+        $campos = [
+            'estatus' => $nuevoEstatus
+        ];
+
+        $filtros = [
+            'id' => $idNotificacion
+        ];
+
+        $resultAlertas = $alertasModel->actualizarNotificaProveedor($campos, $filtros);
 
         if ($resultAlertas['success']) {
-            $Message = $resultAlertas['data'];
+            $Message = $resultAlertas['message'];
             echo json_encode([
                 'success' => true,
                 'message' => $Message
@@ -244,10 +275,36 @@ class AlertasController extends Controller
         }
 
         $alertasModel = new Alertas_Mdl();
-        $resultAlertas = $alertasModel->editarAlertas($idNotificacion,$titulo, $descripcion, $tipoMensaje, $tipoProveedor, $tipoPeriodo, $fechaInicio, $fechaFin);
+        
+        // Preparar campos y filtros siguiendo el patrón de consumo
+        $campos = [
+            'tipoProveedor' => $tipoProveedor,
+            'titulo' => $titulo,
+            'mensaje' => $descripcion,
+            'tipoMensaje' => $tipoMensaje,
+            'periodo' => $tipoPeriodo,
+            'estatus' => 1,
+            'idUserReg' => $_SESSION['EQXident'] ?? 0,
+            'fechaReg' => null // El modelo manejará NOW() automáticamente
+        ];
+
+        // Si el periodo es 1 (sin fechas), establecer fechas como NULL
+        if ($tipoPeriodo == 1) {
+            $campos['fechaInicio'] = null;
+            $campos['fechaFin'] = null;
+        } else {
+            $campos['fechaInicio'] = $fechaInicio;
+            $campos['fechaFin'] = $fechaFin;
+        }
+
+        $filtros = [
+            'id' => $idNotificacion
+        ];
+
+        $resultAlertas = $alertasModel->actualizarNotificaProveedor($campos, $filtros);
 
         if ($resultAlertas['success']) {
-            $Message = $resultAlertas['data'];
+            $Message = $resultAlertas['message'];
             echo json_encode([
                 'success' => true,
                 'message' => $Message

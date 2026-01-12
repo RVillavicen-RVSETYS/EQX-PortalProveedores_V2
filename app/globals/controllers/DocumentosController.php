@@ -97,8 +97,21 @@ class DocumentosController extends Controller
         // Preparar la ruta base
         $currentYear = date('Y'); // Año actual
         $currentYearMonth = date('Y-m'); // Mes actual
-        $destinationDirSinBasePath = $empresa . DIRECTORY_SEPARATOR . $tipoDoctoNombre . DIRECTORY_SEPARATOR . $currentYear . DIRECTORY_SEPARATOR . $idProveedor . DIRECTORY_SEPARATOR . $currentYearMonth;
-        $destinationDir = $this->basePath . DIRECTORY_SEPARATOR . $destinationDirSinBasePath;
+        
+        // Estructura especial para complementos de pago: /complementosPago/anio/proveedor/noProveedor_CPAGO_uuid.pdf
+        if ($tipoDocto === 'COMPPAG') {
+            $destinationDirSinBasePath = $tipoDoctoNombre . DIRECTORY_SEPARATOR . $currentYear . DIRECTORY_SEPARATOR . $idProveedor;
+            $destinationDir = $this->basePath . DIRECTORY_SEPARATOR . $destinationDirSinBasePath;
+            // Nombre del archivo: noProveedor_CPAGO_uuid.extension
+            $fileName = "{$idProveedor}_CPAGO_{$identDocto}.{$extension}";
+        } else {
+            // Estructura estándar para otros tipos de documentos
+            $destinationDirSinBasePath = $empresa . DIRECTORY_SEPARATOR . $tipoDoctoNombre . DIRECTORY_SEPARATOR . $currentYear . DIRECTORY_SEPARATOR . $idProveedor . DIRECTORY_SEPARATOR . $currentYearMonth;
+            $destinationDir = $this->basePath . DIRECTORY_SEPARATOR . $destinationDirSinBasePath;
+            // Generar el nombre único del archivo usando tipoDocto directamente
+            $dateTime = date('YmdHis'); // Timestamp único
+            $fileName = "{$idProveedor}_{$tipoDocto}_{$identDocto}_{$dateTime}.{$extension}";
+        }
 
         if ($this->debug == 1) {
             echo "Directorio de Destino: {$destinationDir}<br>";
@@ -111,10 +124,6 @@ class DocumentosController extends Controller
                 return $response;
             }
         }
-
-        // Generar el nombre único del archivo usando tipoDocto directamente
-        $dateTime = date('YmdHis'); // Timestamp único
-        $fileName = "{$idProveedor}_{$tipoDocto}_{$identDocto}_{$dateTime}.{$extension}";
 
         if ($this->debug == 1) {
             echo "Nombre del Archivo: {$fileName}<br>";

@@ -335,7 +335,7 @@ class FacturasNacionalesController extends Controller
             'data' => []
         ];
 
-        //$this->debug = 1;
+        $this->debug = 1; // Activado temporalmente para debugging
 
         if ($this->debug == 1) {
             echo '<br>Valores para la carga:';
@@ -472,8 +472,17 @@ class FacturasNacionalesController extends Controller
                 }
                 $class_Validaciones = new $claseValidacion();
 
+                // Obtener configuración para validaciones (excepciones del proveedor y configCFDI)
+                $MDL_ConfigParaCFDI = new RecepcionCFDIs_Mdl();
+                $configCFDI = $MDL_ConfigParaCFDI->configuracionBaseRecepcionCFDI($idEmpresa, 'P', $versionDocto);
+                $exepcionesProv = $MDL_Proveedores->exepcionesProveedoresFacturas($noProveedor);
+                
+                $configParaValidaciones = [];
+                $configParaValidaciones['configCFDI'] = $configCFDI['data'] ?? [];
+                $configParaValidaciones['excepcionesProveedor'] = $exepcionesProv['data'] ?? [];
+                
                 // Ejecutar el método validarReglasInternasNacional_Pagos
-                $reglasInternas = $class_Validaciones->validarReglasInternasNacional_Pagos($dataProv['data'], $dataEmpresa['data'],  $dataCFDIXML['data'], $comprasPorFacturas['data'], $dataPagosProv['data']);
+                $reglasInternas = $class_Validaciones->validarReglasInternasNacional_Pagos($dataProv['data'], $dataEmpresa['data'], $dataCFDIXML['data'], $comprasPorFacturas['data'], $configParaValidaciones);
                 if ($this->debug == 1) {
                     echo '<br><br>Resultado de validarReglasInternasNacional_Pagos: ' . PHP_EOL;
                     var_dump($reglasInternas);
@@ -555,61 +564,6 @@ class FacturasNacionalesController extends Controller
 
 
         return $response;
-    }
-
-    public function registraNuevoComplementoPago($resultadoDeVerificacion)
-    {
-        //$this->debug = 1;
-        if ($this->debug == 1) {
-            echo '<br><br>Datos Recibidos de ResultadoDeVerificacion: ' . PHP_EOL;
-            var_dump($resultadoDeVerificacion);
-        }
-
-        if (empty($resultadoDeVerificacion['version'])) {
-            return ['success' => false, 'message' => 'No se recibio la version del CFDI.'];
-        }
-        if ($this->debug == 1) {
-            echo '<br><br>Version del CFDI recibido: ' . $resultadoDeVerificacion['version'];
-        }
-
-        $versionDocto = $resultadoDeVerificacion['version'];
-
-        // Construir el nombre de la clase del modelo y el método dinámicamente
-        $claseModelo = 'App\\Globals\\Controllers\\RegistroCFDIs\\RegistroCFDIs' . $versionDocto . '_Mdl';
-        $metodoFunction = 'registrarCFDI_Pagos' . $versionDocto;
-
-        $archivoModelo = __DIR__ . DIRECTORY_SEPARATOR . 'RegistroCFDIs' . DIRECTORY_SEPARATOR . 'RegistroCFDIs' . $versionDocto . '_Mdl.php';
-
-        if (!file_exists($archivoModelo)) {
-            return ['success' => false, 'message' => "El archivo de registro para la versión '$versionDocto' no existe."];
-        }
-        require_once $archivoModelo;
-
-        if ($this->debug == 1) {
-            echo "<br><br>Clase de Modelo a utilizar: $claseModelo";
-            echo "<br>Método a ejecutar: $metodoFunction<br>";
-        }
-
-        // Verificar que la clase del modelo exista
-        if (!class_exists($claseModelo)) {
-            return ['success' => false, 'message' => "La clase de registro para la versión '$versionDocto' no existe."];
-        }
-
-        $MDL_registraCFDI = new $claseModelo();
-
-        // Verificar que el método exista en la clase
-        if (!method_exists($MDL_registraCFDI, $metodoFunction)) {
-            return ['success' => false, 'message' => "El método de registro '$metodoFunction' no está definido en la clase '$claseModelo'."];
-        }
-
-
-        $respRegistro = $MDL_registraCFDI->$metodoFunction($resultadoDeVerificacion);
-        if ($this->debug == 1) {
-            echo '<br><br>Resultado de registroCFDI: ' . PHP_EOL;
-            var_dump($respRegistro);
-        }
-
-        return $respRegistro;
     }
 
     public function verificaNuevaNotaCredito($dataNotaCredXML, $noProveedor, $idCompra, $idNotaCredito, $isAdmin)
@@ -726,7 +680,11 @@ class FacturasNacionalesController extends Controller
             print_r($reglasInternas);
         }
         if (!$reglasInternas['success'] || !$reglasInternas['isValid']) {
-            return ['success' => false, 'message' => 'Problemas al Validar Reglas Internas:<br>' . $reglasInternas['message']];
+            // Registrar en logs con el prefijo completo para debugging
+            $timestamp = date("Y-m-d H:i:s");
+            error_log("[$timestamp] app/Globals/Controllers/FacturasNacionalesController.php -> Problemas al Validar Reglas Internas: " . $reglasInternas['message'] . PHP_EOL, 3, LOG_FILE);
+            // Retornar solo el mensaje al usuario sin el prefijo técnico
+            return ['success' => false, 'message' => $reglasInternas['message']];
         }
 
         // 10. Ejecutar el método validarReglasNegocioNacional_Egresos
@@ -736,7 +694,11 @@ class FacturasNacionalesController extends Controller
             print_r($reglasNegocio);
         }
         if (!$reglasNegocio['success'] || !$reglasNegocio['isValid']) {
-            return ['success' => false, 'message' => 'Problemas al Validar Reglas de Negocio:<br>' . $reglasNegocio['message']];
+            // Registrar en logs con el prefijo completo para debugging
+            $timestamp = date("Y-m-d H:i:s");
+            error_log("[$timestamp] app/Globals/Controllers/FacturasNacionalesController.php -> Problemas al Validar Reglas de Negocio: " . $reglasNegocio['message'] . PHP_EOL, 3, LOG_FILE);
+            // Retornar solo el mensaje al usuario sin el prefijo técnico
+            return ['success' => false, 'message' => $reglasNegocio['message']];
         }
 
         // 11. Ejecutar las Validaciones Fiscales del CFDI
@@ -861,6 +823,86 @@ class FacturasNacionalesController extends Controller
         if(!$respRegistro['success']){
             $Ctrl_Documentos->eliminaDocumento($pdfMovido['data']['rutaParaBD'], 'NOTACRED');
             $Ctrl_Documentos->eliminaDocumento($xmlMovido['data']['rutaParaBD'], 'NOTACRED');
+        }
+
+        return $respRegistro;
+    }
+
+    public function registraNuevoComplementoPago($resultadoDeVerificacion)
+    {
+        $this->debug = 1; // Activado temporalmente para debugging
+        if ($this->debug == 1) {
+            echo '<br><br>--- Inicia el Registro de Complemento de Pago ---<br>';
+            print_r($resultadoDeVerificacion);
+        }
+
+        // Preparar datos en el formato que espera registrarCFDI_Pagosv40
+        // El método registrarCFDI_Pagosv40 moverá los archivos automáticamente
+        $datosParaRegistrar = $resultadoDeVerificacion;
+        
+        // Asegurar que los documentos estén en el formato esperado
+        // Hay dos flujos posibles:
+        // 1. Desde HistoricoController: ya viene con 'documentos' completo
+        // 2. Desde CargaFacturasGlobalController: viene con 'ruta_temporal_pdf/xml'
+        if (!isset($datosParaRegistrar['documentos'])) {
+            $datosParaRegistrar['documentos'] = [];
+        }
+        
+        // Si viene desde CargaFacturasGlobalController, convertir rutas temporales a formato documentos
+        if (isset($resultadoDeVerificacion['ruta_temporal_pdf']) && !isset($datosParaRegistrar['documentos']['ComplementoPDF'])) {
+            $datosParaRegistrar['documentos']['ComplementoPDF'] = [
+                'tmp_name' => $resultadoDeVerificacion['ruta_temporal_pdf']
+            ];
+        }
+        if (isset($resultadoDeVerificacion['ruta_temporal_xml']) && !isset($datosParaRegistrar['documentos']['ComplementoXML'])) {
+            $datosParaRegistrar['documentos']['ComplementoXML'] = [
+                'tmp_name' => $resultadoDeVerificacion['ruta_temporal_xml']
+            ];
+        }
+        
+        // Validar que existan los documentos necesarios
+        if (empty($datosParaRegistrar['documentos']['ComplementoPDF']['tmp_name']) || empty($datosParaRegistrar['documentos']['ComplementoXML']['tmp_name'])) {
+            return ['success' => false, 'message' => 'No se recibieron correctamente los archivos del complemento de pago.'];
+        }
+
+        // 3. Registrar en la base de datos dinámicamente según la versión del CFDI
+        $versionDocto = $resultadoDeVerificacion['version'];
+        
+        // Construir el nombre de la clase del modelo y el método dinámicamente
+        $claseModelo = 'App\\Globals\\Controllers\\RegistroCFDIs\\RegistroCFDIs' . $versionDocto . '_Mdl';
+        $metodoFunction = 'registrarCFDI_Pagos' . $versionDocto;
+
+        $archivoModelo = __DIR__ . DIRECTORY_SEPARATOR . 'RegistroCFDIs' . DIRECTORY_SEPARATOR . 'RegistroCFDIs' . $versionDocto . '_Mdl.php';
+
+        if (!file_exists($archivoModelo)) {
+            return ['success' => false, 'message' => "El archivo de registro para la versión '$versionDocto' no existe."];
+        }
+        require_once $archivoModelo;
+
+        if ($this->debug == 1) {
+            echo "<br><br>Clase de Modelo a utilizar: $claseModelo";
+            echo "<br>Método a ejecutar: $metodoFunction<br>";
+        }
+
+        // Verificar que la clase del modelo exista
+        if (!class_exists($claseModelo)) {
+            return ['success' => false, 'message' => "La clase de registro para la versión '$versionDocto' no existe."];
+        }
+        
+        $MDL_registraCFDI = new $claseModelo();
+
+        // Verificar que el método exista en la clase
+        if (!method_exists($MDL_registraCFDI, $metodoFunction)) {
+            return ['success' => false, 'message' => "El método de registro '$metodoFunction' no está definido en la clase '$claseModelo'."];
+        }
+
+        // Llamar al método dinámicamente
+        // El método registrarCFDI_Pagosv40 moverá los archivos y manejará el rollback si es necesario
+        $respRegistro = $MDL_registraCFDI->$metodoFunction($datosParaRegistrar);
+
+        if ($this->debug == 1) {
+            echo '<br><br>Resultado del registro en BD: <br>';
+            print_r($respRegistro);
         }
 
         return $respRegistro;

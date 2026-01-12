@@ -16,6 +16,7 @@ use App\Models\Proveedores\Proveedores_Mdl;
 use App\Globals\Controllers\DocumentosController;
 use App\Globals\Controllers\FacturasNacionalesController;
 use App\Globals\Controllers\CfdisController;
+use App\Globals\Controllers\VerificaFoliosDocumentosController;
 
 class InicioController extends Controller
 {
@@ -185,6 +186,10 @@ class InicioController extends Controller
         $this->view('ProveedorExtranjero/VistasCompartidas/detalladoDeCompra', $data);
     }
 
+    /**
+     * @deprecated Mantener temporalmente para compatibilidad
+     * Usar verificaOrdenCompraFactura según corresponda
+     */
     public function validaOrdenCompra()
     {
         // Lógica para la vista de inicio
@@ -202,7 +207,8 @@ class InicioController extends Controller
         $MDL_ordenCompra = new OrdenCompra_Mdl();
         $validOrdenCompra = $MDL_ordenCompra->verificaOrdenCompra($ordenCompra, $noProveedor);
         $MDL_anticipos = new Anticipos_Mdl();
-        $verificaDebeAnticipo = $MDL_anticipos->verificaAnticipoDeOrdenCompra($ordenCompra);
+        $filtros['folioCompra'] = $ordenCompra;
+        $verificaDebeAnticipo = $MDL_anticipos->verificaAnticipoDeOrdenCompra($filtros);
 
         if ($validOrdenCompra['success']) {
             $Message = $validOrdenCompra['data']['cantHES'];
@@ -260,9 +266,22 @@ class InicioController extends Controller
             echo json_encode([
                 'success' => false,
                 'message' => $errorMessage
-            ]);
+                ]);
         }
     }
+
+    /**
+     * @deprecated Mantener temporalmente para compatibilidad
+     * Usar verificaOrdenCompraFactura según corresponda
+     */
+    public function verificaOrdenCompraFactura()
+    {
+        $ordenCompra = $_POST['ordenCompra'] ?? '';
+        $noProveedor = $_SESSION['EQXnoProveedor'] ?? '';
+        $globalController = new VerificaFoliosDocumentosController();
+        $globalController->verificaOrdenCompraFactura($ordenCompra, $noProveedor);
+    }
+
 
     public function validaHojaEntrada()
     {

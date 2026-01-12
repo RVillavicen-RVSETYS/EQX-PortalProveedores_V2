@@ -327,6 +327,7 @@ class RegistroCFDIsv40_Mdl
 
     public function registrarCFDI_Pagosv40($dataDeValidacion)
     {
+        self::$debug = 1; // Activado temporalmente para debugging
         $response = ["success" => true, "message" => "", "debug" => ""];
 
         try {
@@ -415,8 +416,10 @@ class RegistroCFDIsv40_Mdl
 
             $doctoPDF = $dataDeValidacion['documentos']['ComplementoPDF']['tmp_name'];
             $doctoXML = $dataDeValidacion['documentos']['ComplementoXML']['tmp_name'];
-            $almacenaPDF = $almacenaDoctos->almacenaCFDI($doctoPDF, 'COMPPAG', $idProveedor, $idComplemento, $sociedad,'PDF');
-            $almacenaXML = $almacenaDoctos->almacenaCFDI($doctoXML, 'COMPPAG', $idProveedor, $idComplemento, $sociedad,'XML');
+            // Para complementos de pago, usar UUID en lugar de ID para la estructura de carpetas
+            $uuidComplemento = $dataDeValidacion["dataComplementoXML"]["TimbreFiscal"]["UUID"];
+            $almacenaPDF = $almacenaDoctos->almacenaCFDI($doctoPDF, 'COMPPAG', $idProveedor, $uuidComplemento, $sociedad,'pdf');
+            $almacenaXML = $almacenaDoctos->almacenaCFDI($doctoXML, 'COMPPAG', $idProveedor, $uuidComplemento, $sociedad,'xml');
             if (self::$debug) {
                 echo "<br> * PDF de Complemento de Pago Registrado: <br>";
                 var_dump($almacenaPDF);
@@ -686,7 +689,7 @@ class RegistroCFDIsv40_Mdl
                 idCompra, idProveedor, tipoComprobante, uuid, estatus, total, subtotal, 
                 idCatTipoMoneda, serie, folio, version, tipoFactura, rfcEmisor, rfcReceptor, 
                 uuidRelacionado, fechaPago, selloCFDI, selloSAT, formaDePago, numOperacion, 
-                urlPDF, urlXML, validacionEFOS, detalleValidaciónEFOS, codigoEstatusValida, 
+                urlPDF, urlXML, validacionEFOS, detalleValidacionEFOS, codigoEstatusValida, 
                 estadoValida, idUserReg, fechaReg, idNCExterno
             ) VALUES (
                 :idCompra, :idProveedor, :tipoComprobante, :uuid, :estatus, :total, :subtotal, 
