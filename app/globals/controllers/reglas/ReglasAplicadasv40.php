@@ -796,7 +796,7 @@ class ReglasAplicadasv40
             }
             $pagosGrouped[$key]['monto']  += floatval($p['montoPagado']);
             $pagosGrouped[$key]['fechas'][] = $p['fechaPago'];
-            $pagosGrouped[$key]['formas'][] = $p['formaPago'];
+            $pagosGrouped[$key]['formas'][] = $p['formaPagoSAT'] ?? $p['formaPago']; // Usar formaPagoSAT (código SAT) si existe, sino usar formaPago (ID) como fallback
         }
         foreach ($pagosGrouped as &$grp) {
             $grp['formas'] = array_unique($grp['formas']);
