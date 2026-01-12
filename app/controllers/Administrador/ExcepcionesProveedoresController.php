@@ -9,6 +9,8 @@ use App\Models\Proveedores\Excepciones\ExentoAnoFisc_Mdl;
 use App\Models\Proveedores\Excepciones\ExentoFechaEmision_Mdl;
 use App\Models\Proveedores\Excepciones\UsoCfdiDistinto_Mdl;
 use App\Models\Proveedores\Excepciones\BloqDiferencias_Mdl;
+use App\Models\Proveedores\Excepciones\ExcepcionesProveedores_Mdl;
+use App\Models\Proveedores\Proveedores_Mdl;
 
 class ExcepcionesProveedoresController extends Controller
 {

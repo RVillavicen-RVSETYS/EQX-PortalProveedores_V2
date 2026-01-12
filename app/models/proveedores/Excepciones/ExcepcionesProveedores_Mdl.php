@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Models\Configuraciones;
+namespace App\Models\Proveedores\Excepciones;
 
 use PDO; // Asegúrate de importar PDO si es necesario
 use BD_Connect; // Asegúrate de que la conexión esté disponible
