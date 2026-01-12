@@ -42,7 +42,7 @@ class RegistrarPago_Mdl
             $index = 0;
 
             foreach ($pagos as $pago) {
-                $sql .= "(?, ?, ?, ?, ?, ?, ?, ?, ?),";
+                $sql .= "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?),";
 
                 $values[] = $pago['IdPagoDet'];
                 $values[] = $pago['IdAcuse'];
