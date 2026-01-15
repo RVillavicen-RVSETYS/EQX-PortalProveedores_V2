@@ -335,7 +335,7 @@ class FacturasNacionalesController extends Controller
             'data' => []
         ];
 
-        $this->debug = 1; // Activado temporalmente para debugging
+        $this->debug = 0; // Activado temporalmente para debugging
 
         if ($this->debug == 1) {
             echo '<br>Valores para la carga:';
@@ -830,7 +830,7 @@ class FacturasNacionalesController extends Controller
 
     public function registraNuevoComplementoPago($resultadoDeVerificacion)
     {
-        $this->debug = 1; // Activado temporalmente para debugging
+        $this->debug = 0; // Activado temporalmente para debugging
         if ($this->debug == 1) {
             echo '<br><br>--- Inicia el Registro de Complemento de Pago ---<br>';
             print_r($resultadoDeVerificacion);

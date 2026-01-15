@@ -428,7 +428,7 @@ class ReglasAplicadasv40
 
     public function validarReglasInternasNacional_Pagos($dataProveedor, $dataEmpresa, $dataXML, $dataCompras, $configParaValidaciones = [])
     {
-        $this->debug = 1; // Activado temporalmente para debugging
+        $this->debug = 0; // Activado temporalmente para debugging
         $response = [
             "success" => true,
             "message" => "",
@@ -998,6 +998,8 @@ class ReglasAplicadasv40
             $response['message'] = implode("<br>", $errores);
             $response['debug']   = implode("<br>", $errores);
         } else {
+            $response['success'] = true;
+            $response['isValid'] = true;
             $response['message'] = "Todo OK";
             $response['debug']   = "No se encontraron errores.";
         }

@@ -130,7 +130,9 @@ class cfdisv40
             $response['data']['TimbreFiscal'] = $timbre ? [
                 'UUID' => strtoupper((string) ($timbre[0]['UUID'] ?? '')),
                 'FechaTimbrado' => (string) ($timbre[0]['FechaTimbrado'] ?? ''),
-                'RfcProvCertif' => (string) ($timbre[0]['RfcProvCertif'] ?? '')
+                'RfcProvCertif' => (string) ($timbre[0]['RfcProvCertif'] ?? ''),
+                'SelloSAT' => (string) ($timbre[0]['SelloSAT'] ?? ''),
+                'SelloCFD' => (string) ($timbre[0]['SelloCFD'] ?? ''),
             ] : [];
 
             // Generar el campo serializado
@@ -309,7 +311,9 @@ class cfdisv40
             $response['data']['TimbreFiscal'] = $timbre ? [
                 'UUID' => strtoupper((string) ($timbre[0]['UUID'] ?? '')),
                 'FechaTimbrado' => (string) ($timbre[0]['FechaTimbrado'] ?? ''),
-                'RfcProvCertif' => (string) ($timbre[0]['RfcProvCertif'] ?? '')
+                'RfcProvCertif' => (string) ($timbre[0]['RfcProvCertif'] ?? ''),
+                'SelloSAT' => (string) ($timbre[0]['SelloSAT'] ?? ''),
+                'SelloCFD' => (string) ($timbre[0]['SelloCFD'] ?? ''),
             ] : [];
 
             // Generar el campo serializado

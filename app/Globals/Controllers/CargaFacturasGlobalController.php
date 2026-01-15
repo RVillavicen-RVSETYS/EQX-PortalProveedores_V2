@@ -7,7 +7,7 @@ use App\Globals\Controllers\SubirFacturaController;
 
 class CargaFacturasGlobalController extends Controller
 {
-    protected $debug = 1; // Activado temporalmente para debugging
+    protected $debug = 0; // Activado temporalmente para debugging
 
     public function __construct()
     {
