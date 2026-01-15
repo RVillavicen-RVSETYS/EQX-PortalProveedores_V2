@@ -35,7 +35,7 @@ if ($listaProveedoresDesc['success'] == false) {
 ?>
     <div class="alert alert-info">
         <button type="button" class="close" data-dismiss="alert" aria-label="Close"> <span aria-hidden="true">×</span> </button>
-        <h3 class="text-info"><i class="fa fa-exclamation-circle"></i> Atención</h3> Por Favor Agregar Un Proveedor Para Indicar Que Tiene Descuento
+        Por favor agrega un proveedor para indicar que tiene descuento.
     </div>
 <?php
 } else {
@@ -106,7 +106,7 @@ if ($listaProveedoresDesc['success'] == false) {
         info: true,
         buttons: [{
                 extend: 'pdfHtml5',
-                className: 'btn btn-pdf bg-Equinoxgold text-white',
+                className: 'btn btn-pdf bg-pyme-primary text-white',
                 orientation: 'landscape',
                 pageSize: 'LEGAL',
                 text: "Pdf",
@@ -114,7 +114,7 @@ if ($listaProveedoresDesc['success'] == false) {
 
             {
                 extend: 'csvHtml5',
-                className: 'btn btn-pdf bg-Equinoxgold text-white',
+                className: 'btn btn-pdf bg-pyme-primary text-white',
                 text: "Csv",
                 exportOptions: {
                     columns: ":not(.no-exportar)"
@@ -122,7 +122,7 @@ if ($listaProveedoresDesc['success'] == false) {
             },
             {
                 extend: 'excelHtml5',
-                className: 'btn btn-pdf bg-Equinoxgold text-white',
+                className: 'btn btn-pdf bg-pyme-primary text-white',
                 text: "Excel",
                 exportOptions: {
                     columns: ":not(.no-exportar)"
@@ -130,7 +130,7 @@ if ($listaProveedoresDesc['success'] == false) {
             },
             {
                 extend: 'copy',
-                className: 'btn btn-pdf bg-Equinoxgold text-white',
+                className: 'btn btn-pdf bg-pyme-primary text-white',
                 text: "Copiar",
                 exportOptions: {
                     columns: ":not(.no-exportar)"

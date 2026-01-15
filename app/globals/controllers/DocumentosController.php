@@ -44,9 +44,9 @@ class DocumentosController extends Controller
             'message' => '',
             'data' => []
         ];
-        $this->debug = 0;
 
         if ($this->debug == 1) {
+            echo "<br> ================================= <br>Iniciando almacenaCFDI en DocumentosController<br>";
             echo "<br>Temporal Name Recibido: {$tmpName}<br>";
             echo "Empresa: {$empresa}<br>";
             echo "Tipo de Documento: {$tipoDocto}<br>";
@@ -97,8 +97,21 @@ class DocumentosController extends Controller
         // Preparar la ruta base
         $currentYear = date('Y'); // Año actual
         $currentYearMonth = date('Y-m'); // Mes actual
-        $destinationDir = $this->basePath . DIRECTORY_SEPARATOR . $empresa . DIRECTORY_SEPARATOR . $tipoDoctoNombre . DIRECTORY_SEPARATOR . $currentYear . DIRECTORY_SEPARATOR . $idProveedor . DIRECTORY_SEPARATOR . $currentYearMonth;
-        $destinationDirSinBasePath = $empresa . DIRECTORY_SEPARATOR . $tipoDoctoNombre . DIRECTORY_SEPARATOR . $currentYear . DIRECTORY_SEPARATOR . $idProveedor . DIRECTORY_SEPARATOR . $currentYearMonth;
+        
+        // Estructura especial para complementos de pago: /complementosPago/anio/proveedor/noProveedor_CPAGO_uuid.pdf
+        if ($tipoDocto === 'COMPPAG') {
+            $destinationDirSinBasePath = $tipoDoctoNombre . DIRECTORY_SEPARATOR . $currentYear . DIRECTORY_SEPARATOR . $idProveedor;
+            $destinationDir = $this->basePath . DIRECTORY_SEPARATOR . $destinationDirSinBasePath;
+            // Nombre del archivo: noProveedor_CPAGO_uuid.extension
+            $fileName = "{$idProveedor}_CPAGO_{$identDocto}.{$extension}";
+        } else {
+            // Estructura estándar para otros tipos de documentos
+            $destinationDirSinBasePath = $empresa . DIRECTORY_SEPARATOR . $tipoDoctoNombre . DIRECTORY_SEPARATOR . $currentYear . DIRECTORY_SEPARATOR . $idProveedor . DIRECTORY_SEPARATOR . $currentYearMonth;
+            $destinationDir = $this->basePath . DIRECTORY_SEPARATOR . $destinationDirSinBasePath;
+            // Generar el nombre único del archivo usando tipoDocto directamente
+            $dateTime = date('YmdHis'); // Timestamp único
+            $fileName = "{$idProveedor}_{$tipoDocto}_{$identDocto}_{$dateTime}.{$extension}";
+        }
 
         if ($this->debug == 1) {
             echo "Directorio de Destino: {$destinationDir}<br>";
@@ -111,10 +124,6 @@ class DocumentosController extends Controller
                 return $response;
             }
         }
-
-        // Generar el nombre único del archivo usando tipoDocto directamente
-        $dateTime = date('YmdHis'); // Timestamp único
-        $fileName = "{$idProveedor}_{$tipoDocto}_{$identDocto}_{$dateTime}.{$extension}";
 
         if ($this->debug == 1) {
             echo "Nombre del Archivo: {$fileName}<br>";
@@ -139,7 +148,7 @@ class DocumentosController extends Controller
 
         // Preparar la respuesta
         $response['success'] = true;
-        $response['message'] = 'El archivo se almacenó temporalmente con éxito.';
+        $response['message'] = 'El archivo se almacenó con éxito.';
         $response['data'] = [
             'absolutePath' => $destinationPath,
             'relativePath' => $relativePath,
@@ -408,9 +417,9 @@ class DocumentosController extends Controller
         }
 
         // Validar que el archivo tenga un tamaño mínimo
-        $minimumFileSize = 50; // Tamaño mínimo en bytes
+        $minimumFileSize = 0; // Tamaño mínimo en bytes
         if ($fileToValidate['size'] < $minimumFileSize) {
-            $response['message'] = 'El archivo parece estar dañado o es demasiado pequeño.';
+            $response['message'] = 'El archivo parece estar dañado o es demasiado pequeño.'.$fileToValidate['size'];
             return $response;
         }
 

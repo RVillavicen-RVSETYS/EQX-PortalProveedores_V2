@@ -54,7 +54,7 @@ class App
                     echo "Controlador no encontrado: $controllerFile <br>Redirigiendo a 404.<br>";
                     exit();
                 }
-                $this->logAndRedirect404("Controlador en subcarpeta no encontrado", $url[1] ?? 'N/A');
+            $this->logAndRedirect404("Controlador en subcarpeta no encontrado", $controllerFile);
             }
         }
         // Verificar si el controlador solicitado existe en /app/Controllers/
@@ -70,11 +70,13 @@ class App
                 echo "Controlador no encontrado: $this->controller <br>Redirigiendo a 404.<br>";
                 exit();
             }
-            $this->logAndRedirect404("Controlador como archivo no encontrado", $url[0] ?? 'N/A');
+            $route = is_array($url) ? implode('/', $url) : (string)$url;
+            $expectedFile = isset($url[0]) ? ("../app/Controllers/" . ucfirst($url[0]) . ".php") : 'N/A';
+            $this->logAndRedirect404("Controlador como archivo no encontrado para la ruta '" . $route . "' (buscado: " . $expectedFile . ")", $url[0] ?? 'N/A');
         }
 
         // Incluir y crear una instancia del controlador
-        require_once "../app/Controllers/" . $this->controller . ".php";
+        require_once "../app/Controllers/" . str_replace('\\', '/', $this->controller) . ".php";
         $controllerClass = "App\\Controllers\\" . str_replace('/', '\\', $this->controller);
         $this->controller = new $controllerClass;
 
@@ -154,9 +156,31 @@ class App
     private function logAndRedirect404($error, $detail)
     {
         $timestamp = date("Y-m-d H:i:s");
-        error_log("[$timestamp] core/App.php ->$error: " . $detail . PHP_EOL, 3, LOG_FILE);
+        // Contexto adicional de la petición para facilitar el diagnóstico
+        $requestUri = $_SERVER['REQUEST_URI'] ?? '';
+        $method = $_SERVER['REQUEST_METHOD'] ?? '';
+        $host = $_SERVER['HTTP_HOST'] ?? '';
+        $referer = $_SERVER['HTTP_REFERER'] ?? '';
+        $remoteAddr = $_SERVER['REMOTE_ADDR'] ?? '';
+        $userAgent = $_SERVER['HTTP_USER_AGENT'] ?? '';
+        $parsedUrl = $_GET['url'] ?? '';
+        if (is_array($parsedUrl)) {
+            $parsedUrl = implode('/', $parsedUrl);
+        }
+
+        $logLine = "[$timestamp] core/App.php ->$error: " . $detail
+            . " | uri=" . $requestUri
+            . " | host=" . $host
+            . " | method=" . $method
+            . " | parsed_url=" . $parsedUrl
+            . " | ip=" . $remoteAddr
+            . " | referer=" . $referer
+            . " | ua=" . $userAgent
+            . PHP_EOL;
+
+        error_log($logLine, 3, LOG_FILE);
         if ($this->debug == 1) {
-            echo "$error: " . $detail . "<br>";
+            echo nl2br(htmlentities($logLine)) . "<br>";
         }
         require_once "../app/Views/errors/404.php";
         exit();

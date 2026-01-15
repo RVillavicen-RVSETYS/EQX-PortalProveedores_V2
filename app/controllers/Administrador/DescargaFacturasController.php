@@ -90,8 +90,6 @@ class DescargaFacturasController extends Controller
 
         $filtros['estatusFactura'] = '2';
 
-        $filtros['pagada'] = '1';
-
         $MDL_compras = new Compras_Mdl();
 
         $listaCompras = $MDL_compras->listaComprasFacturadas($filtros, 0, 'DESC');

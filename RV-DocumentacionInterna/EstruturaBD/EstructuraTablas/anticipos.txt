@@ -1,0 +1,1 @@
+"id"	"idProveedor"	"nameProveedor"	"ordenCompra"	"codAnticipo"	"monto"	"idCatTipoMoneda"	"claseDocto"	"sociedad"	"CeBe"	"referencia"	"posicion"	"CME"	"fechaVencimiento"	"fechaBase"	"importeMonLocal"	"importeMon2"	"fechaDoctoUp"	"fechaReg (DateTime)"

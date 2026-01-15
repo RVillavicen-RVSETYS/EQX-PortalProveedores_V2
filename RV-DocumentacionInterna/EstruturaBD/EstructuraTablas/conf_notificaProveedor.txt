@@ -1,0 +1,1 @@
+"id"	"tipoProveedor"	"titulo"	"mensaje"	"tipoMensaje"	"periodo"	"fechaInicio"	"fechaFin"	"estatus"	"idUserReg"	"fechaReg (DateTime)"

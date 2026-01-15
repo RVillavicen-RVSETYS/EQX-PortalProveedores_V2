@@ -43,13 +43,12 @@ $fechaFinal = date("Y-m-t");
     <!-- Custom CSS -->
 
     <link href="/assets/extra-libs/datatables.net-bs4/css/dataTables.bootstrap4.css" rel="stylesheet">
-    <link href="/assets/libs/fancybox/fancybox.css" rel="stylesheet">
+    <link href="/assets/libs/fancybox/dist/fancybox/fancybox.css" rel="stylesheet">
     <link href="/assets/libs/fancybox/dist/carousel/carousel.css" rel="stylesheet">
     <link href="/assets/libs/fancybox/dist/carousel/carousel.thumbs.css" rel="stylesheet">
     <link href="/assets/libs/fancybox/dist/panzoom/panzoom.css" rel="stylesheet">
     <link href="/assets/libs/fancybox/dist/panzoom/panzoom.toolbar.css" rel="stylesheet">
     <link href="/assets/libs/fancybox/dist/panzoom/panzoom.pins.css" rel="stylesheet">
-    <link href="/assets/libs/sweetalert2/dist/sweetalert2.min.css" rel="stylesheet">
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
     <!--[if lt IE 9]>
@@ -224,7 +223,7 @@ $fechaFinal = date("Y-m-t");
     <script src="/assets/libs/fancybox/dist/panzoom/panzoom.umd.js"></script>
     <script src="/assets/libs/fancybox/dist/panzoom/panzoom.toolbar.umd.js"></script>
     <script src="/assets/libs/fancybox/dist/panzoom/panzoom.pins.umd.js"></script>
-    <script src="/assets/libs/fancybox/l10n/es.umd.js"></script>
+    <script src="/assets/libs/fancybox/dist/fancybox/l10n/es.umd.js"></script>
     <script src="/assets/libs/fancybox/dist/panzoom/l10n/es.umd.js"></script>
     <script src="/assets/libs/fancybox/dist/carousel/l10n/es.umd.js"></script>
 

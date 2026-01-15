@@ -309,10 +309,19 @@ class ControlProveedoresController extends Controller
         }
 
         $proveedoresModel = new Proveedores_Mdl();
-        $resultProveedores = $proveedoresModel->actualizaRFC($idProveedor, $nuevoRFC);
+        
+        $campos = [
+            'rfc' => $nuevoRFC,
+        ];
+
+        $filtros = [
+            'id' => $idProveedor,
+        ];
+
+        $resultProveedores = $proveedoresModel->actualizarDatosProveedor($campos, $filtros);
 
         if ($resultProveedores['success']) {
-            $Message = $resultProveedores['data'];
+            $Message = $resultProveedores['message'];
             echo json_encode([
                 'success' => true,
                 'message' => $Message
@@ -340,10 +349,19 @@ class ControlProveedoresController extends Controller
         }
 
         $proveedoresModel = new Proveedores_Mdl();
-        $resultProveedores = $proveedoresModel->actualizaCorreo($idProveedor, $nuevoCorreo);
+        
+        $campos = [
+            'correo' => $nuevoCorreo,
+        ];
+
+        $filtros = [
+            'id' => $idProveedor,
+        ];
+
+        $resultProveedores = $proveedoresModel->actualizarDatosProveedor($campos, $filtros);
 
         if ($resultProveedores['success']) {
-            $Message = $resultProveedores['data'];
+            $Message = $resultProveedores['message'];
             echo json_encode([
                 'success' => true,
                 'message' => $Message
@@ -395,20 +413,27 @@ class ControlProveedoresController extends Controller
         $idProveedor = $_POST['idProveedor'] ?? '';
         $nuevaPass = $_POST['nuevaPass'] ?? '';
 
-        $passEncript = password_hash($nuevaPass, PASSWORD_DEFAULT);
-
         if ($this->debug == 1) {
             echo "<br>Contenido de data:<br>";
             var_dump($data);
             echo "<br>Contenido de idProveedor: $idProveedor <br>";
-            echo "<br>Contenido de nuevoCorreo: $nuevaPass <br>";
+            echo "<br>Contenido de nuevaPass: $nuevaPass <br>";
         }
 
         $proveedoresModel = new Proveedores_Mdl();
-        $resultProveedores = $proveedoresModel->actualizaPassword($idProveedor, $passEncript);
+        
+        $campos = [
+            'pass' => $nuevaPass, // El modelo hace el hash automáticamente
+        ];
+
+        $filtros = [
+            'id' => $idProveedor,
+        ];
+
+        $resultProveedores = $proveedoresModel->actualizarDatosProveedor($campos, $filtros);
 
         if ($resultProveedores['success']) {
-            $Message = $resultProveedores['data'];
+            $Message = $resultProveedores['message'];
             echo json_encode([
                 'success' => true,
                 'message' => $Message
@@ -473,6 +498,8 @@ class ControlProveedoresController extends Controller
         $data['acuse'] =  $acuse;
         $data['dataCompra'] =  $dataCompra;
         $data['dataProveedor'] =  $resultProveedores['data'];
+        $data['puedeAutorizar'] = 1; // Cambiar a 0 si no puede autorizar
+        $data['puedeRechazar'] = 1; // Cambiar a 0 si no puede regresar
 
         if ($this->debug == 1) {
             echo 'Variables enviadas:' . PHP_EOL;
@@ -481,7 +508,7 @@ class ControlProveedoresController extends Controller
         }
 
         // Cargar la vista correspondiente
-        $this->view('Administrador/ControlProveedores/detalladoDeCompra', $data);
+        $this->view('Administrador/VistasCompartidas/detalladoDeCompra', $data);
     }
 
     public function verDocumento()

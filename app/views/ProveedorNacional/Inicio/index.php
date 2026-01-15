@@ -218,8 +218,7 @@ if ($notificaciones['success'] && !empty($notificaciones['data'])) {
                                                             </div>
                                                         </div>
 
-                                                        <div id="contentNotaCredito">
-                                                        </div>
+
 
                                                         <div class="form-group">
                                                             <label for="facturaPDF"><?= $menuModel->txt('Facturas'); ?></label>
@@ -244,6 +243,13 @@ if ($notificaciones['success'] && !empty($notificaciones['data'])) {
                                                                 </div>
                                                             </div>
                                                         </div>
+
+                                                        <div id="contentNotaCredito">
+
+                                                        </div>
+                                                        <div class="justify-content-end d-none" id="btnNotaCredito">
+                                                            <button type="button" class="btn btn-success mt-2" onclick="cargarFormNotaCredito(lastNotasCredito)"><i class="fas fa-plus"></i> Nota de Crédito</button>
+                                                        </div>
                                                         <hr>
                                                         <div class="row">
                                                             <div class="col-md-6 text-right"></div>
@@ -253,7 +259,7 @@ if ($notificaciones['success'] && !empty($notificaciones['data'])) {
                                                                 <button type="submit" class="btn btn-success waves-effect waves-light"><?= $menuModel->txt('Carga_Factura'); ?></button>
                                                             </div>
                                                             <div id="bloquear-btn1" style="display: none;">
-                                                            <div class="loading text-center"><img src="../assets/images/loadingHorizontal.gif" alt="loading..."/></div>
+                                                                <div class="loading text-center"><img src="../assets/images/loadingHorizontal.gif" alt="loading..." /></div>
                                                             </div>
                                                         </div>
                                                     </form>
@@ -376,7 +382,7 @@ if ($notificaciones['success'] && !empty($notificaciones['data'])) {
     </aside>
     <!-- ============================================================== -->
     <!-- All Jquery -->
-    <!-- ============================================================== -->  
+    <!-- ============================================================== -->
     <script src="/assets/libs/jquery/dist/jquery.min.js"></script>
     <script src="/assets/libs/fancybox/dist/fancybox/fancybox.umd.js"></script>
     <script src="/assets/libs/fancybox/dist/carousel/carousel.umd.js"></script>
@@ -386,8 +392,8 @@ if ($notificaciones['success'] && !empty($notificaciones['data'])) {
     <script src="/assets/libs/fancybox/dist/panzoom/panzoom.toolbar.umd.js"></script>
     <script src="/assets/libs/fancybox/dist/panzoom/panzoom.pins.umd.js"></script>
     <script src="/assets/libs/fancybox/dist/fancybox/l10n/es.umd.js"></script>
-    <script src="/assets/libs/fancybox/dist/panzoom/l10n/es.umd.js"></script>   
-    <script src="/assets/libs/fancybox/dist/carousel/l10n/es.umd.js"></script>   
+    <script src="/assets/libs/fancybox/dist/panzoom/l10n/es.umd.js"></script>
+    <script src="/assets/libs/fancybox/dist/carousel/l10n/es.umd.js"></script>
 
     <!-- Bootstrap tether Core JavaScript -->
     <script src="/assets/libs/popper.js/dist/umd/popper.min.js"></script>
@@ -407,9 +413,10 @@ if ($notificaciones['success'] && !empty($notificaciones['data'])) {
     <script src="/dist/js/sidebarmenu.js"></script>
     <!--Custom JavaScript -->
     <script src="/dist/js/custom.js"></script>
-    <script src="/dist/js/basicFuctions.js"></script>
     <script src="/assets/libs/toastr/build/toastr.min.js"></script>
     <script src="/assets/libs/moment/moment.js"></script>
+    <script src="/assets/libs/sweetalert2/dist/sweetalert2.js"></script>
+    <script src="/assets/libs/sweetalert2/dist/sweetalert2.all.js"></script>
     <script src="/assets/extra-libs/datatables.net/js/jquery.dataTables.min-ESP.js"></script>
     <script src="/dist/js/pages/datatable/datatable-basic.init.js"></script>
 
@@ -426,8 +433,238 @@ if ($notificaciones['success'] && !empty($notificaciones['data'])) {
     <script src="/assets/libs/chartist-plugin-tooltips/dist/chartist-plugin-tooltip.min.js"></script>
     <script src="/assets/extra-libs/datatables.net/js/pdfmake.min.js"></script>
     <script src="/assets/extra-libs/datatables.net/js/vfs_fonts.js"></script>
+    <script src="/assets/libs/sweetalert2/sweet-alert.init.js"></script>
+    <script src="/dist/js/basicFuctions.js"></script>
+
+    <script src="/assets/libs/select2/dist/js/select2.full.min.js"></script>
+    <script src="/assets/libs/select2/dist/js/select2.min.js"></script>
+    <script src="/dist/js/pages/forms/select2/select2.init.js"></script>
     <script>
+        let lastNotasCredito = [];
+
+        function validaOrdCompra(ordenCompra) {
+            $("#ordenCompra").removeClass("is-invalid is-valid");
+            $("#invalid_ordenCompra").html("");
+
+            oc = validarEstructuraOC(ordenCompra);
+            console.log(validarEstructuraOC(ordenCompra));
+            console.log(oc.valor);
+
+            $("#ordenCompra").val(oc.valor);
+            if (oc.valido) {
+                $.ajax({
+                    type: 'POST',
+                    url: 'Inicio/verificaOrdenCompraFactura',
+                    data: {
+                        ordenCompra: oc.valor
+                    },
+                    dataType: 'json',
+                    success: function(response) {
+                        if (response.success) {
+                            validOC = true;
+                            $("#ordenCompra").addClass("is-valid");
+                            $('#contentNotaCredito').empty();
+                            $("#btnNotaCredito").addClass("d-none");
+                            contadorFormNotas = 0;
+                            
+                            // Verificar si hay HES pendientes
+                            const cantHES = response.cantHES ?? 0;
+                            const cantNC = response.cantNC ?? 0;
+                            
+                            if (cantHES > 0) {
+                                // Hay HES pendientes, puede cargar factura
+                                // Si hay NC pendientes, mostrar información (opcional)
+                                if (cantNC > 0) {
+                                    console.log('Información: Hay notas de crédito pendientes:', response.messageNC);
+                                }
+                                
+                            } else {
+                                $("#invalid_ordenCompra").html(response.messageHES || 'No hay HES pendientes para esta Orden de Compra');
+                            }
+                        } else {
+                            validOC = false;
+                            $("#ordenCompra").addClass("is-invalid");
+                            $("#invalid_ordenCompra").html(response.message || 'Error al validar la Orden de Compra');
+                        }
+                    },
+                    error: function() {
+                        notificaBad('Error al validar la Orden de Compra. Consulta a tu administrador');
+                        validOC = false;
+                    }
+                });
+            } else {
+                $("#ordenCompra").addClass("is-invalid");
+                $("#invalid_ordenCompra").html("Estructura: COM-XXX-######");
+                validOC = false;
+            }
+        }
+
+        let contadorFormNotas = 0;
+
+        function cargarFormNotaCredito(arrayNotasCredito) {
+            contadorFormNotas++;
+
+            $.ajax({
+                type: 'POST',
+                url: 'Inicio/cargaFormNotaCredito',
+                data: {
+                    id: contadorFormNotas,
+                    arrayNotasCredito: arrayNotasCredito
+                },
+                success: function(response) {
+                    // Reemplaza los IDs/for con el número único
+                    const formHtml = response.replace(/{{id}}/g, contadorFormNotas);
+                    $('#contentNotaCredito').append(formHtml);
+
+                    // Re-inicializa select2 después de insertar el HTML
+                    const $select = $(`#notaCredito_${contadorFormNotas}`);
+                    arrayNotasCredito.forEach(nc => {
+                        const esObligatoria = nc.Obligatoria == "1";
+                        const optionText = esObligatoria ? `🔴 ${nc.Descripcion}` : nc.Descripcion;
+                        const option = new Option(optionText, nc.IdNotaCredito, false, false);
+                        $(option).attr('data-obligatoria', nc.Obligatoria);
+                        $select.append(option);
+                    });
+
+                    $select.select2(); // Inicializa select2 en el select ya con opciones
+
+                    $('#btnNotaCredito').removeClass('d-none');
+                },
+                error: function() {
+                    $('#contentNotaCredito').append('<div class="text-danger">Error cargando formulario.</div>');
+                }
+            });
+        }
+
+        const selectedNoteCreditIds = new Map();
+
+        // Al seleccionar una opción
+        $(document).on('select2:select', '.formulario-nota .select2', function(e) {
+            const selectedId = e.params.data.id;
+            const selectedText = e.params.data.text;
+
+            selectedNoteCreditIds.set(selectedId, selectedText);
+
+            $('.formulario-nota .select2').not(this).each(function() {
+                $(this).find(`option[value="${selectedId}"]`).prop('disabled', true);
+            });
+
+            // Actualizar UI
+            $('.formulario-nota .select2').select2();
+        });
+
+        // Al deseleccionar una opción
+        $(document).on('select2:unselect', '.formulario-nota .select2', function(e) {
+            const deselectedId = e.params.data.id;
+
+            selectedNoteCreditIds.delete(deselectedId);
+
+            $('.formulario-nota .select2').not(this).each(function() {
+                $(this).find(`option[value="${deselectedId}"]`).prop('disabled', false);
+            });
+
+            // Actualizar UI
+            $('.formulario-nota .select2').select2();
+        });
+
+        $(document).on('change', '.custom-file-input', function() {
+            let fileName = $(this).val().split('\\').pop(); // obtiene el nombre del archivo
+            $(this).next('.custom-file-label').addClass("selected").html(fileName);
+        });
+
+        $(document).on('click', '.btn-eliminar-nota', function() {
+            // Verifica cuántos bloques hay antes de eliminar
+            const totalBloques = $('.formulario-nota').length;
+
+            const $bloque = $(this).closest('.formulario-nota');
+            const $selectInBlock = $bloque.find('.select2');
+
+            if (totalBloques <= 1) {
+
+                let contieneObligatorias = false;
+
+                $selectInBlock.find('option').each(function() {
+                    if ($(this).data('obligatoria') == "1") {
+                        contieneObligatorias = true;
+                        return false; // break
+                    }
+                });
+
+                // Evitar borrar el último bloque
+                if (contieneObligatorias == true) {
+                    Swal.fire({
+                        type: 'warning',
+                        title: 'No puedes eliminar esta Nota de Crédito',
+                        text: 'Contiene al menos una nota de crédito obligatoria.',
+                        confirmButtonText: 'Entendido'
+                    });
+                    return; // No se elimina
+                }
+
+                if (contieneObligatorias == false) {
+
+                    Swal.fire({
+                        title: 'Seguro que quieres eliminar esta Nota de Crédito?',
+                        text: "Esta acción no se puede deshacer.",
+                        type: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#3085d6',
+                        cancelButtonColor: '#d33',
+                        confirmButtonText: 'Sí, eliminar',
+                        cancelButtonText: 'Cancelar'
+                    }).then((result) => {
+                        if (result.value) {
+                            if ($selectInBlock.length > 0) {
+                                const currentSelections = $selectInBlock.val();
+
+                                if (currentSelections && currentSelections.length > 0) {
+                                    currentSelections.forEach(id => {
+                                        selectedNoteCreditIds.delete(id);
+
+                                        $('.formulario-nota .select2').not($selectInBlock).each(function() {
+                                            $(this).find(`option[value="${id}"]`).prop('disabled', false);
+                                        });
+                                    });
+
+                                    $('.formulario-nota .select2').select2();
+                                }
+                            }
+
+                            $bloque.remove();
+
+                            Swal.fire(
+                                'Nota de Crédito Eliminada',
+                                'La Nota de Crédito ha sido eliminada correctamente.',
+                                'success'
+                            )
+                        }
+                    })
+
+                }
+
+            } else {
+                if ($selectInBlock.length > 0) {
+                    const currentSelections = $selectInBlock.val();
+
+                    if (currentSelections && currentSelections.length > 0) {
+                        currentSelections.forEach(id => {
+                            selectedNoteCreditIds.delete(id);
+
+                            $('.formulario-nota .select2').not($selectInBlock).each(function() {
+                                $(this).find(`option[value="${id}"]`).prop('disabled', false);
+                            });
+                        });
+
+                        $('.formulario-nota .select2').select2();
+                    }
+                }
+                $bloque.remove();
+            }
+        });
+
+
         $(document).ready(function() {
+
             let validOC = false;
             let validHES = false;
             let reqAnticipo = false;
@@ -435,7 +672,7 @@ if ($notificaciones['success'] && !empty($notificaciones['data'])) {
             $("#Form_CargaFactura").submit(function(e) {
                 e.preventDefault();
                 var formData = new FormData(this);
-                //bloquearBtn('btn1');
+                bloquearBtn('btn1');
                 $.ajax({
                     type: 'POST',
                     url: 'Inicio/registraNuevaFactura',
@@ -445,24 +682,34 @@ if ($notificaciones['success'] && !empty($notificaciones['data'])) {
                     contentType: false,
                     success: function(response) {
                         desbloquearBtn('btn1');
-                        if (response.success) {                            
+                        if (response.success) {
+                            // Si todo salió bien, limpiar el formulario
                             resetFormulario("Form_CargaFactura");
-                            notificaSuc(response.message); // Muestra el mensaje OK
+                            // Limpiar también los campos dinámicos de Notas de Crédito
+                            $('#contentNotaCredito').empty();
+                            $('#btnNotaCredito').addClass("d-none");
+                            // Limpiar select2 y otros campos
+                            $('#ordenCompra').val(null).trigger('change');
+                            $('#listaHES').val('');
+                            // Resetear variables globales
+                            contadorFormNotas = 0;
+                            selectedNoteCreditIds.clear();
+                            validOC = false;
+                            validHES = false;
+                            reqAnticipo = false;
+                            lastNotasCredito = [];
+                            notificaSucSweet("Excelente!!", response.message);
+                            // Cargar tabla solo si todo fue exitoso
+                            cargaTablaUltimasFacturas();
                         } else {
-                            notificaBad(response.message); // Muestra el mensaje de error
+                            // Si hubo error, NO limpiar el formulario para que el usuario pueda corregir
+                            notificaBadSweet("Lo sentimos!!", response.message); // Muestra el mensaje de error
                         }
                     },
                     error: function() {
+                        desbloquearBtn('btn1');
+                        // Si hay error en la petición, NO limpiar el formulario
                         notificaBad('Error al querer cargar factura. Consulta a tu administrador');
-                        desbloquearBtn('btn1');
-                    },
-                    complete: function() {
-                        // Rehabilitar el botón
-                        desbloquearBtn('btn1');
-
-                        // Limpiar los campos Inputs
-                        resetFormulario("Form_CargaFactura");
-                        cargaTablaUltimasFacturas();
                     }
                 });
             });
@@ -494,49 +741,6 @@ if ($notificaciones['success'] && !empty($notificaciones['data'])) {
         function cargaTablaUltimasFacturas() {
             $('#cajaResultados').html('<div class="loading text-center"><img src="../assets/images/loading.gif" alt="loading" /><br/>Un momento, por favor...</div>');
             $('#cajaResultados').load('Inicio/tablaUltimas50Facturas');
-        }
-
-        function validaOrdCompra(ordenCompra) {
-            $("#ordenCompra").removeClass("is-invalid is-valid");
-            $("#invalid_ordenCompra").html("");
-
-            oc = validarEstructuraOC(ordenCompra);
-            console.log(validarEstructuraOC(ordenCompra));
-            console.log(oc.valor);
-
-            $("#ordenCompra").val(oc.valor);
-            if (oc.valido) {
-                $.ajax({
-                    type: 'POST',
-                    url: 'Inicio/validaOrdenCompra',
-                    data: {
-                        ordenCompra: oc.valor
-                    },
-                    dataType: 'json',
-                    success: function(response) {
-                        if (response.success) {
-                            validOC = true;
-                            $("#ordenCompra").addClass("is-valid");
-
-                            if (response.anticipo) {
-                                $("#contentNotaCredito").html(response.solicitaNotaCredito);
-                            }
-                        } else {
-                            validOC = false;
-                            $("#ordenCompra").addClass("is-invalid");
-                            $("#invalid_ordenCompra").html(response.message);
-                        }
-                    },
-                    error: function() {
-                        notificaBad('Error al validar la Orden de Compra. Consulta a tu administrador');
-                        validOC = false;
-                    }
-                });
-            } else {
-                $("#ordenCompra").addClass("is-invalid");
-                $("#invalid_ordenCompra").html("Estructura: COM-XXX-######");
-                validOC = false;
-            }
         }
 
         function validaHojaEntrada(hojaEntrada) {
@@ -708,7 +912,7 @@ if ($notificaciones['success'] && !empty($notificaciones['data'])) {
         }
 
         function resetFormulario(idForm) {
-            $('#'+idForm)[0].reset();
+            $('#' + idForm)[0].reset();
             $(".custom-file-input").each(function() {
                 $(this).val(''); // Restablece el input
                 $(this).next('.custom-file-label').text('Elegir archivo...'); // Restablece el label

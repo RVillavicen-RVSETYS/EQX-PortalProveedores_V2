@@ -18,14 +18,13 @@ if ($debug == 1) {
                 <th class="text-center"># Acuse</th>
                 <th class="">Tipo</th>
                 <th>Proveedor</th>
+                <th>Folio Interno</th>
                 <th>Orden Compra</th>
                 <th>No Recepcion</th>
                 <th>Fecha Recepción</th>
                 <th>Fecha Pago</th>
                 <th>Fecha Limite</th>
-                <th>Folio Interno</th>
                 <th>Estatus Fiscal</th>
-                <th>Programación de Pago</th>
                 <th>Ver</th>
             </tr>
         </thead>
@@ -94,14 +93,13 @@ if ($debug == 1) {
                     <td class="text-center">' . $row['acuse'] . '</td>
                     <td>' . $claseDocto . '</td>
                     <td>' . $row['RazonSocial'] . '</td>
+                    <td>' . $row['referencia'] . '</td>
                     <td>' . $row['ordenCompra'] . '</td>
                     <td>' . $recepciones . '</td>
                     <td>' . $row['fechaReg'] . '</td>
                     <td>' . $row['FechaPago'] . '</td>
                     <td>' . $row['FechaVence'] . '</td>
-                    <td>' . $row['referencia'] . '</td>
                     <td>' . $valida . ' </td>
-                    <td>' . $statContable . '</td>
                     <td> <button class="btn btn-sm btn-success" onClick="detalleCompra(\'' . $row['acuse'] . '\',' . $row['IdProveedor'] . ');"><i class="text-white icon-doc"></i></button> </td>
                     </tr>';
                 }

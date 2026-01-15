@@ -79,7 +79,7 @@ class CfdisController extends Controller
         }
 
         // 4. Cargar el archivo y clase de la versión correspondiente
-        $archivoVersion = __DIR__ . '\Cfdis\\'.$claseFuncion.'.php';
+        $archivoVersion = __DIR__ . '/Cfdis/'.$claseFuncion.'.php';
         if ($this->debug == 1) {
             echo '<br><br>URL de la Clase que leera el Archivo: ' . $archivoVersion .'<br>';
         }

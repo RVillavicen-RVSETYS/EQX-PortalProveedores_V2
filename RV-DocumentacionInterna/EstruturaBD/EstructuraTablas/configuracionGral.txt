@@ -1,0 +1,2 @@
+"id"	"idEmpresa"	"maxComplementosPendientes"	"diasPago"
+"1"	"1"	"10"	"2,4"

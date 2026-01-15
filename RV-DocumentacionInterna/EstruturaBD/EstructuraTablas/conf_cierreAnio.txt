@@ -1,0 +1,1 @@
+"id"	"fechaInicio"	"fechaFin"	"mensajeCierre"	"mensajeCierreIng"	"estatus"	"fechaReg (DateTime)"	"idUserReg"

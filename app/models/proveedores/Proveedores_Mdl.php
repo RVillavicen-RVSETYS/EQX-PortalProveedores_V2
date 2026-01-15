@@ -292,7 +292,7 @@ class Proveedores_Mdl
                             dtcomp.idCompra AS 'DtIdCompra' 
                         FROM
                             silmeagro_erpV1.vw_ext_PortalProveedores_MontosHES erpHes
-                            LEFT JOIN EQX_PortalProveedoresV2.detcompras dtcomp ON erpHes.idCompra = dtcomp.idCompra 
+                            LEFT JOIN EQX_PortalProveedoresV2.detcompras dtcomp ON erpHes.HES = dtcomp.noRecepcion
                         WHERE
                             erpHes.idProveedor = :idProveedor
                         GROUP BY
@@ -379,50 +379,6 @@ class Proveedores_Mdl
     }
 
     /* CONSULTAS DE UPDATE */
-    public function actualizaRFC($idProveedor, $nuevoRFC)
-    {
-        try {
-            $sql = "UPDATE proveedores 
-                    SET rfc = :newRFC 
-                    WHERE id = :idProveedor";
-
-            if (self::$debug) {
-                $params = [
-                    ':newRFC' => $nuevoRFC,
-                    ':idProveedor' => $idProveedor
-                ];
-                $this->db->imprimirConsulta($sql, $params, 'Actualiza El RFC.<br>');
-            }
-            $stmt = $this->db->prepare($sql);
-            $stmt->bindParam(':newRFC', $nuevoRFC, PDO::PARAM_STR);
-            $stmt->bindParam(':idProveedor', $idProveedor, PDO::PARAM_INT);
-            $stmt->execute();
-            $filasAfectadas = $stmt->rowCount();
-
-            if (self::$debug) {
-                echo '<br>Resultado de Query:';
-                var_dump($filasAfectadas);
-                echo '<br><br>';
-            }
-
-            if ($filasAfectadas == 1) {
-                return ['success' => true, 'data' => 'RFC Actualizado Correctamente.'];
-            } else {
-                if (self::$debug) {
-                    echo "Error Al Actualizar El RFC.<br>";
-                }
-                return ['success' => false, 'message' => 'Error Al Actualizar El RFC.'];
-            }
-        } catch (\Exception $e) {
-            $timestamp = date("Y-m-d H:i:s");
-            error_log("[$timestamp] app/Models/Proveedores_Mdl.php ->Error Al Actualizar El RFC Del Proveedor: " . $e->getMessage(), 3, LOG_FILE_BD);
-            if (self::$debug) {
-                echo "Error Al Actualizar El RFC Del Proveedor: " . $e->getMessage();
-            }
-            return ['success' => false, 'message' => 'Problemas Con El Proveedor, Notifica a tu administrador.'];
-        }
-    }
-
     public function exepcionesProveedoresFacturas(INT $idProveedor)
     {
         try {
@@ -435,6 +391,7 @@ class Proveedores_Mdl
             $sql = "
                 SELECT 
                     p.id AS ProveedorID, 
+                    p.descontarPromocionesAplicables,
                     IFNULL(iDesc.idProveedor, 0) AS IgnoraDescuento, 
                     IFNULL(exanio.idProveedor, 0) AS AnioFiscal, 
                     IFNULL(exemi.idProveedor, 0) AS FechaEmision, 
@@ -484,7 +441,8 @@ class Proveedores_Mdl
                 'FechaEmision' => $result['FechaEmision'] == $idProveedor,
                 'UsoCfdiDistinto' => $result['UsoCfdiDistinto'] == $idProveedor,
                 'UsoCfdi' => $result['UsoCfdi'] ?? null,
-                'BloqDiferenciaMonto' => $result['BloqDiferenciaMonto'] == $idProveedor
+                'BloqDiferenciaMonto' => $result['BloqDiferenciaMonto'] == $idProveedor,
+                'DescontarPromocionesAplicables' => $result['descontarPromocionesAplicables'] == 1
             ];
 
             return ['success' => true, 'message' => 'Todo OK', 'data' => $responseData];
@@ -501,94 +459,6 @@ class Proveedores_Mdl
             }
 
             return ['success' => false, 'message' => 'Problemas al obtener las excepciones del proveedor. Notifica a tu administrador.'];
-        }
-    }
-
-    public function actualizaCorreo($idProveedor, $nuevoCorreo)
-    {
-        try {
-            $sql = "UPDATE proveedores 
-                    SET correo = :newCorreo 
-                    WHERE id = :idProveedor";
-
-            if (self::$debug) {
-                $params = [
-                    ':newCorreo' => $nuevoCorreo,
-                    ':idProveedor' => $idProveedor
-                ];
-                $this->db->imprimirConsulta($sql, $params, 'Actualiza El Correo.<br>');
-            }
-            $stmt = $this->db->prepare($sql);
-            $stmt->bindParam(':newCorreo', $nuevoCorreo, PDO::PARAM_STR);
-            $stmt->bindParam(':idProveedor', $idProveedor, PDO::PARAM_INT);
-            $stmt->execute();
-            $filasAfectadas = $stmt->rowCount();
-
-            if (self::$debug) {
-                echo '<br>Resultado de Query:';
-                var_dump($filasAfectadas);
-                echo '<br><br>';
-            }
-
-            if ($filasAfectadas == 1) {
-                return ['success' => true, 'data' => 'Correo Actualizado Correctamente.'];
-            } else {
-                if (self::$debug) {
-                    echo "Error Al Actualizar El Correo.<br>";
-                }
-                return ['success' => false, 'message' => 'Error Al Actualizar El Correo.'];
-            }
-        } catch (\Exception $e) {
-            $timestamp = date("Y-m-d H:i:s");
-            error_log("[$timestamp] app/Models/Proveedores_Mdl.php ->Error Al Actualizar El Correo Del Proveedor: " . $e->getMessage(), 3, LOG_FILE_BD);
-            if (self::$debug) {
-                echo "Error Al Actualizar El Correo Del Proveedor: " . $e->getMessage();
-            }
-            return ['success' => false, 'message' => 'Problemas Con El Proveedor, Notifica a tu administrador.'];
-        }
-    }
-
-    public function actualizaPassword($idProveedor, $nuevaPass)
-    {
-        try {
-            $sql = "UPDATE proveedores
-                    SET pass = :newPass
-                    WHERE id = :idProveedor";
-
-            if (self::$debug) {
-                $params = [
-                    ':newPass' => $nuevaPass,
-                    ':idProveedor' => $idProveedor
-                ];
-                $this->db->imprimirConsulta($sql, $params, 'Actualiza La Contraseña.<br>');
-            }
-            $stmt = $this->db->prepare($sql);
-            $stmt->bindParam(':newPass', $nuevaPass, PDO::PARAM_STR);
-            $stmt->bindParam(':idProveedor', $idProveedor, PDO::PARAM_INT);
-            $stmt->execute();
-            $filasAfectadas = $stmt->rowCount();
-
-            if (self::$debug) {
-                echo '<br>Resultado de Query:';
-                var_dump($filasAfectadas);
-                echo '<br><br>';
-            }
-
-            if ($filasAfectadas == 1) {
-                return ['success' => true, 'data' => 'Contraseña Actualizada Correctamente.'];
-            } else {
-                if (self::$debug) {
-                    echo "Error Al Actualizar La Contraseña.<br>";
-                }
-                return ['success' => false, 'message' => 'Error Al Actualizar La Contraseña.'];
-            }
-        } catch (\Exception $e) {
-            $timestamp = date("Y-m-d H:i:s");
-            error_log("[$timestamp] app/Models/Proveedores_Mdl.php ->Error Al Actualizar La Contraseña Del Proveedor: " . $e->getMessage(), 3, LOG_FILE_BD);
-            if (self::$debug) {
-                echo "Error Al Actualizar La Contraseña Del Proveedor: " . $e->getMessage();
-            }
-            return ['success' => false, 'message' => 'Problemas Con El Proveedor, Notifica a tu administrador.'];
         }
     }
 

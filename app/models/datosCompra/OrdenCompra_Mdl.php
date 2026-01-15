@@ -28,9 +28,9 @@ class OrdenCompra_Mdl
     public function verificaOrdenCompra($ordenCompra, $noProveedor)
     {
         try {
-            $sql = "SELECT COUNT(id_OC) AS cantHES
-              FROM vw_ext_PortalProveedores_HESporPagar
-              WHERE idProveedor = :noProveedor AND OrdenCompra = :ordenCompra";
+            $sql = "SELECT COUNT(idCompra) AS cantHES
+              FROM vw_ext_PortalProveedores_MontosHES
+              WHERE idProveedor = :noProveedor AND OC = :ordenCompra";
 
             if (self::$debug) {
                 $params = [

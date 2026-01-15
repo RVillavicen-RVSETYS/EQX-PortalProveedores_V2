@@ -1,0 +1,51 @@
+# Análisis del Proceso: Carga de Nuevas Facturas (registraNuevaFactura)
+
+Este documento describe el flujo de trabajo completo para el registro de una nueva factura en el portal, iniciado desde `CargarFacturasController->registraNuevaFactura()`.
+
+---
+
+## Lo que el Proceso SÍ HACE (El Flujo Completo)
+
+El proceso se puede dividir en 4 grandes etapas:
+
+### Etapa 1: Recepción y Preparación (Controlador: `CargaFacturasGlobalController`)
+1.  **Recepción y Validación Inicial:** Recibe los datos del formulario (POST) y los archivos (FILES). Valida que los datos más críticos existan (número de proveedor, orden de compra, XML y PDF de la factura).
+2.  **Preparación de Datos:** Limpia y formatea datos como la lista de Hojas de Entrada (HES) y organiza la información de las Notas de Crédito adjuntas en un arreglo estructurado.
+3.  **Delegación:** Empaqueta toda la información en un solo arreglo (`$valores`) y lo pasa al `SubirFacturaController` para el procesamiento principal.
+
+### Etapa 2: Verificación de Documentos (Controlador: `SubirFacturaController`)
+1.  **Validación de OC:** Confirma que la Orden de Compra es válida para el proveedor (`OrdenCompra_Mdl`).
+2.  **Verificación de Anticipos:** Revisa si la OC tiene anticipos pendientes para determinar si se debe exigir una Nota de Crédito (`Anticipos_Mdl`).
+3.  **Validación de HES:** Confirma que las Hojas de Entrada proporcionadas son correctas para la OC (`HojaEntrada_Mdl`).
+4.  **Verificación de Archivos:** Revisa que los archivos físicos (PDF, XML) tanto de la factura como de la nota de crédito (si es requerida) se hayan subido correctamente y no estén corruptos (`DocumentosController`).
+5.  **Delegación a Validación Profunda:** Pasa toda la información validada al `FacturasNacionalesController`.
+
+### Etapa 3: Reglas de Negocio y Fiscales (Controlador: `FacturasNacionalesController`)
+Esta es la etapa central de la validación.
+1.  **Recopilación de Datos de BD:** Consulta una gran cantidad de información de la base de datos para tener el contexto completo: datos de las HES, configuraciones del portal, datos de la empresa, datos del proveedor y notas de crédito previamente existentes para la OC.
+2.  **Lectura del XML de la Factura:** Lee y decodifica el archivo XML de la factura principal para extraer todos sus datos (UUID, montos, impuestos, etc.) usando `CfdisController`.
+3.  **Validación Dinámica por Versión:** Carga dinámicamente clases de "Reglas" específicas para la versión del CFDI (ej. `ReglasAplicadasv40.php`).
+4.  **Ejecución de Reglas de Negocio:** Valida que los datos del XML sean consistentes con los datos del sistema (ej. RFCs coinciden, montos cuadran con las HES dentro de tolerancias).
+5.  **Ejecución de Reglas Fiscales:** Carga otra clase dinámica para realizar validaciones fiscales estándar sobre la estructura del CFDI.
+6.  **Preparación para Registro:** Si todas las validaciones son exitosas, empaqueta un resultado final con todos los datos listos para ser insertados en la base de datos.
+
+### Etapa 4: Registro en Base de Datos
+1.  **Llamada a Registro:** El `SubirFacturaController` recibe la confirmación y llama a `registraNuevaFacturaIngresos()`.
+2.  **Selección del Modelo de BD:** Este método elige el modelo de base de datos correcto según la versión del CFDI (ej. `RegistroCFDIsv40_Mdl`).
+3.  **Escritura Final:** El modelo ejecuta la transacción final en la base de datos para guardar la información de la factura principal.
+
+---
+
+## Lo que el Proceso NO HACE (Partes Incompletas o Faltantes)
+
+El análisis revela que la funcionalidad relacionada con las **Notas de Crédito** está incompleta.
+
+1.  **No se Lee el XML de la Nota de Crédito:** El flujo verifica que el archivo XML de la nota de crédito se suba, pero nunca lee su contenido ni extrae sus datos (UUID, montos, etc.).
+2.  **No se Valida el Contenido de la Nota de Crédito:** Al no leer el XML, no se valida su contenido. Faltan validaciones críticas como:
+    *   Verificar que el monto de la nota de crédito corresponda al del anticipo.
+    *   Validar que el UUID de la nota de crédito no esté ya registrado.
+    *   Aplicar reglas de negocio y fiscales, tal como se hace con la factura.
+3.  **No se Asocia la Nota de Crédito:** No existe la lógica para asociar funcionalmente la nota de crédito que se está cargando con el anticipo correspondiente o con la factura principal.
+4.  **No se Guarda la Nota de Crédito:** El proceso finaliza guardando la factura, pero no hay un paso equivalente para guardar los datos de la nota de crédito en la base de datos. El modelo `NotasCredito_Mdl` solo tiene lógica para consultar, no para insertar.
+
+**Conclusión:** El sistema está preparado para solicitar y recibir los archivos de la Nota de Crédito cuando es necesario, pero la lógica para **procesar, validar y guardar** dicha nota no está implementada.

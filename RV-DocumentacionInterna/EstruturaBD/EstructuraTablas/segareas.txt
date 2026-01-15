@@ -1,0 +1,6 @@
+"id"	"nombre"	"descripcion"	"icono"	"orden"	"link"	"error"	"estatus"
+"1"	"Proveedor"	"Bienvenido"	"fas fa-laptop"	"1"	"ProveedorNacional"	"logout"	"1"
+"2"	"Provider"	"Welcome"	"far fa-sun"	"2"	"ProveedorExtranjero"	"logout"	"1"
+"3"	"Administrador"	"Gestión y Facturación"	"fab fa-black-tie"	"3"	"Administrador"	"logout"	"1"
+"4"	"Dashboard"	"Envío y Recepción de Mercancía"	"
+fas fa-box"	"4"	"Dashboard"	"logout"	"1"

@@ -40,8 +40,8 @@ $fechaFinal = date("Y-m-t");
     <?php include '../app/Views/Layout/header.php'; ?>
     <!-- Custom CSS -->
     <link href="/assets/extra-libs/datatables.net-bs4/css/dataTables.bootstrap4.css" rel="stylesheet">
-    <link href="/assets/libs/fancybox/fancybox.css" rel="stylesheet">
-    <link href="/assets/libs/fancybox/dist/carousel/carousel.css" rel="stylesheet">
+    <link href="/assets/libs/fancybox/dist/fancybox/fancybox.css" rel="stylesheet">
+    <link href="/assets/libs/fancybox/dist/fancybox/fancybox.cssl/carousel.css" rel="stylesheet">
     <link href="/assets/libs/fancybox/dist/carousel/carousel.thumbs.css" rel="stylesheet">
     <link href="/assets/libs/fancybox/dist/panzoom/panzoom.css" rel="stylesheet">
     <link href="/assets/libs/fancybox/dist/panzoom/panzoom.toolbar.css" rel="stylesheet">

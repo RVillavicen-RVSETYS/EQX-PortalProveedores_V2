@@ -2,14 +2,16 @@
 
 namespace App\Globals\Controllers;
 
-use App\Models\Compras\Compras_Mdl;
 use Core\Controller;
+use App\Models\Compras\Compras_Mdl;
 use App\Models\DatosCompra\HojaEntrada_Mdl;
+use App\Models\DatosCompra\NotasCredito_Mdl;
 use App\Models\Configuraciones\RecepcionCFDIs_Mdl;
 use App\Models\Empresas\Empresas_Mdl;
+use App\Globals\Controllers\RegistroCFDIs\RegistroCFDIsv33_Mdl;
+use App\Globals\Controllers\RegistroCFDIs\RegistroCFDIsv40_Mdl;
 use App\Models\Proveedores\Proveedores_Mdl;
-use App\Models\DatosCFDIs\RegistroCFDIsv33_Mdl;
-use App\Models\DatosCFDIs\RegistroCFDIsv40_Mdl;
+use App\Models\PagosProveedores\Pagos_Mdl;
 
 class FacturasNacionalesController extends Controller
 {
@@ -27,15 +29,14 @@ class FacturasNacionalesController extends Controller
      *  - Este Controlador trabajara con Transacciones en la BD.
      * NOTA: Antes de llegar Aqui los PDF's y XML ya deben estar verificados, validadas las HES y la OC.
      */
-    public function verificaNuevaFacturaIngresos($reqNotaCredito, $OC, $HES, $doctos, $isAdmin = 0, $reglasAdmin = [])
+    public function verificaNuevaFacturaIngresos($reqNotaCredito, $OC, $HES, $doctos, $isAdmin, $reglasAdmin, $noProveedor)
     {
         $response = [
             'success' => false,
             'message' => '',
             'data' => []
         ];
-
-        $noProveedor = ($isAdmin == 1 && isset($_POST['admin_noProveedor'])) ? $_POST['admin_noProveedor'] : $_SESSION['EQXnoProveedor'];
+        //$noProveedor = ($isAdmin == 1 && isset($_POST['admin_noProveedor'])) ? $_POST['admin_noProveedor'] : $_SESSION['EQXnoProveedor'];
         if ($this->debug == 1) {
             echo '<br>Valores para la carga:';
             echo '<br> * Requiere Nota de Credito:' . $reqNotaCredito;
@@ -51,14 +52,17 @@ class FacturasNacionalesController extends Controller
         }
 
         //Verificamos los Archivos de la Nota de Credito
+        $dataNotaCredXML['data'] = '';
         if ($reqNotaCredito > 0) {
-            if (empty($doctos['NotaCreditoPDF']) || empty($doctos['NotaCreditoXML'])) {
-                return ['success' => false, 'message' => 'No se recibio correctamente la nota de Credito.'];
-            }             
+            foreach ($doctos['NotaCreditoPDF'] as $id => $pdf) {
+                if (empty($pdf) || empty($doctos['NotaCreditoXML'][$id])) {
+                    return ['success' => false, 'message' => "Faltan archivos en la plantilla $id de Nota de Crédito."];
+                }
+            }
         } else {
             $dataNotaCredXML['data'] = '';
         }
-                
+
         //1.- Obtenemos los datos de las HES para comparar con la Factura y definir el idEmpresa y el idMoneda segun la OC
         $MDL_hojaEntrada = new HojaEntrada_Mdl();
         $dataMontosHES = $MDL_hojaEntrada->dataMontosHES($HES, $OC);
@@ -134,12 +138,24 @@ class FacturasNacionalesController extends Controller
                 return ['success' => false, 'message' => $exepcionesProv['message']];
             }
 
+            //Para SilmeAgro se configura que se sumen los porcentajes de las notas de credito.
+            $MDL_notasCredito = new NotasCredito_Mdl();
+            $filtroNotas = [
+                'folioCompra' => $OC,
+            ];
+            $notasCredito = $MDL_notasCredito->verificaNotaCreditoDeOrdenCompra($filtroNotas);
+            if ($this->debug == 1) {
+                echo '<br><br>Resultado de verificaNotaCreditoDeOrdenCompra: ' . PHP_EOL;
+                var_dump($notasCredito);
+            }
+
             // 8. Generar arreglo de Configuración para Validaciones
             $configParaValidaciones = array();
             $configParaValidaciones['datosRecepciones'] = $dataMontosHES['data'];
             $configParaValidaciones['configCFDI'] = $configCFDI['data'];
             $configParaValidaciones['diferenciaMontos'] = $configMontos['data'];
             $configParaValidaciones['excepcionesProveedor'] = $exepcionesProv['data'];
+            $configParaValidaciones['notasCreditos'] = $notasCredito['data'] ?? [];
             if ($this->debug == 1) {
                 echo '<br><br>Resultado de configuraciones para la Recepción del CFDI: ' . PHP_EOL;
                 var_dump($configParaValidaciones);
@@ -188,7 +204,7 @@ class FacturasNacionalesController extends Controller
             //11. Ejecutar el método validarReglasInternasNacional_Ingresos
             $reglasInternas = $cfdiVersion->$metodoValidaReglasInternas($dataProv['data'], $dataEmpresa['data'],  $dataFactXML['data']);
             if ($this->debug == 1) {
-                echo '<br><br>Resultado de validaReglas de Negocio ' . $metodoValidaReglasInternas . ': ' . PHP_EOL;
+                echo '<br><br>Resultado de validaReglas de Negocio ' . $metodoValidaReglasInternas . ':<br> ' . PHP_EOL;
                 var_dump($reglasInternas);
                 echo '<br><br> ****** PASAMOS LAS VALIDACIONES INTERNAS <br>';
             }
@@ -204,7 +220,7 @@ class FacturasNacionalesController extends Controller
             }
             if ($reglasNegocio['success'] && $reglasNegocio['isValid']) {
                 if ($this->debug == 1) {
-                echo '<br><br> ****** PASAMOS LAS REGLAS DE NEGOCIO <br>';
+                    echo '<br><br> ****** PASAMOS LAS REGLAS DE NEGOCIO <br>';
                 }
 
                 //13. Ejecutar las Validaciones Fiscales del CFDI
@@ -227,9 +243,7 @@ class FacturasNacionalesController extends Controller
                         echo '<br><br> ****** PASAMOS LA VALIDACION FISCAL <br>';
                     }
 
-                    //14. Ejecutar las Validaciones de la Nota de Credito
-
-
+                    //14. Retornamos el resultado de las Validaciones de la Factura
                     $response = [
                         'success' => true,
                         'message' => 'Todas las Validaciones se han aplicado correctamente.',
@@ -245,7 +259,6 @@ class FacturasNacionalesController extends Controller
                             'dataEmpresa' => $dataEmpresa['data']
                         ]
                     ];
-
                 } else {
                     $response['message'] = 'Tuvimos los siguientes Problemas al Validar tu XML:<br>' . $validaFiscalMente['message'];
                 }
@@ -269,24 +282,42 @@ class FacturasNacionalesController extends Controller
 
         if (empty($resultadoDeVerificacion['version'])) {
             return ['success' => false, 'message' => 'No se recibio la version del CFDI.'];
-        } 
+        }
         if ($this->debug == 1) {
             echo '<br><br>Version del CFDI recibido: ' . $resultadoDeVerificacion['version'];
         }
 
-        switch ($resultadoDeVerificacion['version']) {
-            case 'v33':
-                $MDL_registraCFDI = new  RegistroCFDIsv33_Mdl();
-                $metodoFunction = 'registrarCFDI_Ingresosv33';
-                break;
-            case 'v40':
-                $MDL_registraCFDI = new  RegistroCFDIsv40_Mdl();
-                $metodoFunction = 'registrarCFDI_Ingresosv40';
-                break;
-            default:
-                return ['success' => false, 'message' => 'La version del CFDI no es valida.'];
-        }
+        $versionDocto = $resultadoDeVerificacion['version'];
         
+        // Construir el nombre de la clase del modelo y el método dinámicamente
+        $claseModelo = 'App\\Globals\\Controllers\\RegistroCFDIs\\RegistroCFDIs' . $versionDocto . '_Mdl';
+        $metodoFunction = 'registrarCFDI_Ingresos' . $versionDocto;
+
+        $archivoModelo = __DIR__ . DIRECTORY_SEPARATOR . 'RegistroCFDIs' . DIRECTORY_SEPARATOR . 'RegistroCFDIs' . $versionDocto . '_Mdl.php';
+
+        if (!file_exists($archivoModelo)) {
+            return ['success' => false, 'message' => "El archivo de registro para la versión '$versionDocto' no existe."];
+        }
+        require_once $archivoModelo;
+
+        if ($this->debug == 1) {
+            echo "<br><br>Clase de Modelo a utilizar: $claseModelo";
+            echo "<br>Método a ejecutar: $metodoFunction<br>";
+        }
+
+        // Verificar que la clase del modelo exista
+        if (!class_exists($claseModelo)) {
+            return ['success' => false, 'message' => "La clase de registro para la versión '$versionDocto' no existe."];
+        }
+
+        $MDL_registraCFDI = new $claseModelo();
+
+        // Verificar que el método exista en la clase
+        if (!method_exists($MDL_registraCFDI, $metodoFunction)) {
+            return ['success' => false, 'message' => "El método de registro '$metodoFunction' no está definido en la clase '$claseModelo'."];
+        }
+
+
         $respRegistro = $MDL_registraCFDI->$metodoFunction($resultadoDeVerificacion);
         if ($this->debug == 1) {
             echo '<br><br>Resultado de registroCFDI: ' . PHP_EOL;
@@ -294,34 +325,34 @@ class FacturasNacionalesController extends Controller
         }
 
         return $respRegistro;
-
     }
 
-    public function verificaNuevoComplementoPago($cPagoPDF, $cpagoXML, $idProveedor) {
+    public function verificaNuevoComplementoPago($cPagoPDF, $cpagoXML, $noProveedor, $isAdmin = 0, $reglasAdmin = [])
+    {
         $response = [
             'success' => false,
             'message' => '',
             'data' => []
-        ];      
+        ];
 
-        $this->debug = 1;
+        $this->debug = 0; // Activado temporalmente para debugging
 
         if ($this->debug == 1) {
             echo '<br>Valores para la carga:';
-            echo '<br> * idProveedor:' . $idProveedor;
+            echo '<br> * noProveedor:' . $noProveedor;
             echo '<br> * Documentos:';
             var_dump($cPagoPDF);
             var_dump($cpagoXML);
-        }  
+        }
 
-        if (empty($idProveedor) || is_int($idProveedor)) {
+        if (empty($noProveedor) || is_int($noProveedor)) {
             return ['success' => false, 'message' => 'El numero de Proveedor no es valido. Notifica a tu administrador.'];
-        } 
+        }
 
         //Verificamos que se hayan enviado los Archivos del Complemento de Pago
         if (empty($cPagoPDF['type']) || empty($cpagoXML['type'])) {
             return ['success' => false, 'message' => 'No se recibio correctamente el Complemento de Pago.'];
-        }  
+        }
 
         //3.- Leer XML
         $Ctrl_CFDIs = new CfdisController();
@@ -332,57 +363,42 @@ class FacturasNacionalesController extends Controller
         }
         if ($dataCFDIXML['success']) {
             $versionDocto = $dataCFDIXML['version'];
+            $uuiComplemento = $dataCFDIXML['data']['TimbreFiscal']['UUID'];
             $tipoCFDI = $dataCFDIXML['data']['Comprobante']['TipoDeComprobante'];
 
-            // Análisis de Pagos recibidos en el complemento
-            $pagosRecibidos = [];
+            // Listado de UUIDs de los documentos relacionados
+            $cantPagosRecibidos = 0;
             $idDocumentos = '';
             if (isset($dataCFDIXML['data']['Pagos']['Pagos']) && is_array($dataCFDIXML['data']['Pagos']['Pagos'])) {
+                $idDocumentosArray = [];
                 foreach ($dataCFDIXML['data']['Pagos']['Pagos'] as $pago) {
-                    $detallesPago = [
-                        'FechaPago' => $pago['FechaPago'] ?? null,
-                        'FormaDePagoP' => $pago['FormaDePagoP'] ?? null,
-                        'MonedaP' => $pago['MonedaP'] ?? null,
-                        'Monto' => $pago['Monto'] ?? null,
-                        'TipoCambioP' => $pago['TipoCambioP'] ?? null,
-                    ];
-
+                    $cantPagosRecibidos++;
                     if (isset($pago['DoctosRelacionados']) && is_array($pago['DoctosRelacionados'])) {
                         foreach ($pago['DoctosRelacionados'] as $docto) {
                             $detallesPagoRelacionado = [
                                 'EquivalenciaDR' => $docto['EquivalenciaDR'] ?? null,
-                                'Folio' => $docto['Folio'] ?? null,
                                 'IdDocumento' => $docto['IdDocumento'] ?? null,
-                                'ImpPagado' => $docto['ImpPagado'] ?? null,
-                                'ImpSaldoAnt' => $docto['ImpSaldoAnt'] ?? null,
-                                'ImpSaldoInsoluto' => $docto['ImpSaldoInsoluto'] ?? null,
                                 'MonedaDR' => $docto['MonedaDR'] ?? null,
-                                'NumParcialidad' => $docto['NumParcialidad'] ?? null,
-                                'ObjetoImpDR' => $docto['ObjetoImpDR'] ?? null,
+                                'Folio' => $docto['Folio'] ?? null,
                                 'Serie' => $docto['Serie'] ?? null,
                             ];
-
-                            $pagosRecibidos[] = array_merge($detallesPago, $detallesPagoRelacionado);
-
-                            $idDocumentos .= (is_null($detallesPagoRelacionado['IdDocumento'])) ? "" : ",".$detallesPagoRelacionado['IdDocumento'];
+                            if (!is_null($detallesPagoRelacionado['IdDocumento']) && !in_array($detallesPagoRelacionado['IdDocumento'], $idDocumentosArray)) {
+                                $idDocumentosArray[] = $detallesPagoRelacionado['IdDocumento'];
+                            }
                         }
-
-                        $idDocumentos = trim($idDocumentos, ',');
-                    } else {
-                        $pagosRecibidos[] = $detallesPago;
                     }
                 }
+                $idDocumentos = implode(',', $idDocumentosArray);
             } else {
                 return ['success' => false, 'message' => 'No se encontraron Pagos en el Complemento.'];
             }
 
             if ($this->debug == 1) {
-                echo '<br><br>UUIDs Recibidos: '.$idDocumentos.'<br><br>Pagos recibidos en el complemento: ' . PHP_EOL;
-                var_dump($pagosRecibidos);
+                echo '<br><br>UUIDs Recibidos: ' . $idDocumentos . '<br><br>Pagos recibidos en el complemento: ' . PHP_EOL;
             }
 
-            if (count($pagosRecibidos) < 1) {
-                return ['success' => false, 'message' => 'No se encontraron Pagos en el Complemento.'];                
+            if ($cantPagosRecibidos < 1) {
+                return ['success' => false, 'message' => 'No se encontraron Pagos en el Complemento.'];
             }
 
             if (empty($idDocumentos)) {
@@ -393,7 +409,7 @@ class FacturasNacionalesController extends Controller
             $filtrosPorFacturas = [
                 'uuids' => $idDocumentos
             ];
-            
+
             $MDL_Compras = new Compras_Mdl();
             $comprasPorFacturas = $MDL_Compras->dataCompraPorFacturas($filtrosPorFacturas);
             if ($this->debug == 1) {
@@ -401,119 +417,140 @@ class FacturasNacionalesController extends Controller
                 var_dump($comprasPorFacturas);
             }
             if ($comprasPorFacturas['success']) {
-                // Verificamos que los datos de las Compras de los UUIDs Relacionados sean correctos
+                $idEmpresa = $comprasPorFacturas['data'][0]['sociedad'] ?? 0;
+
+                //Obtener datos de los Pagos realizados
+                $MDL_Pagos = new Pagos_Mdl();
+                $dataPagosProv = $MDL_Pagos->dataPagosDesdeFacturas($filtrosPorFacturas);
                 if ($this->debug == 1) {
-                    echo '<br>Validando datos de las Compras relacionadas con los UUIDs...';
+                    echo '<br><br>Resultado de Pagos desde Facturas: ' . PHP_EOL;
+                    var_dump($dataPagosProv);
                 }
-                if (empty($comprasPorFacturas['data'] || $comprasPorFacturas['cantRes'] < 1)) {
-                    if ($this->debug == 1) {
-                        echo '<br>No se encontraron Compras relacionadas con los UUIDs del Complemento de Pago.';
-                    }
-                    return ['success' => false, 'message' => 'No se encontraron Compras relacionadas con los UUIDs del Complemento de Pago.'];
+                if (!$dataPagosProv['success']) {
+                    return ['success' => false, 'message' => $dataPagosProv['message']];
                 }
 
-                $errores = [];
-
+                //Obtener datos de la empresa para las validaciones
+                $MDL_Empresas = new Empresas_Mdl();
+                $dataEmpresa = $MDL_Empresas->empresaPorId($idEmpresa);
                 if ($this->debug == 1) {
-                    echo '<br>Vamos a comenzar a validar los datos de las compras.';
+                    echo '<br><br>Resultado de Busqueda de Empresa: ' . PHP_EOL;
+                    var_dump($dataEmpresa);
                 }
-                foreach ($comprasPorFacturas['data'] as $factura) {
-                    $serie = $factura['serie'] ?? 'N/A';
-                    $folio = $factura['folio'] ?? 'N/A';
-                    $uuid = $factura['uuid'] ?? 'N/A';
-                    if ($this->debug == 1) {
-                        echo "<br>Evaluación de la Factura '{$serie}{$folio}' con UUID '{$uuid}'";
-                    }
-
-                    // Verificar que la factura pertenezca al proveedor
-                    if ($this->debug == 1) {
-                        echo "<br> * La factura debe pertenece al proveedor {$idProveedor}: ".$factura['idProveedor'];
-                    }
-                    if ($factura['idProveedor'] != $idProveedor) {
-                        $errores[] = "* La factura '{$serie}' '{$folio}' con UUID '{$uuid}': No pertenece al proveedor.";
-                    }
-
-                    // Verificar que el Método de Pago sea PPD
-                    if ($this->debug == 1) {
-                        echo "<br> * La factura debe tener el método de Pago PPD:".$factura['idCatMetodoPago'];
-                    }
-                    if ($factura['idCatMetodoPago'] !== 'PPD') {
-                        $errores[] = "* La factura '{$serie}' '{$folio}' con UUID '{$uuid}': El método de Pago no es PPD.";
-                    }
-
-                    // Verificar que la Forma de Pago sea 99
-                    if ($this->debug == 1) {
-                        echo "<br> * La factura debe tener la forma de Pago 99:".$factura['idCatFormaPago'];
-                    }
-                    if ($factura['idCatFormaPago'] !== '99') {
-                        $errores[] = "* La factura '{$serie}' '{$folio}' con UUID '{$uuid}': La forma de Pago no es 99.";
-                    }
-
-                    // Verificar que no tenga un complemento anterior con saldo insoluto en 0
-                    if ($this->debug == 1) {
-                        echo "<br> * La factura no debe tener un complemento de pago con saldo insoluto en 0.".$factura['minInsoluto'] <= 0;
-                    }
-                    if (!is_null($factura['idUltimoComplemento']) && $factura['minInsoluto'] <= 0) {
-                        $errores[] = "* La factura '{$serie}' '{$folio}' con UUID '{$uuid}': Ya tiene un complemento de pago con saldo insoluto en 0.";
-                    }
-
-                    // Verificar que la factura ya haya sido pagada
-                    if ($this->debug == 1) {
-                        echo "<br> * La factura debe tener id de pagada:".$factura['idPago'];
-                    }
-                    if ($factura['idPago'] < 1) {
-                        $errores[] = "* La factura '{$serie}' '{$folio}' con UUID '{$uuid}': No ha sido pagada.";
-                    }
+                if (!$dataEmpresa['success']) {
+                    return ['success' => false, 'message' => $dataEmpresa['message']];
                 }
 
-                // Verificamos los datos de los Complementos de Pago recibidos
+                //Obtener datos de Proveedores
+                $MDL_Proveedores = new Proveedores_Mdl();
+                $dataProv = $MDL_Proveedores->obtenerDatosProveedor($noProveedor);
                 if ($this->debug == 1) {
-                    echo '<br><br>Validando los Complementos de Pago recibidos...';
+                    echo '<br><br>Resultado de datos del Proveedor: ' . PHP_EOL;
+                    var_dump($dataProv);
                 }
-                $totalImpPagado = 0;
-
-                foreach ($pagosRecibidos as $pago) {
-                    $idDocumento = $pago["IdDocumento"];
-                    $impPagado = $pago["ImpPagado"];
-                    $totalImpPagado += $impPagado;
-
-                    $documentoEncontrado = false;
-                    foreach ($comprasPorFacturas['data'] as $factura) {
-                        if ($factura["uuid"] === $idDocumento) {
-                            $documentoEncontrado = true;
-
-                            // Verificar que el minInsoluto sea NULL o menor o igual a la suma de los $pagosRecibidos[x]["ImpPagado"]
-                            $minInsoluto = $factura["minInsoluto"];
-                            if ($this->debug == 1) {
-                                echo "<br> * El Total de los Importes Pagados en el complemento ($impPagado) deb ser menor al último insoluto de la factura $impPagado.";
-                            }
-                            if (!is_null($minInsoluto) && $minInsoluto < $impPagado) {
-                                $errores[] = "El Total de los Importes Pagados ($impPagado) es mayor al último insoluto de la factura $idDocumento.";
-                            }
-                            break;
-                        }
-                    }
-
-                    // Veirifca rque exista el documento en las compras relacionadas.
-                    if ($this->debug == 1) {
-                        echo "<br> * Debemos tener una factura con el UUID: $idDocumento";
-                    }
-                    if (!$documentoEncontrado) {
-                        $errores[] = "El documento $idDocumento no lo hemos recibido.";
-                    }
+                if (!$dataProv['success']) {
+                    return ['success' => false, 'message' => $dataProv['message']];
                 }
 
-                // Si hay errores, devolverlos
-                if (!empty($errores)) {
-                    if ($this->debug == 1) {
-                        echo '<br>Errores encontrados durante las validaciones:<br>' . implode('<br>', $errores);
-                    }
-                    $response['message'] = implode('<br>', $errores);
-                    return $response;
-                }
-
+                // Instanciar la clase de Validación y verificar que los métodos existan para esa Versión
+                $claseValidacion = 'ReglasAplicadas' . $versionDocto;
+                $archivoVersion = __DIR__ . "/Reglas/{$claseValidacion}.php";
                 if ($this->debug == 1) {
-                    echo '<br>Hasta el momento OK...';
+                    echo '<br><br>URL de la Clase que Valida Reglas de Negocio: ' . $archivoVersion . '<br>';
+                    echo '<br><br>Clase que validara: ' . $claseValidacion . '<br>';
+                }
+                if (!file_exists($archivoVersion)) {
+                    return ['success' => false, 'message' => "El archivo para las Reglas de Negocio de la versión $versionDocto no existe."];
+                }
+                require_once $archivoVersion;
+
+                if (!class_exists($claseValidacion)) {
+                    if ($this->debug == 1) {
+                        echo '<br><br>La Clase de Validación no está definida: ' . $claseValidacion . '<br>';
+                    }
+                    return ['success' => false, 'message' => "El Metodo $claseValidacion no está definido en la clase correspondiente."];
+                }
+                $class_Validaciones = new $claseValidacion();
+
+                // Obtener configuración para validaciones (excepciones del proveedor y configCFDI)
+                $MDL_ConfigParaCFDI = new RecepcionCFDIs_Mdl();
+                $configCFDI = $MDL_ConfigParaCFDI->configuracionBaseRecepcionCFDI($idEmpresa, 'P', $versionDocto);
+                $exepcionesProv = $MDL_Proveedores->exepcionesProveedoresFacturas($noProveedor);
+                
+                $configParaValidaciones = [];
+                $configParaValidaciones['configCFDI'] = $configCFDI['data'] ?? [];
+                $configParaValidaciones['excepcionesProveedor'] = $exepcionesProv['data'] ?? [];
+                
+                // Ejecutar el método validarReglasInternasNacional_Pagos
+                $reglasInternas = $class_Validaciones->validarReglasInternasNacional_Pagos($dataProv['data'], $dataEmpresa['data'], $dataCFDIXML['data'], $comprasPorFacturas['data'], $configParaValidaciones);
+                if ($this->debug == 1) {
+                    echo '<br><br>Resultado de validarReglasInternasNacional_Pagos: ' . PHP_EOL;
+                    var_dump($reglasInternas);
+                    echo '<br> ******<br>';
+                }
+                if (!$reglasInternas['success'] || !$reglasInternas['isValid']) {
+                    return ['success' => false, 'message' => 'Tuvimos los siguientes Problemas al Validar tu CFDI:<br>' . $reglasInternas['message']];
+                }
+
+                // Ejecutar el método validarReglasNegocioNacional_Pagos
+                $configParaValidaciones = array();
+                $configParaValidaciones['Excepciones']['NoValidarFechasPago'] = 1;
+                $configParaValidaciones['Excepciones']['NoValidarFormasPago'] = 1;
+
+                $reglasNegocio = $class_Validaciones->validarReglasNegocioNacional_Pagos($dataCFDIXML['data'], $comprasPorFacturas['data'], $dataPagosProv['data'], $configParaValidaciones);
+                if ($this->debug == 1) {
+                    echo '<br><br>Resultado de validarReglasNegocioNacional_Pagos: ' . PHP_EOL;
+                    var_dump($reglasNegocio);
+                    echo '<br> ******<br>';
+                }
+                if (!$reglasNegocio['success'] || !$reglasNegocio['isValid']) {
+                    return ['success' => false, 'message' => 'Tuvimos los siguientes Problemas al Validar tu CFDI:<br>' . $reglasNegocio['message']];
+                }
+
+                // Ejecutar las Validaciones Fiscales del CFDI
+                $claseFuncionFiscal = 'cfdis' . $versionDocto;
+                $archivoVersion = __DIR__ . "/Cfdis/{$claseFuncionFiscal}.php";
+                if ($this->debug == 1) {
+                    echo '<br><br>URL de la Clase que Valida Fiscalmente es: ' . $archivoVersion . '<br>';
+                    echo 'Clase que validara  Fiscalmente: ' . $claseFuncionFiscal . '<br>';
+                }
+                require_once $archivoVersion;
+
+                $cfdiFiscalVersion = new $claseFuncionFiscal();
+                $validaFiscalMente = $cfdiFiscalVersion->validarCFDIv1($dataCFDIXML['data']);
+                if ($this->debug == 1) {
+                    echo '<br><br>Resultado de Vaidación Fiscal: ' . PHP_EOL;
+                    var_dump($validaFiscalMente);
+                }
+                if ($validaFiscalMente['success'] && $validaFiscalMente['isValid']) {
+                    if ($this->debug == 1) {
+                        echo '<br><br> ****** PASAMOS LA VALIDACION FISCAL <br>';
+                    }
+
+                    //14. Retornamos el resultado de las validaciónes del Complemento de Pago
+                    $response = [
+                        'success' => true,
+                        'message' => 'Todas las Validaciones se han aplicado correctamente.',
+                        'data' => [
+                            'version' => $versionDocto,
+                            'isAdmin' => $isAdmin,
+                            'ValidFiscal' => $validaFiscalMente['data'],
+                            'dataFacturas' => $comprasPorFacturas['data'],
+                            'dataPagos' => $dataPagosProv['data'],
+                            'dataProv' => $dataProv['data'],
+                            'dataComplementoXML' => $dataCFDIXML['data'],
+                            'dataEmpresa' => $dataEmpresa['data'],
+                            'documentos' => [
+                                'ComplementoPDF' => $cPagoPDF,
+                                'ComplementoXML' => $cpagoXML
+                            ]
+                        ]
+                    ];
+                } else {
+                    if ($this->debug == 1) {
+                        echo '<br><br> ****** NO PASAMOS LA VALIDACION FISCAL <br>';
+                    }
+                    return ['success' => false, 'message' => 'Tuvimos los siguientes Problemas al Validar tu XML:<br>' . $validaFiscalMente['message']];
                 }
             } else {
                 if ($this->debug == 1) {
@@ -521,17 +558,355 @@ class FacturasNacionalesController extends Controller
                 }
                 return ['success' => false, 'message' => $comprasPorFacturas['message']];
             }
-            return ['success' => false, 'message' => $comprasPorFacturas['message']];
-            
         } else {
             return ['success' => false, 'message' => $dataCFDIXML['message']];
         }
 
 
         return $response;
-
     }
 
+    public function verificaNuevaNotaCredito($dataNotaCredXML, $noProveedor, $idCompra, $idNotaCredito, $isAdmin)
+    {
+        $response = [
+            'success' => false,
+            'message' => 'Ocurrió un error inesperado.',
+            'data' => []
+        ];
+
+        if ($this->debug == 1) {
+            echo '<br>--- Inicia la verificación de Nota de Crédito (Egreso) ---<br>';
+            echo " * Proveedor: $noProveedor, ID Compra (Factura): $idCompra, idNotaCredito: $idNotaCredito, Es Admin: $isAdmin<br>";
+            echo " * Datos del XML de Nota de Crédito:<br>";
+            print_r($dataNotaCredXML);
+        }
+
+        // 1.- Extraer datos básicos del XML
+        $versionDocto = $dataNotaCredXML['version'] ?? null;
+        $tipoCFDI = $dataNotaCredXML['data']['Comprobante']['TipoDeComprobante'] ?? null;
+        
+        if ($tipoCFDI !== 'E') {
+            return ['success' => false, 'message' => "El CFDI no es de tipo Egreso (Nota de Crédito). Tipo encontrado: $tipoCFDI."];
+        }
+
+        // 2.- Obtener datos de la factura original a la que se aplica la NC
+        $MDL_Compras = new Compras_Mdl();
+        // El id del proveedor se usa para seguridad, para asegurar que la factura le pertenezca
+        $dataFacturaOriginal = $MDL_Compras->dataCompraPorAcuse($noProveedor, $idCompra);
+        if (!$dataFacturaOriginal['success'] || empty($dataFacturaOriginal['data'])) {
+            return ['success' => false, 'message' => 'No se pudieron obtener los datos de la factura original seleccionada (ID Compra: ' . $idCompra . ').'];
+        }
+        if ($this->debug == 1) {
+            echo '<br><br>Resultado de Factura Original: <br>';
+            print_r($dataFacturaOriginal);
+        }
+        // Usamos la sociedad de la factura original para las validaciones
+        $idEmpresa = $dataFacturaOriginal['data']['sociedad'];
+
+
+        // 3.- Obtener datos de la empresa para las validaciones
+        $MDL_Empresas = new Empresas_Mdl();
+        $dataEmpresa = $MDL_Empresas->empresaPorId($idEmpresa);
+        if (!$dataEmpresa['success']) {
+            return ['success' => false, 'message' => $dataEmpresa['message']];
+        }
+        if ($this->debug == 1) {
+            echo '<br><br>Resultado de Búsqueda de Empresa: <br>';
+            print_r($dataEmpresa);
+        }
+
+        // 4.- Obtener datos del Proveedor
+        $MDL_Proveedores = new Proveedores_Mdl();
+        $dataProv = $MDL_Proveedores->obtenerDatosProveedor($noProveedor);
+        if (!$dataProv['success']) {
+            return ['success' => false, 'message' => $dataProv['message']];
+        }
+        if ($this->debug == 1) {
+            echo '<br><br>Resultado de datos del Proveedor: <br>';
+            print_r($dataProv);
+        }
+
+        // 5.- Obtener datos de la Política de Nota de Crédito aplicada
+        $MDL_NotasCredito = new NotasCredito_Mdl();
+        $dataPoliticaNC = $MDL_NotasCredito->obtenerPoliticaPorIdNotaCredito($idNotaCredito);
+        if (!$dataPoliticaNC['success']) {
+            return ['success' => false, 'message' => $dataPoliticaNC['message']];
+        }
+        if ($this->debug == 1) {
+            echo '<br><br>Resultado de Política de Nota de Crédito: <br>';
+            print_r($dataPoliticaNC);
+        }
+
+        // 6. Generar arreglo de Configuración para Validaciones
+        $configParaValidaciones = [
+            'politicaNC' => $dataPoliticaNC['data'],
+            'facturaOriginal' => $dataFacturaOriginal['data']
+        ];
+        if ($this->debug == 1) {
+            echo '<br><br>Configuraciones para la Recepción de la Nota de Crédito: <br>';
+            print_r($configParaValidaciones);
+        }
+
+        // 7. Cargar el archivo y clase de la versión correspondiente para las validaciones
+        $claseFuncion = 'ReglasAplicadas' . $versionDocto;
+        $archivoVersion = __DIR__ . "/Reglas/{$claseFuncion}.php";
+        if (!file_exists($archivoVersion)) {
+            return ['success' => false, 'message' => "El archivo para las Reglas de Negocio de la versión $versionDocto no existe."];
+        }
+        require_once $archivoVersion;
+        if (!class_exists($claseFuncion)) {
+            return ['success' => false, 'message' => "La Clase de Reglas $claseFuncion no está definida."];
+        }
+        if ($this->debug == 1) {
+            echo "<br><br>Clase de Reglas a utilizar: $claseFuncion en $archivoVersion<br>";
+        }
+
+        // 8. Instanciar la clase y verificar que los métodos existan para esa Versión
+        $cfdiVersion = new $claseFuncion();
+        $metodoValidaReglasInternas = "validarReglasInternasNacional_Egresos";
+        $metodoValidaReglasNegocio = "validarReglasNegocioNacional_Egresos";
+
+        if (!method_exists($cfdiVersion, $metodoValidaReglasInternas) || !method_exists($cfdiVersion, $metodoValidaReglasNegocio)) {
+            return ['success' => false, 'message' => "Los métodos de validación para Egresos no están definidos en la clase $claseFuncion."];
+        }
+        if ($this->debug == 1) {
+            echo "<br>Métodos de validación a ejecutar: $metodoValidaReglasInternas y $metodoValidaReglasNegocio<br>";
+        }
+
+        // 9. Ejecutar el método validarReglasInternasNacional_Egresos
+        $reglasInternas = $cfdiVersion->$metodoValidaReglasInternas($dataProv['data'], $dataEmpresa['data'], $dataNotaCredXML['data']);
+        if ($this->debug == 1) {
+            echo '<br><br>Resultado de Reglas Internas: <br>';
+            print_r($reglasInternas);
+        }
+        if (!$reglasInternas['success'] || !$reglasInternas['isValid']) {
+            // Registrar en logs con el prefijo completo para debugging
+            $timestamp = date("Y-m-d H:i:s");
+            error_log("[$timestamp] app/Globals/Controllers/FacturasNacionalesController.php -> Problemas al Validar Reglas Internas: " . $reglasInternas['message'] . PHP_EOL, 3, LOG_FILE);
+            // Retornar solo el mensaje al usuario sin el prefijo técnico
+            return ['success' => false, 'message' => $reglasInternas['message']];
+        }
+
+        // 10. Ejecutar el método validarReglasNegocioNacional_Egresos
+        $reglasNegocio = $cfdiVersion->$metodoValidaReglasNegocio($dataNotaCredXML['data'], $configParaValidaciones);
+        if ($this->debug == 1) {
+            echo '<br><br>Resultado de Reglas de Negocio: <br>';
+            print_r($reglasNegocio);
+        }
+        if (!$reglasNegocio['success'] || !$reglasNegocio['isValid']) {
+            // Registrar en logs con el prefijo completo para debugging
+            $timestamp = date("Y-m-d H:i:s");
+            error_log("[$timestamp] app/Globals/Controllers/FacturasNacionalesController.php -> Problemas al Validar Reglas de Negocio: " . $reglasNegocio['message'] . PHP_EOL, 3, LOG_FILE);
+            // Retornar solo el mensaje al usuario sin el prefijo técnico
+            return ['success' => false, 'message' => $reglasNegocio['message']];
+        }
+
+        // 11. Ejecutar las Validaciones Fiscales del CFDI
+        $claseFuncionFiscal = 'cfdis' . $versionDocto;
+        $archivoVersionFiscal = __DIR__ . "/Cfdis/{$claseFuncionFiscal}.php";
+        require_once $archivoVersionFiscal;
+        $cfdiFiscalVersion = new $claseFuncionFiscal();
+        $validaFiscalMente = $cfdiFiscalVersion->validarCFDIv1($dataNotaCredXML['data']);
+        if ($this->debug == 1) {
+            echo '<br><br>Resultado de Validación Fiscal (SAT): <br>';
+            print_r($validaFiscalMente);
+        }
+        if (!$validaFiscalMente['success'] || !$validaFiscalMente['isValid']) {
+            return ['success' => false, 'message' => 'Problemas en la Validación Fiscal (SAT):<br>' . $validaFiscalMente['message']];
+        }
+
+        // 12. Retornamos el resultado de las Validaciones
+        $response = [
+            'success' => true,
+            'message' => 'Todas las Validaciones de la Nota de Crédito se han aplicado correctamente.',
+            'data' => [
+                'version' => $versionDocto,
+                'isAdmin' => $isAdmin,
+                'idNotaCredito' => $idNotaCredito,
+                'ValidFiscal' => $validaFiscalMente['data'],
+                'dataProv' => $dataProv['data'],
+                'dataNotaCredXML' => $dataNotaCredXML['data'],
+                'dataEmpresa' => $dataEmpresa['data']
+            ]
+        ];
+
+        return $response;
+    }
+
+    public function registraNuevaNotaCredito($resultadoDeVerificacion)
+    {
+        if ($this->debug == 1) {
+            echo '<br><br>--- Inicia el Registro de Nota de Crédito ---<br>';
+            print_r($resultadoDeVerificacion);
+        }
+
+        // 1. Mover los documentos a su ubicación final
+        $Ctrl_Documentos = new DocumentosController();
+        $idEmpresa = $resultadoDeVerificacion['dataEmpresa']['id'];
+        $idProveedor = $resultadoDeVerificacion['dataProv']['IdProveedor'];
+        $uuid = $resultadoDeVerificacion['dataNotaCredXML']['TimbreFiscal']['UUID'];
+        
+        // --- Mover PDF ---
+        $rutaTemporalPDF = $resultadoDeVerificacion['ruta_temporal_pdf']; 
+        $pdfMovido = $Ctrl_Documentos->almacenaCFDI($rutaTemporalPDF, 'NOTACRED', $idProveedor, $uuid, $idEmpresa, 'pdf');
+        
+        if(!$pdfMovido['success']){
+            return ['success' => false, 'message' => 'Error al mover el archivo PDF: ' . $pdfMovido['message']];
+        }
+
+        // --- Mover XML ---
+        $rutaTemporalXML = $resultadoDeVerificacion['ruta_temporal_xml'];
+        $xmlMovido = $Ctrl_Documentos->almacenaCFDI($rutaTemporalXML, 'NOTACRED', $idProveedor, $uuid, $idEmpresa, 'xml');
+
+        if(!$xmlMovido['success']){
+            // Si el XML falla, eliminamos el PDF que ya se movió para no dejar archivos huérfanos.
+            $Ctrl_Documentos->eliminaDocumento($pdfMovido['data']['rutaParaBD'], 'NOTACRED');
+            return ['success' => false, 'message' => 'Error al mover el archivo XML: ' . $xmlMovido['message']];
+        }
+
+            // 2. Preparar datos para el modelo
+            $datosParaRegistrar = $resultadoDeVerificacion;
+            $datosParaRegistrar['ruta_temporal_pdf'] = $rutaTemporalPDF;
+            $datosParaRegistrar['ruta_temporal_xml'] = $rutaTemporalXML;
+            $datosParaRegistrar['urlPDF'] = $pdfMovido['data']['rutaParaBD'];
+            $datosParaRegistrar['urlXML'] = $xmlMovido['data']['rutaParaBD'];
+            // El idCompra ya viene en el array de resultadoDeVerificacion
+
+            // 3. Registrar en la base de datos dinámicamente según la versión del CFDI
+            $versionDocto = $resultadoDeVerificacion['version'];
+            
+            // Construir el nombre de la clase del modelo y el método dinámicamente
+            $claseModelo = 'App\\Globals\\Controllers\\RegistroCFDIs\\RegistroCFDIs' . $versionDocto . '_Mdl';
+            $metodoFunction = 'registrarCFDI_Egresos' . $versionDocto;
+
+            $archivoModelo = __DIR__ . DIRECTORY_SEPARATOR . 'RegistroCFDIs' . DIRECTORY_SEPARATOR . 'RegistroCFDIs' . $versionDocto . '_Mdl.php';
+
+            if (!file_exists($archivoModelo)) {
+                $Ctrl_Documentos->eliminaDocumento($pdfMovido['data']['rutaParaBD'], 'NOTACRED');
+                $Ctrl_Documentos->eliminaDocumento($xmlMovido['data']['rutaParaBD'], 'NOTACRED');
+                return ['success' => false, 'message' => "El archivo de registro para la versión '$versionDocto' no existe."];
+            }
+            require_once $archivoModelo;
+
+            if ($this->debug == 1) {
+                echo "<br><br>Clase de Modelo a utilizar: $claseModelo";
+                echo "<br>Método a ejecutar: $metodoFunction<br>";
+            }
+
+            // Verificar que la clase del modelo exista
+            if (!class_exists($claseModelo)) {
+                // Si el modelo no existe, hacemos rollback de los archivos movidos
+                $Ctrl_Documentos->eliminaDocumento($pdfMovido['data']['rutaParaBD'], 'NOTACRED');
+                $Ctrl_Documentos->eliminaDocumento($xmlMovido['data']['rutaParaBD'], 'NOTACRED');
+                return ['success' => false, 'message' => "La clase de registro para la versión '$versionDocto' no existe."];
+            }
+            
+            $MDL_registraCFDI = new $claseModelo();
+
+            // Verificar que el método exista en la clase
+            if (!method_exists($MDL_registraCFDI, $metodoFunction)) {
+                // Si el método no existe, hacemos rollback de los archivos movidos
+                $Ctrl_Documentos->eliminaDocumento($pdfMovido['data']['rutaParaBD'], 'NOTACRED');
+                $Ctrl_Documentos->eliminaDocumento($xmlMovido['data']['rutaParaBD'], 'NOTACRED');
+                return ['success' => false, 'message' => "El método de registro '$metodoFunction' no está definido en la clase '$claseModelo'."];
+            }
+
+            // Llamar al método dinámicamente
+            $respRegistro = $MDL_registraCFDI->$metodoFunction($datosParaRegistrar);
+
+            if ($this->debug == 1) {
+                echo '<br><br>Resultado del registro en BD: <br>';
+                print_r($respRegistro);
+            }
+
+        // Si el registro en BD falla, eliminamos los archivos movidos.
+        if(!$respRegistro['success']){
+            $Ctrl_Documentos->eliminaDocumento($pdfMovido['data']['rutaParaBD'], 'NOTACRED');
+            $Ctrl_Documentos->eliminaDocumento($xmlMovido['data']['rutaParaBD'], 'NOTACRED');
+        }
+
+        return $respRegistro;
+    }
+
+    public function registraNuevoComplementoPago($resultadoDeVerificacion)
+    {
+        $this->debug = 0; // Activado temporalmente para debugging
+        if ($this->debug == 1) {
+            echo '<br><br>--- Inicia el Registro de Complemento de Pago ---<br>';
+            print_r($resultadoDeVerificacion);
+        }
+
+        // Preparar datos en el formato que espera registrarCFDI_Pagosv40
+        // El método registrarCFDI_Pagosv40 moverá los archivos automáticamente
+        $datosParaRegistrar = $resultadoDeVerificacion;
+        
+        // Asegurar que los documentos estén en el formato esperado
+        // Hay dos flujos posibles:
+        // 1. Desde HistoricoController: ya viene con 'documentos' completo
+        // 2. Desde CargaFacturasGlobalController: viene con 'ruta_temporal_pdf/xml'
+        if (!isset($datosParaRegistrar['documentos'])) {
+            $datosParaRegistrar['documentos'] = [];
+        }
+        
+        // Si viene desde CargaFacturasGlobalController, convertir rutas temporales a formato documentos
+        if (isset($resultadoDeVerificacion['ruta_temporal_pdf']) && !isset($datosParaRegistrar['documentos']['ComplementoPDF'])) {
+            $datosParaRegistrar['documentos']['ComplementoPDF'] = [
+                'tmp_name' => $resultadoDeVerificacion['ruta_temporal_pdf']
+            ];
+        }
+        if (isset($resultadoDeVerificacion['ruta_temporal_xml']) && !isset($datosParaRegistrar['documentos']['ComplementoXML'])) {
+            $datosParaRegistrar['documentos']['ComplementoXML'] = [
+                'tmp_name' => $resultadoDeVerificacion['ruta_temporal_xml']
+            ];
+        }
+        
+        // Validar que existan los documentos necesarios
+        if (empty($datosParaRegistrar['documentos']['ComplementoPDF']['tmp_name']) || empty($datosParaRegistrar['documentos']['ComplementoXML']['tmp_name'])) {
+            return ['success' => false, 'message' => 'No se recibieron correctamente los archivos del complemento de pago.'];
+        }
+
+        // 3. Registrar en la base de datos dinámicamente según la versión del CFDI
+        $versionDocto = $resultadoDeVerificacion['version'];
+        
+        // Construir el nombre de la clase del modelo y el método dinámicamente
+        $claseModelo = 'App\\Globals\\Controllers\\RegistroCFDIs\\RegistroCFDIs' . $versionDocto . '_Mdl';
+        $metodoFunction = 'registrarCFDI_Pagos' . $versionDocto;
+
+        $archivoModelo = __DIR__ . DIRECTORY_SEPARATOR . 'RegistroCFDIs' . DIRECTORY_SEPARATOR . 'RegistroCFDIs' . $versionDocto . '_Mdl.php';
+
+        if (!file_exists($archivoModelo)) {
+            return ['success' => false, 'message' => "El archivo de registro para la versión '$versionDocto' no existe."];
+        }
+        require_once $archivoModelo;
+
+        if ($this->debug == 1) {
+            echo "<br><br>Clase de Modelo a utilizar: $claseModelo";
+            echo "<br>Método a ejecutar: $metodoFunction<br>";
+        }
+
+        // Verificar que la clase del modelo exista
+        if (!class_exists($claseModelo)) {
+            return ['success' => false, 'message' => "La clase de registro para la versión '$versionDocto' no existe."];
+        }
+        
+        $MDL_registraCFDI = new $claseModelo();
+
+        // Verificar que el método exista en la clase
+        if (!method_exists($MDL_registraCFDI, $metodoFunction)) {
+            return ['success' => false, 'message' => "El método de registro '$metodoFunction' no está definido en la clase '$claseModelo'."];
+        }
+
+        // Llamar al método dinámicamente
+        // El método registrarCFDI_Pagosv40 moverá los archivos y manejará el rollback si es necesario
+        $respRegistro = $MDL_registraCFDI->$metodoFunction($datosParaRegistrar);
+
+        if ($this->debug == 1) {
+            echo '<br><br>Resultado del registro en BD: <br>';
+            print_r($respRegistro);
+        }
+
+        return $respRegistro;
+    }
 
     private function logErrorAndExit($message)
     {

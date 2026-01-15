@@ -1,0 +1,5 @@
+"id"	"nombre"	"estatus"	"orden"
+"1"	"Administrador"	"1"	"3"
+"2"	"Proveedor Nacional"	"1"	"2"
+"3"	"Proveedor Extranjero"	"1"	"1"
+"4"	"Solo Lectura"	"1"	"4"

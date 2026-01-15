@@ -104,6 +104,21 @@ if ($debug == 1) {
             opacity: 1;
             transform: translateX(-50%) translateY(-5px);
         }
+
+        .select2-container--default .select2-selection--multiple {
+            min-height: 35px;
+            max-height: none;
+            height: auto;
+            overflow-y: auto;
+            padding-bottom: 5px;
+        }
+
+        .select2-selection__rendered {
+            display: flex;
+            flex-wrap: wrap;
+            max-height: none;
+            overflow-y: auto;
+        }
     </style>
 
 </head>
@@ -169,7 +184,7 @@ if ($debug == 1) {
                                                     <span><i class="fas fa-info-circle font-12"></i></span>
                                                     <div class="tooltip-text">
                                                         <strong>Ignorar Descuento</strong>
-                                                        <p></p>
+                                                        <p>Al estar en esta lista los montos de las facturas se comparan sin incluir el descuento.</p>
                                                     </div>
                                                 </div>
                                             </span>
@@ -184,7 +199,7 @@ if ($debug == 1) {
                                                     <span><i class="fas fa-info-circle font-12"></i></span>
                                                     <div class="tooltip-text">
                                                         <strong>Exento Año Fiscal</strong>
-                                                        <p></p>
+                                                        <p>Esta opción habilita la carga de facturas emitidas en años fiscales anteriores al actual.</p>
                                                     </div>
                                                 </div>
                                             </span>
@@ -199,7 +214,7 @@ if ($debug == 1) {
                                                     <span><i class="fas fa-info-circle font-12"></i></span>
                                                     <div class="tooltip-text">
                                                         <strong>Exento Tiempo Emisión</strong>
-                                                        <p></p>
+                                                        <p>Esta opción habilita la carga de facturas emitidas con una antigüedad mayor a seis meses.</p>
                                                     </div>
                                                 </div>
                                             </span>
@@ -214,7 +229,7 @@ if ($debug == 1) {
                                                     <span><i class="fas fa-info-circle font-12"></i></span>
                                                     <div class="tooltip-text">
                                                         <strong>Uso CFDI Distinto</strong>
-                                                        <p></p>
+                                                        <p>Esta opción habilita la carga de facturas con un uso de CFDI diferente al estándar.</p>
                                                     </div>
                                                 </div>
                                             </span>
@@ -229,7 +244,22 @@ if ($debug == 1) {
                                                     <span><i class="fas fa-info-circle font-12"></i></span>
                                                     <div class="tooltip-text">
                                                         <strong>Bloquear Diferencias</strong>
-                                                        <p></p>
+                                                        <p>No se permiten diferencias de montos entre la factura y la orden de compra para estos proveedores.</p>
+                                                    </div>
+                                                </div>
+                                            </span>
+                                        </a>
+                                    </li>
+
+                                    <li class="nav-item">
+                                        <a class="nav-link" data-toggle="tab" href="#bloqueoDeCfdis" role="tab" onclick="cargarBloqueoDeCFDIs();">
+                                            <span class="hidden-xs-down">Bloquear Uso De CFDis</span>
+                                            <span class="hidden-sm-up">
+                                                <div class="tooltip-container">
+                                                    <span><i class="fas fa-info-circle font-12"></i></span>
+                                                    <div class="tooltip-text">
+                                                        <strong>Bloquear Uso De CFDis</strong>
+                                                        <p>Configurar Usos de CFDI con los que los proveedores pueden cargar facturas.</p>
                                                     </div>
                                                 </div>
                                             </span>
@@ -244,6 +274,7 @@ if ($debug == 1) {
                                     <div class="tab-pane p-20" id="fechaEm" role="tabpanel"></div>
                                     <div class="tab-pane p-20" id="usoCFDI" role="tabpanel"></div>
                                     <div class="tab-pane p-20" id="bloqueoDif" role="tabpanel"></div>
+                                    <div class="tab-pane p-20" id="bloqueoDeCfdis" role="tabpanel"></div>
                                 </div>
                             </div>
                         </div>

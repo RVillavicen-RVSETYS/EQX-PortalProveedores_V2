@@ -5,7 +5,7 @@ namespace App\Controllers\Administrador;
 use Core\Controller;
 use App\Models\Menu_Mdl;
 use App\Models\Proveedores\Proveedores_Mdl;
-use App\Models\Configuraciones\BloqueoProveedores_Mdl;
+use App\Models\Proveedores\Excepciones\BloqueoProveedores_Mdl;
 
 class BloqueoProveedoresController extends Controller
 {
@@ -191,10 +191,31 @@ class BloqueoProveedoresController extends Controller
         $verificaBloqueo = $bloqueoModel->verificarBloqueo($idProveedor);
 
         if ($verificaBloqueo['data']['IdProveedor'] != $verificaBloqueo['data']['IdProvBloqueo']) {
-            $resultBloqueo = $bloqueoModel->insertarBloqueo($idProveedor, $verificaBloqueo['data']['Proveedor'], 1, $bloque);
+            // Preparar campos siguiendo el patrón de consumo
+            $campos = [
+                'idProveedor' => $idProveedor,
+                'nombre' => $verificaBloqueo['data']['Proveedor'],
+                'estatus' => 1,
+                'grupo' => $bloque,
+                'idUserReg' => $_SESSION['EQXident'] ?? 0
+            ];
+
+            $resultBloqueo = $bloqueoModel->registraBloqueoProveedor($campos);
         } else {
             $nuevoEstatus = ($verificaBloqueo['data']['EstatusBloqueo'] == 1) ? 0 : 1;
-            $resultBloqueo = $bloqueoModel->actualizarBloqueo($verificaBloqueo['data']['IdBloqueo'], $idProveedor, $bloque, $nuevoEstatus);
+            
+            // Preparar campos y filtros siguiendo el patrón de consumo
+            $campos = [
+                'grupo' => $bloque,
+                'estatus' => $nuevoEstatus
+            ];
+
+            $filtros = [
+                'id' => $verificaBloqueo['data']['IdBloqueo'],
+                'idProveedor' => $idProveedor
+            ];
+
+            $resultBloqueo = $bloqueoModel->actualizarBloqueoProveedor($campos, $filtros);
         }
 
         if ($resultBloqueo['success']) {
@@ -231,11 +252,20 @@ class BloqueoProveedoresController extends Controller
 
         $bloqueoModel = new BloqueoProveedores_Mdl();
 
-        $resultBloqueo = $bloqueoModel->insertarCierreAnual($fechaInicio, $fechaFin, $msjEsp, $msjIng);
+        // Preparar campos siguiendo el patrón de consumo
+        $campos = [
+            'fechaInicio' => $fechaInicio,
+            'fechaFin' => $fechaFin,
+            'mensajeCierre' => $msjEsp,
+            'mensajeCierreIng' => $msjIng,
+            'estatus' => 1,
+            'idUserReg' => $_SESSION['EQXident'] ?? 0
+        ];
 
+        $resultBloqueo = $bloqueoModel->registraCierreAnual($campos);
 
         if ($resultBloqueo['success']) {
-            $Message = $resultBloqueo['data'];
+            $Message = $resultBloqueo['message'];
             echo json_encode([
                 'success' => true,
                 'message' => $Message
@@ -347,11 +377,17 @@ class BloqueoProveedoresController extends Controller
 
         $bloqueoModel = new BloqueoProveedores_Mdl();
 
-        $resultBloqueo = $bloqueoModel->agregaProveedor($idProveedor);
+        // Preparar campos siguiendo el patrón de consumo
+        $campos = [
+            'idProveedor' => $idProveedor,
+            'estatus' => 1,
+            'idUserReg' => $_SESSION['EQXident'] ?? 0
+        ];
 
+        $resultBloqueo = $bloqueoModel->registraBloqueoProveedor($campos);
 
         if ($resultBloqueo['success']) {
-            $Message = $resultBloqueo['data'];
+            $Message = $resultBloqueo['message'];
             echo json_encode([
                 'success' => true,
                 'message' => $Message
@@ -379,11 +415,32 @@ class BloqueoProveedoresController extends Controller
 
         $bloqueoModel = new BloqueoProveedores_Mdl();
 
-        $resultBloqueo = $bloqueoModel->cambiaEstatus($idProveedor);
+        // Primero obtener el estatus actual
+        $verificaBloqueo = $bloqueoModel->verificarBloqueo($idProveedor);
+        
+        if (!$verificaBloqueo['success'] || !isset($verificaBloqueo['data']['EstatusBloqueo'])) {
+            echo json_encode([
+                'success' => false,
+                'message' => 'No se encontró el bloqueo del proveedor.'
+            ]);
+            return;
+        }
 
+        $nuevoEstatus = ($verificaBloqueo['data']['EstatusBloqueo'] == 1) ? 0 : 1;
+
+        // Preparar campos y filtros siguiendo el patrón de consumo
+        $campos = [
+            'estatus' => $nuevoEstatus
+        ];
+
+        $filtros = [
+            'idProveedor' => $idProveedor
+        ];
+
+        $resultBloqueo = $bloqueoModel->actualizarBloqueoProveedor($campos, $filtros);
 
         if ($resultBloqueo['success']) {
-            $Message = $resultBloqueo['data'];
+            $Message = $resultBloqueo['message'];
             echo json_encode([
                 'success' => true,
                 'message' => $Message

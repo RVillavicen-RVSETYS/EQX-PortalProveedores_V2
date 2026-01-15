@@ -1,0 +1,2 @@
+"id"	"idEmpresa"	"tipoCFDI"	"versionCFDI"	"tiempoVigencia"	"usosCFDI"	"formasPagoPUE"	"fechaReg (DateTime)"	"idUserReg"	"estatus"
+"1"	"1"	"I"	"v40"	"6 month"	"G01,G03,I01,I02,I03,I04,I06,I07,I08"	"03"	"11/1/2025 19:15:38"	"1"	"1"

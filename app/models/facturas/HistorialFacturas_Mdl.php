@@ -153,30 +153,35 @@ class HistorialFacturas_Mdl
 
     public function buscaPagoSilme($fechaInicial, $fechaFinal)
     {
+        self::$debug = 0;
         if (self::$debug) {
             echo "Ya entro a la función para actualizar los Pagos.<br>";
         }
         try {
 
             $sql = "SELECT
-                    pc.id AS 'IdPago',
-                    pc.idOperacion AS 'IdDetPago',
-                    rec.idCompra AS 'OrdenCompra',
-                    ph.idRecepcion AS 'HojaEntrada',
-                    pc.monto AS 'MontoPago',
-                    ph.residual AS 'SaldoInsoluto',
-                    pc.idSatMoneda AS 'Moneda',
-                    pc.idSatFormaPago AS 'FormaPago',
-                    pc.fechaPago AS 'FechaPago',
-                    ph.referencia AS 'Referencia',
-                    ph.idCuentaBancaria AS 'CuentaBancaria' 
+                    cpd.id AS IdPagoDet,
+                    cpd.idAcuse AS IdAcuse,
+                    comp.folio AS OC,
+                    GROUP_CONCAT( rec.folio ) AS HES,
+                    cpd.totalPagado AS TotalPagado,
+                    ( cpd.montoTotal - cpd.totalPagado ) AS SaldoInsoluto,
+                    cpd.idSatMonedas AS Moneda,
+                    res.TipoCambio AS TipoCambio,
+                    cpa.idSatFormaPago AS FormaPago,
+                    cpd.fechaPago AS FechaPago
                 FROM
-                    pagosCompras pc
-                    INNER JOIN pagos_hes ph ON pc.idOperacion = ph.id
-                    INNER JOIN recepciones rec ON ph.idRecepcion = rec.id 
+                    compras_PagosDet cpd
+                    INNER JOIN compras comp ON cpd.idCompra = comp.id
+                    INNER JOIN compras_PagosRecepcion cpr ON cpd.id = cpr.idComprasPagosDet
+                    INNER JOIN recepciones rec ON cpr.idRecepcion = rec.id
+                    INNER JOIN compras_PagosAplicados cpa ON cpd.id = cpa.idComprasPagosDet
+                    LEFT JOIN (SELECT cp.id, cp.tipoCambio AS TipoCambio FROM compras_Pagos cp ) res ON cpa.idComprasPagos = res.id
                 WHERE
-                    DATE_FORMAT( pc.fechaPago, '%Y-%m-%d' ) BETWEEN :fechaInicial 
-                    AND :fechaFinal";
+                    DATE_FORMAT( cpd.fechaPago, '%Y-%m-%d' ) BETWEEN :fechaInicial AND :fechaFinal
+                    AND cpd.estatus = 1
+                GROUP BY
+                    cpd.id";
 
             // Modo debug para imprimir consulta con parámetros
             if (self::$debug) {
@@ -193,6 +198,7 @@ class HistorialFacturas_Mdl
             $stmt->execute();
 
             $dataResul = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            $cantResult = count($dataResul);
 
             if (self::$debug) {
                 echo '<br>Resultado de Query:';
@@ -200,13 +206,18 @@ class HistorialFacturas_Mdl
                 echo '<br><br>';
             }
 
-            if ($dataResul) {
-                return ['success' => true, 'data' => $dataResul];
+            if ($cantResult > 0) {
+                return ['success' => true, 'cantResul' => $cantResult, 'data' => $dataResul];
             } else {
-                if (self::$debug) {
-                    echo "Error Al Buscar Pagos.<br>";
+
+                if ($cantResult == 0) {
+                    return ['success' => false, 'message' => 'No se encontraron pagos nuevos en este rango de fechas.'];
+                } else {
+                    if (self::$debug) {
+                        echo "Error Al Buscar Pagos.<br>";
+                    }
+                    return ['success' => false, 'message' => 'Error Al Buscar Pagos.'];
                 }
-                return ['success' => false, 'message' => 'Error Al Buscar Pagos.'];
             }
         } catch (\PDOException $e) {
             // Captura de errores y almacenamiento en el log
@@ -223,21 +234,22 @@ class HistorialFacturas_Mdl
         }
         try {
 
-            $sql = "INSERT INTO pagos_compras (idPago, idDetPago, OC, HES, montoPagado, saldoInsoluto, moneda, formaPago, fechaPago)
-                VALUES (:idPago, :idDetPago, :OC, :HES, :montoPagado, :saldoInsoluto, :moneda, :formaPago, :fechaPago) ON DUPLICATE KEY UPDATE idPago = idPago;";
+            $sql = "INSERT IGNORE INTO pagos_compras ( idPagoDet, idAcuse, OC, HES, montoPagado, saldoInsoluto, moneda, tipoCambio, formaPago, fechaPago)
+                    VALUES ( :idPagoDet, :idAcuse, :OC, :HES, :montoPagado, :saldoInsoluto, :moneda, :tipoCambio, :formaPago, :fechaPago);";
 
             // Modo debug para imprimir consulta con parámetros
             if (self::$debug) {
 
                 foreach ($dataPagos as $pago) {
                     $params = [
-                        ':idPago' => $pago['IdPago'],
-                        ':idDetPago' => $pago['IdDetPago'],
-                        ':OC' => $pago['OrdenCompra'],
-                        ':HES' => $pago['HojaEntrada'],
-                        ':montoPagado' => $pago['MontoPago'],
+                        ':idPagoDet' => $pago['IdPagoDet'],
+                        ':idAcuse' => $pago['IdAcuse'],
+                        ':OC' => $pago['OC'],
+                        ':HES' => $pago['HES'],
+                        ':montoPagado' => $pago['TotalPagado'],
                         ':saldoInsoluto' => $pago['SaldoInsoluto'],
                         ':moneda' => $pago['Moneda'],
+                        ':tipoCambio' => $pago['TipoCambio'],
                         ':formaPago' => $pago['FormaPago'],
                         ':fechaPago' => $pago['FechaPago']
                     ];
@@ -248,13 +260,14 @@ class HistorialFacturas_Mdl
             $stmt = $this->db->prepare($sql);
             $cant = 0;
             foreach ($dataPagos as $pago) {
-                $stmt->bindValue(':idPago', $pago['IdPago'], PDO::PARAM_INT);
-                $stmt->bindValue(':idDetPago', $pago['IdDetPago'], PDO::PARAM_INT);
-                $stmt->bindValue(':OC', $pago['OrdenCompra'], PDO::PARAM_INT);
-                $stmt->bindValue(':HES', $pago['HojaEntrada'], PDO::PARAM_INT);
-                $stmt->bindValue(':montoPagado', $pago['MontoPago'], PDO::PARAM_STR);
+                $stmt->bindValue(':idPagoDet', $pago['IdPagoDet'], PDO::PARAM_INT);
+                $stmt->bindValue(':idAcuse', $pago['IdAcuse'], PDO::PARAM_INT);
+                $stmt->bindValue(':OC', $pago['OC'], PDO::PARAM_STR);
+                $stmt->bindValue(':HES', $pago['HES'], PDO::PARAM_STR);
+                $stmt->bindValue(':montoPagado', $pago['TotalPagado'], PDO::PARAM_STR);
                 $stmt->bindValue(':saldoInsoluto', $pago['SaldoInsoluto'], PDO::PARAM_STR);
                 $stmt->bindValue(':moneda', $pago['Moneda'], PDO::PARAM_STR);
+                $stmt->bindValue(':tipoCambio', $pago['TipoCambio'], PDO::PARAM_STR);
                 $stmt->bindValue(':formaPago', $pago['FormaPago'], PDO::PARAM_INT);
                 $stmt->bindValue(':fechaPago', $pago['FechaPago'], PDO::PARAM_STR);
 
@@ -282,8 +295,8 @@ class HistorialFacturas_Mdl
         } catch (\PDOException $e) {
             // Captura de errores y almacenamiento en el log
             $timestamp = date("Y-m-d H:i:s");
-            error_log("[$timestamp] app/Models/HistorialFacturas_Mdl.php -> No Se Encontraron Nuevos Pagos En Silme: " . $e->getMessage() . PHP_EOL, 3, LOG_FILE_BD);
-            return ['success' => false, 'message' => 'No Se Encontraron Nuevos Pagos En Silme. Notifica a tu administrador'];
+            error_log("[$timestamp] app/Models/HistorialFacturas_Mdl.php -> Error Al Registrar Pagos: " . $e->getMessage() . PHP_EOL, 3, LOG_FILE_BD);
+            return ['success' => false, 'message' => 'Error Al Registrar Pagos. Notifica a tu administrador'];
         }
     }
 }

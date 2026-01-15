@@ -1,0 +1,6 @@
+"id"	"usuario"	"pass"	"idNivel"	"idSucursal"	"estatus"	"idUserReg"	"fechaReg (DateTime)"	"idEmpleado"	"idUserMod"	"fechaMod"	"idioma"
+"1"	"audit_corporativo"	"$2y$10$t0KYcBv5n04.VRhkuVOCr.p8VbfkSjnZtQFWyBXVjZqhLoAXxZMFe"	"1"	"1"	"1"	"1"	"29/7/2021 16:55:28"	"1"			"es_mx"
+"2"	"enrique.vazquez"	"$2y$10$t0KYcBv5n04.VRhkuVOCr.p8VbfkSjnZtQFWyBXVjZqhLoAXxZMFe"	"1"	"1"	"1"	"1"	"2/1/2023 23:33:51"	"2"			"es_mx"
+"3"	"cristina.vazquez"	"$2y$10$t0KYcBv5n04.VRhkuVOCr.p8VbfkSjnZtQFWyBXVjZqhLoAXxZMFe"	"1"	"1"	"1"	"1"	"27/12/2024 13:22:57"	"3"			"es_mx"
+"4"	"mireya.mateo"	"$2y$10$t0KYcBv5n04.VRhkuVOCr.p8VbfkSjnZtQFWyBXVjZqhLoAXxZMFe"	"1"	"1"	"1"	"1"	"12/3/2025 12:43:54"	"4"			"es_mx"
+"5"	"francisco.demo"	"$2y$10$t0KYcBv5n04.VRhkuVOCr.p8VbfkSjnZtQFWyBXVjZqhLoAXxZMFe"	"1"	"1"	"1"	"1"	"17/4/2025 13:10:12"	"5"			"es_mx"

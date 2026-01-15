@@ -23,90 +23,98 @@ if ($debug == 1) {
     <button type="button" class="btn ink-reaction btn-primary" data-toggle="modal" data-target="#modalNuevaAlerta"><i class="fa fa-plus"></i> Crear Alerta</button>
 </div>
 
-<table class="table table-sm" id="tableAlertas">
-    <thead>
-        <tr>
-            <th>#</th>
-            <th>Tipo Proveedor</th>
-            <th>Titulo</th>
-            <th>Mensaje</th>
-            <th>Tipo Alerta</th>
-            <th>Perido</th>
-            <th>Estatus</th>
-            <th>Acción</th>
-        </tr>
-    </thead>
-    <tbody>
-        <?php
-        $cont = 1;
-        foreach ($listaAlertas['data'] as $alertas) {
-            $tipoProv = '';
-            $tipoAlerta = '';
-            $periodo = '';
-
-            switch ($alertas['TipoProveedor']) {
-                case 'NAC':
-                    $tipoProv = 'Nacional';
-                    break;
-                case 'INT':
-                    $tipoProv = 'Internacional';
-                    break;
-            }
-
-            switch ($alertas['TipoMsj']) {
-                case 'INFO':
-                    $tipoAlerta = '<h6 class="text-info"><i class="fa fa-exclamation-circle"></i> ' . $alertas['TipoMsj'] . '</h6>';
-                    break;
-                case 'WARNING':
-                    $tipoAlerta = '<h6 class="text-warning"><i class="fa fa-exclamation-triangle"></i> ' . $alertas['TipoMsj'] . '</h6>';
-                    break;
-                case 'ERROR':
-                    $tipoAlerta = '<h6 class="text-danger"><i class="fas fa-times-circle"></i> ' . $alertas['TipoMsj'] . '</h6>';
-                    break;
-            }
-
-            if ($alertas['TipoPeriodo'] == 2) {
-                $periodo = 'Del ' . $alertas['Inicio'] . ' Al ' . $alertas['Fin'];
-            } else {
-                $periodo = 'Indefinido';
-            }
-
-            if ($alertas['Estatus'] == 1) {
-                $color = 'btn-outline-success';
-                $icono = 'fas fa-check';
-            } else {
-                $color = 'btn-outline-danger';
-                $icono = 'fas fa-times';
-            }
-
-        ?>
+<?php
+if (empty($listaAlertas['data'])) {
+    echo '<div class="row"><div class="col-12 py-3 alert alert-info">No se a configurado ninguna alerta.</div></div>';
+} else {
+?>
+    <table class="table table-sm" id="tableAlertas">
+        <thead>
             <tr>
-                <td><?= $cont++; ?></td>
-                <td><?= $tipoProv; ?></td>
-                <td><?= $alertas['Titulo']; ?></td>
-                <td><?= $alertas['Mensaje']; ?></td>
-                <td class="text-left"><?= $tipoAlerta; ?></td>
-                <td><?= $periodo; ?></td>
-
-                <td>
-                    <div id="bloquear-btnEstatus<?= $alertas['IdNotificacion']; ?>" style="display:none;">
-                        <button class="btn btn-xs btn-rounded <?= $color; ?> " type="button" disabled="" style="height: 100%;">
-                            <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
-                        </button>
-                    </div>
-                    <div id="desbloquear-btnEstatus<?= $alertas['IdNotificacion']; ?>">
-                        <button id="btnEstatus<?= $alertas['IdNotificacion']; ?>" onclick="cambiarEstatus(<?= $alertas['Estatus']; ?>, <?= $alertas['IdNotificacion']; ?>)" type="button" class="btn btn-xs btn-rounded <?= $color; ?>"><i class="<?= $icono; ?>"></i></button>
-                    </div>
-                </td>
-
-                <td class="text-center"><button onclick="cargarDatos(<?= $alertas['IdNotificacion']; ?>)" type="button" class="btn btn-xs btn-outline-primary" data-toggle="modal" data-target="#modalEditaAlerta"><i class="fas fa-pencil-alt"></i></button></td>
+                <th>#</th>
+                <th>Tipo Proveedor</th>
+                <th>Titulo</th>
+                <th>Mensaje</th>
+                <th>Tipo Alerta</th>
+                <th>Perido</th>
+                <th>Estatus</th>
+                <th>Acción</th>
             </tr>
-        <?php
-        }
-        ?>
-    </tbody>
+        </thead>
+        <tbody>
+            <?php
+            $cont = 1;
+            foreach ($listaAlertas['data'] as $alertas) {
+                $tipoProv = '';
+                $tipoAlerta = '';
+                $periodo = '';
 
-</table>
+                switch ($alertas['TipoProveedor']) {
+                    case 'NAC':
+                        $tipoProv = 'Nacional';
+                        break;
+                    case 'INT':
+                        $tipoProv = 'Internacional';
+                        break;
+                }
+
+                switch ($alertas['TipoMsj']) {
+                    case 'INFO':
+                        $tipoAlerta = '<h6 class="text-info"><i class="fa fa-exclamation-circle"></i> ' . $alertas['TipoMsj'] . '</h6>';
+                        break;
+                    case 'WARNING':
+                        $tipoAlerta = '<h6 class="text-warning"><i class="fa fa-exclamation-triangle"></i> ' . $alertas['TipoMsj'] . '</h6>';
+                        break;
+                    case 'ERROR':
+                        $tipoAlerta = '<h6 class="text-danger"><i class="fas fa-times-circle"></i> ' . $alertas['TipoMsj'] . '</h6>';
+                        break;
+                }
+
+                if ($alertas['TipoPeriodo'] == 2) {
+                    $periodo = 'Del ' . $alertas['Inicio'] . ' Al ' . $alertas['Fin'];
+                } else {
+                    $periodo = 'Indefinido';
+                }
+
+                if ($alertas['Estatus'] == 1) {
+                    $color = 'btn-outline-success';
+                    $icono = 'fas fa-check';
+                } else {
+                    $color = 'btn-outline-danger';
+                    $icono = 'fas fa-times';
+                }
+
+            ?>
+                <tr>
+                    <td><?= $cont++; ?></td>
+                    <td><?= $tipoProv; ?></td>
+                    <td><?= $alertas['Titulo']; ?></td>
+                    <td><?= $alertas['Mensaje']; ?></td>
+                    <td class="text-left"><?= $tipoAlerta; ?></td>
+                    <td><?= $periodo; ?></td>
+
+                    <td>
+                        <div id="bloquear-btnEstatus<?= $alertas['IdNotificacion']; ?>" style="display:none;">
+                            <button class="btn btn-xs btn-rounded <?= $color; ?> " type="button" disabled="" style="height: 100%;">
+                                <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
+                            </button>
+                        </div>
+                        <div id="desbloquear-btnEstatus<?= $alertas['IdNotificacion']; ?>">
+                            <button id="btnEstatus<?= $alertas['IdNotificacion']; ?>" onclick="cambiarEstatus(<?= $alertas['Estatus']; ?>, <?= $alertas['IdNotificacion']; ?>)" type="button" class="btn btn-xs btn-rounded <?= $color; ?>"><i class="<?= $icono; ?>"></i></button>
+                        </div>
+                    </td>
+
+                    <td class="text-center"><button onclick="cargarDatos(<?= $alertas['IdNotificacion']; ?>)" type="button" class="btn btn-xs btn-outline-primary" data-toggle="modal" data-target="#modalEditaAlerta"><i class="fas fa-pencil-alt"></i></button></td>
+                </tr>
+            <?php
+            }
+            ?>
+        </tbody>
+
+    </table>
+<?php
+}
+?>
 
 <!-- MODAL PARA CREAR NUEVA ALERTA-->
 <div class="modal fade" id="modalNuevaAlerta" role="dialog" aria-labelledby="modalNuevaAlertaLabel" aria-hidden="true">
@@ -362,7 +370,7 @@ if ($debug == 1) {
         info: true,
         buttons: [{
                 extend: 'pdfHtml5',
-                className: 'btn btn-pdf bg-Equinoxgold text-white',
+                className: 'btn btn-pdf bg-pyme-primary text-white',
                 orientation: 'landscape',
                 pageSize: 'LEGAL',
                 text: "Pdf",
@@ -370,7 +378,7 @@ if ($debug == 1) {
 
             {
                 extend: 'csvHtml5',
-                className: 'btn btn-pdf bg-Equinoxgold text-white',
+                className: 'btn btn-pdf bg-pyme-primary text-white',
                 text: "Csv",
                 exportOptions: {
                     columns: ":not(.no-exportar)"
@@ -378,7 +386,7 @@ if ($debug == 1) {
             },
             {
                 extend: 'excelHtml5',
-                className: 'btn btn-pdf bg-Equinoxgold text-white',
+                className: 'btn btn-pdf bg-pyme-primary text-white',
                 text: "Excel",
                 exportOptions: {
                     columns: ":not(.no-exportar)"
@@ -386,7 +394,7 @@ if ($debug == 1) {
             },
             {
                 extend: 'copy',
-                className: 'btn btn-pdf bg-Equinoxgold text-white',
+                className: 'btn btn-pdf bg-pyme-primary text-white',
                 text: "Copiar",
                 exportOptions: {
                     columns: ":not(.no-exportar)"

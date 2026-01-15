@@ -1,5 +1,13 @@
 # -----Redirigir todo el tráfico a index.php --En Productivo
 RewriteEngine On
+
+# -----Normalización case-insensitive para AdminPanel
+# Detecta cualquier variante de adminpanel (ADMINPANEL, adminpanel, AdminPanel, AdMiNpAnEl, etc.)
+# y redirige a la versión correcta: AdminPanel
+# La bandera [NC] hace la comparación case-insensitive
+RewriteCond %{REQUEST_URI} ^/adminpanel(/.*)?$ [NC]
+RewriteRule ^adminpanel(/.*)?$ /AdminPanel$1 [R=301,L]
+
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule ^(.*)$ index.php?url=$1 [QSA,L]
