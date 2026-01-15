@@ -214,87 +214,6 @@ if ($debug == 1) {
                                     <div class="card-header bg-pyme-primary">
                                         <div class="row">
                                             <div class="col-md-10">
-                                                <h4 class="m-b-0 text-white">Carga Notas De Crédito</h4>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="card-body">
-                                        <div class="row">
-                                            <div class="col-12">
-
-                                                <form class="form" id="Form_CargaNotaCredito" method="post" enctype="multipart/form-data" action="CargarFacturas/registraNotaCredito">
-
-                                                    <div class="form-group row">
-                                                        <label for="noProveedorNC" class="col-3 col-form-label">Proveedor</label>
-                                                        <div class="col-9 input-group mb-3">
-                                                            <select name="noProveedorNC" id="noProveedorNC" class="select2 form-control custom-select" style="width: 100%;height: 36px;" required>
-                                                                <option value="">Selecciona Un Proveedor</option>
-                                                                <?php
-                                                                foreach ($listaProveedores['data'] as $proveedor) {
-                                                                ?>
-                                                                    <option value="<?= $proveedor['IdProveedor']; ?>"> <?= $proveedor['IdProveedor']; ?> - <?= $proveedor['RazonSocial']; ?> (<?= $proveedor['Proveedor']; ?>) </option>
-                                                                <?php
-                                                                }
-                                                                ?>
-                                                            </select>
-                                                        </div>
-                                                    </div>
-
-                                                    <div class="form-group row">
-                                                        <label for="ordenCompraNC" class="col-3 col-form-label">Orden Compra</label>
-                                                        <div class="col-9">
-                                                            <input class="form-control" type="search" value="" id="ordenCompraNC" name="ordenCompraNC" maxlength="14" onchange="validaOrdCompra(this.value,'NC');" required>
-                                                            <div class="invalid-feedback" id="invalid_ordenCompraNC">
-                                                                <img src="../assets/images/barLoadign.gif" alt="" />
-                                                            </div>
-                                                        </div>
-                                                    </div>
-
-                                                    <!-- Factura Ingresada (Nuevo campo) -->
-                                                    <div class="form-group row" id="campoFacturaIngresada" style="display: none;">
-                                                        <label for="idCompraNC" class="col-3 col-form-label">Factura Ingresada</label>
-                                                        <div class="col-9">
-                                                            <select class="form-control custom-select" id="idCompraNC" name="idCompraNC" style="width: 100%; height:36px;" required>
-                                                                <option value="">Seleccione una factura...</option>
-                                                            </select>
-                                                            <div class="invalid-feedback" id="invalid_idCompraNC"></div>
-                                                        </div>
-                                                    </div>
-
-                                                    <div id="contentNotaCreditoNC">
-
-                                                    </div>
-                                                    <div class="justify-content-end d-none" id="btnNotaCreditoNC">
-                                                        <button type="button" class="btn btn-success mt-2" onclick="cargarFormNotaCredito(lastNotasCredito,'NC')"><i class="fas fa-plus"></i> Nota de Crédito</button>
-                                                    </div>
-
-                                                    <hr>
-                                                    <div class="row">
-                                                        <div class="col-md-6 text-right"></div>
-
-                                                        <div id="desbloquear-btnNC">
-                                                            <button type="reset" class="btn btn-danger waves-effect" onclick="resetForm()"><i class="far fa-trash-alt text-white"></i> Limpiar</button>
-                                                            <button type="submit" class="btn btn-success waves-effect waves-light">Carga Nota de Credito</button>
-                                                        </div>
-                                                        <div id="bloquear-btnNC" style="display: none;">
-                                                            <div class="loading text-center"><img src="../assets/images/loadingHorizontal.gif" alt="loading..." /></div>
-                                                        </div>
-                                                    </div>
-                                                </form>
-
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-12 col-lg-12">
-                                <div class="card border">
-                                    <div class="card-header bg-pyme-primary">
-                                        <div class="row">
-                                            <div class="col-md-10">
                                                 <h4 class="m-b-0 text-white">Carga Complementos de Pago</h4>
                                             </div>
                                         </div>
@@ -360,6 +279,87 @@ if ($debug == 1) {
                                                             <button type="submit" class="btn btn-success waves-effect waves-light">Carga Complemento de Pago</button>
                                                         </div>
                                                         <div id="bloquear-btnCP" style="display: none;">
+                                                            <div class="loading text-center"><img src="../assets/images/loadingHorizontal.gif" alt="loading..." /></div>
+                                                        </div>
+                                                    </div>
+                                                </form>
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-12 col-lg-12">
+                                <div class="card border">
+                                    <div class="card-header bg-pyme-primary">
+                                        <div class="row">
+                                            <div class="col-md-10">
+                                                <h4 class="m-b-0 text-white">Carga Notas De Crédito</h4>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-12">
+
+                                                <form class="form" id="Form_CargaNotaCredito" method="post" enctype="multipart/form-data" action="CargarFacturas/registraNotaCredito">
+
+                                                    <div class="form-group row">
+                                                        <label for="noProveedorNC" class="col-3 col-form-label">Proveedor</label>
+                                                        <div class="col-9 input-group mb-3">
+                                                            <select name="noProveedorNC" id="noProveedorNC" class="select2 form-control custom-select" style="width: 100%;height: 36px;" required>
+                                                                <option value="">Selecciona Un Proveedor</option>
+                                                                <?php
+                                                                foreach ($listaProveedores['data'] as $proveedor) {
+                                                                ?>
+                                                                    <option value="<?= $proveedor['IdProveedor']; ?>"> <?= $proveedor['IdProveedor']; ?> - <?= $proveedor['RazonSocial']; ?> (<?= $proveedor['Proveedor']; ?>) </option>
+                                                                <?php
+                                                                }
+                                                                ?>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="form-group row">
+                                                        <label for="ordenCompraNC" class="col-3 col-form-label">Orden Compra</label>
+                                                        <div class="col-9">
+                                                            <input class="form-control" type="search" value="" id="ordenCompraNC" name="ordenCompraNC" maxlength="14" onchange="validaOrdCompra(this.value,'NC');" required>
+                                                            <div class="invalid-feedback" id="invalid_ordenCompraNC">
+                                                                <img src="../assets/images/barLoadign.gif" alt="" />
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <!-- Factura Ingresada (Nuevo campo) -->
+                                                    <div class="form-group row" id="campoFacturaIngresada" style="display: none;">
+                                                        <label for="idCompraNC" class="col-3 col-form-label">Factura Ingresada</label>
+                                                        <div class="col-9">
+                                                            <select class="form-control custom-select" id="idCompraNC" name="idCompraNC" style="width: 100%; height:36px;" required>
+                                                                <option value="">Seleccione una factura...</option>
+                                                            </select>
+                                                            <div class="invalid-feedback" id="invalid_idCompraNC"></div>
+                                                        </div>
+                                                    </div>
+
+                                                    <div id="contentNotaCreditoNC">
+
+                                                    </div>
+                                                    <div class="justify-content-end d-none" id="btnNotaCreditoNC">
+                                                        <button type="button" class="btn btn-success mt-2" onclick="cargarFormNotaCredito(lastNotasCredito,'NC')"><i class="fas fa-plus"></i> Nota de Crédito</button>
+                                                    </div>
+
+                                                    <hr>
+                                                    <div class="row">
+                                                        <div class="col-md-6 text-right"></div>
+
+                                                        <div id="desbloquear-btnNC">
+                                                            <button type="reset" class="btn btn-danger waves-effect" onclick="resetForm()"><i class="far fa-trash-alt text-white"></i> Limpiar</button>
+                                                            <button type="submit" class="btn btn-success waves-effect waves-light">Carga Nota de Credito</button>
+                                                        </div>
+                                                        <div id="bloquear-btnNC" style="display: none;">
                                                             <div class="loading text-center"><img src="../assets/images/loadingHorizontal.gif" alt="loading..." /></div>
                                                         </div>
                                                     </div>
@@ -608,8 +608,8 @@ if ($debug == 1) {
 
             $.ajax({
                 type: 'POST',
-                url: 'CargarFacturas/obtenerFacturasPorOC',               
-                data: { 
+                url: 'CargarFacturas/obtenerFacturasPorOC',
+                data: {
                     ordenCompra: ordenCompra,
                     idsNotaCredito: idsNotaCredito
                 },
@@ -705,7 +705,7 @@ if ($debug == 1) {
                                 console.log('=== FLUJO Carga Notas De Crédito ===');
                                 console.log('cantNC:', cantNC);
                                 console.log('response completa:', response);
-                                
+
                                 if (cantNC === 0) {
                                     // No hay notas de crédito pendientes
                                     console.log('No hay notas de crédito pendientes (cantNC = 0)');
@@ -729,18 +729,18 @@ if ($debug == 1) {
                                     console.log('Llamando a obtenerFacturas con OC:', oc.valor, 'y lastNotasCredito:', lastNotasCredito);
                                     obtenerFacturas(oc.valor, lastNotasCredito);
                                 }
-                            } else { 
+                            } else {
                                 // FLUJO: Carga Factura (tipo === 'FACT')
                                 console.log('=== FLUJO Carga Factura ===');
                                 console.log('cantHES:', response.cantHES);
                                 console.log('cantNC:', response.cantNC);
                                 console.log('messageHES:', response.messageHES);
                                 console.log('messageNC:', response.messageNC);
-                                
+
                                 // Verificar si hay HES pendientes
                                 const cantHES = response.cantHES ?? 0;
                                 const cantNC = response.cantNC ?? 0;
-                                
+
                                 if (cantHES > 0) {
                                     // Hay HES pendientes, puede cargar factura
                                     // Si hay NC pendientes, cargar el formulario de NC
@@ -757,7 +757,7 @@ if ($debug == 1) {
                                     // No hay HES pendientes
                                     $invalidMsg.html(response.messageHES || 'No hay HES pendientes para esta Orden de Compra');
                                 }
-                                
+
                             }
                         } else {
                             validOC = false;
@@ -1107,7 +1107,7 @@ if ($debug == 1) {
                     desbloquearBtn('btnNC');
                     if (response.success) {
                         notificaSucSweet("Excelente!!", response.message);
-                        
+
                         // 1. Limpiar formulario estándar
                         resetFormulario("Form_CargaNotaCredito");
 
@@ -1149,10 +1149,10 @@ if ($debug == 1) {
                     desbloquearBtn('btnCP');
                     if (response.success) {
                         notificaSucSweet("Excelente!!", response.message);
-                        
+
                         // Limpiar formulario
                         resetFormulario("Form_CargaComplementoPago");
-                        
+
                         // Ocultar contenedores y resetear campos
                         $('#contenedorInputsComplementoPago').hide();
                         $('#mensajeComplementoPago').hide();
@@ -1164,7 +1164,11 @@ if ($debug == 1) {
                     }
                 },
                 error: function(xhr, status, error) {
-                    console.error('Error en la petición:', {xhr: xhr, status: status, error: error});
+                    console.error('Error en la petición:', {
+                        xhr: xhr,
+                        status: status,
+                        error: error
+                    });
                     notificaBad('Error al querer cargar complemento de pago. Consulta a tu administrador. Estado: ' + xhr.status);
                     desbloquearBtn('btnCP');
                 }
@@ -1186,20 +1190,20 @@ if ($debug == 1) {
             const $textoMensaje = $('#textoMensajeComplementoPago');
             const $contenedorInputs = $('#contenedorInputsComplementoPago');
             const $btnSubmit = $('#Form_CargaComplementoPago button[type="submit"]');
-            
+
             // Ocultar elementos inicialmente
             $mensajeDiv.hide();
             $contenedorInputs.hide();
             $btnSubmit.prop('disabled', true);
-            
+
             // Limpiar mensajes previos
             $textoMensaje.html('');
-            
+
             if (!noProveedor || noProveedor === '') {
                 $btnSubmit.prop('disabled', true);
                 return;
             }
-            
+
             $.ajax({
                 type: 'POST',
                 url: 'CargarFacturas/VerificaSiDebeComplementosPago',
