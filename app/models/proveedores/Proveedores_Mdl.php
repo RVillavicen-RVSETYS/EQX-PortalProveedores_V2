@@ -240,6 +240,16 @@ class Proveedores_Mdl
                 AND prov.nombre <> ''
                 AND prov.rfc IS NOT NULL
                 AND prov.rfc <> ''
+                AND prov.razonSocial IS NOT NULL
+                AND prov.razonSocial <> ''
+                AND prov.regimenFiscal IS NOT NULL
+                AND prov.regimenFiscal <> ''
+                AND prov.pais IS NOT NULL
+                AND prov.pais <> ''
+                AND prov.cp IS NOT NULL
+                AND prov.cp <> ''
+                AND prov.idSAT_moneda IS NOT NULL
+                AND prov.idSAT_moneda <> ''
                 AND prov.idioma IS NOT NULL
                 AND prov.idioma <> '';";
 
