@@ -11,6 +11,7 @@ use App\Globals\Controllers\DocumentosController;
 use App\Globals\Controllers\FacturasNacionalesController;
 use App\Globals\Controllers\CfdisController;
 use App\Models\Proveedores\Proveedores_Mdl;
+use App\Globals\Services\Api\SilmeApi\NotificarNotaCreditoController;
 use BD_Connect;
 use PDO;
 
@@ -184,7 +185,7 @@ class SubirFacturaController extends Controller
 
                                 if ($facturaRegistrada['success']) {
                                     $idCompra = $facturaRegistrada['idCompra'] ?? null;
-                                    
+
                                     // 8.- Procesar Notas de Crédito si existen y la factura se registró correctamente
                                     if (!empty($arrayNotasCredito) && !empty($idCompra)) {
                                         $resultadoNC = $this->procesarNotasCreditoConFactura(
@@ -195,11 +196,11 @@ class SubirFacturaController extends Controller
                                             $isAdmin,
                                             $facturaRegistrada
                                         );
-                                        
+
                                         if (!$resultadoNC['success']) {
                                             // Si alguna NC falla, hacer rollback de la factura
                                             $this->rollbackFacturaRegistrada($idCompra, $facturaRegistrada);
-                                            
+
                                             echo json_encode([
                                                 'success' => false,
                                                 'message' => 'La factura se registró pero hubo problemas con las Notas de Crédito. Todo fue revertido: ' . $resultadoNC['message'],
@@ -207,7 +208,7 @@ class SubirFacturaController extends Controller
                                             ]);
                                             return;
                                         }
-                                        
+
                                         // Si todas las NC se procesaron correctamente
                                         if ($this->debug == 1) {
                                             echo '<br><h1>Factura y Notas de Crédito Registradas correctamente</h1>';
@@ -297,6 +298,7 @@ class SubirFacturaController extends Controller
 
         $resultados = [];
         $notasParaProcesar = [];
+        $idsNotasRegistradas = []; // Arreglo para acumular los IDs de las NC registradas (Acuses)
 
         // 1. Reestructurar datos de las NC para procesamiento
         foreach ($arrayNotasCredito as $idPlantilla => $nota) {
@@ -309,8 +311,8 @@ class SubirFacturaController extends Controller
             // identNotasCred ya viene como string separado por comas desde CargaFacturasGlobalController
             $identNotasCred = $nota['identNotasCred'] ?? '';
             $notasSeleccionadas = !empty($identNotasCred) ? explode(',', $identNotasCred) : [];
-            
-            $idNotaCredito = count($notasSeleccionadas) > 1 
+
+            $idNotaCredito = count($notasSeleccionadas) > 1
                 ? implode(',', array_map('intval', $notasSeleccionadas))
                 : (!empty($notasSeleccionadas) ? (int)$notasSeleccionadas[0] : '');
 
@@ -394,18 +396,53 @@ class SubirFacturaController extends Controller
             if (!$notaRegistrada['success']) {
                 $resultados[] = ['success' => false, 'message' => "Error al registrar NC de plantilla #{$nota['idPlantilla']}: " . $notaRegistrada['message']];
                 break;
+            } else {
+                // Obtener el ID de la Nota de Crédito registrada (Acuse) directamente del modelo
+                if (isset($notaRegistrada['idNotaCredito'])) {
+                    $idsNotasRegistradas[] = $notaRegistrada['idNotaCredito'];
+                }
             }
 
             $resultados[] = ['success' => true, 'message' => "Nota de Crédito #{$nota['idPlantilla']} registrada con éxito."];
         }
 
-        // 3. Evaluar resultados
+        // 3. Preparar payload para notificación a SILME
+        $payloadNotasCredito = [];
+        foreach ($notasParaProcesar as $index => $nota) {
+            if (!isset($idsNotasRegistradas[$index])) {
+                continue; // seguridad extra
+            }
+            $payloadNotasCredito[] = [
+                'idNC_Silme' => (int)$nota['idNotaCredito'],
+                'idAcuseNC'  => (int)$idsNotasRegistradas[$index]
+            ];
+        }
+        $payloadAPI = [
+            'folioOC' => $ordenCompra,
+            'notasCredito' => $payloadNotasCredito
+        ];
+
+        // 4. Evaluar resultados
         $todosExitosos = true;
         $mensajes = [];
         foreach ($resultados as $res) {
             $mensajes[] = $res['message'];
             if (!$res['success']) {
                 $todosExitosos = false;
+            }
+        }
+
+        // 5. Notificar a SILME SOLO si todo fue exitoso
+        if ($todosExitosos && !empty($payloadNotasCredito)) {
+
+            $Ctrl_NotificarNC = new NotificarNotaCreditoController();
+            $respuestaAPI = $Ctrl_NotificarNC->notificarAcuses($payloadAPI);
+
+            if (!$respuestaAPI['success']) {
+                return [
+                    'success' => false,
+                    'message' => $respuestaAPI['message']
+                ];
             }
         }
 
@@ -458,7 +495,7 @@ class SubirFacturaController extends Controller
             $stmt = $db->prepare($sql);
             $stmt->execute([':idCompra' => $idCompra]);
             $facturaData = $stmt->fetch(PDO::FETCH_ASSOC);
-            
+
             if ($facturaData) {
                 if (!empty($facturaData['urlPDF'])) {
                     $Ctrl_Documentos->eliminaDocumento($facturaData['urlPDF'], 'FACT');

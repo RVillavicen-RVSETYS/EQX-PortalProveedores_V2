@@ -848,6 +848,7 @@ class RegistroCFDIsv40_Mdl
             BD_Connect::commit();
             $response["message"] = "La Nota de Crédito se ha registrado correctamente con el ID: $idNotaCredito.";
             $response["debug"] .= "\n* Nota de Crédito registrada correctamente.";
+            $response["idNotaCredito"] = $idNotaCredito; // Retornar el ID explícitamente
         } catch (\Exception $e) {
             // Rollback de la transacción
             BD_Connect::rollBack();

@@ -142,7 +142,7 @@ class NotasCredito_Mdl
 
             // Usamos la vista del ERP para obtener los datos de la política
             $sql = "SELECT * FROM vw_ext_PortalProveedores_NotasCredito WHERE IdNotaCredito = :idNotaCredito LIMIT 1";
-            
+
             $params = [':idNotaCredito' => $idNotaCredito];
 
             if (self::$debug) {
@@ -152,7 +152,7 @@ class NotasCredito_Mdl
             $stmt = $this->dbHES->prepare($sql);
             $stmt->bindValue(':idNotaCredito', $idNotaCredito, PDO::PARAM_INT);
             $stmt->execute();
-            
+
             $politicaResult = $stmt->fetch(PDO::FETCH_ASSOC);
             $cantResult = $stmt->rowCount();
 
@@ -168,7 +168,6 @@ class NotasCredito_Mdl
                 }
                 return ['success' => false, 'message' => 'No se encontró una política de nota de crédito con el ID proporcionado.'];
             }
-
         } catch (\Exception $e) {
             $timestamp = date("Y-m-d H:i:s");
             error_log("[$timestamp] app/Models/DatosCompra/NotasCredito_Mdl.php -> Error en obtenerPoliticaPorId: " . $e->getMessage(), 3, LOG_FILE_BD);
@@ -289,13 +288,13 @@ class NotasCredito_Mdl
             if (!empty($invalidCampos) || !empty($invalidFiltros)) {
                 throw new \Exception(
                     (!empty($invalidCampos) ? 'Campos no válidos: ' . implode(', ', $invalidCampos) . '. ' : '') .
-                    (!empty($invalidFiltros) ? 'Filtros no válidos: ' . implode(', ', $invalidFiltros) . '.' : '')
+                        (!empty($invalidFiltros) ? 'Filtros no válidos: ' . implode(', ', $invalidFiltros) . '.' : '')
                 );
             }
 
             // Construir SQL usando implode
             $sql = "UPDATE cfdi_notasCreditos SET " . implode(', ', $setParts) .
-                   " WHERE " . implode(' AND ', $whereParts);
+                " WHERE " . implode(' AND ', $whereParts);
 
             if (self::$debug) {
                 $this->db->imprimirConsulta($sql, $params, 'Actualizar Nota de Crédito');
@@ -306,7 +305,7 @@ class NotasCredito_Mdl
             // Bind de parámetros
             foreach ($params as $param => $value) {
                 $clave = trim($param, ':'); // Elimina ":" del nombre del parámetro
-                
+
                 // Determinar el tipo de dato
                 $tipoDato = null;
                 if (isset($camposValidos[$clave])) {
@@ -364,6 +363,115 @@ class NotasCredito_Mdl
                 'message' => 'Error: ' . $e->getMessage(),
                 'filasAfectadas' => 0
             ];
+        }
+    }
+
+    public function obtenerDatosNotaCredito($filtros = [], INT $cantMaxRes = 0, $orden = 'DESC')
+    {
+
+        self::$debug = 0; // Cambiar a 0 para desactivar mensajes de depuración
+        if (self::$debug) {
+            echo '<br><br>Filtros Recibidos: ';
+            var_dump($filtros);
+        }
+        $filtrosDisponibles = [
+            'idNC' => ['tipoDato' => 'STRING', 'sqlFiltro' => 'nc.id = :idNC']
+        ];
+
+        $filtrosSQL = '';
+        $params = [];
+
+        try {
+            if (!is_int($cantMaxRes)) {
+                throw new \Exception('El valor de $cantMaxRes debe ser un entero.');
+            }
+            $limiteResult = ($cantMaxRes == 0) ? '' : 'LIMIT ' . $cantMaxRes;
+
+            if (!in_array($orden, ['DESC', 'ASC'])) {
+                throw new \Exception('El orden debe ser DESC o ASC.');
+            } else {
+                $orden = strtoupper($orden);
+            }
+
+            foreach ($filtros as $nombreFiltro => $valorFiltro) {
+                if (isset($filtrosDisponibles[$nombreFiltro]) && $valorFiltro !== null) {
+                    switch ($nombreFiltro) {
+                        case 'entreFechasRecepcion':
+                            list($fechaInicial, $fechaFinal) = explode(',', $valorFiltro);
+                            if (!strtotime($fechaInicial) || !strtotime($fechaFinal)) {
+                                throw new \Exception('Las fechas proporcionadas no son válidas.');
+                            }
+                            $filtrosSQL .= ' AND ' . $filtrosDisponibles[$nombreFiltro]['sqlFiltro'];
+                            $params[':fechaInicial'] = $fechaInicial;
+                            $params[':fechaFinal'] = $fechaFinal;
+                            break;
+
+                        default:
+                            $filtrosSQL .= ' AND ' . $filtrosDisponibles[$nombreFiltro]['sqlFiltro'];
+                            $params[':' . $nombreFiltro] = $valorFiltro;
+                            break;
+                    }
+                }
+            }
+
+            if (empty($filtrosSQL)) {
+                throw new \Exception('No se encontró ningún parámetro válido.');
+            }
+            $filtrosSQL = ltrim($filtrosSQL, ' AND');
+
+            if (self::$debug) {
+                echo '<br><br>Parametros: ';
+                var_dump($params);
+                echo '<br><br>';
+            }
+
+            $sql = "SELECT DISTINCT
+                        com.id AS IdCompra,
+                        dtcom.ordenCompra AS FolioOC,
+                        nc.id AS IdNotaCredito,
+                        nc.idNCExterno AS IdNotaCreditoExterno 
+                    FROM
+                        cfdi_notasCreditos nc
+                        INNER JOIN compras com ON nc.idCompra = com.id
+                        INNER JOIN detcompras dtcom ON com.id = dtcom.idCompra
+                    WHERE 
+                        $filtrosSQL";
+
+            if (self::$debug) {
+                $this->db->imprimirConsulta($sql, $params, 'Lista Notas Credito');
+            }
+            $stmt = $this->db->prepare($sql);
+            foreach ($params as $param => $value) {
+                $stmt->bindValue($param, $value, is_int($value) ? PDO::PARAM_INT : PDO::PARAM_STR);
+            }
+            $stmt->execute();
+            $dataResult = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            // Obtener la cantidad de registros
+            $cantResult = $stmt->rowCount();
+
+            if (self::$debug) {
+                echo '<br>Resultado de Query:';
+                var_dump($dataResult);
+                echo '<br><br>';
+            }
+
+            return ['success' => true, 'cantResult' => $cantResult, 'data' => $dataResult];
+        } catch (\Exception $e) {
+            $timestamp = date("Y-m-d H:i:s");
+            $errorMessage = $e->getMessage();
+            error_log("[$timestamp] app/Models/DatosCompra/NotasCredito_Mdl.php ->Error en obtenerDatosNotaCredito: " . $errorMessage, 3, LOG_FILE_BD);
+            if (self::$debug) {
+                echo "<br>Error al listar Notas Credito: " . $errorMessage; // Mostrar error en modo depuración
+            }
+            // Retornar mensaje más específico si es posible
+            $mensajeUsuario = 'Problemas al listar las Notas De Credito, Notifica a tu administrador.';
+            if (strpos($errorMessage, 'No se encontró ningún parámetro válido') !== false) {
+                $mensajeUsuario = 'No se proporcionaron parámetros válidos para buscar las Notas de Crédito.';
+            } elseif (strpos($errorMessage, 'SQLSTATE') !== false || strpos($errorMessage, 'SQL') !== false) {
+                $mensajeUsuario = 'Error de conexión con la base de datos al buscar Notas de Crédito.';
+            }
+            return ['success' => false, 'message' => $mensajeUsuario];
         }
     }
 }
