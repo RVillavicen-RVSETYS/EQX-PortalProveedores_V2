@@ -265,6 +265,9 @@ class cfdisv40
                         'MonedaP' => (string) ($pago['MonedaP'] ?? ''),
                         'Monto' => (float) ($pago['Monto'] ?? 0),
                         'TipoCambioP' => (float) ($pago['TipoCambioP'] ?? 0),
+                        'NumOperacion' => (string) ($pago['NumOperacion'] ?? ''),
+                        'CtaOrdenante' => (string) ($pago['CtaOrdenante'] ?? ''),
+                        'CtaBeneficiario' => (string) ($pago['CtaBeneficiario'] ?? ''),
                         'DoctosRelacionados' => array_map(function ($docto) {
                             $impuestosDR = [];
                             foreach ($docto->xpath('pago20:ImpuestosDR/pago20:TrasladosDR/pago20:TrasladoDR') as $trasladoDR) {

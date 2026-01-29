@@ -5,6 +5,7 @@ namespace App\Globals\Controllers\RegistroCFDIs;
 use PDO;
 use BD_Connect;
 use App\Globals\Controllers\DocumentosController;
+use App\Models\Compras\Compras_Mdl;
 
 // Incluye conección a la BD
 if (!defined('INCLUDE_CHECK')) {
@@ -354,19 +355,35 @@ class RegistroCFDIsv40_Mdl
             $fechaActual = new \DateTime('now', $timezone);
             $idProveedor = $dataDeValidacion["dataProv"]["IdProveedor"];
             $sociedad = $dataDeValidacion["dataEmpresa"]["id"];
+            $facturasRelacionadas = $dataDeValidacion["dataFacturas"] ?? [];
+            $idCompraPorUuid = [];
+            foreach ($facturasRelacionadas as $factura) {
+                $uuidFactura = strtoupper($factura['uuid'] ?? $factura['FacUUID'] ?? '');
+                $idCompra = $factura['id'] ?? null;
+                if (!empty($uuidFactura) && !empty($idCompra)) {
+                    $idCompraPorUuid[$uuidFactura] = $idCompra;
+                }
+            }
+
+            $pagoPrincipal = $dataDeValidacion["dataComplementoXML"]["Pagos"]["Pagos"][0] ?? [];
+            $ctaBeneficiario = $pagoPrincipal["CtaBeneficiario"] ?? '';
+            $ctaOrdenante = $pagoPrincipal["CtaOrdenante"] ?? '';
+            $numOperacion = $pagoPrincipal["NumOperacion"] ?? '';
 
             // Insertar en cfdi_complementoPago
             //id	idProveedor	uuid	estatus	montoTotalPago	monto	serie	folio	version	tipoFactura	rfcEmisor	rfcReceptor	fechaPago	selloCFDI	selloSAT	formaDePago	numOperacion	urlPDF	urlXML	idUserReg	fechaReg	moneda	tipoCambioP	domicilioRec	domicilioEmisor	regimenFiscEmisor	razonSocialRec	razonSocialEm	regimenFiscRec	usoCFDI
             $sqlComplemento = "INSERT INTO cfdi_complementoPago (idProveedor, uuid, estatus, subtotal, total, montoTotalPagos, montoTotalTrasladobaseIVA, montoTotalTrasladoImpuestoIVA, moneda, serie, 
                             folio, version, tipoFactura, rfcEmisor, rfcReceptor, fecha, exportacion, selloCFDI, selloSAT, noCertificado, idUserReg, fechaReg, domicilioRec, 
-                            LugarExpedicion, regimenFiscEmisor, razonSocialRec, razonSocialEm, regimenFiscRec, usoCFDI, reglasNegocio, validada, codigoEstatusSAT, estadoValidaSAT, estadoEFO, serializado)
+                            LugarExpedicion, regimenFiscEmisor, razonSocialRec, razonSocialEm, regimenFiscRec, usoCFDI, reglasNegocio, validada, codigoEstatusSAT, estadoValidaSAT, estadoEFO, serializado,
+                            CtaBeneficiario, CtaOrdenante, NumOperacion)
                                 VALUES (:idProveedor, :uuid, :estatus, :subtotal, :total, :montoTotalPagos, :montoTotalTrasladobaseIVA, :montoTotalTrasladoImpuestoIVA, :moneda, :serie,
                             :folio,:version,:tipoFactura,:rfcEmisor,:rfcReceptor,:fecha, :exportacion, :selloCFDI, :selloSAT, :noCertificado, :idUserReg, NOW(),:domicilioRec,
-                            :LugarExpedicion,:regimenFiscEmisor,:razonSocialRec,:razonSocialEm, :regimenFiscRec,:usoCFDI, :reglasNegocio, :validada, :codigoEstatusSAT, :estadoValidaSAT, :estadoEFO, :serializado)";
+                            :LugarExpedicion,:regimenFiscEmisor,:razonSocialRec,:razonSocialEm, :regimenFiscRec,:usoCFDI, :reglasNegocio, :validada, :codigoEstatusSAT, :estadoValidaSAT, :estadoEFO, :serializado,
+                            :ctaBeneficiario, :ctaOrdenante, :numOperacion)";
             $paramsComplemento = [
                 ":idProveedor" => $idProveedor,
                 ":uuid" => $dataDeValidacion["dataComplementoXML"]["TimbreFiscal"]["UUID"],
-                ":estatus" => 2,
+                ":estatus" => 1,
                 ":subtotal" => $dataDeValidacion["dataComplementoXML"]["Comprobante"]["SubTotal"],
                 ":total" => $dataDeValidacion["dataComplementoXML"]["Comprobante"]["Total"],
                 ":montoTotalPagos" => $dataDeValidacion["dataComplementoXML"]["Pagos"]["Totales"]["MontoTotalPagos"],
@@ -397,7 +414,10 @@ class RegistroCFDIsv40_Mdl
                 ":codigoEstatusSAT" => $dataDeValidacion["ValidFiscal"]["CodigoEstatus"],
                 ":estadoValidaSAT" => $dataDeValidacion["ValidFiscal"]["Estado"],
                 ":estadoEFO" => $dataDeValidacion["ValidFiscal"]["ValidacionEFOS"],
-                ":serializado" => $dataDeValidacion["dataComplementoXML"]["Serializado"]
+                ":serializado" => $dataDeValidacion["dataComplementoXML"]["Serializado"],
+                ":ctaBeneficiario" => $ctaBeneficiario,
+                ":ctaOrdenante" => $ctaOrdenante,
+                ":numOperacion" => $numOperacion
             ];
 
             if (self::$debug) {
@@ -481,7 +501,11 @@ class RegistroCFDIsv40_Mdl
                 $tipoCambioP = $pago["TipoCambioP"];
 
                 foreach ($pago["DoctosRelacionados"] as $docto) {
-                    $uuidFact = $docto["IdDocumento"];
+                    $uuidFact = strtoupper($docto["IdDocumento"] ?? '');
+                    $idCompra = $idCompraPorUuid[$uuidFact] ?? null;
+                    if (empty($idCompra)) {
+                        throw new \Exception("No se encontró el idCompra para el UUID relacionado: $uuidFact");
+                    }
                     $serie = $docto["Serie"];
                     $folio = $docto["Folio"];
                     $monedaDR = $docto["MonedaDR"];
@@ -490,7 +514,7 @@ class RegistroCFDIsv40_Mdl
                     $importePagado = $docto["ImpPagado"];
                     $saldoInsoluto = $docto["ImpSaldoInsoluto"];
 
-                    $valuesInsert .= "($idComplemento, '$fechaPago', '$formaPago', $totalPagado, '$idCatTipoMoneda', '$tipoCambioP', '$uuidFact', '$serie', '$folio',  '$monedaDR', $noParcialidad, $saldoAnterior, $importePagado, $saldoInsoluto), ";
+                    $valuesInsert .= "($idComplemento, $idCompra, '$fechaPago', '$formaPago', $totalPagado, '$idCatTipoMoneda', '$tipoCambioP', '$uuidFact', '$serie', '$folio',  '$monedaDR', $noParcialidad, $saldoAnterior, $importePagado, $saldoInsoluto), ";
                     if (isset($montosPagadosPorUUID[$uuidFact])) {
                         $montosPagadosPorUUID[$uuidFact]['montoPagado'] += floatval($importePagado);
                         if ($saldoInsoluto < $montosPagadosPorUUID[$uuidFact]['insoluto']) {
@@ -500,6 +524,7 @@ class RegistroCFDIsv40_Mdl
                         $montosPagadosPorUUID[$uuidFact]['montoPagado'] = floatval($importePagado);
                         $montosPagadosPorUUID[$uuidFact]['insoluto'] = floatval($saldoInsoluto);
                     }
+                    $montosPagadosPorUUID[$uuidFact]['idCompra'] = $idCompra;
                 }
             }
             $valuesInsert = rtrim($valuesInsert, ', ');
@@ -507,7 +532,7 @@ class RegistroCFDIsv40_Mdl
                 echo '<br><br> Datos para Insert de cfdi_complementoPagoDetalle: ' . $valuesInsert;
             }
 
-            $sqlDetComplemento = "INSERT INTO cfdi_complementoPagoDet(idComplementoPago, fechaPago, formaPago, totalPagado, idCatTipoMoneda, tipoCambio, uuidFact, serie, folio, monedaDR, noParcialidad, saldoAnterior, importePagado, saldoInsoluto) 
+            $sqlDetComplemento = "INSERT INTO cfdi_complementoPagoDet(idComplementoPago, idCompra, fechaPago, formaPago, totalPagado, idCatTipoMoneda, tipoCambio, uuidFact, serie, folio, monedaDR, noParcialidad, saldoAnterior, importePagado, saldoInsoluto) 
                         VALUES $valuesInsert";
             if (self::$debug) {
                 $this->db->imprimirConsulta($sqlDetComplemento, [], 'Registro de cfdi_complementoPagoDetalle');
@@ -523,36 +548,22 @@ class RegistroCFDIsv40_Mdl
                 $response["debug"] .= "\n* Detalle del complemento de pago registrado correctamente.<br>";
             }
 
-            // Actualizar los montos del Complemento de Pago en la tabla Compras            
+            // Recalcular montos del Complemento de Pago en la tabla Compras
+            $MDL_Compras = new Compras_Mdl();
+            $comprasActualizadas = [];
             foreach ($montosPagadosPorUUID as $uuid => $data) {
-                $montoPagado = $data['montoPagado'];
-                $insoluto = $data['insoluto'];
-                if (self::$debug) {
-                    echo "<br> * UUID: $uuid - Monto Pagado: $montoPagado - Insoluto: $insoluto <br>";
+                $idCompra = $data['idCompra'] ?? null;
+                if (!empty($idCompra) && !in_array($idCompra, $comprasActualizadas, true)) {
+                    $resultadoRecalc = $MDL_Compras->recalcularComplementosPorCompra((int)$idCompra, ['1', '2']);
+                    if (!$resultadoRecalc['success']) {
+                        throw new \Exception($resultadoRecalc['message'] ?? 'Error al recalcular complementos.');
+                    }
+                    $comprasActualizadas[] = $idCompra;
                 }
-
-                $sqlUpdateMontos = "UPDATE compras c
-                    INNER JOIN cfdi_facturas fc ON c.id = fc.idCompra
-                    SET c.totalComplementos = c.totalComplementos + :montoPagado, 
-                        c.insolutoPendiente = IF(ISNULL(c.insolutoPendiente), :insoluto, if(:insoluto2 < c.insolutoPendiente, :insoluto3, c.insolutoPendiente))
-                    WHERE fc.uuid = :uuid";
-                $paramsUpdateMontos = [
-                    ":montoPagado" => $montoPagado,
-                    ":insoluto" => $insoluto,
-                    ":insoluto2" => $insoluto,
-                    ":insoluto3" => $insoluto,
-                    ":uuid" => $uuid
-                ];
-                if (self::$debug) {
-                    $this->db->imprimirConsulta($sqlUpdateMontos, $paramsUpdateMontos, "Actualización de montos del Complemento de Pago en Compras");
-                }
-
-                $stmt = $this->db->prepare($sqlUpdateMontos);
-                $stmt->execute($paramsUpdateMontos);
             }
             if (self::$debug) {
-                echo "<br> * Montos del Complemento de Pago actualizados correctamente en Compras. <br>";
-                $response["debug"] .= "\n* Montos del Complemento de Pago actualizados correctamente en Compras.<br>";
+                echo "<br> * Montos del Complemento de Pago recalculados correctamente en Compras. <br>";
+                $response["debug"] .= "\n* Montos del Complemento de Pago recalculados correctamente en Compras.<br>";
             }
 
 

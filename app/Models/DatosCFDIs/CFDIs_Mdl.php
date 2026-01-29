@@ -326,6 +326,43 @@ class CFDIs_Mdl
         }
     }
 
+    public function obtenerComprasRelacionadasPorComplemento(INT $idComplemento)
+    {
+        self::$debug = 0;
+        if (empty($idComplemento)) {
+            return ['success' => false, 'message' => 'El idComplemento es requerido.'];
+        }
+
+        try {
+            $sql = "SELECT DISTINCT COALESCE(cpd.idCompra, cf.idCompra) AS idCompra
+                    FROM cfdi_complementoPagoDet cpd
+                    LEFT JOIN cfdi_facturas cf ON cpd.uuidFact = cf.uuid
+                    WHERE cpd.idComplementoPago = :idComplemento
+                      AND (cpd.idCompra IS NOT NULL OR cf.idCompra IS NOT NULL)";
+
+            $params = [':idComplemento' => $idComplemento];
+            if (self::$debug) {
+                $this->db->imprimirConsulta($sql, $params, 'Compras relacionadas por complemento');
+            }
+
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute($params);
+            $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            $ids = array_values(array_filter(array_map(function ($row) {
+                return $row['idCompra'] ?? null;
+            }, $result)));
+
+            return ['success' => true, 'data' => $ids];
+        } catch (\Exception $e) {
+            $timestamp = date("Y-m-d H:i:s");
+            error_log("[$timestamp] app/Models/DatosCFDIs/CFDIs_Mdl.php ->Error al obtener compras por complemento: " . $e->getMessage(), 3, LOG_FILE_BD);
+            if (self::$debug) {
+                echo "<br>Error al obtener compras por complemento: " . $e->getMessage();
+            }
+            return ['success' => false, 'message' => 'Error al obtener compras por complemento.'];
+        }
+    }
+
     public function obtenerFacturasPorUUID($filtros = [], INT $cantMaxRes = 0, $orden = 'DESC')
     {
         self::$debug = 0; // Cambiar a 0 para desactivar mensajes de depuración
@@ -826,6 +863,158 @@ class CFDIs_Mdl
                 echo "<br>Error al listar Datos Para La Grafica: " . $e->getMessage(); // Mostrar error en modo depuración
             }
             return ['success' => false, 'message' => 'Problemas al listar Datos Para La Grafica, Notifica a tu administrador.'];
+        }
+    }
+
+    public function actualizarComplementoPago($campos = [], $filtros = [])
+    {
+        $camposValidos = [
+            'estatus' => [
+                'tipoDato' => 'STRING',
+                'sqlQuery' => 'estatus = :estatus',
+                'permitidos' => ['0', '1', '2', '3'],
+                'mensajeError' => 'Estatus inválido. Permitidos: 0,1,2,3'
+            ],
+            'idUserValida' => [
+                'tipoDato' => 'INT',
+                'sqlQuery' => 'idUserValida = :idUserValida'
+            ],
+            'fechaValida' => [
+                'tipoDato' => 'STRING',
+                'sqlQuery' => 'fechaValida = :fechaValida'
+            ],
+            'idUserRechaza' => [
+                'tipoDato' => 'INT',
+                'sqlQuery' => 'idUserRechaza = :idUserRechaza'
+            ],
+            'fechaRechaza' => [
+                'tipoDato' => 'STRING',
+                'sqlQuery' => 'fechaRechaza = :fechaRechaza'
+            ],
+            'motivoRechazo' => [
+                'tipoDato' => 'STRING',
+                'sqlQuery' => 'motivoRechazo = :motivoRechazo'
+            ]
+        ];
+
+        $filtrosValidos = [
+            'id' => ['tipoDato' => 'INT', 'sqlQuery' => 'id = :id'],
+            'uuid' => ['tipoDato' => 'STRING', 'sqlQuery' => 'uuid = :uuid']
+        ];
+
+        try {
+            if (!is_array($campos) || !is_array($filtros)) {
+                throw new \Exception('Los campos y filtros deben ser arreglos.');
+            }
+
+            if (count($campos) == 0) {
+                throw new \Exception('Los campos no pueden estar vacíos.');
+            }
+
+            if (count($filtros) == 0) {
+                throw new \Exception('Los filtros no pueden estar vacíos.');
+            }
+
+            $params = [];
+            $invalidCampos = [];
+            $invalidFiltros = [];
+            $setParts = [];
+            $whereParts = [];
+
+            foreach ($campos as $campo => $valor) {
+                if (!array_key_exists($campo, $camposValidos)) {
+                    $invalidCampos[] = $campo;
+                } else {
+                    if (isset($camposValidos[$campo]['permitidos'])) {
+                        if (!in_array((string)$valor, $camposValidos[$campo]['permitidos'], true)) {
+                            throw new \Exception($camposValidos[$campo]['mensajeError'] ?? "Valor inválido para el campo $campo.");
+                        }
+                    }
+                    $setParts[] = $camposValidos[$campo]['sqlQuery'];
+                    $params[":$campo"] = $valor;
+                }
+            }
+
+            foreach ($filtros as $filtro => $valor) {
+                if (!array_key_exists($filtro, $filtrosValidos)) {
+                    $invalidFiltros[] = $filtro;
+                } else {
+                    $whereParts[] = $filtrosValidos[$filtro]['sqlQuery'];
+                    $params[":$filtro"] = $valor;
+                }
+            }
+
+            if (!empty($invalidCampos) || !empty($invalidFiltros)) {
+                throw new \Exception(
+                    (!empty($invalidCampos) ? 'Campos no válidos: ' . implode(', ', $invalidCampos) . '. ' : '') .
+                    (!empty($invalidFiltros) ? 'Filtros no válidos: ' . implode(', ', $invalidFiltros) . '.' : '')
+                );
+            }
+
+            $sql = "UPDATE cfdi_complementoPago SET " . implode(', ', $setParts) .
+                   " WHERE " . implode(' AND ', $whereParts);
+
+            if (self::$debug) {
+                $this->db->imprimirConsulta($sql, $params, 'Actualizar Complemento de Pago');
+            }
+
+            $stmt = $this->db->prepare($sql);
+
+            foreach ($params as $param => $value) {
+                $clave = trim($param, ':');
+                $tipoDato = null;
+                if (isset($camposValidos[$clave])) {
+                    $tipoDato = $camposValidos[$clave]['tipoDato'];
+                } elseif (isset($filtrosValidos[$clave])) {
+                    $tipoDato = $filtrosValidos[$clave]['tipoDato'];
+                }
+
+                if ($tipoDato) {
+                    if ($value === null) {
+                        $stmt->bindValue($param, $value, PDO::PARAM_NULL);
+                    } else {
+                        $stmt->bindValue(
+                            $param,
+                            $value,
+                            $tipoDato === 'INT' ? PDO::PARAM_INT : PDO::PARAM_STR
+                        );
+                    }
+                }
+            }
+
+            $stmt->execute();
+            $filasAfectadas = $stmt->rowCount();
+
+            if (self::$debug) {
+                echo '<br>Resultado de Query:';
+                var_dump($filasAfectadas);
+                echo '<br><br>';
+            }
+
+            if ($filasAfectadas >= 1) {
+                return [
+                    'success' => true,
+                    'message' => 'Complemento de pago actualizado correctamente.',
+                    'filasAfectadas' => $filasAfectadas
+                ];
+            }
+
+            return [
+                'success' => false,
+                'message' => 'No se actualizó ningún registro.',
+                'filasAfectadas' => $filasAfectadas
+            ];
+        } catch (\Exception $e) {
+            $timestamp = date("Y-m-d H:i:s");
+            error_log("[$timestamp] app/Models/DatosCFDIs/CFDIs_Mdl.php ->Error al actualizar Complemento de Pago: " . $e->getMessage() . PHP_EOL, 3, LOG_FILE_BD);
+            if (self::$debug) {
+                echo "Error al actualizar Complemento de Pago: " . $e->getMessage();
+            }
+            return [
+                'success' => false,
+                'message' => 'Error: ' . $e->getMessage(),
+                'filasAfectadas' => 0
+            ];
         }
     }
 }

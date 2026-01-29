@@ -177,7 +177,7 @@ class HistorialFacturasController extends Controller
         $data['noProveedor'] = $noProveedor;
         $data['acuse'] =  $acuse;
         $data['dataCompra'] =  $dataCompra;
-        $data['puedeAutorizar'] = 0; // Cambiar a 0 si no puede autorizar
+        $data['puedeAutorizar'] = 1; // Cambiar a 0 si no puede autorizar
         $data['puedeRechazar'] = 1; // Cambiar a 0 si no puede regresar
 
         if ($this->debug == 1) {
