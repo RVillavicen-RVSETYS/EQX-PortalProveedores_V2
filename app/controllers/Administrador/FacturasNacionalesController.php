@@ -10,6 +10,7 @@ use App\Globals\Controllers\DocumentosController;
 use App\Models\Facturas\Nacionales_Mdl;
 use App\Models\DatosCompra\NotasCredito_Mdl;
 use App\Globals\Services\Api\SilmeApi\NotificarNotaCreditoController;
+use App\Models\DatosCFDIs\CFDIs_Mdl;
 
 Error_reporting(E_ALL);
 class FacturasNacionalesController extends Controller
@@ -496,6 +497,120 @@ class FacturasNacionalesController extends Controller
             $response = [
                 'success' => false,
                 'message' => 'Error al actualizar el estatus de la nota de crédito.'
+            ];
+            echo json_encode($response);
+            exit(0);
+        }
+    }
+
+    public function actualizarEstatusComplementoPago()
+    {
+        $idComplemento = $_POST['idComplemento'] ?? '';
+        $uuidComplemento = $_POST['uuidComplemento'] ?? '';
+        $estatus = $_POST['estatus'] ?? '';
+
+        if ($this->debug == 1) {
+            echo "<br>Contenido de POST: ";
+            var_dump($_POST);
+            echo "<br>idComplemento: $idComplemento<br>";
+            echo "<br>uuidComplemento: $uuidComplemento<br>";
+            echo "<br>estatus: $estatus<br>";
+        }
+
+        if (empty($idComplemento) || empty($estatus)) {
+            $response = [
+                'success' => false,
+                'message' => 'No se recibieron los datos necesarios para actualizar el complemento de pago.'
+            ];
+            echo json_encode($response);
+            exit(0);
+        }
+
+        if (!in_array($estatus, ['0', '1', '2', '3'])) {
+            $response = [
+                'success' => false,
+                'message' => 'El estatus proporcionado no es válido.'
+            ];
+            echo json_encode($response);
+            exit(0);
+        }
+
+        try {
+            $MDL_CFDIs = new CFDIs_Mdl();
+            $campos = ['estatus' => $estatus];
+            $idUser = $_SESSION['EQXident'] ?? 0;
+
+            if ($estatus == '2') {
+                $campos['idUserValida'] = $idUser;
+                $campos['fechaValida'] = date('Y-m-d H:i:s');
+                $campos['idUserRechaza'] = null;
+                $campos['fechaRechaza'] = null;
+                $campos['motivoRechazo'] = null;
+            }
+
+            if ($estatus == '3') {
+                $motivoRechazo = $_POST['motivoRechazo'] ?? '';
+                if (empty($motivoRechazo)) {
+                    $response = [
+                        'success' => false,
+                        'message' => 'El motivo del rechazo es obligatorio.'
+                    ];
+                    echo json_encode($response);
+                    exit(0);
+                }
+                $campos['idUserRechaza'] = $idUser;
+                $campos['fechaRechaza'] = date('Y-m-d H:i:s');
+                $campos['motivoRechazo'] = $motivoRechazo;
+                $campos['idUserValida'] = null;
+                $campos['fechaValida'] = null;
+            }
+
+            $resultado = $MDL_CFDIs->actualizarComplementoPago($campos, ['id' => $idComplemento]);
+
+            if ($resultado['success']) {
+                $comprasIds = $MDL_CFDIs->obtenerComprasRelacionadasPorComplemento((int)$idComplemento);
+                if ($comprasIds['success']) {
+                    $MDL_Compras = new Compras_Mdl();
+                    foreach ($comprasIds['data'] as $idCompra) {
+                        $resultadoRecalc = $MDL_Compras->recalcularComplementosPorCompra((int)$idCompra, ['1', '2']);
+                        if (!$resultadoRecalc['success']) {
+                            $response = [
+                                'success' => false,
+                                'message' => $resultadoRecalc['message'] ?? 'Error al recalcular complementos.'
+                            ];
+                            echo json_encode($response);
+                            exit(0);
+                        }
+                    }
+                }
+
+                $mensajesEstatus = [
+                    '0' => 'Complemento de pago marcado como cancelado correctamente.',
+                    '1' => 'Complemento de pago marcado como pendiente correctamente.',
+                    '2' => 'Complemento de pago aceptado correctamente.',
+                    '3' => 'Complemento de pago rechazado correctamente.'
+                ];
+
+                $response = [
+                    'success' => true,
+                    'message' => $mensajesEstatus[$estatus] ?? 'Estatus actualizado correctamente.'
+                ];
+            } else {
+                $response = [
+                    'success' => false,
+                    'message' => $resultado['message'] ?? 'Error al actualizar el estatus del complemento de pago.'
+                ];
+            }
+
+            echo json_encode($response);
+            exit(0);
+        } catch (\Exception $e) {
+            $timestamp = date("Y-m-d H:i:s");
+            error_log("[$timestamp] app/Controllers/Administrador/FacturasNacionalesController.php ->Error al actualizar estatus de complemento de pago: " . $e->getMessage() . PHP_EOL, 3, LOG_FILE);
+
+            $response = [
+                'success' => false,
+                'message' => 'Error al actualizar el estatus del complemento de pago.'
             ];
             echo json_encode($response);
             exit(0);

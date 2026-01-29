@@ -365,8 +365,96 @@ class Compras_Mdl
                     }
                 }
 
+                // Obtener todos los complementos de pago relacionados a esta compra
+                $complementosPago = [];
+                if (!empty($comprasresult['acuse'])) {
+                    $sqlComplementos = "SELECT
+                                            cpg.id AS idComplemento,
+                                            cpg.uuid,
+                                            cpg.serie,
+                                            cpg.folio,
+                                            cpg.urlPDF,
+                                            cpg.urlXML,
+                                            cpg.estatus,
+                                            cpg.total,
+                                            cpg.subtotal,
+                                            cpg.moneda,
+                                            cpg.fecha,
+                                            cpg.fechaReg,
+                                            cpg.montoTotalPagos,
+                                            cpd.id AS idDetalle,
+                                            cpd.fechaPago,
+                                            cpd.formaPago,
+                                            cpd.totalPagado,
+                                            cpd.idCatTipoMoneda,
+                                            cpd.tipoCambio,
+                                            cpd.uuidFact,
+                                            cpd.serie AS serieFact,
+                                            cpd.folio AS folioFact,
+                                            cpd.monedaDR,
+                                            cpd.noParcialidad,
+                                            cpd.saldoAnterior,
+                                            cpd.importePagado,
+                                            cpd.saldoInsoluto
+                                        FROM cfdi_facturas cf
+                                        INNER JOIN cfdi_complementoPagoDet cpd ON cf.uuid = cpd.uuidFact
+                                        INNER JOIN cfdi_complementoPago cpg ON cpd.idComplementoPago = cpg.id
+                                        WHERE cf.idCompra = :idCompra
+                                        ORDER BY cpg.fechaReg DESC, cpd.noParcialidad DESC";
+
+                    $stmtComplementos = $this->db->prepare($sqlComplementos);
+                    $stmtComplementos->bindParam(':idCompra', $acuse, PDO::PARAM_INT);
+                    $stmtComplementos->execute();
+                    $complementosRows = $stmtComplementos->fetchAll(PDO::FETCH_ASSOC);
+
+                    foreach ($complementosRows as $row) {
+                        $idComplemento = $row['idComplemento'];
+                        if (!isset($complementosPago[$idComplemento])) {
+                            $complementosPago[$idComplemento] = [
+                                'id' => $row['idComplemento'],
+                                'uuid' => $row['uuid'],
+                                'serie' => $row['serie'],
+                                'folio' => $row['folio'],
+                                'urlPDF' => $row['urlPDF'],
+                                'urlXML' => $row['urlXML'],
+                                'estatus' => $row['estatus'],
+                                'total' => $row['total'],
+                                'subtotal' => $row['subtotal'],
+                                'moneda' => $row['moneda'],
+                                'fecha' => $row['fecha'],
+                                'fechaReg' => $row['fechaReg'],
+                                'montoTotalPagos' => $row['montoTotalPagos'],
+                                'detalles' => []
+                            ];
+                        }
+                        $complementosPago[$idComplemento]['detalles'][] = [
+                            'idDetalle' => $row['idDetalle'],
+                            'fechaPago' => $row['fechaPago'],
+                            'formaPago' => $row['formaPago'],
+                            'totalPagado' => $row['totalPagado'],
+                            'idCatTipoMoneda' => $row['idCatTipoMoneda'],
+                            'tipoCambio' => $row['tipoCambio'],
+                            'uuidFact' => $row['uuidFact'],
+                            'serieFact' => $row['serieFact'],
+                            'folioFact' => $row['folioFact'],
+                            'monedaDR' => $row['monedaDR'],
+                            'noParcialidad' => $row['noParcialidad'],
+                            'saldoAnterior' => $row['saldoAnterior'],
+                            'importePagado' => $row['importePagado'],
+                            'saldoInsoluto' => $row['saldoInsoluto']
+                        ];
+                    }
+
+                    if (self::$debug) {
+                        echo '<br>Resultado de Complementos de Pago:';
+                        var_dump($complementosPago);
+                        echo '<br><br>';
+                    }
+                }
+
                 // Agregar el array de notas de crédito al resultado
                 $comprasresult['notasCredito'] = $notasCredito;
+                $comprasresult['complementosPago'] = array_values($complementosPago);
 
                 return ['success' => true, 'data' => $comprasresult];
             } catch (\Exception $e) {
@@ -735,6 +823,84 @@ class Compras_Mdl
                 echo "<br>Error al buscar facturas por OC: " . $e->getMessage();
             }
             return ['success' => false, 'message' => 'Problemas al buscar las facturas por OC, notifica a tu administrador.'];
+        }
+    }
+
+    public function recalcularComplementosPorCompra(INT $idCompra, array $estatuses = ['1', '2'])
+    {
+        self::$debug = 0;
+        if (empty($idCompra)) {
+            return ['success' => false, 'message' => 'El idCompra es requerido.'];
+        }
+        if (empty($estatuses)) {
+            return ['success' => false, 'message' => 'Se requiere al menos un estatus para recalcular complementos.'];
+        }
+
+        try {
+            $placeholders = [];
+            $params = [':idCompra' => $idCompra];
+            foreach (array_values($estatuses) as $index => $estatus) {
+                $key = ':estatus_' . $index;
+                $placeholders[] = $key;
+                $params[$key] = (string)$estatus;
+            }
+
+            $sqlTotales = "SELECT
+                                COALESCE(SUM(cpd.importePagado), 0) AS totalComplementos,
+                                COALESCE(MIN(cpd.saldoInsoluto), 0) AS insolutoPendiente
+                           FROM cfdi_complementoPagoDet cpd
+                           INNER JOIN cfdi_complementoPago cp ON cpd.idComplementoPago = cp.id
+                           LEFT JOIN cfdi_facturas cf ON cpd.uuidFact = cf.uuid
+                           WHERE cp.estatus IN (" . implode(', ', $placeholders) . ")
+                             AND (cpd.idCompra = :idCompra OR (cpd.idCompra IS NULL AND cf.idCompra = :idCompra))";
+
+            if (self::$debug) {
+                $this->db->imprimirConsulta($sqlTotales, $params, 'Recalcular Complementos (totales)');
+            }
+
+            $stmt = $this->db->prepare($sqlTotales);
+            $stmt->execute($params);
+            $totales = $stmt->fetch(PDO::FETCH_ASSOC) ?: ['totalComplementos' => 0, 'insolutoPendiente' => 0];
+
+            $sqlUpdate = "UPDATE compras
+                          SET totalComplementos = :totalComplementos,
+                              insolutoPendiente = :insolutoPendiente
+                          WHERE id = :idCompra";
+
+            $paramsUpdate = [
+                ':totalComplementos' => $totales['totalComplementos'] ?? 0,
+                ':insolutoPendiente' => $totales['insolutoPendiente'] ?? 0,
+                ':idCompra' => $idCompra
+            ];
+
+            if (self::$debug) {
+                $this->db->imprimirConsulta($sqlUpdate, $paramsUpdate, 'Recalcular Complementos (update compras)');
+            }
+
+            $stmtUpdate = $this->db->prepare($sqlUpdate);
+            $stmtUpdate->execute($paramsUpdate);
+
+            return ['success' => true, 'message' => 'Complementos recalculados correctamente.'];
+        } catch (\Exception $e) {
+            $timestamp = date("Y-m-d H:i:s");
+            $extra = '';
+            if (isset($stmt) && $stmt instanceof \PDOStatement) {
+                $errorInfo = $stmt->errorInfo();
+                if (!empty($errorInfo[2])) {
+                    $extra = " | SQL error: " . $errorInfo[2];
+                }
+            }
+            if (isset($stmtUpdate) && $stmtUpdate instanceof \PDOStatement) {
+                $errorInfo = $stmtUpdate->errorInfo();
+                if (!empty($errorInfo[2])) {
+                    $extra .= " | SQL update error: " . $errorInfo[2];
+                }
+            }
+            error_log("[$timestamp] app/Models/compras/Compras_Mdl.php ->Error recalcular complementos: " . $e->getMessage() . $extra, 3, LOG_FILE_BD);
+            if (self::$debug) {
+                echo "<br>Error al recalcular complementos: " . $e->getMessage() . $extra;
+            }
+            return ['success' => false, 'message' => 'Error al recalcular complementos.'];
         }
     }
 }
