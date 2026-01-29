@@ -505,18 +505,30 @@ class ReglasAplicadasv40
         }
         $cfdis_Mdl = new CFDIs_Mdl();
         $filtrosComplemento = [
-            'uuids' => $dataXML['TimbreFiscal']['UUID'] ?? null,
-            'soloActivos' => 1 // Solo buscar en complementos activos (estatus 0,1,2), excluyendo rechazados (3)
+            'uuids' => $dataXML['TimbreFiscal']['UUID'] ?? null
         ];
         $obtenerCompDePago = $cfdis_Mdl->obtenerComplementosDePago($filtrosComplemento);
         if ($obtenerCompDePago['success']) {
             if ($obtenerCompDePago['cantRes'] > 0) {
+                $complementosActivos = array_filter($obtenerCompDePago['data'], function ($comp) {
+                    $estatus = (string)($comp['estatus'] ?? '');
+                    return in_array($estatus, ['1', '2'], true);
+                });
+
+                if (count($complementosActivos) === 0) {
+                    if ($this->debug == 1) {
+                        echo "<br> * El UUID del complemento de pago existe pero está cancelado/rechazado; se permite nuevo registro.";
+                    }
+                    return $response;
+                }
+
                 if ($this->debug == 1) {
                     echo "<br> * ERROR -- El UUID del complemento de pago ya existe y está activo en la base de datos.";
                 }
-                $fechaRegistro = $obtenerCompDePago['data'][0]['fechaReg'] ?? 'N/A';
-                $estatus = $obtenerCompDePago['data'][0]['estatus'] ?? 'N/A';
-                $estatusTexto = ['0' => 'Pendiente', '1' => 'En Revisión', '2' => 'Aprobada'][$estatus] ?? "Estatus $estatus";
+                $primerActivo = array_values($complementosActivos)[0];
+                $fechaRegistro = $primerActivo['fechaReg'] ?? 'N/A';
+                $estatus = $primerActivo['estatus'] ?? 'N/A';
+                $estatusTexto = ['0' => 'Cancelado', '1' => 'Pendiente', '2' => 'Aceptado', '3' => 'Rechazado'][$estatus] ?? "Estatus $estatus";
                 $response["success"] = false;
                 $response["message"] = "Ese complemento de pago ya fue registrado el {$fechaRegistro} con estatus: {$estatusTexto}.";
                 $response["debug"] = " * ERROR - El UUID del complemento de pago ya existe y está activo en la base de datos (estatus: $estatus).";
@@ -782,6 +794,9 @@ class ReglasAplicadasv40
         // 1) Agrupar $dataPagos por uuid
         if ($this->debug == 1) {
             echo "<br>Agrupando \$dataPagos por uuid...";
+            echo "<br>Total de registros en \$dataPagos: " . count($dataPagos);
+            echo "<br>Datos de \$dataPagos:<br>";
+            var_dump($dataPagos);
         }
         $pagosGrouped = [];
         foreach ($dataPagos as $p) {
@@ -792,11 +807,18 @@ class ReglasAplicadasv40
                     'moneda' => $p['moneda'],
                     'fechas' => [],
                     'formas' => [],
+                    'registros' => [] // Para debug: guardar los registros individuales
                 ];
             }
-            $pagosGrouped[$key]['monto']  += floatval($p['montoPagado']);
+            $montoPagado = floatval($p['montoPagado']);
+            $pagosGrouped[$key]['monto']  += $montoPagado;
             $pagosGrouped[$key]['fechas'][] = $p['fechaPago'];
             $pagosGrouped[$key]['formas'][] = $p['formaPagoSAT'] ?? $p['formaPago']; // Usar formaPagoSAT (código SAT) si existe, sino usar formaPago (ID) como fallback
+            $pagosGrouped[$key]['registros'][] = [
+                'id' => $p['id'] ?? null,
+                'montoPagado' => $montoPagado,
+                'HES' => $p['HES'] ?? null
+            ];
         }
         foreach ($pagosGrouped as &$grp) {
             $grp['formas'] = array_unique($grp['formas']);
@@ -805,6 +827,11 @@ class ReglasAplicadasv40
         unset($grp);
         if ($this->debug == 1) {
             echo "<br> * Pagos agrupados: " . count($pagosGrouped) . " uuid(s).<br>";
+            foreach ($pagosGrouped as $uuid => $data) {
+                echo "<br>UUID: {$uuid} - Monto total: {$data['monto']} - Registros: " . count($data['registros']);
+                echo "<br>Detalle de registros:<br>";
+                var_dump($data['registros']);
+            }
         }
 
         // 2) Agrupar XML por IdDocumento

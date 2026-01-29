@@ -434,13 +434,13 @@ class Pagos_Mdl
 
     public function dataPagosDesdeFacturas($filtros = [], INT $cantMaxRes = 0)
     {
-        self::$debug = 0; // Cambiar a 0 para desactivar mensajes de depuración
+        self::$debug = 0; // Desactivado para producción
         if (self::$debug) {
             echo '<br><br>Filtros Recibidos: ';
             var_dump($filtros);
         }
         $filtrosDisponibles = [
-            'uuids' => ['tipoDato' => 'STRING', 'sqlFiltro' => 'fc.uuid IN (:uuids)'],
+            'uuids' => ['tipoDato' => 'STRING', 'sqlFiltro' => ''], // Se manejará dinámicamente
             'idProveedor' => ['tipoDato' => 'INT', 'sqlFiltro' => 'cp.idProveedor = :idProveedor'],
             'entreFechas' => ['tipoDato' => 'STRING', 'sqlFiltro' => '(cp.fechaReg BETWEEN :fechaInicial AND :fechaFinal)']
         ];
@@ -468,11 +468,25 @@ class Pagos_Mdl
                             break;
 
                         case 'uuids':
-                            // Validar que el valor sea una cadena de UUIDs separados por comas
+                            // Manejar múltiples UUIDs con placeholders dinámicos
                             $uuids = explode(',', $valorFiltro);
                             $uuids = array_map('trim', $uuids); // Limpiar espacios en blanco
-                            $filtrosSQL .= ' AND ' . $filtrosDisponibles[$nombreFiltro]['sqlFiltro'];
-                            $params[':uuids'] = implode(',', $uuids); // Convertir a cadena separada por comas
+                            $uuids = array_filter($uuids); // Eliminar valores vacíos
+                            
+                            if (empty($uuids)) {
+                                throw new \Exception('No se proporcionaron UUIDs válidos.');
+                            }
+                            
+                            $placeholders = [];
+                            foreach ($uuids as $index => $uuid) {
+                                $placeholder = ':uuid_' . $index;
+                                $placeholders[] = $placeholder;
+                                $params[$placeholder] = $uuid;
+                            }
+                            
+                            if (!empty($placeholders)) {
+                                $filtrosSQL .= ' AND fc.uuid IN (' . implode(', ', $placeholders) . ')';
+                            }
                             break;
 
                         default:
@@ -491,20 +505,36 @@ class Pagos_Mdl
             if (self::$debug) {
                 echo '<br><br>Parametros: ';
                 var_dump($params);
-                echo '<br><br>';
+                echo '<br><br>Filtros SQL: ' . $filtrosSQL . '<br><br>';
             }
 
-            $sql = "SELECT * 
+            $sql = "SELECT DISTINCT
+                        pgc.id,
+                        pgc.idPagoDet,
+                        pgc.idAcuse,
+                        pgc.OC,
+                        pgc.HES,
+                        pgc.montoPagado,
+                        pgc.saldoInsoluto,
+                        pgc.moneda,
+                        pgc.formaPago,
+                        pgc.formaPagoSAT,
+                        pgc.fechaPago,
+                        pgc.fechaReg,
+                        dt.uuid,
+                        dt.idCompra
                     FROM pagos_compras pgc
                     INNER JOIN (
-                        SELECT dcp.idCompra, dcp.noRecepcion, fc.uuid, SUM(dcp.monto) AS subtotalHES
+                        SELECT DISTINCT dcp.idCompra, dcp.noRecepcion, fc.uuid
                         FROM cfdi_facturas fc
                         INNER JOIN compras cp ON fc.idCompra = cp.id
                         INNER JOIN detcompras dcp ON cp.id = dcp.idCompra
                         WHERE $filtrosSQL
-                        GROUP BY dcp.idCompra, dcp.noRecepcion
-                    ) dt ON pgc.HES = dt.noRecepcion
-                    ORDER BY dt.uuid, dt.idCompra, dt.noRecepcion DESC
+                    ) dt ON (
+                        pgc.HES = dt.noRecepcion 
+                        OR FIND_IN_SET(dt.noRecepcion, REPLACE(pgc.HES, ' ', '')) > 0
+                    )
+                    ORDER BY dt.uuid, pgc.id DESC
                     $limiteResult";
 
             if (self::$debug) {
@@ -521,9 +551,47 @@ class Pagos_Mdl
             $cantPagos = $stmt->rowCount();
 
             if (self::$debug) {
-                echo '<br>Resultado de Query:';
+                echo '<br><br>=== RESULTADO DE dataPagosDesdeFacturas ===<br>';
+                echo 'Cantidad de registros encontrados: ' . $cantPagos . '<br>';
+                echo 'Resultado de Query:<br>';
                 var_dump($pagosresult);
                 echo '<br><br>';
+                
+                // Si no hay resultados, intentar diagnosticar el problema
+                if ($cantPagos == 0 && isset($filtros['uuids'])) {
+                    echo '<br>⚠️ ADVERTENCIA: No se encontraron pagos para los UUIDs proporcionados.<br>';
+                    echo 'UUIDs buscados: ' . $filtros['uuids'] . '<br>';
+                    echo '<br>Verificando si los UUIDs existen en cfdi_facturas...<br>';
+                    
+                    // Consulta de diagnóstico
+                    $uuids = explode(',', $filtros['uuids']);
+                    $uuids = array_map('trim', $uuids);
+                    $placeholders = [];
+                    $diagParams = [];
+                    foreach ($uuids as $index => $uuid) {
+                        $placeholder = ':diag_uuid_' . $index;
+                        $placeholders[] = $placeholder;
+                        $diagParams[$placeholder] = $uuid;
+                    }
+                    
+                    $sqlDiag = "SELECT fc.uuid, fc.idCompra, cp.id AS idCompra2, COUNT(dcp.id) AS numDetCompras
+                                FROM cfdi_facturas fc
+                                LEFT JOIN compras cp ON fc.idCompra = cp.id
+                                LEFT JOIN detcompras dcp ON cp.id = dcp.idCompra
+                                WHERE fc.uuid IN (" . implode(', ', $placeholders) . ")
+                                GROUP BY fc.uuid, fc.idCompra";
+                    
+                    $stmtDiag = $this->db->prepare($sqlDiag);
+                    foreach ($diagParams as $param => $value) {
+                        $stmtDiag->bindValue($param, $value, PDO::PARAM_STR);
+                    }
+                    $stmtDiag->execute();
+                    $diagResult = $stmtDiag->fetchAll(PDO::FETCH_ASSOC);
+                    
+                    echo 'UUIDs encontrados en cfdi_facturas:<br>';
+                    var_dump($diagResult);
+                    echo '<br><br>';
+                }
             }
 
             return ['success' => true, 'cantRes' => $cantPagos, 'data' => $pagosresult];

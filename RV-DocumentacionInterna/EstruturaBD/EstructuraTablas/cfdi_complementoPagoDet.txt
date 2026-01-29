@@ -1,1 +1,1 @@
-"id"	"idComplementoPago"	"fechaPago"	"formaPago"	"totalPagado"	"idCatTipoMoneda"	"tipoCambio"	"uuidFact"	"serie"	"folio"	"monedaDR"	"noParcialidad"	"saldoAnterior"	"importePagado"	"saldoInsoluto"
+"id"	"idComplementoPago"	"idCompra"	"fechaPago"	"formaPago"	"totalPagado"	"idCatTipoMoneda"	"tipoCambio"	"uuidFact"	"serie"	"folio"	"monedaDR"	"noParcialidad"	"saldoAnterior"	"importePagado"	"saldoInsoluto"
