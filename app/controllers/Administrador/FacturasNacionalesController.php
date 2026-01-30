@@ -478,16 +478,21 @@ class FacturasNacionalesController extends Controller
 
                     $Ctrl_NotificarNC = new NotificarNotaCreditoController();
                     $respuestaAPI = $Ctrl_NotificarNC->notificarAcuses($payloadAPI);
-                    
+
                     if (!$respuestaAPI['success']) {
-                        return [
+                        $responseApi = [
                             'success' => false,
                             'message' => $respuestaAPI['message']
+                        ];
+                    }else {
+                        $responseApi = [
+                            'success' => true,
+                            'message' => 'Estatus de nota de crédito notificado correctamente a Silme.'
                         ];
                     }
                 }
             }
-            
+
             echo json_encode($response);
             exit(0);
         } catch (\Exception $e) {
