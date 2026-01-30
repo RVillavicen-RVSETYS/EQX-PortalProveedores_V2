@@ -479,13 +479,13 @@ $totalImpuestos = $data['dataCompra']['data']['totalImpuestosTrasladados'] + $da
                                             <small class="text-muted d-block mb-1">
                                                 <i class="fas fa-fingerprint text-primary" style="font-size: 10px;"></i> UUID:
                                             </small>
-                                            <div style="font-size: 12px; font-weight: 500; word-break: break-all;"><?= htmlspecialchars($uuidComp); ?></div>
+                                            <h6 class="mb-0" style="word-break: break-all;"><?= htmlspecialchars($uuidComp); ?></h6>
                                         </div>
                                         <div class="col-6 mb-2">
                                             <small class="text-muted d-block mb-1">
                                                 <i class="fas fa-hashtag text-info" style="font-size: 10px;"></i> Serie/Folio:
                                             </small>
-                                            <div style="font-size: 12px; font-weight: 500;"><?= htmlspecialchars($serieComp . $folioComp); ?></div>
+                                            <h6 class="mb-0"><?= htmlspecialchars($serieComp . $folioComp); ?></h6>
                                         </div>
                                     </div>
                                     <div class="row mt-2" style="border-top: 1px solid #e0e0e0; padding-top: 8px;">
@@ -493,13 +493,13 @@ $totalImpuestos = $data['dataCompra']['data']['totalImpuestosTrasladados'] + $da
                                             <small class="text-muted d-block mb-1">
                                                 <i class="far fa-calendar-alt text-success" style="font-size: 10px;"></i> Fecha CFDI:
                                             </small>
-                                            <div style="font-size: 12px; font-weight: 500;"><?= $fechaComp; ?></div>
+                                            <h6 class="mb-0"><?= $fechaComp; ?></h6>
                                         </div>
                                         <div class="col-6">
                                             <small class="text-muted d-block mb-1">
                                                 <i class="fas fa-dollar-sign text-warning" style="font-size: 10px;"></i> Total Pagos:
                                             </small>
-                                            <div style="font-size: 13px; font-weight: 600; color: #333;">$ <?= $totalComp; ?> <?= $monedaComp; ?></div>
+                                            <h6 class="mb-0">$ <?= $totalComp; ?> <?= $monedaComp; ?></h6>
                                         </div>
                                     </div>
                                 </div>

@@ -18,6 +18,7 @@ if ($debug == 1) {
                 <th>No Recepcion</th>
                 <th>Fecha Recepción</th>
                 <th>Folio Interno</th>
+                <th>Total</th>
                 <th>Estatus Fiscal</th>
                 <th>Programación Pago</th>
                 <th>Ver</th>
@@ -27,22 +28,39 @@ if ($debug == 1) {
             <?php
             if (!empty($listaCompras)) {
                 foreach ($listaCompras as $row) {
-                    switch ($row['claseDocto']) {
-                        case 'WE':
-                            $claseDocto = 'FACT';
-                            break;
+                    if (!empty($row['tipoRegistro'])) {
+                        switch ($row['tipoRegistro']) {
+                            case 'FACT':
+                                $claseDocto = 'FACT';
+                                break;
+                            case 'NC':
+                                $claseDocto = '<b>NC</b>';
+                                break;
+                            case 'CP':
+                                $claseDocto = '<b>CP</b>';
+                                break;
+                            default:
+                                $claseDocto = '<span class="text-danger"> NO_DEF </span>';
+                                break;
+                        }
+                    } else {
+                        switch ($row['claseDocto']) {
+                            case 'WE':
+                                $claseDocto = 'FACT';
+                                break;
 
-                        case 'KA':
-                            $claseDocto = '<b>ANT</b>';
-                            break;
+                            case 'KA':
+                                $claseDocto = '<b>ANT</b>';
+                                break;
 
-                        case 'RZ':
-                            $claseDocto = '<b>CONS</b>';
-                            break;
+                            case 'RZ':
+                                $claseDocto = '<b>CONS</b>';
+                                break;
 
-                        default:
-                            $claseDocto = '<span class="text-danger"> NO_DEF </span>';
-                            break;
+                            default:
+                                $claseDocto = '<span class="text-danger"> NO_DEF </span>';
+                                break;
+                        }
                     }
 
                     switch ($row['estatus']) {
@@ -92,6 +110,7 @@ if ($debug == 1) {
                     <td>' . $recepciones . '</td>
                     <td>' . $row['fechaReg'] . '</td>
                     <td>' . $row['referencia'] . '</td>
+                    <td>$ ' . number_format($row['total'] ?? 0, 2, '.', ',') . '</td>
                     <td>' . $valida . ' </td>
                     <td>' . $statContable . '</td>
                     <td> <button class="btn btn-sm btn-success" onClick="detalleCompra(\'' . $row['acuse'] . '\',' . $row['IdProveedor'] . ');"><i class="text-white icon-doc"></i></button> </td>

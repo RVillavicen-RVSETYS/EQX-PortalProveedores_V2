@@ -15,7 +15,7 @@ use App\Models\DatosCFDIs\CFDIs_Mdl;
 Error_reporting(E_ALL);
 class FacturasNacionalesController extends Controller
 {
-    protected $debug = 0;
+    protected $debug = 0; // Debug desactivado
 
     public function __construct()
     {
@@ -95,13 +95,17 @@ class FacturasNacionalesController extends Controller
             $filtros['tipoMoneda'] = $_POST['tipoMoneda'];
         }
 
+        if (!empty($_POST['tipoCFDI'])) {
+            $filtros['tipoCFDI'] = $_POST['tipoCFDI'];
+        }
+
         $filtros['nacional'] = '1';
 
-        $filtros['estatusFactura'] = '1';
+        $filtros['pendienteAprobacion'] = 1;
 
         $MDL_compras = new Compras_Mdl();
 
-        $listaCompras = $MDL_compras->listaComprasFacturadas($filtros, 0, 'DESC');
+        $listaCompras = $MDL_compras->listaAprobacionesCFDI($filtros, 'DESC');
         if ($this->debug == 1) {
             echo '<br><br>Resultado de listaComprasFacturadas: ' . PHP_EOL;
             var_dump($listaCompras);

@@ -111,7 +111,7 @@ $fechaFinal = date("Y-m-t");
                                 <form id="formConsultaAprobaciones">
                                     <div class="row">
 
-                                        <div class="col-12 col-sm-12 col-md-4 col-lg-4">
+                                        <div class="col-12 col-sm-12 col-md-3 col-lg-3">
                                             <label for="fecha" class="col-form-label">Fecha</label>
                                             <div class="input-group mb-3">
                                                 <div class="input-daterange input-group" id="date-range">
@@ -140,7 +140,19 @@ $fechaFinal = date("Y-m-t");
                                             </div>
                                         </div>
 
-                                        <div class="col-md-1">
+                                        <div class="col-md-2">
+                                            <label for="tipoCFDI">Tipo de CFDI</label>
+                                            <div class="input-group mb-3">
+                                                <select name="tipoCFDI" id="tipoCFDI" class="select2 form-control custom-select" style="width: 100%;">
+                                                    <option value="">Todos</option>
+                                                    <option value="FACT">Factura</option>
+                                                    <option value="NC">Nota de Crédito</option>
+                                                    <option value="CP">Complemento de Pago</option>
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-2">
                                             <label for="tipoMoneda">Moneda</label>
                                             <div class="input-group mb-3">
                                                 <select name="tipoMoneda" id="tipoMoneda" class="select2 form-control custom-select" style="width: 100%;">
@@ -156,7 +168,7 @@ $fechaFinal = date("Y-m-t");
                                             </div>
                                         </div>
 
-                                        <div class="col-md-2 align-self-center">
+                                        <div class="col-md-1 align-self-center">
                                             <button form="formConsultaAprobaciones" type="submit" class="btn btn-success mt-3" name="btnFiltros" id="btnFiltros">Consultar</button>
                                         </div>
                                     </div>

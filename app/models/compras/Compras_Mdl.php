@@ -14,7 +14,7 @@ require_once __DIR__ . '/../../../config/BD_Connect.php';
 class Compras_Mdl
 {
     private $db;
-    private static $debug = 0; // Cambiar a 0 para desactivar mensajes de depuración
+    private static $debug = 0; // Debug desactivado
 
     public function __construct()
     {
@@ -40,6 +40,7 @@ class Compras_Mdl
             'tipoMoneda' => ['tipoDato' => 'STRING', 'sqlFiltro' => 'c.idCatTipoMoneda = :tipoMoneda'],
             'pendientePago' => ['tipoDato' => 'STRING', 'sqlFiltro' => 'c.estatus !=  4 AND c.fechaVence IS NULL'],
             'pagada' => ['tipoDato' => 'INT', 'sqlFiltro' => ''],
+            'pendienteAprobacion' => ['tipoDato' => 'INT', 'sqlFiltro' => '(c.estatus = 1 OR COALESCE(ncp.CantNotasPendientes, 0) > 0 OR COALESCE(cpp.CantComplementosPendientes, 0) > 0)'],
             'nacional' => ['tipoDato' => 'INT', 'sqlFiltro' => '']
         ];
 
@@ -85,6 +86,11 @@ class Compras_Mdl
                         case 'pagada':
                             $filtrosSQL .= $valorFiltro == 1 ? ' AND c.totalPagos > 0' : ' AND c.totalPagos = 0';
                             break;
+                        case 'pendienteAprobacion':
+                            if ($valorFiltro == 1) {
+                                $filtrosSQL .= ' AND ' . $filtrosDisponibles[$nombreFiltro]['sqlFiltro'];
+                            }
+                            break;
 
                         default:
                             $filtrosSQL .= ' AND ' . $filtrosDisponibles[$nombreFiltro]['sqlFiltro'];
@@ -109,12 +115,22 @@ class Compras_Mdl
                     GROUP_CONCAT(DISTINCT dc.noRecepcion ORDER BY dc.noRecepcion SEPARATOR ', ') AS noRecepcion,
                     c.fechaReg, c.referencia, cf.urlPDF, cf.urlXML, pv.pais, pv.id AS 'IdProveedor', pv.razonSocial AS 'RazonSocial', pv.rfc AS 'RFC',
                     cf.serie AS 'SerieFact', cf.folio AS 'FolioFact', cf.fechaReg AS 'FechaReg', c.total AS 'Total', c.fechaProbablePago AS 'FechaPago', 
-                    c.fechaVence AS 'FechaVence', cf.idCatTipoMoneda AS 'TipoMonedaFac', c.notaCredito AS 'NotaCredito', cpd.CantComplementos
+                    c.fechaVence AS 'FechaVence', cf.idCatTipoMoneda AS 'TipoMonedaFac', c.notaCredito AS 'NotaCredito', cpd.CantComplementos,
+                    COALESCE(ncp.CantNotasPendientes, 0) AS 'CantNotasPendientes',
+                    COALESCE(cpp.CantComplementosPendientes, 0) AS 'CantComplementosPendientes'
                     FROM compras c
                     INNER JOIN proveedores pv ON c.idProveedor = pv.id
                     INNER JOIN detcompras dc ON c.id = dc.idCompra
                     LEFT JOIN cfdi_facturas cf ON cf.idCompra = c.id
                     LEFT JOIN (SELECT cpd.uuidFact, COUNT(cpd.id) AS 'CantComplementos' FROM cfdi_complementoPagoDet cpd GROUP BY uuidFact) cpd ON cf.uuid = cpd.uuidFact
+                    LEFT JOIN (SELECT idCompra, COUNT(id) AS 'CantNotasPendientes' FROM cfdi_notasCreditos WHERE estatus = 1 GROUP BY idCompra) ncp ON ncp.idCompra = c.id
+                    LEFT JOIN (
+                        SELECT cpd.idCompra, COUNT(DISTINCT cpd.idComplementoPago) AS 'CantComplementosPendientes'
+                        FROM cfdi_complementoPagoDet cpd
+                        INNER JOIN cfdi_complementoPago cp ON cp.id = cpd.idComplementoPago
+                        WHERE cp.estatus = 1
+                        GROUP BY cpd.idCompra
+                    ) cpp ON cpp.idCompra = c.id
                     WHERE $filtrosSQL
                     GROUP BY c.id, c.claseDocto, dc.ordenCompra, c.fechaReg, c.referencia, cf.urlPDF, cf.urlXML 
                     ORDER BY c.id $orden
@@ -147,6 +163,222 @@ class Compras_Mdl
                 echo "<br>Error al listar Compras Facturadas: " . $e->getMessage(); // Mostrar error en modo depuración
             }
             return ['success' => false, 'message' => 'Problemas al listar las Facturas Cargadas, Notifica a tu administrador.'];
+        }
+    }
+
+    public function listaAprobacionesCFDI($filtros = [], $orden = 'DESC')
+    {
+        self::$debug = 0;
+        if (self::$debug) {
+            echo '<br><br>Filtros Recibidos: ';
+            var_dump($filtros);
+        }
+
+        $params = [];
+        $whereFactura = [];
+        $whereNC = [];
+        $whereCP = [];
+        $tipoCFDI = $filtros['tipoCFDI'] ?? '';
+
+        try {
+            if (!in_array($orden, ['DESC', 'ASC'])) {
+                throw new \Exception('El orden debe ser DESC o ASC.');
+            } else {
+                $orden = strtoupper($orden);
+            }
+
+            if (!empty($filtros['idProveedor'])) {
+                $params[':idProveedor_fact'] = $filtros['idProveedor'];
+                $params[':idProveedor_nc'] = $filtros['idProveedor'];
+                $params[':idProveedor_cp'] = $filtros['idProveedor'];
+                $whereFactura[] = 'c.idProveedor = :idProveedor_fact';
+                $whereNC[] = 'c.idProveedor = :idProveedor_nc';
+                $whereCP[] = 'c.idProveedor = :idProveedor_cp';
+            }
+
+            if (!empty($filtros['tipoMoneda'])) {
+                $params[':tipoMoneda_fact'] = $filtros['tipoMoneda'];
+                $params[':tipoMoneda_nc'] = $filtros['tipoMoneda'];
+                $params[':tipoMoneda_cp'] = $filtros['tipoMoneda'];
+                $whereFactura[] = 'c.idCatTipoMoneda = :tipoMoneda_fact';
+                $whereNC[] = 'nc.idCatTipoMoneda = :tipoMoneda_nc';
+                $whereCP[] = 'cp.moneda = :tipoMoneda_cp';
+            }
+
+            if (!empty($filtros['nacional'])) {
+                $whereFactura[] = "pv.pais = 'MX'";
+                $whereNC[] = "pv.pais = 'MX'";
+                $whereCP[] = "pv.pais = 'MX'";
+            }
+
+            if (!empty($filtros['entreFechasRecepcion'])) {
+                list($fechaInicial, $fechaFinal) = explode(',', $filtros['entreFechasRecepcion']);
+                if (!strtotime($fechaInicial) || !strtotime($fechaFinal)) {
+                    throw new \Exception('Las fechas proporcionadas no son válidas.');
+                }
+                $params[':fechaInicial_fact'] = $fechaInicial;
+                $params[':fechaFinal_fact'] = $fechaFinal;
+                $params[':fechaInicial_nc'] = $fechaInicial;
+                $params[':fechaFinal_nc'] = $fechaFinal;
+                $params[':fechaInicial_cp'] = $fechaInicial;
+                $params[':fechaFinal_cp'] = $fechaFinal;
+                $whereFactura[] = '(c.fechaReg BETWEEN :fechaInicial_fact AND :fechaFinal_fact)';
+                $whereNC[] = '(nc.fechaReg BETWEEN :fechaInicial_nc AND :fechaFinal_nc)';
+                $whereCP[] = '(cp.fechaReg BETWEEN :fechaInicial_cp AND :fechaFinal_cp)';
+            }
+
+            if (!empty($filtros['entreFechasPago'])) {
+                list($fechaInicial, $fechaFinal) = explode(',', $filtros['entreFechasPago']);
+                if (!strtotime($fechaInicial) || !strtotime($fechaFinal)) {
+                    throw new \Exception('Las fechas proporcionadas no son válidas.');
+                }
+                $params[':fechaPagoInicial_fact'] = $fechaInicial;
+                $params[':fechaPagoFinal_fact'] = $fechaFinal;
+                $params[':fechaPagoInicial_nc'] = $fechaInicial;
+                $params[':fechaPagoFinal_nc'] = $fechaFinal;
+                $params[':fechaPagoInicial_cp'] = $fechaInicial;
+                $params[':fechaPagoFinal_cp'] = $fechaFinal;
+                $whereFactura[] = '(c.fechaProbablePago BETWEEN :fechaPagoInicial_fact AND :fechaPagoFinal_fact)';
+                $whereNC[] = '(nc.fechaReg BETWEEN :fechaPagoInicial_nc AND :fechaPagoFinal_nc)';
+                $whereCP[] = '(cp.fechaReg BETWEEN :fechaPagoInicial_cp AND :fechaPagoFinal_cp)';
+            }
+
+            $whereFacturaSQL = !empty($whereFactura) ? implode(' AND ', $whereFactura) : '1=1';
+            $whereNCSQL = !empty($whereNC) ? implode(' AND ', $whereNC) : '1=1';
+            $whereCPSQL = !empty($whereCP) ? implode(' AND ', $whereCP) : '1=1';
+
+            $selects = [];
+            if (empty($tipoCFDI) || $tipoCFDI === 'FACT') {
+                $selects[] = "
+                    SELECT
+                        c.id AS acuse,
+                        'FACT' AS tipoRegistro,
+                        c.claseDocto,
+                        dc.ordenCompra,
+                        GROUP_CONCAT(DISTINCT dc.noRecepcion ORDER BY dc.noRecepcion SEPARATOR ', ') AS noRecepcion,
+                        c.fechaReg,
+                        c.referencia,
+                        cf.monto AS total,
+                        c.estatus,
+                        pv.id AS IdProveedor,
+                        pv.razonSocial AS RazonSocial,
+                        pv.rfc AS RFC
+                    FROM compras c
+                    INNER JOIN proveedores pv ON c.idProveedor = pv.id
+                    INNER JOIN detcompras dc ON c.id = dc.idCompra
+                    LEFT JOIN cfdi_facturas cf ON cf.idCompra = c.id
+                    WHERE $whereFacturaSQL AND c.estatus = 1
+                    GROUP BY c.id, c.claseDocto, dc.ordenCompra, c.fechaReg, c.referencia, pv.id, pv.razonSocial, pv.rfc";
+            }
+
+            if (empty($tipoCFDI) || $tipoCFDI === 'NC') {
+                $selects[] = "
+                    SELECT
+                        c.id AS acuse,
+                        'NC' AS tipoRegistro,
+                        c.claseDocto,
+                        dc.ordenCompra,
+                        GROUP_CONCAT(DISTINCT dc.noRecepcion ORDER BY dc.noRecepcion SEPARATOR ', ') AS noRecepcion,
+                        nc.fechaReg,
+                        CONCAT(nc.serie, nc.folio) AS referencia,
+                        nc.total AS total,
+                        nc.estatus,
+                        pv.id AS IdProveedor,
+                        pv.razonSocial AS RazonSocial,
+                        pv.rfc AS RFC
+                    FROM cfdi_notasCreditos nc
+                    INNER JOIN compras c ON nc.idCompra = c.id
+                    INNER JOIN proveedores pv ON c.idProveedor = pv.id
+                    INNER JOIN detcompras dc ON c.id = dc.idCompra
+                    WHERE $whereNCSQL AND nc.estatus = 1
+                    GROUP BY nc.id, c.id, c.claseDocto, dc.ordenCompra, nc.fechaReg, nc.serie, nc.folio, nc.estatus, pv.id, pv.razonSocial, pv.rfc";
+            }
+
+            if (empty($tipoCFDI) || $tipoCFDI === 'CP') {
+                $selects[] = "
+                    SELECT
+                        c.id AS acuse,
+                        'CP' AS tipoRegistro,
+                        c.claseDocto,
+                        dc.ordenCompra,
+                        GROUP_CONCAT(DISTINCT dc.noRecepcion ORDER BY dc.noRecepcion SEPARATOR ', ') AS noRecepcion,
+                        cp.fechaReg,
+                        CONCAT(cp.serie, cp.folio) AS referencia,
+                        cp.montoTotalPagos AS total,
+                        cp.estatus,
+                        pv.id AS IdProveedor,
+                        pv.razonSocial AS RazonSocial,
+                        pv.rfc AS RFC
+                    FROM cfdi_complementoPago cp
+                    INNER JOIN cfdi_complementoPagoDet cpd ON cp.id = cpd.idComplementoPago
+                    INNER JOIN compras c ON cpd.idCompra = c.id
+                    INNER JOIN proveedores pv ON c.idProveedor = pv.id
+                    INNER JOIN detcompras dc ON c.id = dc.idCompra
+                    WHERE $whereCPSQL AND cp.estatus = 1
+                    GROUP BY cp.id, c.id, c.claseDocto, dc.ordenCompra, cp.fechaReg, cp.serie, cp.folio, cp.estatus, pv.id, pv.razonSocial, pv.rfc";
+            }
+
+            if (empty($selects)) {
+                throw new \Exception('No se encontraron filtros válidos.');
+            }
+
+            // Usar solo los parámetros del tipo solicitado para evitar HY093
+            $paramsUsed = [];
+            if (empty($tipoCFDI) || $tipoCFDI === 'FACT') {
+                foreach ($params as $k => $v) {
+                    if (str_ends_with($k, '_fact')) {
+                        $paramsUsed[$k] = $v;
+                    }
+                }
+            }
+            if (empty($tipoCFDI) || $tipoCFDI === 'NC') {
+                foreach ($params as $k => $v) {
+                    if (str_ends_with($k, '_nc')) {
+                        $paramsUsed[$k] = $v;
+                    }
+                }
+            }
+            if (empty($tipoCFDI) || $tipoCFDI === 'CP') {
+                foreach ($params as $k => $v) {
+                    if (str_ends_with($k, '_cp')) {
+                        $paramsUsed[$k] = $v;
+                    }
+                }
+            }
+            $params = $paramsUsed;
+
+            $sql = "
+                SELECT * FROM (
+                    " . implode(' UNION ALL ', $selects) . "
+                ) t
+                ORDER BY t.fechaReg $orden";
+
+            if (self::$debug) {
+                $this->db->imprimirConsulta($sql, $params, 'Lista de Aprobaciones CFDI (FACT/NC/CP)');
+            }
+
+            $stmt = $this->db->prepare($sql);
+            foreach ($params as $param => $value) {
+                $stmt->bindValue($param, $value, is_int($value) ? PDO::PARAM_INT : PDO::PARAM_STR);
+            }
+            $stmt->execute();
+            $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            $cantRes = $stmt->rowCount();
+
+            if (self::$debug) {
+                echo '<br>Resultado de Query:';
+                var_dump($result);
+                echo '<br><br>';
+            }
+
+            return ['success' => true, 'cantRes' => $cantRes, 'data' => $result];
+        } catch (\Exception $e) {
+            $timestamp = date("Y-m-d H:i:s");
+            error_log("[$timestamp] app/Models/compras/Compras_Mdl.php ->Error en listaAprobacionesCFDI: " . $e->getMessage(), 3, LOG_FILE_BD);
+            if (self::$debug) {
+                echo "<br>Error al listar aprobaciones CFDI: " . $e->getMessage();
+            }
+            return ['success' => false, 'message' => 'Problemas al listar aprobaciones CFDI, notifica a tu administrador.'];
         }
     }
 
