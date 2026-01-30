@@ -322,18 +322,20 @@ $totalImpuestos = $data['dataCompra']['data']['totalImpuestosTrasladados'] + $da
                                             <i class="fas fa-file-invoice text-info mr-2"></i>Nota de Crédito #<?= $contadorNC; ?>
                                         </h4>
                                     </div>
-                                    <div class="ml-auto">
-                                        <div class="dl">
-                                            <?php
-                                            $estatusActual = $nota['estatus'] ?? 1;
-                                            ?>
-                                            <select class="custom-select border-0 text-muted cambiarEstatusNC" data-id-nc="<?= $nota['id'] ?? ''; ?>" data-uuid-nc="<?= htmlspecialchars($uuid); ?>" data-estatus-inicial="<?= $estatusActual; ?>">
-                                                <option value="1" <?= $estatusActual == 1 ? 'selected' : ''; ?>>Pendiente</option>
-                                                <option value="2" <?= $estatusActual == 2 ? 'selected' : ''; ?>>Aceptada</option>
-                                                <option value="3" <?= $estatusActual == 3 ? 'selected' : ''; ?>>Rechazada</option>
-                                            </select>
+                                    <?php if (!empty($_SESSION['EQXAdmin']) && !empty($data['puedeAutorizar'])) { ?>
+                                        <div class="ml-auto">
+                                            <div class="dl">
+                                                <?php
+                                                $estatusActual = $nota['estatus'] ?? 1;
+                                                ?>
+                                                <select class="custom-select border-0 text-muted cambiarEstatusNC" data-id-nc="<?= $nota['id'] ?? ''; ?>" data-uuid-nc="<?= htmlspecialchars($uuid); ?>" data-estatus-inicial="<?= $estatusActual; ?>">
+                                                    <option value="1" <?= $estatusActual == 1 ? 'selected' : ''; ?>>Pendiente</option>
+                                                    <option value="2" <?= $estatusActual == 2 ? 'selected' : ''; ?>>Aceptada</option>
+                                                    <option value="3" <?= $estatusActual == 3 ? 'selected' : ''; ?>>Rechazada</option>
+                                                </select>
+                                            </div>
                                         </div>
-                                    </div>
+                                    <?php } ?>
                                 </div>
                                 <div class="m-b-15">
                                     <div class="row">
@@ -458,7 +460,7 @@ $totalImpuestos = $data['dataCompra']['data']['totalImpuestosTrasladados'] + $da
                                             <i class="fas fa-hand-holding-usd text-success mr-2"></i>Complemento #<?= $contadorCP; ?>
                                         </h4>
                                     </div>
-                            <?php if (!empty($_SESSION['EQXAdmin'])) { ?>
+                            <?php if (!empty($_SESSION['EQXAdmin']) && !empty($data['puedeAutorizar'])) { ?>
                                 <div class="ml-auto">
                                     <div class="dl">
                                         <?php

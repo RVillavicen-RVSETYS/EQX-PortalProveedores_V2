@@ -130,6 +130,7 @@ class FacturasNacionalesController extends Controller
         $data = []; // Aquí puedes pasar datos a la vista si es necesario
         $noProveedor = (empty($_POST['idProveedor'])) ? '' : $_POST['idProveedor'];
         $acuse = (empty($_POST['acuse'])) ? '' : $_POST['acuse'];
+        $soloVer = !empty($_POST['soloVer']);
 
         $MDL_compras = new Compras_Mdl();
         $dataCompra = $MDL_compras->dataCompraPorAcuse($noProveedor, $acuse);
@@ -137,8 +138,8 @@ class FacturasNacionalesController extends Controller
         $data['noProveedor'] = $noProveedor;
         $data['acuse'] =  $acuse;
         $data['dataCompra'] =  $dataCompra;
-        $data['puedeAutorizar'] = 1; // Cambiar a 0 si no puede autorizar
-        $data['puedeRechazar'] = 1; // Cambiar a 0 si no puede regresar
+        $data['puedeAutorizar'] = $soloVer ? 0 : 1; // Cambiar a 0 si no puede autorizar
+        $data['puedeRechazar'] = $soloVer ? 0 : 1; // Cambiar a 0 si no puede regresar
 
         if ($this->debug == 1) {
             echo 'Variables enviadas:' . PHP_EOL;
