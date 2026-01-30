@@ -838,7 +838,10 @@ class Compras_Mdl
 
         try {
             $placeholders = [];
-            $params = [':idCompra' => $idCompra];
+            $params = [
+                ':idCompra' => $idCompra,
+                ':idCompra_2' => $idCompra
+            ];
             foreach (array_values($estatuses) as $index => $estatus) {
                 $key = ':estatus_' . $index;
                 $placeholders[] = $key;
@@ -852,14 +855,17 @@ class Compras_Mdl
                            INNER JOIN cfdi_complementoPago cp ON cpd.idComplementoPago = cp.id
                            LEFT JOIN cfdi_facturas cf ON cpd.uuidFact = cf.uuid
                            WHERE cp.estatus IN (" . implode(', ', $placeholders) . ")
-                             AND (cpd.idCompra = :idCompra OR (cpd.idCompra IS NULL AND cf.idCompra = :idCompra))";
+                             AND (cpd.idCompra = :idCompra OR (cpd.idCompra IS NULL AND cf.idCompra = :idCompra_2))";
 
             if (self::$debug) {
                 $this->db->imprimirConsulta($sqlTotales, $params, 'Recalcular Complementos (totales)');
             }
 
             $stmt = $this->db->prepare($sqlTotales);
-            $stmt->execute($params);
+            if ($stmt->execute($params) === false) {
+                $errorInfo = $stmt->errorInfo();
+                throw new \Exception($errorInfo[2] ?? 'Error al ejecutar el cálculo de complementos.');
+            }
             $totales = $stmt->fetch(PDO::FETCH_ASSOC) ?: ['totalComplementos' => 0, 'insolutoPendiente' => 0];
 
             $sqlUpdate = "UPDATE compras

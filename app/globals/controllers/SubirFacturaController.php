@@ -396,31 +396,10 @@ class SubirFacturaController extends Controller
             if (!$notaRegistrada['success']) {
                 $resultados[] = ['success' => false, 'message' => "Error al registrar NC de plantilla #{$nota['idPlantilla']}: " . $notaRegistrada['message']];
                 break;
-            } else {
-                // Obtener el ID de la Nota de Crédito registrada (Acuse) directamente del modelo
-                if (isset($notaRegistrada['idNotaCredito'])) {
-                    $idsNotasRegistradas[] = $notaRegistrada['idNotaCredito'];
-                }
             }
 
             $resultados[] = ['success' => true, 'message' => "Nota de Crédito #{$nota['idPlantilla']} registrada con éxito."];
         }
-
-        // 3. Preparar payload para notificación a SILME
-        $payloadNotasCredito = [];
-        foreach ($notasParaProcesar as $index => $nota) {
-            if (!isset($idsNotasRegistradas[$index])) {
-                continue; // seguridad extra
-            }
-            $payloadNotasCredito[] = [
-                'idNC_Silme' => (int)$nota['idNotaCredito'],
-                'idAcuseNC'  => (int)$idsNotasRegistradas[$index]
-            ];
-        }
-        $payloadAPI = [
-            'folioOC' => $ordenCompra,
-            'notasCredito' => $payloadNotasCredito
-        ];
 
         // 4. Evaluar resultados
         $todosExitosos = true;
@@ -429,20 +408,6 @@ class SubirFacturaController extends Controller
             $mensajes[] = $res['message'];
             if (!$res['success']) {
                 $todosExitosos = false;
-            }
-        }
-
-        // 5. Notificar a SILME SOLO si todo fue exitoso
-        if ($todosExitosos && !empty($payloadNotasCredito)) {
-
-            $Ctrl_NotificarNC = new NotificarNotaCreditoController();
-            $respuestaAPI = $Ctrl_NotificarNC->notificarAcuses($payloadAPI);
-
-            if (!$respuestaAPI['success']) {
-                return [
-                    'success' => false,
-                    'message' => $respuestaAPI['message']
-                ];
             }
         }
 
@@ -466,42 +431,69 @@ class SubirFacturaController extends Controller
         }
 
         try {
+            $db = new BD_Connect();
+            $Ctrl_Documentos = new DocumentosController();
+
+            // Obtener URLs antes de borrar registros
+            $sql = "SELECT urlPDF, urlXML FROM cfdi_facturas WHERE idCompra = :idCompra LIMIT 1";
+            $stmt = $db->prepare($sql);
+            $stmt->execute([':idCompra' => $idCompra]);
+            $facturaData = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            $sql = "SELECT urlPDF, urlXML FROM cfdi_notasCreditos WHERE idCompra = :idCompra";
+            $stmt = $db->prepare($sql);
+            $stmt->execute([':idCompra' => $idCompra]);
+            $notasData = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
             // Iniciar transacción para el rollback
             BD_Connect::beginTransaction();
 
             // Eliminar registros relacionados en orden inverso a como se crearon
-            // 1. Eliminar impuestos
-            $db = new BD_Connect();
+            // 1. Eliminar impuestos de factura
             $sql = "DELETE FROM cfdi_facturasImpuestos WHERE idCompra = :idCompra";
             $stmt = $db->prepare($sql);
             $stmt->execute([':idCompra' => $idCompra]);
 
-            // 2. Eliminar factura
+            // 2. Eliminar notas de crédito ligadas a la compra
+            $sql = "DELETE FROM cfdi_notasCreditos WHERE idCompra = :idCompra";
+            $stmt = $db->prepare($sql);
+            $stmt->execute([':idCompra' => $idCompra]);
+
+            // 3. Eliminar factura
             $sql = "DELETE FROM cfdi_facturas WHERE idCompra = :idCompra";
             $stmt = $db->prepare($sql);
             $stmt->execute([':idCompra' => $idCompra]);
 
-            // 3. Eliminar compra
+            // 4. Eliminar detalle de compra
+            $sql = "DELETE FROM detcompras WHERE idCompra = :idCompra";
+            $stmt = $db->prepare($sql);
+            $stmt->execute([':idCompra' => $idCompra]);
+
+            // 5. Eliminar compra
             $sql = "DELETE FROM compras WHERE id = :idCompra";
             $stmt = $db->prepare($sql);
             $stmt->execute([':idCompra' => $idCompra]);
 
             BD_Connect::commit();
 
-            // Eliminar archivos físicos - obtener URLs desde la BD antes de eliminar
-            $Ctrl_Documentos = new DocumentosController();
-            $db = new BD_Connect();
-            $sql = "SELECT urlPDF, urlXML FROM cfdi_facturas WHERE idCompra = :idCompra LIMIT 1";
-            $stmt = $db->prepare($sql);
-            $stmt->execute([':idCompra' => $idCompra]);
-            $facturaData = $stmt->fetch(PDO::FETCH_ASSOC);
-
+            // Eliminar archivos físicos
             if ($facturaData) {
                 if (!empty($facturaData['urlPDF'])) {
                     $Ctrl_Documentos->eliminaDocumento($facturaData['urlPDF'], 'FACT');
                 }
                 if (!empty($facturaData['urlXML'])) {
                     $Ctrl_Documentos->eliminaDocumento($facturaData['urlXML'], 'FACT');
+                }
+            }
+
+            if (!empty($notasData)) {
+                foreach ($notasData as $nota) {
+                    if (!empty($nota['urlPDF'])) {
+                        $Ctrl_Documentos->eliminaDocumento($nota['urlPDF'], 'NOTACRED');
+                    }
+                    if (!empty($nota['urlXML'])) {
+                        $Ctrl_Documentos->eliminaDocumento($nota['urlXML'], 'NOTACRED');
+                    }
                 }
             }
 

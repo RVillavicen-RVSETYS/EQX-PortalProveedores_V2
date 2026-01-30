@@ -15,7 +15,7 @@ use App\Models\PagosProveedores\Pagos_Mdl;
 
 class FacturasNacionalesController extends Controller
 {
-    protected $debug = 0;
+    protected $debug = 0; // Debug desactivado
 
     public function __construct()
     {
@@ -335,7 +335,7 @@ class FacturasNacionalesController extends Controller
             'data' => []
         ];
 
-        $this->debug = 0; // Activado temporalmente para debugging
+        $this->debug = 1; // Activado para pruebas (Complemento de Pago)
 
         if ($this->debug == 1) {
             echo '<br>Valores para la carga:';
@@ -830,7 +830,7 @@ class FacturasNacionalesController extends Controller
 
     public function registraNuevoComplementoPago($resultadoDeVerificacion)
     {
-        $this->debug = 0; // Activado temporalmente para debugging
+        $this->debug = 1; // Activado para pruebas (Complemento de Pago)
         if ($this->debug == 1) {
             echo '<br><br>--- Inicia el Registro de Complemento de Pago ---<br>';
             print_r($resultadoDeVerificacion);

@@ -341,13 +341,13 @@ $totalImpuestos = $data['dataCompra']['data']['totalImpuestosTrasladados'] + $da
                                             <small class="text-muted d-block mb-1">
                                                 <i class="fas fa-fingerprint text-primary" style="font-size: 10px;"></i> UUID:
                                             </small>
-                                            <div style="font-size: 12px; font-weight: 500; word-break: break-all;"><?= htmlspecialchars($uuid); ?></div>
+                                            <h6 class="mb-0" style="word-break: break-all;"><?= htmlspecialchars($uuid); ?></h6>
                                         </div>
                                         <div class="col-6 mb-2">
                                             <small class="text-muted d-block mb-1">
                                                 <i class="fas fa-hashtag text-info" style="font-size: 10px;"></i> Serie/Folio:
                                             </small>
-                                            <div style="font-size: 12px; font-weight: 500;"><?= htmlspecialchars($serie . $folio); ?></div>
+                                            <h6 class="mb-0"><?= htmlspecialchars($serie . $folio); ?></h6>
                                         </div>
                                     </div>
                                     <div class="row mt-2" style="border-top: 1px solid #e0e0e0; padding-top: 8px;">
@@ -355,13 +355,13 @@ $totalImpuestos = $data['dataCompra']['data']['totalImpuestosTrasladados'] + $da
                                             <small class="text-muted d-block mb-1">
                                                 <i class="far fa-calendar-alt text-success" style="font-size: 10px;"></i> Fecha:
                                             </small>
-                                            <div style="font-size: 12px; font-weight: 500;"><?= $fechaReg; ?></div>
+                                            <h6 class="mb-0"><?= $fechaReg; ?></h6>
                                         </div>
                                         <div class="col-6">
                                             <small class="text-muted d-block mb-1">
                                                 <i class="fas fa-dollar-sign text-warning" style="font-size: 10px;"></i> Total:
                                             </small>
-                                            <div style="font-size: 13px; font-weight: 600; color: #333;">$ <?= $total; ?> <?= $moneda; ?></div>
+                                            <h6 class="mb-0">$ <?= $total; ?> <?= $moneda; ?></h6>
                                         </div>
                                     </div>
                                 </div>
@@ -390,89 +390,7 @@ $totalImpuestos = $data['dataCompra']['data']['totalImpuestosTrasladados'] + $da
                     <?php
                         $contadorNC++;
                     }
-                    
-                    $urlPDF = base64_encode($nota['urlPDF'] ?? '');
-                    $urlXML = base64_encode($nota['urlXML'] ?? '');
-                    $uuid = $nota['uuid'] ?? 'N/A';
-                    $serie = $nota['serie'] ?? '';
-                    $folio = $nota['folio'] ?? '';
-                    $fechaReg = isset($nota['fechaReg']) ? date('d/m/Y', strtotime($nota['fechaReg'])) : 'N/A';
-                    $total = isset($nota['total']) ? number_format(abs($nota['total']), 2, '.', ',') : '0.00';
-                    $moneda = $nota['moneda'] ?? 'MXN';
-                ?>
-                <!-- Comment Row - Nota de Crédito -->
-                <div class="d-flex flex-row comment-row <?= $contadorNC === 1 ? 'm-t-0' : ''; ?>">
-                    <div class="comment-text active w-100 <?= $borderClass; ?>">
-                        <div class="d-flex align-items-center p-b-15">
-                            <div>
-                                <h4 class="font-medium mb-0">
-                                    <i class="fas fa-file-invoice text-info mr-2"></i>Nota de Crédito #<?= $contadorNC; ?>
-                                </h4>
-                            </div>
-                            <div class="ml-auto">
-                                <div class="dl">
-                                    <?php 
-                                    $estatusActual = $nota['estatus'] ?? 1;
-                                    ?>
-                                    <select class="custom-select border-0 text-muted cambiarEstatusNC" data-id-nc="<?= $nota['id'] ?? ''; ?>" data-uuid-nc="<?= htmlspecialchars($uuid); ?>" data-estatus-inicial="<?= $estatusActual; ?>">
-                                        <option value="1" <?= $estatusActual == 1 ? 'selected' : ''; ?>>Pendiente</option>
-                                        <option value="2" <?= $estatusActual == 2 ? 'selected' : ''; ?>>Aceptada</option>
-                                        <option value="3" <?= $estatusActual == 3 ? 'selected' : ''; ?>>Rechazada</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="m-b-15">
-                            <div class="row">
-                                <div class="col-6 mb-2">
-                                    <small class="text-muted d-block mb-1">
-                                        <i class="fas fa-fingerprint text-primary" style="font-size: 10px;"></i> UUID
-                                    </small>
-                                    <h6 class="mb-0" style="word-break: break-all;"><?= htmlspecialchars($uuid); ?></h6>
-                                </div>
-                                <div class="col-6 mb-2">
-                                    <small class="text-muted d-block mb-1">
-                                        <i class="fas fa-hashtag text-info" style="font-size: 10px;"></i> Serie/Folio
-                                    </small>
-                                    <h6 class="mb-0"><?= htmlspecialchars($serie . $folio); ?></h6>
-                                </div>
-                            </div>
-                            <div class="row mt-2" style="border-top: 1px solid #e0e0e0; padding-top: 8px;">
-                                <div class="col-6">
-                                    <small class="text-muted d-block mb-1">
-                                        <i class="far fa-calendar-alt text-success" style="font-size: 10px;"></i> Fecha
-                                    </small>
-                                    <h6 class="mb-0"><?= $fechaReg; ?></h6>
-                                </div>
-                                <div class="col-6">
-                                    <small class="text-muted d-block mb-1">
-                                        <i class="fas fa-dollar-sign text-warning" style="font-size: 10px;"></i> Total
-                                    </small>
-                                    <h6 class="mb-0">$ <?= $total; ?> <?= $moneda; ?></h6>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="comment-footer">
-                            <span class="text-muted float-right"><?= $fechaReg; ?></span>
-                            <span class="label label-rounded <?= $estatusClass; ?>"><?= $estatusBadge; ?></span>
-                            <span class="action-icons active">
-                                <a href="javascript:void(0)" 
-                                   data-fancybox 
-                                   data-type="pdf" 
-                                   data-preloader="true" 
-                                   data-src="<?= '/Administrador/FacturasNacionales/verDocumento/PDF/' . $urlPDF; ?>/#toolbar=0" 
-                                   class="text-danger">
-                                    <i class="far fa-file-pdf"></i> Ver PDF
-                                </a>
-                                <a href="javascript:void(0)" 
-                                   data-fancybox="xml" 
-                                   data-xml-url="<?= '/Administrador/FacturasNacionales/verDocumento/XML/' . $urlXML; ?>"
-                                   class="text-info">
-                                    <i class="far fa-file-code"></i> Ver XML
-                                </a>
-                            </span>
-                        </div>
-                    </div>
+                    ?>
                 </div>
             <?php } ?>
         </div>
