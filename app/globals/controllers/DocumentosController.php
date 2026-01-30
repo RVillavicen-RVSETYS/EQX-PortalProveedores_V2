@@ -6,7 +6,7 @@ use Core\Controller;
 
 class DocumentosController extends Controller
 {
-    protected $debug = 0;
+    protected $debug = 0; // Debug desactivado
     private $basePath;
     private $basePathTemp;
 

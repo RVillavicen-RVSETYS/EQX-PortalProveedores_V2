@@ -24,73 +24,101 @@ class RegistrarPago_Mdl
         $this->db = new BD_Connect();
     }
 
-    public function insertaPagos($pagos)
+    public function insertaPagos(array $pagos)
     {
-
         if (self::$debug) {
-            echo "Entrando a la función para insertar múltiples pagos.<br>";
+            echo "<strong>Entrando a insertaPagos()</strong><br>";
         }
 
         if (empty($pagos)) {
-            return ['success' => false, 'message' => 'No hay datos para insertar.'];
+            return [
+                'success' => false,
+                'message' => 'No hay datos para insertar.',
+                'insertados' => 0
+            ];
         }
 
+        $resultado = [
+            'success' => false,
+            'insertados' => 0,
+            'message' => ''
+        ];
+
         try {
-            $sql = "INSERT INTO pagos_compras (idPagoDet, idAcuse, OC, HES, montoPagado, saldoInsoluto, moneda, tipoCambio, formaPago, fechaPago) VALUES ";
 
+            // 1. Iniciar transacción
+            $this->db->beginTransaction();
+
+            // 2. Armar SQL base
+            $sql = "INSERT INTO pagos_compras ( idPagoDet, idAcuse, OC, HES, montoPagado, saldoInsoluto, moneda, tipoCambio, formaPago, formaPagoSAT, fechaPago, fechaReg ) VALUES ";
+
+            $placeholders = [];
             $values = [];
-            $index = 0;
 
-            foreach ($pagos as $pago) {
-                $sql .= "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?),";
+            foreach ($pagos as $index => $pago) {
+
+                $placeholders[] = "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())";
 
                 $values[] = $pago['IdPagoDet'];
-                $values[] = $pago['IdAcuse'];
-                $values[] = $pago['OC'];
-                $values[] = $pago['HES'];
+                $values[] = $pago['IdAcuse'] ?? null;
+                $values[] = $pago['OC'] ?? null;
+                $values[] = $pago['HES'] ?? null;
                 $values[] = $pago['MontoPagado'];
-                $values[] = $pago['SaldoInsoluto'];
-                $values[] = $pago['Moneda'];   
-                $values[] = $pago['TipoCambio'];   
-                $values[] = $pago['FormaPago'];
+                $values[] = $pago['SaldoInsoluto'] ?? 0;
+                $values[] = $pago['Moneda'] ?? 'MXN';
+                $values[] = $pago['TipoCambio'] ?? 1;
+                $values[] = $pago['FormaPago'] ?? null;
+                $values[] = $pago['FormaPagoSAT'] ?? null;
                 $values[] = $pago['FechaPago'];
 
                 if (self::$debug) {
-                    echo "Registro $index: " . json_encode($pago) . "<br>";
+                    echo "Pago {$index}: " . json_encode($pago) . "<br>";
                 }
-                $index++;
             }
 
-            // Quitamos la última coma para evitar errores de sintaxis
-            $sql = rtrim($sql, ",");
+            // 3. Unir placeholders
+            $sql .= implode(',', $placeholders);
 
-            // Modo debug para imprimir consulta con parámetros
+            // 4. Debug de consulta
             if (self::$debug) {
-                $this->db->imprimirConsulta($sql, $values, 'Bulk Insert de Pagos:');
+                echo "<br><strong>Consulta a ejecutar:</strong><br>";
+                $this->db->imprimirConsulta($sql, $values, 'Bulk Insert Pagos API');
+                echo "<br>";
             }
 
+            // 5. Ejecutar
             $stmt = $this->db->prepare($sql);
             $stmt->execute($values);
 
             $filasAfectadas = $stmt->rowCount();
 
             if (self::$debug) {
-                echo '<br>Resultado de Query: ';
-                var_dump($filasAfectadas);
-                echo '<br><br>';
+                echo "<strong>Filas afectadas:</strong> {$filasAfectadas}<br><br>";
             }
 
-            if ($filasAfectadas > 0) {
-                return ['success' => true, 'message' => "Se insertaron $filasAfectadas pagos correctamente."];
-            } else {
-                return ['success' => false, 'message' => 'No se pudo insertar ningún pago.'];
-            }
+            // 6. Commit
+            $this->db->commit();
+
+            $resultado['success'] = true;
+            $resultado['insertados'] = $filasAfectadas;
+            $resultado['message'] = "Se insertaron {$filasAfectadas} pagos correctamente.";
         } catch (\PDOException $e) {
-            // Captura de errores y almacenamiento en el log
+
+            // 7. Rollback
+            $this->db->rollBack();
             $timestamp = date("Y-m-d H:i:s");
-            error_log("[$timestamp] globals/services/api/SilmeApi/models/RegistrarPago_Mdl.php -> Error en Bulk Insert: " . $e->getMessage() . PHP_EOL, 3, LOG_FILE_BD);
-            return ['success' => false, 'message' => 'Error al insertar pagos. Notifica a tu administrador'];
+            error_log("[$timestamp] RegistrarPago_Mdl.php -> Error Bulk Insert: " . $e->getMessage() . PHP_EOL, 3, LOG_FILE_BD);
+
+            if (self::$debug) {
+                echo "<strong>Error PDO:</strong> " . $e->getMessage() . "<br>";
+            }
+
+            $resultado['success'] = false;
+            $resultado['message'] = 'Error al insertar pagos. Notifica a tu administrador';
+            $resultado['insertados'] = 0;
         }
+
+        return $resultado;
     }
 
 

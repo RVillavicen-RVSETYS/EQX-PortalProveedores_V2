@@ -27,45 +27,45 @@ $totalImpuestos = $data['dataCompra']['data']['totalImpuestosTrasladados'] + $da
 
             <div class="btn-group text-white" role="group">
                 <?php
-                if($puedeAutorizar == 1 || $puedeRechazar == 1) {
-                ?>                
-                <button id="btnValidacion"
-                    type="button"
-                    class="btn btn-outline-primary dropdown-toggle text-white"
-                    data-toggle="dropdown"
-                    aria-haspopup="true"
-                    aria-expanded="false">
-                    <i class="mdi mdi-label font-18"></i>
-                    FechaPago: <?= $data['dataCompra']['data']['FechaProbablePago']; ?>
-                </button>
-                <div class="dropdown-menu" aria-labelledby="btnValidacion">
-                    <?php
-                    if($puedeAutorizar == 1) {
-                    ?>
-                    <a class="dropdown-item"
-                        href="javascript:aceptarFactura(<?= $data['dataCompra']['data']['acuse'] ?>);">
-                        <i class="fas fa-check-circle text-success"></i> Aceptar Factura
-                    </a>
-                    <?php
-                    }
-                    if($puedeRechazar == 1) {
-                    ?>
-                    <a class="dropdown-item"
-                        href="javascript:rechazarFactura(<?= $data['dataCompra']['data']['acuse'] ?>);">
-                        <i class="fas fa-times-circle text-danger"></i> Rechazar Factura
-                    </a>
-                    <?php
-                    }
-                    if($puedeAutorizar == 1) {
-                    ?>
-                    <a class="dropdown-item"
-                        href="javascript:cambiarFecha(<?= $data['dataCompra']['data']['acuse'] ?>);">
-                        <i class="fas fa-undo-alt text-info"></i> Nueva Fecha Pago
-                    </a>
-                    <?php
-                    }
-                    ?>
-                </div>
+                if ($puedeAutorizar == 1 || $puedeRechazar == 1) {
+                ?>
+                    <button id="btnValidacion"
+                        type="button"
+                        class="btn btn-outline-primary dropdown-toggle text-white"
+                        data-toggle="dropdown"
+                        aria-haspopup="true"
+                        aria-expanded="false">
+                        <i class="mdi mdi-label font-18"></i>
+                        FechaPago: <?= $data['dataCompra']['data']['FechaProbablePago']; ?>
+                    </button>
+                    <div class="dropdown-menu" aria-labelledby="btnValidacion">
+                        <?php
+                        if ($puedeAutorizar == 1) {
+                        ?>
+                            <a class="dropdown-item"
+                                href="javascript:aceptarFactura(<?= $data['dataCompra']['data']['acuse'] ?>);">
+                                <i class="fas fa-check-circle text-success"></i> Aceptar Factura
+                            </a>
+                        <?php
+                        }
+                        if ($puedeRechazar == 1) {
+                        ?>
+                            <a class="dropdown-item"
+                                href="javascript:rechazarFactura(<?= $data['dataCompra']['data']['acuse'] ?>);">
+                                <i class="fas fa-times-circle text-danger"></i> Rechazar Factura
+                            </a>
+                        <?php
+                        }
+                        if ($puedeAutorizar == 1) {
+                        ?>
+                            <a class="dropdown-item"
+                                href="javascript:cambiarFecha(<?= $data['dataCompra']['data']['acuse'] ?>);">
+                                <i class="fas fa-undo-alt text-info"></i> Nueva Fecha Pago
+                            </a>
+                        <?php
+                        }
+                        ?>
+                    </div>
                 <?php
                 } ?>
             </div>
@@ -224,7 +224,7 @@ $totalImpuestos = $data['dataCompra']['data']['totalImpuestosTrasladados'] + $da
                     echo $msjStatus;
                     ?>
                     <br><br>
-                    <button data-fancybox type="button" data-type="pdf" data-preloader="true" data-src="<?= '/Administrador/FacturasNacionales/verDocumento/PDF/' . $urlFacPDF; ?>/#toolbar=0" class="btn btn-outline-danger"><i class="far fa-file-pdf"></i> Ver PDF</button>
+                    <button data-fancybox type="button" data-type="pdf" data-preloader="true" data-src="<?= '/Administrador/FacturasNacionales/verDocumento/PDF/' . $urlFacPDF; ?>/#toolbar=1" class="btn btn-outline-danger"><i class="far fa-file-pdf"></i> Ver PDF</button>
                     <button data-fancybox="xml" type="button" data-xml-url="<?= '/Administrador/FacturasNacionales/verDocumento/XML/' . $urlFacXML; ?>" class="btn btn-outline-info"><i class="far fa-file-code"></i> Ver XML</button>
                 </div>
             </div>
@@ -261,137 +261,139 @@ $totalImpuestos = $data['dataCompra']['data']['totalImpuestosTrasladados'] + $da
     <?php if ($contNotaCredito > 0) { ?>
         <div class="tab-pane fade" id="notaCredito" role="tabpanel" aria-labelledby="nota-credito-tab">
             <h4 class="m-t-20 m-b-20"><b>Notas de Crédito</b></h4>
-            
+
             <?php
             // Obtener todas las notas de crédito relacionadas (ahora viene del modelo)
             $notasCredito = $data['dataCompra']['data']['notasCredito'] ?? [];
-            
+
             if (empty($notasCredito)) {
                 echo '<div class="alert alert-info">
                     <i class="fas fa-info-circle"></i> No se encontraron notas de crédito registradas para esta factura.
                 </div>';
             } else {
             ?>
-            <div class="comment-widgets scrollable" style="max-height: 600px; overflow-y: auto;">
-                <?php 
-                $contadorNC = 1;
-                foreach ($notasCredito as $nota) {
-                    // Determinar el badge de estatus
-                    $estatusBadge = '';
-                    $estatusClass = '';
-                    $borderClass = ''; // Clase para el borde izquierdo
-                    switch ($nota['estatus'] ?? 1) {
-                        case 0:
-                            $estatusBadge = 'Cancelada';
-                            $estatusClass = 'label-danger';
-                            break;
-                        case 1:
-                            $estatusBadge = 'Pendiente';
-                            $estatusClass = 'label-info';
-                            break;
-                        case 2:
-                            $estatusBadge = 'Aceptada';
-                            $estatusClass = 'label-success';
-                            $borderClass = 'border-left border-success';
-                            break;
-                        case 3:
-                            $estatusBadge = 'Rechazada';
-                            $estatusClass = 'label-danger';
-                            $borderClass = 'border-left border-danger';
-                            break;
-                        default:
-                            $estatusBadge = 'Pendiente';
-                            $estatusClass = 'label-info';
+                <div class="comment-widgets scrollable" style="max-height: 600px; overflow-y: auto;">
+                    <?php
+                    $contadorNC = 1;
+                    foreach ($notasCredito as $nota) {
+                        // Determinar el badge de estatus
+                        $estatusBadge = '';
+                        $estatusClass = '';
+                        $borderClass = ''; // Clase para el borde izquierdo
+                        switch ($nota['estatus'] ?? 1) {
+                            case 0:
+                                $estatusBadge = 'Cancelada';
+                                $estatusClass = 'label-danger';
+                                break;
+                            case 1:
+                                $estatusBadge = 'Pendiente';
+                                $estatusClass = 'label-info';
+                                break;
+                            case 2:
+                                $estatusBadge = 'Aceptada';
+                                $estatusClass = 'label-success';
+                                $borderClass = 'border-left border-success';
+                                break;
+                            case 3:
+                                $estatusBadge = 'Rechazada';
+                                $estatusClass = 'label-danger';
+                                $borderClass = 'border-left border-danger';
+                                break;
+                            default:
+                                $estatusBadge = 'Pendiente';
+                                $estatusClass = 'label-info';
+                        }
+
+                        $urlPDF = base64_encode($nota['urlPDF'] ?? '');
+                        $urlXML = base64_encode($nota['urlXML'] ?? '');
+                        $uuid = $nota['uuid'] ?? 'N/A';
+                        $serie = $nota['serie'] ?? '';
+                        $folio = $nota['folio'] ?? '';
+                        $fechaReg = isset($nota['fechaReg']) ? date('d/m/Y', strtotime($nota['fechaReg'])) : 'N/A';
+                        $total = isset($nota['total']) ? number_format(abs($nota['total']), 2, '.', ',') : '0.00';
+                        $moneda = $nota['moneda'] ?? 'MXN';
+                    ?>
+                        <!-- Comment Row - Nota de Crédito -->
+                        <div class="d-flex flex-row comment-row <?= $contadorNC === 1 ? 'm-t-0' : ''; ?>">
+                            <div class="comment-text active w-100 <?= $borderClass; ?>">
+                                <div class="d-flex align-items-center p-b-15">
+                                    <div>
+                                        <h4 class="font-medium mb-0">
+                                            <i class="fas fa-file-invoice text-info mr-2"></i>Nota de Crédito #<?= $contadorNC; ?>
+                                        </h4>
+                                    </div>
+                                    <?php if (!empty($_SESSION['EQXAdmin']) && !empty($data['puedeAutorizar'])) { ?>
+                                        <div class="ml-auto">
+                                            <div class="dl">
+                                                <?php
+                                                $estatusActual = $nota['estatus'] ?? 1;
+                                                ?>
+                                                <select class="custom-select border-0 text-muted cambiarEstatusNC" data-id-nc="<?= $nota['id'] ?? ''; ?>" data-uuid-nc="<?= htmlspecialchars($uuid); ?>" data-estatus-inicial="<?= $estatusActual; ?>">
+                                                    <option value="1" <?= $estatusActual == 1 ? 'selected' : ''; ?>>Pendiente</option>
+                                                    <option value="2" <?= $estatusActual == 2 ? 'selected' : ''; ?>>Aceptada</option>
+                                                    <option value="3" <?= $estatusActual == 3 ? 'selected' : ''; ?>>Rechazada</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    <?php } ?>
+                                </div>
+                                <div class="m-b-15">
+                                    <div class="row">
+                                        <div class="col-6 mb-2">
+                                            <small class="text-muted d-block mb-1">
+                                                <i class="fas fa-fingerprint text-primary" style="font-size: 10px;"></i> UUID:
+                                            </small>
+                                            <h6 class="mb-0" style="word-break: break-all;"><?= htmlspecialchars($uuid); ?></h6>
+                                        </div>
+                                        <div class="col-6 mb-2">
+                                            <small class="text-muted d-block mb-1">
+                                                <i class="fas fa-hashtag text-info" style="font-size: 10px;"></i> Serie/Folio:
+                                            </small>
+                                            <h6 class="mb-0"><?= htmlspecialchars($serie . $folio); ?></h6>
+                                        </div>
+                                    </div>
+                                    <div class="row mt-2" style="border-top: 1px solid #e0e0e0; padding-top: 8px;">
+                                        <div class="col-6">
+                                            <small class="text-muted d-block mb-1">
+                                                <i class="far fa-calendar-alt text-success" style="font-size: 10px;"></i> Fecha:
+                                            </small>
+                                            <h6 class="mb-0"><?= $fechaReg; ?></h6>
+                                        </div>
+                                        <div class="col-6">
+                                            <small class="text-muted d-block mb-1">
+                                                <i class="fas fa-dollar-sign text-warning" style="font-size: 10px;"></i> Total:
+                                            </small>
+                                            <h6 class="mb-0">$ <?= $total; ?> <?= $moneda; ?></h6>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="comment-footer">
+                                    <span class="text-muted float-right"><?= $fechaReg; ?></span>
+                                    <span class="label label-rounded <?= $estatusClass; ?>"><?= $estatusBadge; ?></span>
+                                    <span class="action-icons active">
+                                        <a href="javascript:void(0)"
+                                            data-fancybox
+                                            data-type="pdf"
+                                            data-preloader="true"
+                                            data-src="<?= '/Administrador/FacturasNacionales/verDocumento/PDF/' . $urlPDF; ?>/#toolbar=1"
+                                            class="text-danger">
+                                            <i class="far fa-file-pdf"></i> Ver PDF
+                                        </a>
+                                        <a href="javascript:void(0)"
+                                            data-fancybox="xml"
+                                            data-xml-url="<?= '/Administrador/FacturasNacionales/verDocumento/XML/' . $urlXML; ?>"
+                                            class="text-info">
+                                            <i class="far fa-file-code"></i> Ver XML
+                                        </a>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    <?php
+                        $contadorNC++;
                     }
-                    
-                    $urlPDF = base64_encode($nota['urlPDF'] ?? '');
-                    $urlXML = base64_encode($nota['urlXML'] ?? '');
-                    $uuid = $nota['uuid'] ?? 'N/A';
-                    $serie = $nota['serie'] ?? '';
-                    $folio = $nota['folio'] ?? '';
-                    $fechaReg = isset($nota['fechaReg']) ? date('d/m/Y', strtotime($nota['fechaReg'])) : 'N/A';
-                    $total = isset($nota['total']) ? number_format(abs($nota['total']), 2, '.', ',') : '0.00';
-                    $moneda = $nota['moneda'] ?? 'MXN';
-                ?>
-                <!-- Comment Row - Nota de Crédito -->
-                <div class="d-flex flex-row comment-row <?= $contadorNC === 1 ? 'm-t-0' : ''; ?>">
-                    <div class="comment-text active w-100 <?= $borderClass; ?>">
-                        <div class="d-flex align-items-center p-b-15">
-                            <div>
-                                <h4 class="font-medium mb-0">
-                                    <i class="fas fa-file-invoice text-info mr-2"></i>Nota de Crédito #<?= $contadorNC; ?>
-                                </h4>
-                            </div>
-                            <div class="ml-auto">
-                                <div class="dl">
-                                    <?php 
-                                    $estatusActual = $nota['estatus'] ?? 1;
-                                    ?>
-                                    <select class="custom-select border-0 text-muted cambiarEstatusNC" data-id-nc="<?= $nota['id'] ?? ''; ?>" data-uuid-nc="<?= htmlspecialchars($uuid); ?>" data-estatus-inicial="<?= $estatusActual; ?>">
-                                        <option value="1" <?= $estatusActual == 1 ? 'selected' : ''; ?>>Pendiente</option>
-                                        <option value="2" <?= $estatusActual == 2 ? 'selected' : ''; ?>>Aceptada</option>
-                                        <option value="3" <?= $estatusActual == 3 ? 'selected' : ''; ?>>Rechazada</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="m-b-15">
-                            <div class="row">
-                                <div class="col-6 mb-2">
-                                    <small class="text-muted d-block mb-1">
-                                        <i class="fas fa-fingerprint text-primary" style="font-size: 10px;"></i> UUID
-                                    </small>
-                                    <h6 class="mb-0" style="word-break: break-all;"><?= htmlspecialchars($uuid); ?></h6>
-                                </div>
-                                <div class="col-6 mb-2">
-                                    <small class="text-muted d-block mb-1">
-                                        <i class="fas fa-hashtag text-info" style="font-size: 10px;"></i> Serie/Folio
-                                    </small>
-                                    <h6 class="mb-0"><?= htmlspecialchars($serie . $folio); ?></h6>
-                                </div>
-                            </div>
-                            <div class="row mt-2" style="border-top: 1px solid #e0e0e0; padding-top: 8px;">
-                                <div class="col-6">
-                                    <small class="text-muted d-block mb-1">
-                                        <i class="far fa-calendar-alt text-success" style="font-size: 10px;"></i> Fecha
-                                    </small>
-                                    <h6 class="mb-0"><?= $fechaReg; ?></h6>
-                                </div>
-                                <div class="col-6">
-                                    <small class="text-muted d-block mb-1">
-                                        <i class="fas fa-dollar-sign text-warning" style="font-size: 10px;"></i> Total
-                                    </small>
-                                    <h6 class="mb-0">$ <?= $total; ?> <?= $moneda; ?></h6>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="comment-footer">
-                            <span class="text-muted float-right"><?= $fechaReg; ?></span>
-                            <span class="label label-rounded <?= $estatusClass; ?>"><?= $estatusBadge; ?></span>
-                            <span class="action-icons active">
-                                <a href="javascript:void(0)" 
-                                   data-fancybox 
-                                   data-type="pdf" 
-                                   data-preloader="true" 
-                                   data-src="<?= '/Administrador/FacturasNacionales/verDocumento/PDF/' . $urlPDF; ?>/#toolbar=0" 
-                                   class="text-danger">
-                                    <i class="far fa-file-pdf"></i> Ver PDF
-                                </a>
-                                <a href="javascript:void(0)" 
-                                   data-fancybox="xml" 
-                                   data-xml-url="<?= '/Administrador/FacturasNacionales/verDocumento/XML/' . $urlXML; ?>"
-                                   class="text-info">
-                                    <i class="far fa-file-code"></i> Ver XML
-                                </a>
-                            </span>
-                        </div>
-                    </div>
+                    ?>
                 </div>
-                <?php 
-                    $contadorNC++;
-                } 
-                ?>
-            </div>
             <?php } ?>
         </div>
     <?php
@@ -458,7 +460,7 @@ $totalImpuestos = $data['dataCompra']['data']['totalImpuestosTrasladados'] + $da
                                             <i class="fas fa-hand-holding-usd text-success mr-2"></i>Complemento #<?= $contadorCP; ?>
                                         </h4>
                                     </div>
-                            <?php if (!empty($_SESSION['EQXAdmin'])) { ?>
+                            <?php if (!empty($_SESSION['EQXAdmin']) && !empty($data['puedeAutorizar'])) { ?>
                                 <div class="ml-auto">
                                     <div class="dl">
                                         <?php
@@ -479,13 +481,13 @@ $totalImpuestos = $data['dataCompra']['data']['totalImpuestosTrasladados'] + $da
                                             <small class="text-muted d-block mb-1">
                                                 <i class="fas fa-fingerprint text-primary" style="font-size: 10px;"></i> UUID:
                                             </small>
-                                            <div style="font-size: 12px; font-weight: 500; word-break: break-all;"><?= htmlspecialchars($uuidComp); ?></div>
+                                            <h6 class="mb-0" style="word-break: break-all;"><?= htmlspecialchars($uuidComp); ?></h6>
                                         </div>
                                         <div class="col-6 mb-2">
                                             <small class="text-muted d-block mb-1">
                                                 <i class="fas fa-hashtag text-info" style="font-size: 10px;"></i> Serie/Folio:
                                             </small>
-                                            <div style="font-size: 12px; font-weight: 500;"><?= htmlspecialchars($serieComp . $folioComp); ?></div>
+                                            <h6 class="mb-0"><?= htmlspecialchars($serieComp . $folioComp); ?></h6>
                                         </div>
                                     </div>
                                     <div class="row mt-2" style="border-top: 1px solid #e0e0e0; padding-top: 8px;">
@@ -493,13 +495,13 @@ $totalImpuestos = $data['dataCompra']['data']['totalImpuestosTrasladados'] + $da
                                             <small class="text-muted d-block mb-1">
                                                 <i class="far fa-calendar-alt text-success" style="font-size: 10px;"></i> Fecha CFDI:
                                             </small>
-                                            <div style="font-size: 12px; font-weight: 500;"><?= $fechaComp; ?></div>
+                                            <h6 class="mb-0"><?= $fechaComp; ?></h6>
                                         </div>
                                         <div class="col-6">
                                             <small class="text-muted d-block mb-1">
                                                 <i class="fas fa-dollar-sign text-warning" style="font-size: 10px;"></i> Total Pagos:
                                             </small>
-                                            <div style="font-size: 13px; font-weight: 600; color: #333;">$ <?= $totalComp; ?> <?= $monedaComp; ?></div>
+                                            <h6 class="mb-0">$ <?= $totalComp; ?> <?= $monedaComp; ?></h6>
                                         </div>
                                     </div>
                                 </div>
@@ -583,7 +585,7 @@ $totalImpuestos = $data['dataCompra']['data']['totalImpuestosTrasladados'] + $da
             e.preventDefault();
             const xmlUrl = $(this).attr('data-xml-url');
             const button = $(this);
-            
+
             if (xmlUrl) {
                 // Mostrar indicador de carga
                 Fancybox.show([{
@@ -610,7 +612,7 @@ $totalImpuestos = $data['dataCompra']['data']['totalImpuestosTrasladados'] + $da
                                 <pre style="white-space: pre-wrap; word-wrap: break-word; background: #f8f9fa; padding: 15px; border-radius: 5px; border: 1px solid #dee2e6; font-family: 'Courier New', monospace; font-size: 12px; line-height: 1.5; max-height: 70vh; overflow: auto; color: #212529;">${xmlContent.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</pre>
                             </div>
                         `;
-                        
+
                         // Cerrar el modal de carga y abrir el modal con el contenido
                         Fancybox.close();
                         Fancybox.show([{
@@ -775,7 +777,7 @@ $totalImpuestos = $data['dataCompra']['data']['totalImpuestosTrasladados'] + $da
         const idNC = select.attr('data-id-nc');
         const uuidNC = select.attr('data-uuid-nc');
         const nuevoEstatus = select.val();
-        
+
         // Obtener el estatus inicial desde el atributo data
         if (!select.data('estatus-anterior')) {
             const estatusInicial = select.attr('data-estatus-inicial') || select.val();
@@ -844,7 +846,7 @@ $totalImpuestos = $data['dataCompra']['data']['totalImpuestosTrasladados'] + $da
         let tipo = 'warning';
         let confirmColor = '#3085d6';
 
-        switch(nuevoEstatus) {
+        switch (nuevoEstatus) {
             case '1':
                 titulo = '¿Marcar como Pendiente?';
                 texto = '¿Estás seguro de marcar esta nota de crédito como pendiente?';

@@ -434,7 +434,7 @@ class Pagos_Mdl
 
     public function dataPagosDesdeFacturas($filtros = [], INT $cantMaxRes = 0)
     {
-        self::$debug = 0; // Desactivado para producción
+        self::$debug = 1; // Activado para pruebas (Complemento de Pago)
         if (self::$debug) {
             echo '<br><br>Filtros Recibidos: ';
             var_dump($filtros);

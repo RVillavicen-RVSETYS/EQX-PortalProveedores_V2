@@ -15,7 +15,7 @@ use App\Models\PagosProveedores\Pagos_Mdl;
 
 class FacturasNacionalesController extends Controller
 {
-    protected $debug = 0;
+    protected $debug = 0; // Debug desactivado
 
     public function __construct()
     {
@@ -288,7 +288,7 @@ class FacturasNacionalesController extends Controller
         }
 
         $versionDocto = $resultadoDeVerificacion['version'];
-        
+
         // Construir el nombre de la clase del modelo y el método dinámicamente
         $claseModelo = 'App\\Globals\\Controllers\\RegistroCFDIs\\RegistroCFDIs' . $versionDocto . '_Mdl';
         $metodoFunction = 'registrarCFDI_Ingresos' . $versionDocto;
@@ -335,7 +335,7 @@ class FacturasNacionalesController extends Controller
             'data' => []
         ];
 
-        $this->debug = 0; // Activado temporalmente para debugging
+        $this->debug = 1; // Activado para pruebas (Complemento de Pago)
 
         if ($this->debug == 1) {
             echo '<br>Valores para la carga:';
@@ -476,11 +476,11 @@ class FacturasNacionalesController extends Controller
                 $MDL_ConfigParaCFDI = new RecepcionCFDIs_Mdl();
                 $configCFDI = $MDL_ConfigParaCFDI->configuracionBaseRecepcionCFDI($idEmpresa, 'P', $versionDocto);
                 $exepcionesProv = $MDL_Proveedores->exepcionesProveedoresFacturas($noProveedor);
-                
+
                 $configParaValidaciones = [];
                 $configParaValidaciones['configCFDI'] = $configCFDI['data'] ?? [];
                 $configParaValidaciones['excepcionesProveedor'] = $exepcionesProv['data'] ?? [];
-                
+
                 // Ejecutar el método validarReglasInternasNacional_Pagos
                 $reglasInternas = $class_Validaciones->validarReglasInternasNacional_Pagos($dataProv['data'], $dataEmpresa['data'], $dataCFDIXML['data'], $comprasPorFacturas['data'], $configParaValidaciones);
                 if ($this->debug == 1) {
@@ -584,7 +584,7 @@ class FacturasNacionalesController extends Controller
         // 1.- Extraer datos básicos del XML
         $versionDocto = $dataNotaCredXML['version'] ?? null;
         $tipoCFDI = $dataNotaCredXML['data']['Comprobante']['TipoDeComprobante'] ?? null;
-        
+
         if ($tipoCFDI !== 'E') {
             return ['success' => false, 'message' => "El CFDI no es de tipo Egreso (Nota de Crédito). Tipo encontrado: $tipoCFDI."];
         }
@@ -745,12 +745,12 @@ class FacturasNacionalesController extends Controller
         $idEmpresa = $resultadoDeVerificacion['dataEmpresa']['id'];
         $idProveedor = $resultadoDeVerificacion['dataProv']['IdProveedor'];
         $uuid = $resultadoDeVerificacion['dataNotaCredXML']['TimbreFiscal']['UUID'];
-        
+
         // --- Mover PDF ---
-        $rutaTemporalPDF = $resultadoDeVerificacion['ruta_temporal_pdf']; 
+        $rutaTemporalPDF = $resultadoDeVerificacion['ruta_temporal_pdf'];
         $pdfMovido = $Ctrl_Documentos->almacenaCFDI($rutaTemporalPDF, 'NOTACRED', $idProveedor, $uuid, $idEmpresa, 'pdf');
-        
-        if(!$pdfMovido['success']){
+
+        if (!$pdfMovido['success']) {
             return ['success' => false, 'message' => 'Error al mover el archivo PDF: ' . $pdfMovido['message']];
         }
 
@@ -758,69 +758,69 @@ class FacturasNacionalesController extends Controller
         $rutaTemporalXML = $resultadoDeVerificacion['ruta_temporal_xml'];
         $xmlMovido = $Ctrl_Documentos->almacenaCFDI($rutaTemporalXML, 'NOTACRED', $idProveedor, $uuid, $idEmpresa, 'xml');
 
-        if(!$xmlMovido['success']){
+        if (!$xmlMovido['success']) {
             // Si el XML falla, eliminamos el PDF que ya se movió para no dejar archivos huérfanos.
             $Ctrl_Documentos->eliminaDocumento($pdfMovido['data']['rutaParaBD'], 'NOTACRED');
             return ['success' => false, 'message' => 'Error al mover el archivo XML: ' . $xmlMovido['message']];
         }
 
-            // 2. Preparar datos para el modelo
-            $datosParaRegistrar = $resultadoDeVerificacion;
-            $datosParaRegistrar['ruta_temporal_pdf'] = $rutaTemporalPDF;
-            $datosParaRegistrar['ruta_temporal_xml'] = $rutaTemporalXML;
-            $datosParaRegistrar['urlPDF'] = $pdfMovido['data']['rutaParaBD'];
-            $datosParaRegistrar['urlXML'] = $xmlMovido['data']['rutaParaBD'];
-            // El idCompra ya viene en el array de resultadoDeVerificacion
+        // 2. Preparar datos para el modelo
+        $datosParaRegistrar = $resultadoDeVerificacion;
+        $datosParaRegistrar['ruta_temporal_pdf'] = $rutaTemporalPDF;
+        $datosParaRegistrar['ruta_temporal_xml'] = $rutaTemporalXML;
+        $datosParaRegistrar['urlPDF'] = $pdfMovido['data']['rutaParaBD'];
+        $datosParaRegistrar['urlXML'] = $xmlMovido['data']['rutaParaBD'];
+        // El idCompra ya viene en el array de resultadoDeVerificacion
 
-            // 3. Registrar en la base de datos dinámicamente según la versión del CFDI
-            $versionDocto = $resultadoDeVerificacion['version'];
-            
-            // Construir el nombre de la clase del modelo y el método dinámicamente
-            $claseModelo = 'App\\Globals\\Controllers\\RegistroCFDIs\\RegistroCFDIs' . $versionDocto . '_Mdl';
-            $metodoFunction = 'registrarCFDI_Egresos' . $versionDocto;
+        // 3. Registrar en la base de datos dinámicamente según la versión del CFDI
+        $versionDocto = $resultadoDeVerificacion['version'];
 
-            $archivoModelo = __DIR__ . DIRECTORY_SEPARATOR . 'RegistroCFDIs' . DIRECTORY_SEPARATOR . 'RegistroCFDIs' . $versionDocto . '_Mdl.php';
+        // Construir el nombre de la clase del modelo y el método dinámicamente
+        $claseModelo = 'App\\Globals\\Controllers\\RegistroCFDIs\\RegistroCFDIs' . $versionDocto . '_Mdl';
+        $metodoFunction = 'registrarCFDI_Egresos' . $versionDocto;
 
-            if (!file_exists($archivoModelo)) {
-                $Ctrl_Documentos->eliminaDocumento($pdfMovido['data']['rutaParaBD'], 'NOTACRED');
-                $Ctrl_Documentos->eliminaDocumento($xmlMovido['data']['rutaParaBD'], 'NOTACRED');
-                return ['success' => false, 'message' => "El archivo de registro para la versión '$versionDocto' no existe."];
-            }
-            require_once $archivoModelo;
+        $archivoModelo = __DIR__ . DIRECTORY_SEPARATOR . 'RegistroCFDIs' . DIRECTORY_SEPARATOR . 'RegistroCFDIs' . $versionDocto . '_Mdl.php';
 
-            if ($this->debug == 1) {
-                echo "<br><br>Clase de Modelo a utilizar: $claseModelo";
-                echo "<br>Método a ejecutar: $metodoFunction<br>";
-            }
+        if (!file_exists($archivoModelo)) {
+            $Ctrl_Documentos->eliminaDocumento($pdfMovido['data']['rutaParaBD'], 'NOTACRED');
+            $Ctrl_Documentos->eliminaDocumento($xmlMovido['data']['rutaParaBD'], 'NOTACRED');
+            return ['success' => false, 'message' => "El archivo de registro para la versión '$versionDocto' no existe."];
+        }
+        require_once $archivoModelo;
 
-            // Verificar que la clase del modelo exista
-            if (!class_exists($claseModelo)) {
-                // Si el modelo no existe, hacemos rollback de los archivos movidos
-                $Ctrl_Documentos->eliminaDocumento($pdfMovido['data']['rutaParaBD'], 'NOTACRED');
-                $Ctrl_Documentos->eliminaDocumento($xmlMovido['data']['rutaParaBD'], 'NOTACRED');
-                return ['success' => false, 'message' => "La clase de registro para la versión '$versionDocto' no existe."];
-            }
-            
-            $MDL_registraCFDI = new $claseModelo();
+        if ($this->debug == 1) {
+            echo "<br><br>Clase de Modelo a utilizar: $claseModelo";
+            echo "<br>Método a ejecutar: $metodoFunction<br>";
+        }
 
-            // Verificar que el método exista en la clase
-            if (!method_exists($MDL_registraCFDI, $metodoFunction)) {
-                // Si el método no existe, hacemos rollback de los archivos movidos
-                $Ctrl_Documentos->eliminaDocumento($pdfMovido['data']['rutaParaBD'], 'NOTACRED');
-                $Ctrl_Documentos->eliminaDocumento($xmlMovido['data']['rutaParaBD'], 'NOTACRED');
-                return ['success' => false, 'message' => "El método de registro '$metodoFunction' no está definido en la clase '$claseModelo'."];
-            }
+        // Verificar que la clase del modelo exista
+        if (!class_exists($claseModelo)) {
+            // Si el modelo no existe, hacemos rollback de los archivos movidos
+            $Ctrl_Documentos->eliminaDocumento($pdfMovido['data']['rutaParaBD'], 'NOTACRED');
+            $Ctrl_Documentos->eliminaDocumento($xmlMovido['data']['rutaParaBD'], 'NOTACRED');
+            return ['success' => false, 'message' => "La clase de registro para la versión '$versionDocto' no existe."];
+        }
 
-            // Llamar al método dinámicamente
-            $respRegistro = $MDL_registraCFDI->$metodoFunction($datosParaRegistrar);
+        $MDL_registraCFDI = new $claseModelo();
 
-            if ($this->debug == 1) {
-                echo '<br><br>Resultado del registro en BD: <br>';
-                print_r($respRegistro);
-            }
+        // Verificar que el método exista en la clase
+        if (!method_exists($MDL_registraCFDI, $metodoFunction)) {
+            // Si el método no existe, hacemos rollback de los archivos movidos
+            $Ctrl_Documentos->eliminaDocumento($pdfMovido['data']['rutaParaBD'], 'NOTACRED');
+            $Ctrl_Documentos->eliminaDocumento($xmlMovido['data']['rutaParaBD'], 'NOTACRED');
+            return ['success' => false, 'message' => "El método de registro '$metodoFunction' no está definido en la clase '$claseModelo'."];
+        }
+
+        // Llamar al método dinámicamente
+        $respRegistro = $MDL_registraCFDI->$metodoFunction($datosParaRegistrar);
+
+        if ($this->debug == 1) {
+            echo '<br><br>Resultado del registro en BD: <br>';
+            print_r($respRegistro);
+        }
 
         // Si el registro en BD falla, eliminamos los archivos movidos.
-        if(!$respRegistro['success']){
+        if (!$respRegistro['success']) {
             $Ctrl_Documentos->eliminaDocumento($pdfMovido['data']['rutaParaBD'], 'NOTACRED');
             $Ctrl_Documentos->eliminaDocumento($xmlMovido['data']['rutaParaBD'], 'NOTACRED');
         }
@@ -830,7 +830,7 @@ class FacturasNacionalesController extends Controller
 
     public function registraNuevoComplementoPago($resultadoDeVerificacion)
     {
-        $this->debug = 0; // Activado temporalmente para debugging
+        $this->debug = 1; // Activado para pruebas (Complemento de Pago)
         if ($this->debug == 1) {
             echo '<br><br>--- Inicia el Registro de Complemento de Pago ---<br>';
             print_r($resultadoDeVerificacion);
@@ -839,7 +839,7 @@ class FacturasNacionalesController extends Controller
         // Preparar datos en el formato que espera registrarCFDI_Pagosv40
         // El método registrarCFDI_Pagosv40 moverá los archivos automáticamente
         $datosParaRegistrar = $resultadoDeVerificacion;
-        
+
         // Asegurar que los documentos estén en el formato esperado
         // Hay dos flujos posibles:
         // 1. Desde HistoricoController: ya viene con 'documentos' completo
@@ -847,7 +847,7 @@ class FacturasNacionalesController extends Controller
         if (!isset($datosParaRegistrar['documentos'])) {
             $datosParaRegistrar['documentos'] = [];
         }
-        
+
         // Si viene desde CargaFacturasGlobalController, convertir rutas temporales a formato documentos
         if (isset($resultadoDeVerificacion['ruta_temporal_pdf']) && !isset($datosParaRegistrar['documentos']['ComplementoPDF'])) {
             $datosParaRegistrar['documentos']['ComplementoPDF'] = [
@@ -859,7 +859,7 @@ class FacturasNacionalesController extends Controller
                 'tmp_name' => $resultadoDeVerificacion['ruta_temporal_xml']
             ];
         }
-        
+
         // Validar que existan los documentos necesarios
         if (empty($datosParaRegistrar['documentos']['ComplementoPDF']['tmp_name']) || empty($datosParaRegistrar['documentos']['ComplementoXML']['tmp_name'])) {
             return ['success' => false, 'message' => 'No se recibieron correctamente los archivos del complemento de pago.'];
@@ -867,7 +867,7 @@ class FacturasNacionalesController extends Controller
 
         // 3. Registrar en la base de datos dinámicamente según la versión del CFDI
         $versionDocto = $resultadoDeVerificacion['version'];
-        
+
         // Construir el nombre de la clase del modelo y el método dinámicamente
         $claseModelo = 'App\\Globals\\Controllers\\RegistroCFDIs\\RegistroCFDIs' . $versionDocto . '_Mdl';
         $metodoFunction = 'registrarCFDI_Pagos' . $versionDocto;
@@ -888,7 +888,7 @@ class FacturasNacionalesController extends Controller
         if (!class_exists($claseModelo)) {
             return ['success' => false, 'message' => "La clase de registro para la versión '$versionDocto' no existe."];
         }
-        
+
         $MDL_registraCFDI = new $claseModelo();
 
         // Verificar que el método exista en la clase

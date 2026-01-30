@@ -26,6 +26,23 @@ if ($debug == 1) {
     var_dump($datosPagina);
 }
 
+$meses = [
+    1 => 'Enero',
+    2 => 'Febrero',
+    3 => 'Marzo',
+    4 => 'Abril',
+    5 => 'Mayo',
+    6 => 'Junio',
+    7 => 'Julio',
+    8 => 'Agosto',
+    9 => 'Septiembre',
+    10 => 'Octubre',
+    11 => 'Noviembre',
+    12 => 'Diciembre'
+];
+$mesActual = (int)date('n');
+$nombreMesActual = $meses[$mesActual] ?? '';
+
 ?>
 
 <!DOCTYPE html>
@@ -94,12 +111,19 @@ if ($debug == 1) {
                             <div class="card-header bg-pyme-primary">
                                 <div class="row">
                                     <div class="col-md-10">
-                                        <h4 class="m-b-0 text-white">Facturas</h4>
+                                        <h4 class="m-b-0 text-white" id="tituloFacturasMes">Facturas Cargadas en <?= $nombreMesActual; ?></h4>
+                                    </div>
+                                    <div class="ml-auto">
+                                        <select id="mesFacturas" class="custom-select border-0 text-muted  bg-pyme-primary">
+                                            <?php foreach ($meses as $numeroMes => $nombreMes) { ?>
+                                                <option value="<?= $numeroMes; ?>" data-mes="<?= $nombreMes; ?>" <?= $numeroMes === $mesActual ? 'selected' : ''; ?>><?= $nombreMes; ?></option>
+                                            <?php } ?>
+                                        </select>
                                     </div>
                                 </div>
                             </div>
                             <div class="card-body">
-                                <div id="cajaResultados" class="jsgrid" style="position: relative; height: auto; width: 100%;">
+                                <div id="TablaFacturasCargadasPorAdmin" class="jsgrid" style="position: relative; height: auto; width: 100%;">
                                 </div>
                             </div>
                         </div>
@@ -1010,6 +1034,44 @@ if ($debug == 1) {
 
         $(document).ready(function() {
             $('.select2').select2();
+            const $mesFacturas = $('#mesFacturas');
+            const $tituloFacturasMes = $('#tituloFacturasMes');
+            const actualizarTituloMes = () => {
+                const mesSeleccionado = $mesFacturas.find('option:selected').data('mes') || '';
+                $tituloFacturasMes.text('Facturas Cargadas en ' + mesSeleccionado);
+            };
+            actualizarTituloMes();
+            $mesFacturas.on('change', actualizarTituloMes);
+
+            const cargarFacturasCargadas = () => {
+                const mes = parseInt($mesFacturas.val(), 10);
+                const anio = new Date().getFullYear();
+                const fechaInicial = `${anio}-${String(mes).padStart(2, '0')}-01`;
+                const ultimoDia = new Date(anio, mes, 0).getDate();
+                const fechaFinal = `${anio}-${String(mes).padStart(2, '0')}-${String(ultimoDia).padStart(2, '0')}`;
+
+                $.ajax({
+                    type: 'POST',
+                    url: 'FacturasNacionales/listaAprobacionesNa',
+                    data: {
+                        fechaInicial: fechaInicial,
+                        fechaFinal: fechaFinal
+                    },
+                    success: function(response) {
+                        $('#TablaFacturasCargadasPorAdmin').html(response);
+                    },
+                    error: function() {
+                        $('#TablaFacturasCargadasPorAdmin').html('Error al cargar la lista de CFDIs. Consulta a tu administrador.');
+                    },
+                    beforeSend: function() {
+                        $('#TablaFacturasCargadasPorAdmin').html('<div class="loading text-center"><img src="../assets/images/loading.gif" alt="loading" /><br/>Un momento, por favor...</div>');
+                    }
+                });
+            };
+
+            cargarFacturasCargadas();
+            $mesFacturas.on('change', cargarFacturasCargadas);
+
             let validOC = false;
             let validHES = false;
             let reqAnticipo = false;
@@ -1431,6 +1493,20 @@ if ($debug == 1) {
             $('button[type="submit"]').prop('disabled', false);
             $('#desbloquear-' + btn).show();
             $('#bloquear-' + btn).hide();
+        }
+
+        function detalleCompra(acuse, idProveedor) {
+            $('#customizer_body').html('<div class="loading text-center"><img src="../assets/images/loading.gif" alt="loading" /><br/>Un momento, por favor...</div>');
+            $(".customizer").toggleClass('show-service-panel');
+            $(".service-panel-toggle").toggle();
+            $.post("FacturasNacionales/detalladoDeCompra", {
+                    acuse: acuse,
+                    idProveedor: idProveedor,
+                    soloVer: 1
+                },
+                function(respuesta) {
+                    $("#customizer_body").html(respuesta);
+                });
         }
 
         function resetFormulario(idForm) {

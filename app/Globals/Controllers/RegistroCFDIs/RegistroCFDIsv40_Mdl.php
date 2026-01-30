@@ -16,7 +16,7 @@ require_once __DIR__ . '/../../../../config/BD_Connect.php';
 class RegistroCFDIsv40_Mdl
 {
     private $db;
-    private static $debug = 0;
+    private static $debug = 0; // Debug desactivado
 
     public function __construct()
     {
@@ -29,6 +29,10 @@ class RegistroCFDIsv40_Mdl
     public function registrarCFDI_Ingresosv40($dataDeValidacion)
     {
         $response = ["success" => true, "message" => "", "debug" => ""];
+        // Inicializar variables usadas en rollback (catch)
+        $urlFacturaPDF = null;
+        $urlFacturaXML = null;
+        $almacenaDoctos = null;
 
         try {
             // Iniciar transacción
@@ -289,6 +293,9 @@ class RegistroCFDIsv40_Mdl
             BD_Connect::rollBack();
             $timestamp = date("Y-m-d H:i:s");
             if ($facturaAlmacenada == 1) {
+                if (!($almacenaDoctos instanceof DocumentosController)) {
+                    $almacenaDoctos = new DocumentosController();
+                }
                 $borraDocumento = $almacenaDoctos->eliminaDocumento($urlFacturaPDF, 'PDF');
                 if ($borraDocumento["success"] == false) {
                     error_log("[$timestamp] app/Models/datosCFDIs/RegistroCFDIsv40_Mdl.php -> Error al borrar la Factura: " . $urlFacturaPDF, 3, LOG_FILE);
@@ -332,8 +339,12 @@ class RegistroCFDIsv40_Mdl
 
     public function registrarCFDI_Pagosv40($dataDeValidacion)
     {
-        self::$debug = 0; // Activado temporalmente para debugging
+        self::$debug = 1; // Activado para pruebas (Complemento de Pago)
         $response = ["success" => true, "message" => "", "debug" => ""];
+        // Inicializar variables usadas en rollback (catch)
+        $urlComplementoPDF = null;
+        $urlComplementoXML = null;
+        $almacenaDoctos = null;
 
         try {
             // Iniciar transacción
@@ -575,6 +586,9 @@ class RegistroCFDIsv40_Mdl
             BD_Connect::rollBack();
             $timestamp = date("Y-m-d H:i:s");
             if ($complementoAlmacenado == 1) {
+                if (!($almacenaDoctos instanceof DocumentosController)) {
+                    $almacenaDoctos = new DocumentosController();
+                }
                 $borraDocumento = $almacenaDoctos->eliminaDocumento($urlComplementoPDF, 'PDF');
                 if ($borraDocumento["success"] == false) {
                     error_log("[$timestamp] app/Models/datosCFDIs/RegistroCFDIsv40_Mdl.php -> Error al borrar el Complemento: " . $urlComplementoPDF, 3, LOG_FILE);
@@ -859,6 +873,7 @@ class RegistroCFDIsv40_Mdl
             BD_Connect::commit();
             $response["message"] = "La Nota de Crédito se ha registrado correctamente con el ID: $idNotaCredito.";
             $response["debug"] .= "\n* Nota de Crédito registrada correctamente.";
+            $response["idNotaCredito"] = $idNotaCredito; // Retornar el ID explícitamente
         } catch (\Exception $e) {
             // Rollback de la transacción
             BD_Connect::rollBack();

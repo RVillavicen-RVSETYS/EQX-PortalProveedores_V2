@@ -9,11 +9,13 @@ use App\Models\Compras\Compras_Mdl;
 use App\Globals\Controllers\DocumentosController;
 use App\Models\Facturas\Nacionales_Mdl;
 use App\Models\DatosCompra\NotasCredito_Mdl;
+use App\Globals\Services\Api\SilmeApi\NotificarNotaCreditoController;
 use App\Models\DatosCFDIs\CFDIs_Mdl;
 
+Error_reporting(E_ALL);
 class FacturasNacionalesController extends Controller
 {
-    protected $debug = 0;
+    protected $debug = 0; // Debug desactivado
 
     public function __construct()
     {
@@ -93,13 +95,17 @@ class FacturasNacionalesController extends Controller
             $filtros['tipoMoneda'] = $_POST['tipoMoneda'];
         }
 
+        if (!empty($_POST['tipoCFDI'])) {
+            $filtros['tipoCFDI'] = $_POST['tipoCFDI'];
+        }
+
         $filtros['nacional'] = '1';
 
-        $filtros['estatusFactura'] = '1';
+        $filtros['pendienteAprobacion'] = 1;
 
         $MDL_compras = new Compras_Mdl();
 
-        $listaCompras = $MDL_compras->listaComprasFacturadas($filtros, 0, 'DESC');
+        $listaCompras = $MDL_compras->listaAprobacionesCFDI($filtros, 'DESC');
         if ($this->debug == 1) {
             echo '<br><br>Resultado de listaComprasFacturadas: ' . PHP_EOL;
             var_dump($listaCompras);
@@ -124,6 +130,7 @@ class FacturasNacionalesController extends Controller
         $data = []; // Aquí puedes pasar datos a la vista si es necesario
         $noProveedor = (empty($_POST['idProveedor'])) ? '' : $_POST['idProveedor'];
         $acuse = (empty($_POST['acuse'])) ? '' : $_POST['acuse'];
+        $soloVer = !empty($_POST['soloVer']);
 
         $MDL_compras = new Compras_Mdl();
         $dataCompra = $MDL_compras->dataCompraPorAcuse($noProveedor, $acuse);
@@ -131,8 +138,8 @@ class FacturasNacionalesController extends Controller
         $data['noProveedor'] = $noProveedor;
         $data['acuse'] =  $acuse;
         $data['dataCompra'] =  $dataCompra;
-        $data['puedeAutorizar'] = 1; // Cambiar a 0 si no puede autorizar
-        $data['puedeRechazar'] = 1; // Cambiar a 0 si no puede regresar
+        $data['puedeAutorizar'] = $soloVer ? 0 : 1; // Cambiar a 0 si no puede autorizar
+        $data['puedeRechazar'] = $soloVer ? 0 : 1; // Cambiar a 0 si no puede regresar
 
         if ($this->debug == 1) {
             echo 'Variables enviadas:' . PHP_EOL;
@@ -235,7 +242,7 @@ class FacturasNacionalesController extends Controller
     {
         $data = []; // Aquí puedes pasar datos a la vista si es necesario
         $acuse = $_POST['acuse'] ?? '';
-        
+
         if ($this->debug == 1) {
             echo "<br>Contenido de data:<br>";
             var_dump($data);
@@ -290,7 +297,7 @@ class FacturasNacionalesController extends Controller
         $data = []; // Aquí puedes pasar datos a la vista si es necesario
         $acuse = $_POST['acuse'] ?? '';
         $nuevaFecha = $_POST['nuevaFecha'] ?? '';
-        
+
         if ($this->debug == 1) {
             echo "<br>Contenido de data:<br>";
             var_dump($data);
@@ -386,11 +393,11 @@ class FacturasNacionalesController extends Controller
         try {
             // Usar el modelo siguiendo el estándar del proyecto
             $MDL_NotasCredito = new NotasCredito_Mdl();
-            
+
             // Preparar campos según el estatus
             $campos = ['estatus' => $estatus];
             $idUser = $_SESSION['EQXident'] ?? 0;
-            
+
             // Si es aceptada (estatus 2), agregar campos de validación
             if ($estatus == '2') {
                 $campos['idUserValida'] = $idUser;
@@ -400,7 +407,7 @@ class FacturasNacionalesController extends Controller
                 $campos['fechaRechaza'] = null;
                 $campos['motivoRechazo'] = null;
             }
-            
+
             // Si es rechazada (estatus 3), agregar campos de rechazo
             if ($estatus == '3') {
                 $motivoRechazo = $_POST['motivoRechazo'] ?? '';
@@ -419,7 +426,7 @@ class FacturasNacionalesController extends Controller
                 $campos['idUserValida'] = null;
                 $campos['fechaValida'] = null;
             }
-            
+
             // Actualizar usando el método genérico del modelo
             $resultado = $MDL_NotasCredito->actualizarNotaCredito($campos, ['id' => $idNC]);
 
@@ -442,13 +449,56 @@ class FacturasNacionalesController extends Controller
                 ];
             }
 
+            // Enviar Datos a Silme
+            if ($resultado['success']) {
+
+                $filtros = [
+                    'idNC' => $idNC
+                ];
+                $dataNotaCredito = $MDL_NotasCredito->obtenerDatosNotaCredito($filtros);
+
+                switch ($estatus) {
+                    case '2':
+                        $idAcuseNC = $dataNotaCredito['data'][0]['IdNotaCredito'];
+                        break;
+                    case '0':
+                    case '1':
+                    case '3':
+                        $idAcuseNC = NULL;
+                        break;
+                }
+
+                if ($dataNotaCredito['success'] and $dataNotaCredito['cantResult'] > 0) {
+
+                    $payloadAPI = [];
+                    $payloadAPI = [
+                        'folioOC' => $dataNotaCredito['data'][0]['FolioOC'],
+                        'notasCredito' => [
+                            [
+                                'idNC_Silme' => $dataNotaCredito['data'][0]['IdNotaCreditoExterno'],
+                                'idAcuseNC' => $idAcuseNC
+                            ]
+                        ]
+                    ];
+
+                    $Ctrl_NotificarNC = new NotificarNotaCreditoController();
+                    $respuestaAPI = $Ctrl_NotificarNC->notificarAcuses($payloadAPI);
+                    
+                    if (!$respuestaAPI['success']) {
+                        return [
+                            'success' => false,
+                            'message' => $respuestaAPI['message']
+                        ];
+                    }
+                }
+            }
+            
             echo json_encode($response);
             exit(0);
-
         } catch (\Exception $e) {
             $timestamp = date("Y-m-d H:i:s");
             error_log("[$timestamp] app/Controllers/Administrador/FacturasNacionalesController.php ->Error al actualizar estatus de nota de crédito: " . $e->getMessage() . PHP_EOL, 3, LOG_FILE);
-            
+
             $response = [
                 'success' => false,
                 'message' => 'Error al actualizar el estatus de la nota de crédito.'

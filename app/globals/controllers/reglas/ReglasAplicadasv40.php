@@ -4,7 +4,7 @@ use App\Models\DatosCFDIs\CFDIs_Mdl;
 
 class ReglasAplicadasv40
 {
-    protected $debug = 0;
+    protected $debug = 0; // Debug desactivado
 
     public function validarReglasInternasNacional_Ingresos($dataProveedor, $dataEmpresa, $dataXML)
     {
@@ -428,7 +428,7 @@ class ReglasAplicadasv40
 
     public function validarReglasInternasNacional_Pagos($dataProveedor, $dataEmpresa, $dataXML, $dataCompras, $configParaValidaciones = [])
     {
-        $this->debug = 0; // Activado temporalmente para debugging
+        $this->debug = 1; // Activado para pruebas (Complemento de Pago)
         $response = [
             "success" => true,
             "message" => "",
