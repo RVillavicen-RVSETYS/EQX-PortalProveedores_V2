@@ -14,7 +14,6 @@ class CargaFacturasGlobalController extends Controller
         if ($this->debug == 1) {
             echo "<h2>Ya estamos dentro de Globals\Controllers\CargaFacturasGlobalController.php.</h2>";
         }
-
     }
 
     public function cargaFormNotaCredito()
@@ -52,7 +51,7 @@ class CargaFacturasGlobalController extends Controller
             echo json_encode(['success' => false, 'message' => 'El archivo XML de la factura es obligatorio.']);
             return;
         }
-        
+
         if (empty($filesData['facturaPDF']['tmp_name'])) {
             echo json_encode(['success' => false, 'message' => 'El archivo PDF de la factura es obligatorio.']);
             return;
@@ -158,10 +157,10 @@ class CargaFacturasGlobalController extends Controller
             }
             // Si hay múltiples políticas seleccionadas, las unimos con coma para guardarlas en idNCExterno
             // Esto permite que una NC cubra múltiples conceptos/políticas
-            $idNotaCredito = is_array($notasSeleccionadas) && count($notasSeleccionadas) > 1 
+            $idNotaCredito = is_array($notasSeleccionadas) && count($notasSeleccionadas) > 1
                 ? implode(',', array_map('intval', $notasSeleccionadas))
                 : (is_array($notasSeleccionadas) ? $notasSeleccionadas[0] : $notasSeleccionadas);
-            
+
             $notasParaProcesar[] = [
                 'idPlantilla' => $idPlantilla,
                 'idNotaCredito' => $idNotaCredito, // Puede ser un ID único o múltiples IDs separados por coma
@@ -204,7 +203,7 @@ class CargaFacturasGlobalController extends Controller
             $pdfVerificado = $Ctrl_Documentos->verificadorDeDocumentoARecibir($nota['pdf'], 'pdf');
             if (!$pdfVerificado['success']) {
                 $resultados[] = ['success' => false, 'message' => "Error en PDF de plantilla #{$nota['idPlantilla']}: " . $pdfVerificado['message']];
-                break; 
+                break;
             } else {
                 if ($this->debug == 1) {
                     echo "<br>3.1.- PDF verificado correctamente para plantilla #{$nota['idPlantilla']}.<br>";
@@ -230,8 +229,8 @@ class CargaFacturasGlobalController extends Controller
                 if ($this->debug == 1) {
                     echo "<br>3.2.- XML leído correctamente para plantilla #{$nota['idPlantilla']}.<br>";
                 }
-            }   
-            
+            }
+
             // 3.3.- Llamar a la validación de la Nota de Crédito
             $notaValidada = $Ctrl_ProcesaNotasCredito->verificaNuevaNotaCredito(
                 $dataNotaCredXML,
@@ -269,16 +268,16 @@ class CargaFacturasGlobalController extends Controller
                     echo "<br>3.4.- Nota de Crédito registrada correctamente para plantilla #{$nota['idPlantilla']}.<br>";
                 }
             }
-            
+
             $resultados[] = ['success' => true, 'message' => "Nota de Crédito registrada con éxito."];
         }
 
         // 4.- Evaluar resultados y responder
         $todosExitosos = true;
         $mensajes = [];
-        foreach($resultados as $res){
+        foreach ($resultados as $res) {
             $mensajes[] = $res['message'];
-            if(!$res['success']){
+            if (!$res['success']) {
                 $todosExitosos = false;
             }
         }
@@ -289,6 +288,7 @@ class CargaFacturasGlobalController extends Controller
 
     public function registraNuevoComplementoPago($postData, $filesData, $isAdmin)
     {
+        $this->debug = 0;
         if ($this->debug == 1) {
             echo '<br>---- CargaFacturasGlobalController -> registraNuevoComplementoPago ----<br>';
             echo '<br>----postData----<br>';

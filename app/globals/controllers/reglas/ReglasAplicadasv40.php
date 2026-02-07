@@ -366,12 +366,9 @@ class ReglasAplicadasv40
                 }
             }
             $debugMessages[] = "<br>* Subtotal XML después de aplicar descuentos: <b>$subtotalXML</b>.";
-            
         } else {
             $debugMessages[] = "<br>* Proveedor sin configuración para descontar promociones aplicables.";
         }
-
-        
 
         $subtotalConfig = $configParaValidaciones['datosRecepciones']['Subtotal'] ?? 0;
         $bloqDiferencia = $configParaValidaciones['excepcionesProveedor']['BloqDiferenciaMonto'] ?? false;
@@ -428,7 +425,7 @@ class ReglasAplicadasv40
 
     public function validarReglasInternasNacional_Pagos($dataProveedor, $dataEmpresa, $dataXML, $dataCompras, $configParaValidaciones = [])
     {
-        $this->debug = 1; // Activado para pruebas (Complemento de Pago)
+        $this->debug = 0; // Activado para pruebas (Complemento de Pago)
         $response = [
             "success" => true,
             "message" => "",
@@ -692,11 +689,11 @@ class ReglasAplicadasv40
         $fechaComprobante = $dataXML['Comprobante']['Fecha'] ?? '';
         $fechaTimbrado = $dataXML['TimbreFiscal']['FechaTimbrado'] ?? '';
         $anioActual = date('Y');
-        
+
         if (!empty($fechaComprobante) && !empty($fechaTimbrado)) {
             $fechaFactura = strtotime($fechaComprobante);
             $fechaTimbradoTimestamp = strtotime($fechaTimbrado);
-            
+
             $excepcionAnioFiscal = $configParaValidaciones['excepcionesProveedor']['AnioFiscal'] ?? false;
             if (!$excepcionAnioFiscal) {
                 if (date('Y', $fechaFactura) !== $anioActual || date('Y', $fechaTimbradoTimestamp) !== $anioActual) {
@@ -723,7 +720,7 @@ class ReglasAplicadasv40
         if (!empty($fechaComprobante) && !empty($fechaTimbrado)) {
             $tiempoVigencia = $configParaValidaciones['configCFDI']['tiempoVigencia'] ?? '6 month';
             $fechaLimite = strtotime("- $tiempoVigencia");
-            
+
             $excepcionFechaEmision = $configParaValidaciones['excepcionesProveedor']['FechaEmision'] ?? false;
             if (!$excepcionFechaEmision) {
                 if ($fechaFactura < $fechaLimite || $fechaTimbradoTimestamp < $fechaLimite) {
@@ -1310,7 +1307,7 @@ class ReglasAplicadasv40
             // Si hubo errores, se mantiene isValid = false y se listan los problemas
             $response["message"] = implode("", $errorMessages);
         }
-        
+
         $response["debug"] = implode("<br>", $debugMessages);
         $response["success"] = true; // La función se ejecutó completamente
         return $response;

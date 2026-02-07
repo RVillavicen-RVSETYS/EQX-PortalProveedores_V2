@@ -277,7 +277,7 @@ class RegistroCFDIsv40_Mdl
                 }
                 $valuesImpuestos[] = "($idCFDI, '$idCompra', 'Retencion', '{$impuesto["Impuesto"]}', '{$impuesto["TipoFactor"]}', '{$impuesto["TasaOCuota"]}', '{$impuesto["Base"]}', '{$impuesto["Importe"]}')";
             }
-            
+
             if (!empty($valuesImpuestos)) {
                 $sqlImpuestos .= implode(",", $valuesImpuestos);
                 $stmt = $this->db->prepare($sqlImpuestos);
@@ -339,7 +339,7 @@ class RegistroCFDIsv40_Mdl
 
     public function registrarCFDI_Pagosv40($dataDeValidacion)
     {
-        self::$debug = 1; // Activado para pruebas (Complemento de Pago)
+        self::$debug = 0; // Activado para pruebas (Complemento de Pago)
         $response = ["success" => true, "message" => "", "debug" => ""];
         // Inicializar variables usadas en rollback (catch)
         $urlComplementoPDF = null;
