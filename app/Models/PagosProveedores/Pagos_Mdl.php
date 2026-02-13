@@ -311,10 +311,12 @@ class Pagos_Mdl
                     } elseif ($nombreFiltro == 'idProveedor1') {
                         if (!empty($valorFiltro)) {
                             $filtrosSQL .= ' AND ' . $filtrosDisponibles[$nombreFiltro]['sqlFiltro'];
+                            $params[':idProveedor1'] = (int)$valorFiltro;
                         }
                     } elseif ($nombreFiltro == 'idProveedor2') {
                         if (!empty($valorFiltro)) {
                             $filtrosSQL2 .= ' AND ' . $filtrosDisponibles[$nombreFiltro]['sqlFiltro'];
+                            $params[':idProveedor2'] = (int)$valorFiltro;
                         }
                     } else {
                         $filtrosSQL .= ' AND ' . $filtrosDisponibles[$nombreFiltro]['sqlFiltro'];
