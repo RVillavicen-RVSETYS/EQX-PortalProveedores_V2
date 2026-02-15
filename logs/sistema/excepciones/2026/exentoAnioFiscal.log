@@ -1,3 +1,5 @@
 [2026-01-01 01:57:53] app/Models/ExcepcionesProveedores_Mdl.php -> Se Agregó El Proveedor: 100074, IdUserReg: 1
 [2026-01-11 19:48:26] app/Models/ExcepcionesProveedores_Mdl.php -> Se Agregó El Proveedor: 100145, IdUserReg: 2
 [2026-02-05 02:18:12] app/Models/Proveedores/Excepciones/ExentoAnoFisc_Mdl.php -> Se Agregó El Proveedor: 100143, IdUserReg: 2
+[2026-02-09 01:52:05] app/Models/Proveedores/Excepciones/ExentoAnoFisc_Mdl.php -> Se Agregó El Proveedor: 100071, IdUserReg: 2
+[2026-02-10 02:09:01] app/Models/Proveedores/Excepciones/ExentoAnoFisc_Mdl.php -> Se Agregó El Proveedor: 100016, IdUserReg: 2

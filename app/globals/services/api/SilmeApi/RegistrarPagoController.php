@@ -67,33 +67,41 @@ class RegistrarPagoController extends Controller
             return;
         }
 
-        // 5. Validar cada pago
-        foreach ($data['pagos'] as $index => $pago) {
-            if (
-                empty($pago['IdPagoDet']) ||
-                !isset($pago['MontoPagado']) ||
-                empty($pago['FechaPago'])
-            ) {
-                http_response_code(422);
-                echo json_encode([
-                    'success' => false,
-                    'message' => "Pago inválido en posición {$index}"
-                ]);
-                return;
-            }
-        }
+        // Validar si es liquidacion con NC
+        if ($data['pagos'][0]['MontoPagado'] == 0 and $data['pagos'][0]['PagoCompleto'] == 1) {
 
-        // 6. Mandar al modelo
-        $registrarPagoModel = new RegistrarPago_Mdl();
-        $resultado = $registrarPagoModel->insertaPagos($data['pagos']);
+            // 6. Mandar al modelo
+            echo "Es liquidacion con NC";
+            $registrarPagoModel = new RegistrarPago_Mdl();
+            $resultado = $registrarPagoModel->ejecutarActualizaEstatus($data['pagos'][0]['IdAcuse']);
+        } else {
+            // 5. Validar cada pago
+            //echo "Es pago normal";
+            foreach ($data['pagos'] as $index => $pago) {
+                if (
+                    empty($pago['IdPagoDet']) ||
+                    !isset($pago['IdAcuse']) ||
+                    empty($pago['OC'])
+                ) {
+                    http_response_code(422);
+                    echo json_encode([
+                        'success' => false,
+                        'message' => "Pago inválido en posición {$index}"
+                    ]);
+                    return;
+                }
+            }
+
+            // 6. Mandar al modelo
+            $registrarPagoModel = new RegistrarPago_Mdl();
+            $resultado = $registrarPagoModel->insertaPagos($data['pagos']);
+        }
 
         // 7. Respuesta estándar
         http_response_code(200);
         echo json_encode([
-            'success' => true,
-            'message' => 'Pagos recibidos correctamente',
-            'procesados' => count($data['pagos']),
-            'response' => $resultado
+            'success' => $resultado['success'],
+            'message' => $resultado['message'],
         ]);
     }
 }

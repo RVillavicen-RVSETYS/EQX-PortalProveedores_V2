@@ -24,6 +24,68 @@ class RegistrarPago_Mdl
         $this->db = new BD_Connect();
     }
 
+    public function ejecutarActualizaEstatus($idAcuse)
+    {
+        if (self::$debug) {
+            echo "<strong>Entrando a ejecutarActualizaEstatus()</strong><br>";
+        }
+
+        if (empty($idAcuse)) {
+            return [
+                'success' => false,
+                'message' => 'No se recibió el IdAcuse.',
+            ];
+        }
+
+        $resultado = [
+            'success' => false,
+            'message' => ''
+        ];
+
+        try {
+
+            // 1. Iniciar transacción
+            $this->db->beginTransaction();
+
+            // 2. Preparar CALL
+            $sql = "CALL sp_oper_Compras_ActualizaEstatus(?)";
+
+            if (self::$debug) {
+                echo "<br><strong>Consulta a ejecutar:</strong><br>";
+                $this->db->imprimirConsulta($sql, [$idAcuse], 'CALL Actualiza Estatus');
+                echo "<br>";
+            }
+
+            // 3. Ejecutar
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute([$idAcuse]);
+
+            // MUY IMPORTANTE en procedimientos almacenados
+            $stmt->closeCursor();
+
+            // 4. Commit
+            $this->db->commit();
+
+            $resultado['success'] = true;
+            $resultado['message'] = "Estatus actualizado correctamente.";
+        } catch (\PDOException $e) {
+
+            $this->db->rollBack();
+
+            $timestamp = date("Y-m-d H:i:s");
+            error_log("[$timestamp] ejecutarActualizaEstatus -> Error: " . $e->getMessage() . PHP_EOL, 3, LOG_FILE_BD);
+
+            if (self::$debug) {
+                echo "<strong>Error PDO:</strong> " . $e->getMessage() . "<br>";
+            }
+
+            $resultado['success'] = false;
+            $resultado['message'] = 'Error al actualizar el estatus. Notifica a tu administrador';
+        }
+
+        return $resultado;
+    }
+
     public function insertaPagos(array $pagos)
     {
         if (self::$debug) {
@@ -50,26 +112,34 @@ class RegistrarPago_Mdl
             $this->db->beginTransaction();
 
             // 2. Armar SQL base
-            $sql = "INSERT INTO pagos_compras ( idPagoDet, idAcuse, OC, HES, montoPagado, saldoInsoluto, moneda, tipoCambio, formaPago, formaPagoSAT, fechaPago, fechaReg ) VALUES ";
+            $sql = "INSERT INTO pagos_compras ( idPagoDet, idAcuse, OC, HES, montoPagado, saldoInsoluto, moneda, tipoCambio, montoTipoCambio, monedaTipoCambio, formaPago, formaPagoSAT, fechaPago, fechaReg ) VALUES ";
 
             $placeholders = [];
             $values = [];
+            $idsAcuse = [];
 
             foreach ($pagos as $index => $pago) {
 
-                $placeholders[] = "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())";
+                $placeholders[] = "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())";
 
                 $values[] = $pago['IdPagoDet'];
-                $values[] = $pago['IdAcuse'] ?? null;
-                $values[] = $pago['OC'] ?? null;
-                $values[] = $pago['HES'] ?? null;
+                $values[] = $pago['IdAcuse'];
+                $values[] = $pago['OC'];
+                $values[] = $pago['HES'];
                 $values[] = $pago['MontoPagado'];
-                $values[] = $pago['SaldoInsoluto'] ?? 0;
-                $values[] = $pago['Moneda'] ?? 'MXN';
-                $values[] = $pago['TipoCambio'] ?? 1;
-                $values[] = $pago['FormaPago'] ?? null;
-                $values[] = $pago['FormaPagoSAT'] ?? null;
+                $values[] = $pago['SaldoInsoluto'];
+                $values[] = $pago['Moneda'];
+                $values[] = $pago['TipoCambio'];
+                $values[] = $pago['MontoTipoCambio'];
+                $values[] = $pago['MonedaTipoCambio'];
+                $values[] = $pago['FormaPago'];
+                $values[] = $pago['FormaPagoSAT'];
                 $values[] = $pago['FechaPago'];
+
+                // Guardar idAcuse para actualizar después
+                if (!empty($pago['IdAcuse'])) {
+                    $idsAcuse[] = $pago['IdAcuse'];
+                }
 
                 if (self::$debug) {
                     echo "Pago {$index}: " . json_encode($pago) . "<br>";
@@ -94,6 +164,18 @@ class RegistrarPago_Mdl
 
             if (self::$debug) {
                 echo "<strong>Filas afectadas:</strong> {$filasAfectadas}<br><br>";
+            }
+
+            $idsAcuseUnicos = array_unique($idsAcuse);
+            if (!empty($idsAcuseUnicos)) {
+                $stmtSP = $this->db->prepare("CALL sp_oper_Compras_ActualizaEstatus(?)");
+                foreach ($idsAcuseUnicos as $id) {
+                    if (self::$debug) {
+                        echo "Actualizando estatus compra ID: {$id}<br>";
+                    }
+                    $stmtSP->execute([$id]);
+                    $stmtSP->closeCursor(); // MUY IMPORTANTE
+                }
             }
 
             // 6. Commit
