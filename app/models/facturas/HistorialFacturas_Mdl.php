@@ -234,13 +234,16 @@ class HistorialFacturas_Mdl
         }
         try {
 
-            $sql = "INSERT IGNORE INTO pagos_compras ( idPagoDet, idAcuse, OC, HES, montoPagado, saldoInsoluto, moneda, tipoCambio, formaPago, fechaPago)
-                    VALUES ( :idPagoDet, :idAcuse, :OC, :HES, :montoPagado, :saldoInsoluto, :moneda, :tipoCambio, :formaPago, :fechaPago);";
+            $sql = "INSERT IGNORE INTO pagos_compras ( idPagoDet, idAcuse, OC, HES, montoPagado, saldoInsoluto, moneda, tipoCambio, montoTipoCambio, monedaTipoCambio, formaPago, fechaPago)
+                    VALUES ( :idPagoDet, :idAcuse, :OC, :HES, :montoPagado, :saldoInsoluto, :moneda, :tipoCambio, :montoTipoCambio, :monedaTipoCambio, :formaPago, :fechaPago);";
 
             // Modo debug para imprimir consulta con parámetros
             if (self::$debug) {
 
                 foreach ($dataPagos as $pago) {
+                    $tipoCambio = $pago['TipoCambio'] ?? null;
+                    $montoTipoCambio = $pago['MontoTipoCambio'] ?? $pago['TotalPagado'];
+                    $monedaTipoCambio = $pago['MonedaTipoCambio'] ?? $pago['Moneda'];
                     $params = [
                         ':idPagoDet' => $pago['IdPagoDet'],
                         ':idAcuse' => $pago['IdAcuse'],
@@ -249,7 +252,9 @@ class HistorialFacturas_Mdl
                         ':montoPagado' => $pago['TotalPagado'],
                         ':saldoInsoluto' => $pago['SaldoInsoluto'],
                         ':moneda' => $pago['Moneda'],
-                        ':tipoCambio' => $pago['TipoCambio'],
+                        ':tipoCambio' => ($tipoCambio === null || $tipoCambio === '') ? 1 : $tipoCambio,
+                        ':montoTipoCambio' => $montoTipoCambio,
+                        ':monedaTipoCambio' => $monedaTipoCambio,
                         ':formaPago' => $pago['FormaPago'],
                         ':fechaPago' => $pago['FechaPago']
                     ];
@@ -264,10 +269,15 @@ class HistorialFacturas_Mdl
                 $stmt->bindValue(':idAcuse', $pago['IdAcuse'], PDO::PARAM_INT);
                 $stmt->bindValue(':OC', $pago['OC'], PDO::PARAM_STR);
                 $stmt->bindValue(':HES', $pago['HES'], PDO::PARAM_STR);
+                $tipoCambio = $pago['TipoCambio'] ?? null;
+                $montoTipoCambio = $pago['MontoTipoCambio'] ?? $pago['TotalPagado'];
+                $monedaTipoCambio = $pago['MonedaTipoCambio'] ?? $pago['Moneda'];
                 $stmt->bindValue(':montoPagado', $pago['TotalPagado'], PDO::PARAM_STR);
                 $stmt->bindValue(':saldoInsoluto', $pago['SaldoInsoluto'], PDO::PARAM_STR);
                 $stmt->bindValue(':moneda', $pago['Moneda'], PDO::PARAM_STR);
-                $stmt->bindValue(':tipoCambio', $pago['TipoCambio'], PDO::PARAM_STR);
+                $stmt->bindValue(':tipoCambio', ($tipoCambio === null || $tipoCambio === '') ? 1 : $tipoCambio, PDO::PARAM_STR);
+                $stmt->bindValue(':montoTipoCambio', $montoTipoCambio, PDO::PARAM_STR);
+                $stmt->bindValue(':monedaTipoCambio', $monedaTipoCambio, PDO::PARAM_STR);
                 $stmt->bindValue(':formaPago', $pago['FormaPago'], PDO::PARAM_INT);
                 $stmt->bindValue(':fechaPago', $pago['FechaPago'], PDO::PARAM_STR);
 

@@ -127,13 +127,17 @@ class RegistrarPago_Mdl
                 $values[] = $pago['OC'];
                 $values[] = $pago['HES'];
                 $values[] = $pago['MontoPagado'];
-                $values[] = $pago['SaldoInsoluto'];
-                $values[] = $pago['Moneda'];
-                $values[] = $pago['TipoCambio'];
-                $values[] = $pago['MontoTipoCambio'];
-                $values[] = $pago['MonedaTipoCambio'];
-                $values[] = $pago['FormaPago'];
-                $values[] = $pago['FormaPagoSAT'];
+                $values[] = $pago['SaldoInsoluto'] ?? 0;
+                $moneda = $pago['Moneda'] ?? 'MXN';
+                $tipoCambio = $pago['TipoCambio'] ?? 1;
+                $montoTipoCambio = $pago['MontoTipoCambio'] ?? $pago['MontoPagado'];
+                $monedaTipoCambio = $pago['MonedaTipoCambio'] ?? $moneda;
+                $values[] = $moneda;
+                $values[] = $tipoCambio;
+                $values[] = $montoTipoCambio;
+                $values[] = $monedaTipoCambio;
+                $values[] = $pago['FormaPago'] ?? null;
+                $values[] = $pago['FormaPagoSAT'] ?? null;
                 $values[] = $pago['FechaPago'];
 
                 // Guardar idAcuse para actualizar después

@@ -800,20 +800,28 @@ class ReglasAplicadasv40
             $key = $p['uuid'];
             if (!isset($pagosGrouped[$key])) {
                 $pagosGrouped[$key] = [
-                    'monto'  => 0.0,
-                    'moneda' => $p['moneda'],
+                    // monto/moneda aplicado a la factura (ImpPagado/MonedaDR)
+                    'montoAplicado'  => 0.0,
+                    'monedaAplicada' => $p['moneda'],
+                    // monto/moneda del pago real (Pago:Monto/MonedaP)
+                    'montoPagoReal'  => 0.0,
+                    'monedaPagoReal' => $p['monedaTipoCambio'] ?? $p['moneda'],
+                    'tipoCambio'     => $p['tipoCambio'] ?? null,
                     'fechas' => [],
                     'formas' => [],
                     'registros' => [] // Para debug: guardar los registros individuales
                 ];
             }
             $montoPagado = floatval($p['montoPagado']);
-            $pagosGrouped[$key]['monto']  += $montoPagado;
+            $montoPagoReal = floatval($p['montoTipoCambio'] ?? $p['montoPagado']);
+            $pagosGrouped[$key]['montoAplicado']  += $montoPagado;
+            $pagosGrouped[$key]['montoPagoReal'] += $montoPagoReal;
             $pagosGrouped[$key]['fechas'][] = $p['fechaPago'];
             $pagosGrouped[$key]['formas'][] = $p['formaPagoSAT'] ?? $p['formaPago']; // Usar formaPagoSAT (código SAT) si existe, sino usar formaPago (ID) como fallback
             $pagosGrouped[$key]['registros'][] = [
                 'id' => $p['id'] ?? null,
                 'montoPagado' => $montoPagado,
+                'montoPagoReal' => $montoPagoReal,
                 'HES' => $p['HES'] ?? null
             ];
         }
@@ -825,7 +833,7 @@ class ReglasAplicadasv40
         if ($this->debug == 1) {
             echo "<br> * Pagos agrupados: " . count($pagosGrouped) . " uuid(s).<br>";
             foreach ($pagosGrouped as $uuid => $data) {
-                echo "<br>UUID: {$uuid} - Monto total: {$data['monto']} - Registros: " . count($data['registros']);
+                echo "<br>UUID: {$uuid} - Monto aplicado: {$data['montoAplicado']} - Monto pago real: {$data['montoPagoReal']} - Registros: " . count($data['registros']);
                 echo "<br>Detalle de registros:<br>";
                 var_dump($data['registros']);
             }
@@ -838,19 +846,24 @@ class ReglasAplicadasv40
         $xmlGrouped = [];
         foreach ($dataXML['Pagos']['Pagos'] as $pagoNodo) {
             $formaXML  = $pagoNodo['FormaDePagoP'];
-            $monedaXML = $pagoNodo['MonedaP'];
+            $monedaP = $pagoNodo['MonedaP'];
+            $tipoCambioP = $pagoNodo['TipoCambioP'] ?? '';
             $fechaXML  = substr($pagoNodo['FechaPago'], 0, 10);
             foreach ($pagoNodo['DoctosRelacionados'] as $dr) {
                 $doc = $dr['IdDocumento'];
                 if (!isset($xmlGrouped[$doc])) {
                     $xmlGrouped[$doc] = [
-                        'monto'  => 0.0,
-                        'moneda' => $monedaXML,
+                        // ImpPagado/MonedaDR por documento
+                        'impPagado'  => 0.0,
+                        'monedaDR' => $dr['MonedaDR'] ?? '',
+                        // Moneda/TipoCambio del pago real (Pago)
+                        'monedaP' => $monedaP,
+                        'tipoCambioP' => $tipoCambioP,
                         'fechas' => [],
                         'formas' => [],
                     ];
                 }
-                $xmlGrouped[$doc]['monto']  += floatval($dr['ImpPagado']);
+                $xmlGrouped[$doc]['impPagado']  += floatval($dr['ImpPagado']);
                 $xmlGrouped[$doc]['fechas'][] = $fechaXML;
                 $xmlGrouped[$doc]['formas'][] = $formaXML;
             }
@@ -873,9 +886,11 @@ class ReglasAplicadasv40
                 echo "<br>---- Procesando UUID: {$docId} ----<br>";
             }
             $out = [
-                'montoXML'   => round($xmlData['monto'], 2),
+                'montoXML'   => round($xmlData['impPagado'], 2),
                 'montoPago'  => null,
-                'monedaXML'  => $xmlData['moneda'],
+                'monedaXML'  => $xmlData['monedaP'],
+                'monedaDR'   => $xmlData['monedaDR'],
+                'tipoCambioP' => $xmlData['tipoCambioP'],
                 'monedaPago' => null,
                 'formasXML'  => $xmlData['formas'],
                 'formasPago' => [],
@@ -891,14 +906,14 @@ class ReglasAplicadasv40
 
             if (isset($pagosGrouped[$docId])) {
                 $pagoData = $pagosGrouped[$docId];
-                $out['montoPago']  = round($pagoData['monto'], 2);
-                $out['monedaPago'] = $pagoData['moneda'];
+                $out['montoPago']  = round($pagoData['montoAplicado'], 2);
+                $out['monedaPago'] = $pagoData['monedaPagoReal'];
                 $out['formasPago'] = $pagoData['formas'];
                 $out['fechasPago'] = $pagoData['fechas'];
 
                 if ($this->debug == 1) {
-                    echo " * Monto XML: {$out['montoXML']} vs Pago: {$out['montoPago']}<br>";
-                    echo " * Moneda XML: {$out['monedaXML']} vs Pago: {$out['monedaPago']}<br>";
+                    echo " * Monto XML (ImpPagado): {$out['montoXML']} vs Pago aplicado: {$out['montoPago']}<br>";
+                    echo " * Moneda XML (MonedaP): {$out['monedaXML']} vs Pago real: {$out['monedaPago']}<br>";
                     echo " * Formas XML: [" . implode(',', $out['formasXML']) . "] vs Pago: [" . implode(',', $out['formasPago']) . "]" .
                         (!empty($configParaValidaciones['Excepciones']['NoValidarFormasPago']) ? " <b>*** Aplica Excepción</b>" : "") . "<br>";
                     echo " * Fechas XML: [" . implode(',', $out['fechasXML']) . "] vs Pago: [" . implode(',', $out['fechasPago']) . "]" .
@@ -914,6 +929,17 @@ class ReglasAplicadasv40
                 sort($out['fechasPago']);
                 sort($out['fechasXML']);
                 $out['coincide']['fechas'] = ($out['fechasPago'] === $out['fechasXML']);
+
+                if (
+                    $out['monedaDR'] !== ''
+                    && $out['monedaXML'] !== ''
+                    && $out['monedaDR'] !== $out['monedaXML']
+                ) {
+                    $tipoCambioP = floatval($out['tipoCambioP']);
+                    if ($tipoCambioP <= 0) {
+                        $errores[] = "* UUID {$docId}: MonedaP ({$out['monedaXML']}) ≠ MonedaDR ({$out['monedaDR']}) y TipoCambioP inválido o vacío.";
+                    }
+                }
 
                 if (!$out['coincide']['monto']) {
                     $errores[] = "* UUID {$docId}: monto XML ({$out['montoXML']}) ≠ pago ({$out['montoPago']}).";
@@ -980,7 +1006,7 @@ class ReglasAplicadasv40
                     echo " * ERROR: UUID de factura no encontrado en el XML.<br>";
                 }
             } else {
-                $xmlMoneda = $xmlGrouped[$uuidFactura]['moneda'];
+                $xmlMoneda = $xmlGrouped[$uuidFactura]['monedaDR'];
 
                 if ($this->debug == 1) {
                     echo " * Moneda en Factura: $monedaFactura vs Moneda en XML: $xmlMoneda<br>";
