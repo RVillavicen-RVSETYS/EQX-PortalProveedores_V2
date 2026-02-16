@@ -50,14 +50,14 @@ class RegistrarPago_Mdl
             $this->db->beginTransaction();
 
             // 2. Armar SQL base
-            $sql = "INSERT INTO pagos_compras ( idPagoDet, idAcuse, OC, HES, montoPagado, saldoInsoluto, moneda, tipoCambio, formaPago, formaPagoSAT, fechaPago, fechaReg ) VALUES ";
+            $sql = "INSERT INTO pagos_compras ( idPagoDet, idAcuse, OC, HES, montoPagado, saldoInsoluto, moneda, tipoCambio, montoTipoCambio, monedaTipoCambio, formaPago, formaPagoSAT, fechaPago, fechaReg ) VALUES ";
 
             $placeholders = [];
             $values = [];
 
             foreach ($pagos as $index => $pago) {
 
-                $placeholders[] = "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())";
+                $placeholders[] = "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())";
 
                 $values[] = $pago['IdPagoDet'];
                 $values[] = $pago['IdAcuse'] ?? null;
@@ -65,8 +65,14 @@ class RegistrarPago_Mdl
                 $values[] = $pago['HES'] ?? null;
                 $values[] = $pago['MontoPagado'];
                 $values[] = $pago['SaldoInsoluto'] ?? 0;
-                $values[] = $pago['Moneda'] ?? 'MXN';
-                $values[] = $pago['TipoCambio'] ?? 1;
+                $moneda = $pago['Moneda'] ?? 'MXN';
+                $tipoCambio = $pago['TipoCambio'] ?? 1;
+                $montoTipoCambio = $pago['MontoTipoCambio'] ?? $pago['MontoPagado'];
+                $monedaTipoCambio = $pago['MonedaTipoCambio'] ?? $moneda;
+                $values[] = $moneda;
+                $values[] = $tipoCambio;
+                $values[] = $montoTipoCambio;
+                $values[] = $monedaTipoCambio;
                 $values[] = $pago['FormaPago'] ?? null;
                 $values[] = $pago['FormaPagoSAT'] ?? null;
                 $values[] = $pago['FechaPago'];
