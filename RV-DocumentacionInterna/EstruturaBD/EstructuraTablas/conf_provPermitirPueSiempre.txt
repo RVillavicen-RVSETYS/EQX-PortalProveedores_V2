@@ -1,0 +1,18 @@
+Tabla: conf_provPermitirPueSiempre
+Excepción: Permitir PUE siempre (permite aceptar facturas PUE aunque los días de crédito ya no caigan en el mes corriente).
+
+Columnas (comentarios en BD):
+- id (INT PK AUTO_INCREMENT) - PK
+- idProveedor (INT, FK a proveedores.id) - FK a proveedores.id
+- fechaExpiracion (DATE) - Fecha límite hasta la que aplica el permiso
+- motivo (VARCHAR(500)) - Motivo por el que se otorga el permiso
+- estatus (TINYINT, DEFAULT 1) - Valores: 0=Cancelado/Inactivo, 1=Activo
+- idUserReg (INT NULL) - Usuario que registró (auditoría)
+- fechaReg (DATETIME NULL) - Fecha y hora de registro (auditoría)
+- idUserCancela (INT NULL) - Usuario que canceló, si aplica (auditoría)
+- fechaCancela (DATETIME NULL) - Fecha y hora de cancelación, si aplica (auditoría)
+- motivoCancela (VARCHAR(255) NULL) - Motivo por el que se deshabilitó/canceló el permiso
+
+Ejemplo registro:
+"id"	"idProveedor"	"fechaExpiracion"	"motivo"	"estatus"	"idUserReg"	"fechaReg"	"idUserCancela"	"fechaCancela"	"motivoCancela"
+"1"	"100029"	"2025-02-28"	"Urge factura, pagaré mañana"	"1"	"2"	"2025-02-16 10:00:00"	NULL	NULL	NULL

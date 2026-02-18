@@ -140,6 +140,10 @@ if ($debug == 1) {
             [10, 25, 50, "Todo"]
         ],
         info: true,
+        initComplete: function() {
+            var $filter = $('#tableFechaEmision_filter input[type="search"]');
+            if ($filter.length) $filter.attr('id', 'tableFechaEmision_search').attr('name', 'tableFechaEmision_search');
+        },
         buttons: [{
                 extend: 'pdfHtml5',
                 className: 'btn btn-pdf bg-pyme-primary text-white',

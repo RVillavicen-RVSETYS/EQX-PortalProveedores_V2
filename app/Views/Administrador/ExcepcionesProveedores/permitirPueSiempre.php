@@ -1,27 +1,19 @@
 <?php
 $debug = 0;
+$listaPermitir = $listaPermitirPueSiempre ?? ['success' => false];
+$listaProveedores = $listaProveedores ?? ['success' => false, 'data' => []];
 
 if ($debug == 1) {
-    echo 'Contenido de menuData:';
-    var_dump($menuData);
-    echo '<br><br>Contenido de areaData:';
-    var_dump($areaData);
-    echo '<br><br>Contenido de areaLink:';
-    var_dump($areaLink);
-    echo '<br><br>Contenido de _SESSION:';
+    if (isset($menuData)) { echo 'Contenido de menuData:'; var_dump($menuData); echo '<br><br>'; }
+    if (isset($areaData)) { echo 'Contenido de areaData:'; var_dump($areaData); echo '<br><br>'; }
+    if (isset($areaLink)) { echo 'Contenido de areaLink:'; var_dump($areaLink); echo '<br><br>'; }
+    echo 'Contenido de _SESSION:';
     var_dump($_SESSION);
-    echo '<br><br>Request-URI: ' . $_SERVER['REQUEST_URI'] . '<br>Contenido de piezasURL:';
-    var_dump($piezasURL);
-    echo '<br><br>Ruta del MenuActual: ' . $rutaMenu . '<br><br>Contenido de datosPagina:';
-    var_dump($datosPagina);
-    echo '<br><br>Lista De Proveedores Ignora Descuento: <br><br>Contenido de Proveedores_Mdl.php:';
-    var_dump($exentosCfdiDistinto['data']);
-    echo '<br><br>Lista Uso De CFDI: <br><br>Contenido de Proveedores_Mdl.php:';
-    var_dump($catUsoCfdi['data']);
-    echo '<br><br>Lista De Proveedores: <br><br>Contenido de Proveedores_Mdl.php:';
-    var_dump($listaProveedores['data']);
+    echo '<br><br>Lista Permitir PUE Siempre: <br><br>';
+    var_dump($listaPermitir);
+    echo '<br><br>Lista De Proveedores: <br><br>';
+    var_dump($listaProveedores);
 }
-
 ?>
 
 <div class="row">
@@ -32,17 +24,19 @@ if ($debug == 1) {
                 <h4 class="card-title">Lista De Proveedores</h4>
             </div>
             <div class="card-body border">
-                <form id="agregarProveedorUC">
+                <form id="agregarProveedorPUE">
                     <div class="row">
-                        <label for="idProveedorUC">Proveedores</label>
+                        <label for="idProveedorPUE">Proveedores</label>
                         <div class="input-group mb-3">
-                            <select name="idProveedor" id="idProveedorUC" class="select2 form-control custom-select" style="width: 100%;">
+                            <select name="idProveedor" id="idProveedorPUE" class="select2 form-control custom-select" style="width: 100%;">
                                 <option value="">Selecciona Un Proveedor</option>
                                 <?php
-                                foreach ($listaProveedores['data'] as $proveedor) {
+                                if ($listaProveedores['success'] && !empty($listaProveedores['data'])) {
+                                    foreach ($listaProveedores['data'] as $proveedor) {
                                 ?>
-                                    <option value="<?= $proveedor['IdProveedor']; ?>"><?= $proveedor['IdProveedor']; ?> - <?= $proveedor['Proveedor']; ?></option>
+                                    <option value="<?= (int)$proveedor['IdProveedor']; ?>"><?= htmlspecialchars($proveedor['IdProveedor'] . ' - ' . ($proveedor['Proveedor'] ?? '')); ?></option>
                                 <?php
+                                    }
                                 }
                                 ?>
                             </select>
@@ -50,30 +44,26 @@ if ($debug == 1) {
                     </div>
 
                     <div class="row">
-                        <label for="idUsoCfdi">Uso CFDI</label>
+                        <label for="fechaExpiracionPUE">Fecha De Expiración Del Permiso</label>
                         <div class="input-group mb-3">
-                            <select name="idUsoCfdi" id="idUsoCfdi" class="select2 form-control custom-select" style="width: 100%;">
-                                <option value="">Selecciona Uso De CFDI</option>
-                                <?php
-                                foreach ($catUsoCfdi['data'] as $usoCfdi) {
-                                ?>
-                                    <option value="<?= $usoCfdi['IdUsoCfdi']; ?>"><?= $usoCfdi['IdUsoCfdi']; ?> - <?= $usoCfdi['UsoCfdi']; ?></option>
-                                <?php
-                                }
-                                ?>
-                            </select>
+                            <input type="date" class="form-control" name="fechaExpiracion" id="fechaExpiracionPUE" min="<?= date('Y-m-d'); ?>" required>
                         </div>
                     </div>
 
                     <div class="row">
+                        <label for="motivoPUE">Motivo</label>
+                        <textarea class="form-control" name="motivo" id="motivoPUE" style="resize: none;" rows="3" required></textarea>
+                    </div>
 
-                        <div id="bloquear-btnAgregaProveedorUC" style="display:none;">
+                    <div class="row">
+
+                        <div id="bloquear-btnAgregaProveedorPUE" style="display:none;">
                             <button class="btn btn-primary btn-md" type="button" disabled="" style="height: 100%;">
                                 <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
                             </button>
                         </div>
-                        <div id="desbloquear-btnAgregaProveedorUC">
-                            <button type="submit" id="btnAgregaProveedorUC" class="btn btn-md btn-outline-primary mx-2 mt-3">Guardar</button>
+                        <div id="desbloquear-btnAgregaProveedorPUE">
+                            <button type="submit" id="btnAgregaProveedorPUE" class="btn btn-md btn-outline-primary mx-2 mt-3" <?= (!$listaProveedores['success'] || empty($listaProveedores['data'])) ? 'disabled' : ''; ?>>Guardar</button>
                         </div>
 
                     </div>
@@ -85,24 +75,25 @@ if ($debug == 1) {
 
     <div class="col-8">
         <?php
-        if ($exentosCfdiDistinto['success'] != true) {
+        if ($listaPermitir['success'] != true || empty($listaPermitir['data'])) {
         ?>
-            <div class="alert alert-info">Aún no se registran proveedores para un uso de cfdi distinto al registrado. </div>
+            <div class="alert alert-info">Aún no se registran permisos PUE siempre. </div>
         <?php
         } else {
         ?>
-            <table class="table table-sm" id="tableUsoCdfi">
+            <table class="table table-sm" id="tablePermitirPueSiempre">
                 <thead>
                     <tr>
                         <th>No. Proveedor</th>
                         <th>Proveedor</th>
-                        <th>Uso De CFDI</th>
+                        <th>Fecha Expiración Del Permiso</th>
+                        <th>Motivo</th>
                         <th>Estatus</th>
                     </tr>
                 </thead>
                 <tbody>
                     <?php
-                    foreach ($exentosCfdiDistinto['data'] as $proveedor) {
+                    foreach ($listaPermitir['data'] as $proveedor) {
                         if ($proveedor['Estatus'] == 1) {
                             $color = 'btn-outline-success';
                             $icono = 'fas fa-check';
@@ -112,17 +103,25 @@ if ($debug == 1) {
                         }
                     ?>
                         <tr>
-                            <td class="text-right"><?= $proveedor['IdProveedor']; ?></td>
-                            <td><?= $proveedor['Proveedor']; ?></td>
-                            <td><?= $proveedor['Codigo']; ?> - <?= $proveedor['UsoCfdi']; ?></td>
+                            <td class="text-right"><?= (int)$proveedor['IdProveedor']; ?></td>
+                            <td><?= htmlspecialchars($proveedor['Proveedor'] ?? ''); ?></td>
+                            <td><?php
+                                $fechaExp = $proveedor['FechaExpiracion'] ?? '';
+                                echo $fechaExp ? htmlspecialchars(date('d-m-Y', strtotime($fechaExp))) : '';
+                            ?></td>
+                            <td><?= htmlspecialchars($proveedor['Motivo'] ?? ''); ?></td>
                             <td class="text-center">
-                                <div id="bloquear-btnEstatus4<?= $proveedor['IdConf']; ?>" style="display:none;">
+                                <div id="bloquear-btnEstatus6<?= $proveedor['IdConf']; ?>" style="display:none;">
                                     <button class="btn btn-xs btn-rounded <?= $color; ?> " type="button" disabled="" style="height: 100%;">
                                         <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
                                     </button>
                                 </div>
-                                <div id="desbloquear-btnEstatus4<?= $proveedor['IdConf']; ?>">
-                                    <button id="btnEstatus4<?= $proveedor['IdConf']; ?>" onclick="cambiarEstatus(<?= $proveedor['Estatus']; ?>, <?= $proveedor['IdConf']; ?>, <?= 4 ?>,<?= $proveedor['IdProveedor']; ?>)" type="button" class="btn btn-xs btn-rounded <?= $color; ?>"><i class="<?= $icono; ?>"></i></button>
+                                <div id="desbloquear-btnEstatus6<?= $proveedor['IdConf']; ?>">
+                                    <?php if ($proveedor['Estatus'] == 1) : ?>
+                                    <button type="button" class="btn btn-xs btn-rounded btn-deshabilitar-pue <?= $color; ?>" data-id-conf="<?= (int)$proveedor['IdConf']; ?>" data-id-proveedor="<?= (int)$proveedor['IdProveedor']; ?>"><i class="<?= $icono; ?>"></i></button>
+                                    <?php else : ?>
+                                    <button type="button" class="btn btn-xs btn-rounded <?= $color; ?>" data-id-conf="<?= (int)$proveedor['IdConf']; ?>" data-id-proveedor="<?= (int)$proveedor['IdProveedor']; ?>" data-accion="reactivar-pue"><i class="<?= $icono; ?>"></i></button>
+                                    <?php endif; ?>
                                 </div>
                             </td>
                         </tr>
@@ -145,7 +144,8 @@ if ($debug == 1) {
 
 <script>
     /*Este Se Queda Aquí*/
-    $('#tableUsoCdfi').DataTable({
+    if ($('#tablePermitirPueSiempre').length) {
+    $('#tablePermitirPueSiempre').DataTable({
         iDisplayLength: 10,
         responsive: false,
         fixedColumns: true,
@@ -161,8 +161,10 @@ if ($debug == 1) {
         ],
         info: true,
         initComplete: function() {
-            var $filter = $('#tableUsoCdfi_filter input[type="search"]');
-            if ($filter.length) $filter.attr('id', 'tableUsoCdfi_search').attr('name', 'tableUsoCdfi_search');
+            var $filter = $('#tablePermitirPueSiempre_filter input[type="search"]');
+            if ($filter.length) {
+                $filter.attr('id', 'tablePermitirPueSiempre_search').attr('name', 'tablePermitirPueSiempre_search');
+            }
         },
         buttons: [{
                 extend: 'pdfHtml5',
@@ -198,4 +200,5 @@ if ($debug == 1) {
             }
         ]
     });
+    }
 </script>

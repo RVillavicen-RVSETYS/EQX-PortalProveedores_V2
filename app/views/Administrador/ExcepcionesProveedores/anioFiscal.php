@@ -140,6 +140,10 @@ if ($debug == 1) {
             [10, 25, 50, "Todo"]
         ],
         info: true,
+        initComplete: function() {
+            var $filter = $('#tableExento_filter input[type="search"]');
+            if ($filter.length) $filter.attr('id', 'tableExento_search').attr('name', 'tableExento_search');
+        },
         buttons: [{
                 extend: 'pdfHtml5',
                 className: 'btn btn-pdf bg-pyme-primary text-white',

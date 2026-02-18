@@ -10,6 +10,7 @@ use App\Models\Proveedores\Excepciones\ExentoFechaEmision_Mdl;
 use App\Models\Proveedores\Excepciones\UsoCfdiDistinto_Mdl;
 use App\Models\Proveedores\Excepciones\BloqDiferencias_Mdl;
 use App\Models\Proveedores\Excepciones\ExcepcionesProveedores_Mdl;
+use App\Models\Proveedores\Excepciones\PermitirPueSiempre_Mdl;
 use App\Models\Proveedores\Proveedores_Mdl;
 
 class ExcepcionesProveedoresController extends Controller
@@ -333,10 +334,56 @@ class ExcepcionesProveedoresController extends Controller
         }
     }
 
+    public function listaPermitirPueSiempre()
+    {
+        $data = [];
+        $namespaceParts = explode('\\', __NAMESPACE__);
+        $areaLink = end($namespaceParts);
+
+        $menuModel = new Menu_Mdl();
+        $resultIdArea = $menuModel->obtenerIdAreaPorLink($areaLink);
+
+        $permitePueModel = new PermitirPueSiempre_Mdl();
+        $resultExcepciones = $permitePueModel->obtenerLista();
+        $obtenerProveedores = $permitePueModel->getProveedores();
+
+        if ($resultIdArea['success']) {
+            $idArea = $resultIdArea['data'];
+        } else {
+            $timestamp = date("Y-m-d H:i:s");
+            error_log("[$timestamp] app\\controllers\\Administrador\\ExcepcionesProveedoresController ->Error al buscar Id del Area (nombre: $areaLink): " . PHP_EOL, 3, LOG_FILE);
+            echo 'No pudimos traer el id del Area:' . $resultIdArea['message'];
+            exit(0);
+        }
+
+        $menuData = $menuModel->obtenerEstructuraMenu($_SESSION['EQXidNivel'], $idArea);
+        $areaData = $menuModel->listarAreasDisponibles($_SESSION['EQXidNivel']);
+
+        if ($menuData['success']) {
+            if ($areaData['success']) {
+                $data['menuData'] = $menuData;
+                $data['areaData'] = $areaData;
+                $data['areaLink'] = $areaLink;
+                $data['listaPermitirPueSiempre'] = $resultExcepciones;
+                $data['listaProveedores'] = $obtenerProveedores;
+                $this->view('Administrador/ExcepcionesProveedores/permitirPueSiempre', $data);
+            } else {
+                $timestamp = date("Y-m-d H:i:s");
+                error_log("[$timestamp] app\\controllers\\Administrador\\ExcepcionesProveedoresController ->Error al listar las Areas: " . PHP_EOL, 3, LOG_FILE);
+                echo 'Problemas con las Areas de Acceso:' . $resultIdArea['message'];
+                exit(0);
+            }
+        } else {
+            $timestamp = date("Y-m-d H:i:s");
+            error_log("[$timestamp] app\\controllers\\Administrador\\ExcepcionesProveedoresController ->Error al buscar Id del Area (nombre: $areaLink): " . PHP_EOL, 3, LOG_FILE);
+            echo 'No pudimos traer el detallado del Menu:' . $resultIdArea['message'];
+            exit(0);
+        }
+    }
+
     public function cfdisPorProveedor()
     {
         $data = []; // Aquí puedes pasar datos a la vista si es necesario
-        $tabla = "conf_provCfdisPermitidos";
         // Obtener el nombre del namespace para identificar el área
         $namespaceParts = explode('\\', __NAMESPACE__);
         $areaLink = end($namespaceParts); // Obtiene el ultimo parametro del NameSpace
@@ -413,6 +460,20 @@ class ExcepcionesProveedoresController extends Controller
             'estatus' => $nuevoEstatus
         ];
 
+        // Tabla 6 (Permitir PUE siempre): al deshabilitar (estatus 0) el motivo es obligatorio
+        if ($tabla === '6' && $nuevoEstatus == 0) {
+            $motivoCancela = trim($_POST['motivoCancela'] ?? '');
+            if ($motivoCancela === '') {
+                header('Content-Type: application/json; charset=utf-8');
+                echo json_encode([
+                    'success' => false,
+                    'message' => 'El motivo de deshabilitación es obligatorio.'
+                ]);
+                return;
+            }
+            $campos['motivoCancela'] = $motivoCancela;
+        }
+
         $filtros = [
             'id' => $identificador
         ];
@@ -439,11 +500,16 @@ class ExcepcionesProveedoresController extends Controller
                 $model = new BloqDiferencias_Mdl();
                 $resultExcepciones = $model->actualizarBloqDiferencias($campos, $filtros);
                 break;
+            case '6':
+                $model = new PermitirPueSiempre_Mdl();
+                $resultExcepciones = $model->actualizarPermitirPueSiempre($campos, $filtros);
+                break;
             default:
                 $resultExcepciones = ['success' => false, 'message' => 'Tabla no válida.'];
                 break;
         }
 
+        header('Content-Type: application/json; charset=utf-8');
         if ($resultExcepciones['success']) {
             $Message = $resultExcepciones['message'];
             echo json_encode([
@@ -740,6 +806,36 @@ class ExcepcionesProveedoresController extends Controller
             echo json_encode([
                 'success' => false,
                 'message' => $errorMessage
+            ]);
+        }
+    }
+
+    public function agregarProveedorPUE()
+    {
+        $idProveedor = $_POST['idProveedor'] ?? '';
+        $fechaExpiracion = $_POST['fechaExpiracion'] ?? '';
+        $motivo = $_POST['motivo'] ?? '';
+
+        $permitePueModel = new PermitirPueSiempre_Mdl();
+        $campos = [
+            'idProveedor' => (int) $idProveedor,
+            'fechaExpiracion' => $fechaExpiracion,
+            'motivo' => trim($motivo),
+            'estatus' => 1,
+            'idUserReg' => $_SESSION['EQXident'] ?? 0
+        ];
+
+        $resultExcepciones = $permitePueModel->registraPermitirPueSiempre($campos);
+
+        if ($resultExcepciones['success']) {
+            echo json_encode([
+                'success' => true,
+                'message' => $resultExcepciones['message']
+            ]);
+        } else {
+            echo json_encode([
+                'success' => false,
+                'message' => $resultExcepciones['message']
             ]);
         }
     }
