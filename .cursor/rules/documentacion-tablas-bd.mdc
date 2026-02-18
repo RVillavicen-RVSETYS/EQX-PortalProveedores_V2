@@ -1,0 +1,19 @@
+# Estándar: documentación de tablas en base de datos
+
+Aplicar en cualquier proyecto al crear o documentar tablas.
+
+1. **CREATE TABLE con COMMENT**  
+   En cada columna usar `COMMENT 'descripción'` para documentar su propósito.
+
+2. **Campos de auditoría**  
+   Usar siempre **DATETIME** (no DATE) para: `fechaReg`, `fechaCancela`, y cualquier fecha/hora de auditoría.
+
+3. **Campo estatus**  
+   Documentar siempre en COMMENT: cantidad de valores y significado de cada uno.  
+   Ejemplo: `COMMENT 'Estatus. Valores: 0=Cancelado/Inactivo, 1=Activo'`.
+
+4. **Documentación en archivos**  
+   Mantener el .txt (o equivalente) de estructura de tablas alineado con los COMMENT de la BD.
+
+5. **Script inicial**  
+   Solo CREATE TABLE; no incluir ALTER TABLE en el script de creación inicial.

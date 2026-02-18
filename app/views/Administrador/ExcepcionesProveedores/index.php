@@ -266,6 +266,21 @@ if ($debug == 1) {
                                         </a>
                                     </li>
 
+                                    <li class="nav-item">
+                                        <a class="nav-link" data-toggle="tab" href="#permitirPueSiempre" role="tab" onclick="cargarPermitirPueSiempre();">
+                                            <span class="hidden-xs-down">Permitir Pue Siempre</span>
+                                            <span class="hidden-sm-up">
+                                                <div class="tooltip-container">
+                                                    <span><i class="fas fa-info-circle font-12"></i></span>
+                                                    <div class="tooltip-text">
+                                                        <strong>Permitir Pue Siempre</strong>
+                                                        <p>Permite aceptar facturas PUE aunque los días de crédito ya no caigan en el mes corriente. Un permiso temporal por proveedor.</p>
+                                                    </div>
+                                                </div>
+                                            </span>
+                                        </a>
+                                    </li>
+
                                 </ul>
                                 <!-- Tab panes -->
                                 <div class="tab-content">
@@ -275,6 +290,7 @@ if ($debug == 1) {
                                     <div class="tab-pane p-20" id="usoCFDI" role="tabpanel"></div>
                                     <div class="tab-pane p-20" id="bloqueoDif" role="tabpanel"></div>
                                     <div class="tab-pane p-20" id="bloqueoDeCfdis" role="tabpanel"></div>
+                                    <div class="tab-pane p-20" id="permitirPueSiempre" role="tabpanel"></div>
                                 </div>
                             </div>
                         </div>
@@ -350,6 +366,7 @@ if ($debug == 1) {
     <script src="/assets/libs/chartist-plugin-tooltips/dist/chartist-plugin-tooltip.min.js"></script>
     <script src="/assets/extra-libs/datatables.net/js/pdfmake.min.js"></script>
     <script src="/assets/extra-libs/datatables.net/js/vfs_fonts.js"></script>
+    <script src="/assets/libs/sweetalert2/dist/sweetalert2.all.min.js"></script>
 
     <?php include 'index_js.php'; ?>
 
