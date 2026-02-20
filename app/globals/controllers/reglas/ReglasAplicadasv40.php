@@ -406,7 +406,7 @@ class ReglasAplicadasv40
 
 
 
-            if ($subtotalXML <= $minimo || $subtotalXML >= $maximo) {
+            if (($subtotalXML <= $minimo || $subtotalXML >= $maximo) && $subtotalXML != 0) {
 
                 $response["isValid"] = false;
                 $errorMessages[] = "* El subtotal <b>$ $subtXML</b> es incorrecto.<br>";

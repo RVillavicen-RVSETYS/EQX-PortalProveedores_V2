@@ -232,8 +232,8 @@ class RegistroCFDIsv40_Mdl
                 ":tipoCambio" => $dataDeValidacion["dataFactXML"]["Comprobante"]["TipoCambio"],
                 ":version" => $dataDeValidacion["dataFactXML"]["Comprobante"]["Version"],
                 ":tipoComprobante" => $dataDeValidacion["dataFactXML"]["Comprobante"]["TipoDeComprobante"],
-                ":totalImpuestosTrasladados" => $dataDeValidacion["dataFactXML"]["Impuestos"]["TotalImpuestosTrasladados"],
-                ":totalImpuestosRetenidos" => $dataDeValidacion["dataFactXML"]["Impuestos"]["TotalImpuestosRetenidos"],
+                ":totalImpuestosTrasladados" => $dataDeValidacion["dataFactXML"]["Impuestos"]["TotalImpuestosTrasladados"] ?? 0,
+                ":totalImpuestosRetenidos" => $dataDeValidacion["dataFactXML"]["Impuestos"]["TotalImpuestosRetenidos"] ?? 0,
                 ":validada" => "2",
                 ":codigoEstatusSAT" => $dataDeValidacion["ValidFiscal"]["CodigoEstatus"],
                 ":estadoValidaSAT" => $dataDeValidacion["ValidFiscal"]["Estado"],
@@ -264,14 +264,16 @@ class RegistroCFDIsv40_Mdl
             $sqlImpuestos = "INSERT INTO cfdi_facturasImpuestos (idFactura, idCompra, tipo, impuesto, TipoFactor, TasaOCuota, Base, Importe) VALUES ";
             $valuesImpuestos = [];
 
-            foreach ($dataDeValidacion["dataFactXML"]["Impuestos"]["Traslados"] as $impuesto) {
+            $impuestosTrasladados = $dataDeValidacion["dataFactXML"]["Impuestos"]["Traslados"] ?? [];
+            foreach ($impuestosTrasladados as $impuesto) {
                 if (self::$debug) {
                     echo '<br> * Impuesto Traslado: ' . $impuesto["Impuesto"] . '--' . $impuesto["TipoFactor"] . '--' . $impuesto["TasaOCuota"] . '--' . $impuesto["Base"] . '--' . $impuesto["Importe"];
                 }
                 $valuesImpuestos[] = "($idCFDI, '$idCompra', 'Traslado', '{$impuesto["Impuesto"]}', '{$impuesto["TipoFactor"]}', '{$impuesto["TasaOCuota"]}', '{$impuesto["Base"]}', '{$impuesto["Importe"]}')";
             }
 
-            foreach ($dataDeValidacion["dataFactXML"]["Impuestos"]["Retenciones"] as $impuesto) {
+            $impuestosRetenidos = $dataDeValidacion["dataFactXML"]["Impuestos"]["Retenciones"] ?? [];
+            foreach ($impuestosRetenidos as $impuesto) {
                 if (self::$debug) {
                     echo '<br> * Impuesto Retencion: ' . $impuesto["Impuesto"] . '--' . $impuesto["TipoFactor"] . '--' . $impuesto["TasaOCuota"] . '--' . $impuesto["Base"] . '--' . $impuesto["Importe"];
                 }
