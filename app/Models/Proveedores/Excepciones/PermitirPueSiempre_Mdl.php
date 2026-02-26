@@ -229,10 +229,13 @@ class PermitirPueSiempre_Mdl
             }
 
             // Auditoría cancelación: al cancelar (estatus=0) guardar cuándo, quién y motivo; al reactivar limpiar
-            $setParts[] = 'fechaCancela = IF(:estatus = 0, NOW(), NULL)';
-            $setParts[] = 'idUserCancela = IF(:estatus = 0, :idUserCancela, NULL)';
-            $setParts[] = 'motivoCancela = IF(:estatus = 0, :motivoCancela, NULL)';
+            $setParts[] = 'fechaCancela = IF(:estatusAudit1 = 0, NOW(), NULL)';
+            $setParts[] = 'idUserCancela = IF(:estatusAudit2 = 0, :idUserCancela, NULL)';
+            $setParts[] = 'motivoCancela = IF(:estatusAudit3 = 0, :motivoCancela, NULL)';
             $idUserCancela = $_SESSION['EQXident'] ?? null;
+            $params[':estatusAudit1'] = $campos['estatus'];
+            $params[':estatusAudit2'] = $campos['estatus'];
+            $params[':estatusAudit3'] = $campos['estatus'];
             $params[':idUserCancela'] = $idUserCancela;
             $params[':motivoCancela'] = $campos['motivoCancela'] ?? null;
 
@@ -241,7 +244,9 @@ class PermitirPueSiempre_Mdl
             foreach ($params as $param => $value) {
                 $clave = trim($param, ':');
                 $tipoDato = $camposValidos[$clave]['tipoDato'] ?? $filtrosValidos[$clave]['tipoDato'] ?? 'INT';
-                if ($clave === 'idUserCancela') {
+                if (strpos($clave, 'estatusAudit') === 0) {
+                    $stmt->bindValue($param, $value, PDO::PARAM_INT);
+                } elseif ($clave === 'idUserCancela') {
                     $stmt->bindValue($param, $value, $value === null ? PDO::PARAM_NULL : PDO::PARAM_INT);
                 } elseif ($clave === 'motivoCancela') {
                     $stmt->bindValue($param, $value, $value === null ? PDO::PARAM_NULL : PDO::PARAM_STR);

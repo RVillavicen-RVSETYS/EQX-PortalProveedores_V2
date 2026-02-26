@@ -178,7 +178,7 @@
                 return String(val).trim();
             }
         }).then(function(result) {
-            if (result.isConfirmed && result.value) {
+            if (result.value) {
                 var motivoCancela = result.value;
                 if ($('#' + idBtn).length) bloqueoBtn(idBtn, 1);
                 $.ajax({
@@ -308,8 +308,7 @@
                     notificaBad(respuesta.message);
                 }
             },
-            beforeSend: function() {
-            }
+            beforeSend: function() {}
         });
     }
 

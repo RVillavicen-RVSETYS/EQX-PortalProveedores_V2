@@ -407,13 +407,16 @@ class Proveedores_Mdl
                     IFNULL(exemi.idProveedor, 0) AS FechaEmision, 
                     IFNULL(ucd.idProveedor, 0) AS UsoCfdiDistinto, 
                     ucd.usoCfdi AS UsoCfdi, 
-                    IFNULL(bd.idProveedor, 0) AS BloqDiferenciaMonto
+                    IFNULL(bd.idProveedor, 0) AS BloqDiferenciaMonto,
+                    IFNULL( pps.idProveedor, 0 ) AS PermitirPueSiempre,
+                    pps.fechaExpiracion AS FechaExpiracionPueSiempre
                 FROM proveedores p 
                 LEFT JOIN conf_provIgnoraDescuento iDesc ON p.id = iDesc.idProveedor
                 LEFT JOIN conf_provExentoAnoFisc exanio ON p.id = exanio.idProveedor AND exanio.estatus = '1'
                 LEFT JOIN conf_provExentoFechaEmision exemi ON p.id = exemi.idProveedor AND exemi.estatus = '1'
                 LEFT JOIN conf_provUsoCfdiDistinto ucd ON p.id = ucd.idProveedor AND ucd.estatus = '1'
                 LEFT JOIN conf_provBloqDiferencias bd ON p.id = bd.idProveedor 
+                LEFT JOIN conf_provPermitirPueSiempre pps ON p.id = pps.idProveedor AND pps.estatus = '1' 
                 WHERE p.id = :idProveedor
             ";
 
@@ -452,7 +455,9 @@ class Proveedores_Mdl
                 'UsoCfdiDistinto' => $result['UsoCfdiDistinto'] == $idProveedor,
                 'UsoCfdi' => $result['UsoCfdi'] ?? null,
                 'BloqDiferenciaMonto' => $result['BloqDiferenciaMonto'] == $idProveedor,
-                'DescontarPromocionesAplicables' => $result['descontarPromocionesAplicables'] == 1
+                'DescontarPromocionesAplicables' => $result['descontarPromocionesAplicables'] == 1,
+                'PermitirPueSiempre' => $result['PermitirPueSiempre'] == $idProveedor,
+                'FechaExpiracionPueSiempre' => $result['FechaExpiracionPueSiempre'] ?? null
             ];
 
             return ['success' => true, 'message' => 'Todo OK', 'data' => $responseData];
@@ -782,7 +787,7 @@ class Proveedores_Mdl
 
             $idUser = $_SESSION['EQXident'];
 
-            $sql = "UPDATE proveedores SET " . ltrim($camposSQL, ','). ", userUpdate = '$idUser', fechaUpdate = NOW() " . $filtrosSQL;
+            $sql = "UPDATE proveedores SET " . ltrim($camposSQL, ',') . ", userUpdate = '$idUser', fechaUpdate = NOW() " . $filtrosSQL;
 
             if (self::$debug) {
                 $this->db->imprimirConsulta($sql, $params, 'Actualiza Datos Del Proveedor');
@@ -797,7 +802,7 @@ class Proveedores_Mdl
                     $stmt->bindValue($param, $value, $allParametros[$clave]['tipoDato'] == 'INT' ? PDO::PARAM_INT : PDO::PARAM_STR);
                 }
             }
-            
+
             $stmt->execute();
             $filasAfectadas = $stmt->rowCount();
 
@@ -809,8 +814,8 @@ class Proveedores_Mdl
 
             if ($filasAfectadas >= 1) {
                 return [
-                    'success' => true, 
-                    'message' => 'Datos Actualizados Correctamente.', 
+                    'success' => true,
+                    'message' => 'Datos Actualizados Correctamente.',
                     'filasAfectadas' => $filasAfectadas
                 ];
             } else {

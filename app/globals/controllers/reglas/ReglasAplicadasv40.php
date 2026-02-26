@@ -289,10 +289,26 @@ class ReglasAplicadasv40
             $mesActual = date('m');
             $mesPago = date('m', $fechaPagoPermitida);
 
+            $permitirPueSiempre = $configParaValidaciones['excepcionesProveedor']['PermitirPueSiempre'] ?? false;
+            $fechaExpiracionPue = $configParaValidaciones['excepcionesProveedor']['FechaExpiracionPueSiempre'] ?? null;
+            $excepcionValida = false;
+
+            if ($permitirPueSiempre && $fechaExpiracionPue) {
+                $fechaActual = date('Y-m-d');
+                // Validar que el permiso no haya expirado (fecha de expiración >= hoy)
+                if (strtotime($fechaExpiracionPue) >= strtotime($fechaActual)) {
+                    $excepcionValida = true;
+                }
+            }
+
             if ($mesActual !== $mesPago) {
-                $response["isValid"] = false;
-                $errorMessages[] = "* No podemos recibir la factura con Método de Pago PUE porque no sería pagable dentro del mismo mes.<br>";
-                $debugMessages[] = "ERROR - Validación de Pagabilidad para PUE: Fecha Pago Permitida <b>" . date('Y-m-d', $fechaPagoPermitida) . "</b>, Mes Actual <b>$mesActual</b>, Mes de Pago <b>$mesPago</b>.";
+                if ($excepcionValida) {
+                    $debugMessages[] = "OK - Validación de Pagabilidad para PUE omitida: El proveedor tiene la excepción 'PermitirPueSiempre' vigente hasta <b>{$fechaExpiracionPue}</b>.";
+                } else {
+                    $response["isValid"] = false;
+                    $errorMessages[] = "* No podemos recibir la factura con Método de Pago PUE porque no sería pagable dentro del mismo mes.<br>";
+                    $debugMessages[] = "ERROR - Validación de Pagabilidad para PUE: Fecha Pago Permitida <b>" . date('Y-m-d', $fechaPagoPermitida) . "</b>, Mes Actual <b>$mesActual</b>, Mes de Pago <b>$mesPago</b>.";
+                }
             } else {
                 $debugMessages[] = "OK - Validación de Pagabilidad para PUE: Fecha Pago Permitida <b>" . date('Y-m-d', $fechaPagoPermitida) . "</b>.";
             }
