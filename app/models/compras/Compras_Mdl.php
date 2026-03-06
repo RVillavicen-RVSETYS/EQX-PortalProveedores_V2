@@ -504,7 +504,6 @@ class Compras_Mdl
 
     public function dataCompraPorAcuse(INT $idUser, INT $acuse)
     {
-        self::$debug = 0;
         if (empty($idUser) || empty($acuse)) {
             return ['success' => false, 'message' => 'Se requiere No. de Acuse.'];
         } else {
@@ -531,7 +530,7 @@ class Compras_Mdl
                             FROM detcompras dc
                             GROUP BY dc.idCompra)dcp ON c.id = dcp.idCompra
                         INNER JOIN cfdi_facturas cf ON c.id = cf.idCompra
-                        INNER JOIN (
+                        LEFT JOIN (
                             SELECT fi.idFactura,
                                 GROUP_CONCAT(DISTINCT CASE WHEN fi.tipo = 'Traslado' THEN CONCAT(fi.impuesto, ' = ', fi.Importe) END ORDER BY fi.impuesto SEPARATOR ', ') AS impuestosTrasMontos,
                                 GROUP_CONCAT(DISTINCT CASE WHEN fi.tipo = 'Retencion' THEN CONCAT(fi.impuesto, ' = ', fi.Importe) END ORDER BY fi.impuesto SEPARATOR ', ') AS impuestosRetMontos,
@@ -584,7 +583,7 @@ class Compras_Mdl
                                 FROM cfdi_notasCreditos nc
                                 WHERE nc.idCompra = :idCompra AND nc.estatus > 0
                                 ORDER BY nc.fechaReg DESC";
-                    
+
                     $stmtNotas = $this->db->prepare($sqlNotas);
                     $stmtNotas->bindParam(':idCompra', $acuse, PDO::PARAM_INT);
                     $stmtNotas->execute();
@@ -1008,7 +1007,7 @@ class Compras_Mdl
             if (!empty($idsNotaCredito) && is_array($idsNotaCredito)) {
                 // Filtrar valores válidos
                 $idsNotaCredito = array_filter(array_map('intval', $idsNotaCredito));
-                
+
                 if (!empty($idsNotaCredito)) {
                     // Construir condiciones para cada ID usando FIND_IN_SET
                     // FIND_IN_SET busca un valor dentro de una lista separada por comas
@@ -1018,7 +1017,7 @@ class Compras_Mdl
                         $params[$placeholder] = $id;
                         $findInSetConditions[] = "FIND_IN_SET(" . $placeholder . ", nc.idNCExterno) > 0";
                     }
-                    
+
                     // Excluir facturas que tienen una NC activa con idNCExterno que contiene alguno de los IdNotaCredito
                     // Usamos NOT EXISTS para verificar que no existe ninguna NC activa con esos idNCExterno
                     // FIND_IN_SET permite buscar valores dentro de campos que contienen listas separadas por coma

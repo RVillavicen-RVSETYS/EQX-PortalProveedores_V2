@@ -71,7 +71,7 @@ class RegistrarPagoController extends Controller
         if ($data['pagos'][0]['MontoPagado'] == 0 and $data['pagos'][0]['PagoCompleto'] == 1) {
 
             // 6. Mandar al modelo
-            echo "Es liquidacion con NC";
+            //echo "Es liquidacion con NC";
             $registrarPagoModel = new RegistrarPago_Mdl();
             $resultado = $registrarPagoModel->ejecutarActualizaEstatus($data['pagos'][0]['IdAcuse']);
         } else {
