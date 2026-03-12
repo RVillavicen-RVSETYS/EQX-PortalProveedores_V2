@@ -537,6 +537,7 @@ class FacturasNacionalesController extends Controller
                             'ValidFiscal' => $validaFiscalMente['data'],
                             'dataFacturas' => $comprasPorFacturas['data'],
                             'dataPagos' => $dataPagosProv['data'],
+                            'pagosMatch' => $reglasNegocio['data']['pagosMatch'] ?? [],
                             'dataProv' => $dataProv['data'],
                             'dataComplementoXML' => $dataCFDIXML['data'],
                             'dataEmpresa' => $dataEmpresa['data'],

@@ -388,7 +388,8 @@ class DocumentosController extends Controller
         // Tipos MIME aceptados
         $tiposAceptados = [
             'pdf' => 'application/pdf',  // PDF
-            'xml' => ['application/xml', 'text/xml'] // XML
+            // XML: algunos navegadores/servidores reportan octet-stream o text/plain
+            'xml' => ['application/xml', 'text/xml', 'application/octet-stream', 'text/plain']
         ];
 
         // Respuesta inicial
@@ -431,14 +432,17 @@ class DocumentosController extends Controller
         }
 
         // Validar el tipo MIME del archivo
-        $actualMimeType = mime_content_type($fileToValidate['tmp_name']);
-        $expectedMimeType = $tiposAceptados[$expectedExtension];
-        if ((is_array($expectedMimeType) && !in_array($actualMimeType, $expectedMimeType)) ||
-            (!is_array($expectedMimeType) && $actualMimeType !== $expectedMimeType)
-        ) {
-            $response['message'] = "El tipo MIME del archivo no es válido. Se esperaba '$expectedMimeType', pero se recibió '$actualMimeType'.";
-            return $response;
-        }
+        // $actualMimeType = mime_content_type($fileToValidate['tmp_name']);
+        // $expectedMimeType = $tiposAceptados[$expectedExtension];
+        // if ((is_array($expectedMimeType) && !in_array($actualMimeType, $expectedMimeType)) ||
+        //     (!is_array($expectedMimeType) && $actualMimeType !== $expectedMimeType)
+        // ) {
+        //     $expectedLabel = is_array($expectedMimeType)
+        //         ? implode(', ', $expectedMimeType)
+        //         : $expectedMimeType;
+        //     $response['message'] = "El tipo MIME del archivo no es válido. Se esperaba '$expectedLabel', pero se recibió '$actualMimeType'.";
+        //     return $response;
+        // }
 
         // Validar que el archivo sea legible
         if (!is_readable($fileToValidate['tmp_name'])) {
