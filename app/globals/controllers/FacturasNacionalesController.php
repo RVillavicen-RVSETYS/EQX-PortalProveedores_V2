@@ -394,7 +394,7 @@ class FacturasNacionalesController extends Controller
             }
 
             if ($this->debug == 1) {
-                echo '<br><br>UUIDs Recibidos: ' . $idDocumentos . '<br><br>Pagos recibidos en el complemento: ' . PHP_EOL;
+                echo '<br><br>UUIDs Recibidos: ' . $idDocumentos . '<br>Pagos recibidos en el complemento: ' . $cantPagosRecibidos . PHP_EOL;
             }
 
             if ($cantPagosRecibidos < 1) {

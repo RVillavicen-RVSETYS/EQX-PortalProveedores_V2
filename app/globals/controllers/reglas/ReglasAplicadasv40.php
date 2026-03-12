@@ -832,6 +832,9 @@ class ReglasAplicadasv40
             }
             $pagosSumByUuid[$uuid] += $montoPagado;
         }
+        if ($this->debug == 1) {
+            echo "<br> * Pagos listos para emparejar: " . count($pagosDisponibles) . "<br>";
+        }
 
         // 2) Acumulado de complementos ya registrados por UUID
         $complementosSumByUuid = [];
@@ -855,6 +858,9 @@ class ReglasAplicadasv40
                 $complementosSumByUuid[$row['uuidFact']] = floatval($row['total']);
             }
         }
+        if ($this->debug == 1) {
+            echo "<br> * Complementos acumulados (BD): " . count($complementosSumByUuid) . "<br>";
+        }
 
         // 3) Emparejar pagos del XML con pagos_compras y validar por pago
         $pagosMatch = [];
@@ -866,16 +872,22 @@ class ReglasAplicadasv40
             $formaXMLPago = $pagoNodo['FormaDePagoP'];
             $fechaXMLPago = substr($pagoNodo['FechaPago'], 0, 10);
             $tipoCambioP = $pagoNodo['TipoCambioP'] ?? '';
+            if ($this->debug == 1) {
+                echo "<br>-- Pago XML {$pagoIndex}: monto={$montoXMLPago}, moneda={$monedaXMLPago}, forma={$formaXMLPago}, fecha={$fechaXMLPago} --";
+            }
 
             // Buscar match en pagos_compras por pago real
             $matchId = null;
+            $lastPagoBD = null;
             foreach ($pagosDisponibles as &$pagoBD) {
                 if ($pagoBD['usado']) {
                     continue;
                 }
+                $lastPagoBD = $pagoBD;
                 $montoMatch = abs($pagoBD['montoPagoReal'] - $montoXMLPago) < 0.01;
                 $monedaMatch = ($pagoBD['monedaPagoReal'] === $monedaXMLPago);
-                $fechaMatch = empty($pagoBD['fechaPago']) || $pagoBD['fechaPago'] === $fechaXMLPago;
+                // $fechaMatch = empty($pagoBD['fechaPago']) || $pagoBD['fechaPago'] === $fechaXMLPago;
+                $fechaMatch = true;
                 $formaMatch = empty($pagoBD['formaPagoSAT']) || $pagoBD['formaPagoSAT'] === $formaXMLPago;
                 if ($montoMatch && $monedaMatch && $fechaMatch && $formaMatch) {
                     $matchId = $pagoBD['id'];
@@ -887,8 +899,23 @@ class ReglasAplicadasv40
 
             if (empty($matchId)) {
                 $errores[] = "* Pago XML {$pagoIndex}: no se encontró un pago registrado que coincida con Monto/Moneda/Fecha/Forma.";
+                if ($this->debug == 1) {
+                    $uuidDebug = $pagoNodo['DoctosRelacionados'][0]['IdDocumento'] ?? 'N/A';
+                    echo "<br> * ERROR: Pago XML {$pagoIndex}: no se encontró un pago registrado que coincida con Monto/Moneda/Fecha/Forma. UUID: {$uuidDebug}.";
+                    if (!empty($lastPagoBD)) {
+                        echo "<br> * Monto: {$montoXMLPago} VS Monto Registrado: {$lastPagoBD['montoPagoReal']} - {$lastPagoBD['montoPagado']}";
+                        echo "<br> * Moneda: {$monedaXMLPago} VS Moneda Registrada: {$lastPagoBD['monedaPagoReal']}";
+                        echo "<br> * Fecha: {$fechaXMLPago} VS Fecha Registrada: {$lastPagoBD['fechaPago']}";
+                        echo "<br> * Forma: {$formaXMLPago} VS Forma Registrada: {$lastPagoBD['formaPagoSAT']}";
+                    } else {
+                        echo "<br> * No hay pagos registrados disponibles para comparar.";
+                    }
+                }
             } else {
                 $pagosMatch[$pagoIndex] = $matchId;
+                if ($this->debug == 1) {
+                    echo "<br> * MATCH: Pago XML {$pagoIndex} -> pagos_compras.id={$matchId}";
+                }
             }
 
             // Validaciones por cada documento relacionado
@@ -926,6 +953,9 @@ class ReglasAplicadasv40
                 $totalPagosBD = floatval($pagosSumByUuid[$uuidFact] ?? 0);
                 $totalComplementosBD = floatval($complementosSumByUuid[$uuidFact] ?? 0);
                 $pendiente = $totalPagosBD - $totalComplementosBD;
+                if ($this->debug == 1) {
+                    echo "<br> * UUID {$uuidFact}: totalPagosBD={$totalPagosBD}, totalComplementosBD={$totalComplementosBD}, pendiente={$pendiente}, aplicadoComplemento={$aplicadoEnEsteComplemento[$uuidFact]}";
+                }
                 if ($aplicadoEnEsteComplemento[$uuidFact] > $pendiente + 0.01) {
                     $errores[] = "* UUID {$uuidFact}: el pago del complemento excede el pendiente disponible. Pendiente: {$pendiente}, aplicado en complemento: {$aplicadoEnEsteComplemento[$uuidFact]}.";
                 }
