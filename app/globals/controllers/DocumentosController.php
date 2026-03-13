@@ -239,7 +239,7 @@ class DocumentosController extends Controller
         // Tipos MIME aceptados
         $tiposAceptados = [
             'pdf' => 'application/pdf',  // PDF
-            'xml' => ['application/xml', 'text/xml'], // XML
+            'xml' => ['application/xml', 'text/xml', 'text/plain'], // XML
             'jpeg' => 'image/jpeg',      // Imágenes JPEG
             'png' => 'image/png',        // Imágenes PNG
         ];
