@@ -299,6 +299,10 @@ class CargaFacturasGlobalController extends Controller
         }
 
         // 1.- Validaciones iniciales y obtención de datos
+        if ($this->debug == 1) {
+            echo '<br>===== 1.- Validaciones iniciales y obtención de datos =====<br>';
+        }
+
         $noProveedor = $isAdmin ? ($postData['noProveedorCP'] ?? '') : ($_SESSION['EQXnoProveedor'] ?? '');
         $complementoPagoPDF = $filesData['complementoPagoPDF'] ?? null;
         $complementoPagoXML = $filesData['complementoPagoXML'] ?? null;
@@ -319,6 +323,9 @@ class CargaFacturasGlobalController extends Controller
         }
 
         // 2.- Verificar archivos (PDF y XML)
+        if ($this->debug == 1) {
+            echo '<br>===== 2.- Verificar archivos (PDF y XML) =====<br>';
+        }
         $Ctrl_Documentos = new DocumentosController();
         $Ctrl_CFDIs = new CfdisController();
         $Ctrl_ProcesaComplementoPago = new FacturasNacionalesController();
@@ -338,6 +345,9 @@ class CargaFacturasGlobalController extends Controller
         }
 
         // 3.- Leer el XML para obtener información básica
+        if ($this->debug == 1) {
+            echo '<br>===== 3.- Leer el XML para obtener información básica =====<br>';
+        }
         $dataComplementoXML = $Ctrl_CFDIs->leerCfdiXML($xmlVerificado['data']['tmp_name'], 'Pago');
         if (!$dataComplementoXML['success']) {
             echo json_encode(['success' => false, 'message' => 'Error al leer XML del Complemento de Pago: ' . $dataComplementoXML['message']]);
@@ -345,6 +355,9 @@ class CargaFacturasGlobalController extends Controller
         }
 
         // 4.- Validar el Complemento de Pago (sin requerir facturas relacionadas)
+        if ($this->debug == 1) {
+            echo '<br>===== 4.- Validar el Complemento de Pago (sin requerir facturas relacionadas) =====<br>';
+        }
         $complementoValidado = $Ctrl_ProcesaComplementoPago->verificaNuevoComplementoPago(
             $complementoPagoPDF,
             $complementoPagoXML,
@@ -359,6 +372,9 @@ class CargaFacturasGlobalController extends Controller
         }
 
         // 5.- Registrar el Complemento de Pago
+        if ($this->debug == 1) {
+            echo '<br>===== 5.- Registrar el Complemento de Pago =====<br>';
+        }
         $datosParaRegistrar = $complementoValidado['data'];
         $datosParaRegistrar['ruta_temporal_pdf'] = $pdfVerificado['data']['tmp_name'];
         $datosParaRegistrar['ruta_temporal_xml'] = $xmlVerificado['data']['tmp_name'];
