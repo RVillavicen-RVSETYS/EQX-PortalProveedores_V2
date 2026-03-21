@@ -15,7 +15,7 @@ use App\Models\PagosProveedores\Pagos_Mdl;
 
 class FacturasNacionalesController extends Controller
 {
-    protected $debug = 0; // Debug desactivado
+    protected $debug = 0; // Debug activo (verificación/registro factura ingresos)
 
     public function __construct()
     {

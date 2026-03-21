@@ -120,6 +120,49 @@
         });
     }
 
+    function cargarPoliticasComerciales() {
+        $.ajax({
+            type: 'POST',
+            url: EXCEPCIONES_AJAX_BASE + '/listaPoliticasComerciales',
+            data: {},
+            success: function(response) {
+                $('#politicasComerciales').html(response);
+            },
+            error: function() {
+                $('#politicasComerciales').html('Error al cargar la sección. Consulta a tu administrador.');
+            },
+            beforeSend: function() {
+                $('#politicasComerciales').html('<div class="loading text-center"><img src="../assets/images/loading.gif" alt="loading" /><br/>Un momento, por favor...</div>');
+            }
+        });
+    }
+
+    function eliminarPoliticaComercial(idProveedor) {
+        var idBtn = 'bloquear-btnPolitica' + idProveedor;
+        $.ajax({
+            url: EXCEPCIONES_AJAX_BASE + '/eliminarProveedorPoliticasComerciales',
+            type: 'POST',
+            dataType: 'json',
+            data: { idProveedor: idProveedor },
+            success: function(respuesta) {
+                if (respuesta && respuesta.success) {
+                    notificaSuc(respuesta.message);
+                    cargarPoliticasComerciales();
+                } else {
+                    notificaBad((respuesta && respuesta.message) || 'No se pudo quitar el proveedor.');
+                }
+                if ($('#' + idBtn).length) bloqueoBtn(idBtn, 2);
+            },
+            beforeSend: function() {
+                if ($('#' + idBtn).length) bloqueoBtn(idBtn, 1);
+            },
+            error: function(xhr) {
+                notificaBad(xhr.status === 404 ? 'Ruta no encontrada.' : 'Error al eliminar.');
+                if ($('#' + idBtn).length) bloqueoBtn(idBtn, 2);
+            }
+        });
+    }
+
     function cargarBloqueoDeCFDIs() {
         $.ajax({
             type: 'POST',
@@ -428,6 +471,34 @@
             },
             beforeSend: function() {
                 bloqueoBtn('bloquear-btnAgregaProveedorBD', 1);
+            }
+        });
+    });
+
+    $(document).on('submit', '#agregarProveedorPoliticaComercial', function(event) {
+        event.preventDefault();
+        $.ajax({
+            url: EXCEPCIONES_AJAX_BASE + '/agregarProveedorPoliticasComerciales',
+            type: 'POST',
+            dataType: 'json',
+            data: $(this).serialize(),
+            success: function(respuesta) {
+                if (respuesta && respuesta.success) {
+                    notificaSuc(respuesta.message);
+                    cargarPoliticasComerciales();
+                    $('#motivoPoliticaComercial').val('');
+                    $('#idProveedorPolitica').val(null).trigger('change');
+                } else {
+                    notificaBad((respuesta && respuesta.message) || 'No se pudo guardar.');
+                    bloqueoBtn('bloquear-btnAgregaProveedorPolitica', 2);
+                }
+            },
+            beforeSend: function() {
+                bloqueoBtn('bloquear-btnAgregaProveedorPolitica', 1);
+            },
+            error: function(xhr) {
+                notificaBad(xhr.status === 404 ? 'Ruta no encontrada.' : 'Error al guardar.');
+                bloqueoBtn('bloquear-btnAgregaProveedorPolitica', 2);
             }
         });
     });

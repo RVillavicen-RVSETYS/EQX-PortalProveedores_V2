@@ -373,6 +373,14 @@ class InicioController extends Controller
         }
     }
 
+    /**
+     * Alias para la vista: el JS llama a Inicio/validaCodigoAnticipo (misma lógica que validaAnticipo).
+     */
+    public function validaCodigoAnticipo()
+    {
+        $this->validaAnticipo();
+    }
+
     public function registraNuevaFactura()
     {
         $data = []; // Aquí puedes pasar datos a la vista si es necesario

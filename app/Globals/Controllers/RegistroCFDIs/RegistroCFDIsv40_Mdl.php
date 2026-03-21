@@ -16,7 +16,7 @@ require_once __DIR__ . '/../../../../config/BD_Connect.php';
 class RegistroCFDIsv40_Mdl
 {
     private $db;
-    private static $debug = 0; // Debug desactivado
+    private static $debug = 0; // Debug registro CFDI v4.0
 
     public function __construct()
     {
@@ -341,7 +341,8 @@ class RegistroCFDIsv40_Mdl
 
     public function registrarCFDI_Pagosv40($dataDeValidacion)
     {
-        self::$debug = 0; // Activado para pruebas (Complemento de Pago)
+        // No forzar debug off: respeta self::$debug global (evita apagar trazas tras complemento)
+        // self::$debug = 0;
         $response = ["success" => true, "message" => "", "debug" => ""];
         // Inicializar variables usadas en rollback (catch)
         $urlComplementoPDF = null;

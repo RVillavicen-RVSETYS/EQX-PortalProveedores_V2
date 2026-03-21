@@ -11,6 +11,7 @@ use App\Models\Proveedores\Excepciones\UsoCfdiDistinto_Mdl;
 use App\Models\Proveedores\Excepciones\BloqDiferencias_Mdl;
 use App\Models\Proveedores\Excepciones\ExcepcionesProveedores_Mdl;
 use App\Models\Proveedores\Excepciones\PermitirPueSiempre_Mdl;
+use App\Models\Proveedores\Excepciones\PoliticasComerciales_Mdl;
 use App\Models\Proveedores\Proveedores_Mdl;
 
 class ExcepcionesProveedoresController extends Controller
@@ -330,6 +331,46 @@ class ExcepcionesProveedoresController extends Controller
             $timestamp = date("Y-m-d H:i:s");
             error_log("[$timestamp] app\controllers\Administrador\ExcepcionesProveedoresController ->Error al buscar Id del Area (nombre: $areaLink): " . PHP_EOL, 3, LOG_FILE);
             echo 'No pudimos traer el detallado del Menu:' . $resultIdArea['message'];
+            exit(0);
+        }
+    }
+
+    public function listaPoliticasComerciales()
+    {
+        $data = [];
+        $namespaceParts = explode('\\', __NAMESPACE__);
+        $areaLink = end($namespaceParts);
+
+        $menuModel = new Menu_Mdl();
+        $resultIdArea = $menuModel->obtenerIdAreaPorLink($areaLink);
+
+        $politicasModel = new PoliticasComerciales_Mdl();
+        $resultActivos = $politicasModel->obtenerProveedoresConPoliticaActiva();
+        $listaDisponibles = $politicasModel->getProveedoresDisponibles();
+
+        if ($resultIdArea['success']) {
+            $idArea = $resultIdArea['data'];
+        } else {
+            $timestamp = date('Y-m-d H:i:s');
+            error_log("[$timestamp] app\\controllers\\Administrador\\ExcepcionesProveedoresController -> listaPoliticasComerciales: " . $resultIdArea['message'], 3, LOG_FILE);
+            echo 'No pudimos traer el id del Area:' . $resultIdArea['message'];
+            exit(0);
+        }
+
+        $menuData = $menuModel->obtenerEstructuraMenu($_SESSION['EQXidNivel'], $idArea);
+        $areaData = $menuModel->listarAreasDisponibles($_SESSION['EQXidNivel']);
+
+        if ($menuData['success'] && $areaData['success']) {
+            $data['menuData'] = $menuData;
+            $data['areaData'] = $areaData;
+            $data['areaLink'] = $areaLink;
+            $data['proveedoresPoliticaActiva'] = $resultActivos;
+            $data['listaProveedores'] = $listaDisponibles;
+            $this->view('Administrador/ExcepcionesProveedores/politicasComerciales', $data);
+        } else {
+            $timestamp = date('Y-m-d H:i:s');
+            error_log("[$timestamp] app\\controllers\\Administrador\\ExcepcionesProveedoresController -> listaPoliticasComerciales: error menu o areas", 3, LOG_FILE);
+            echo 'Problemas al cargar menú o áreas.';
             exit(0);
         }
     }
@@ -776,6 +817,37 @@ class ExcepcionesProveedoresController extends Controller
                 'message' => $errorMessage
             ]);
         }
+    }
+
+    public function agregarProveedorPoliticasComerciales()
+    {
+        $idProveedor = (int) ($_POST['idProveedor'] ?? 0);
+        $motivo = $_POST['motivo'] ?? '';
+        $idUser = $_SESSION['EQXident'] ?? 0;
+
+        $model = new PoliticasComerciales_Mdl();
+        $result = $model->activarDescontarPromociones($idProveedor, $motivo, $idUser);
+
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode([
+            'success' => $result['success'],
+            'message' => $result['message'] ?? ($result['success'] ? 'OK' : 'Error'),
+        ]);
+    }
+
+    public function eliminarProveedorPoliticasComerciales()
+    {
+        $idProveedor = (int) ($_POST['idProveedor'] ?? 0);
+        $idUser = $_SESSION['EQXident'] ?? 0;
+
+        $model = new PoliticasComerciales_Mdl();
+        $result = $model->desactivarDescontarPromociones($idProveedor, $idUser);
+
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode([
+            'success' => $result['success'],
+            'message' => $result['message'] ?? ($result['success'] ? 'OK' : 'Error'),
+        ]);
     }
 
     public function agregarProveedorBUC()

@@ -11,7 +11,7 @@ use App\Models\DatosCompra\ComprobantesPago_Mdl;
 
 class VerificaFoliosDocumentosController extends Controller
 {
-    protected $debug = 0;
+    protected $debug = 0; // Debug validación OC/HES/folios
 
     public function __construct()
     {

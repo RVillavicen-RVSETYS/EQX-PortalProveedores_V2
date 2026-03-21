@@ -1,5 +1,5 @@
 <?php
-$debug = 0;
+$debug = 0; // Vista admin carga facturas: trazas en pantalla
 
 $requestUri = $_SERVER['REQUEST_URI'];
 $cleanUri = parse_url($requestUri, PHP_URL_PATH);

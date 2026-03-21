@@ -252,6 +252,21 @@ if ($debug == 1) {
                                     </li>
 
                                     <li class="nav-item">
+                                        <a class="nav-link" data-toggle="tab" href="#politicasComerciales" role="tab" onclick="cargarPoliticasComerciales();">
+                                            <span class="hidden-xs-down">Ajuste políticas comerciales</span>
+                                            <span class="hidden-sm-up">
+                                                <div class="tooltip-container">
+                                                    <span><i class="fas fa-info-circle font-12"></i></span>
+                                                    <div class="tooltip-text">
+                                                        <strong>Ajuste políticas comerciales</strong>
+                                                        <p>Al cargar factura, resta del total del XML los descuentos por políticas (NC) configurados en la orden, para validar montos contra recepciones.</p>
+                                                    </div>
+                                                </div>
+                                            </span>
+                                        </a>
+                                    </li>
+
+                                    <li class="nav-item">
                                         <a class="nav-link" data-toggle="tab" href="#bloqueoDeCfdis" role="tab" onclick="cargarBloqueoDeCFDIs();">
                                             <span class="hidden-xs-down">Bloquear Uso De CFDis</span>
                                             <span class="hidden-sm-up">
@@ -289,6 +304,7 @@ if ($debug == 1) {
                                     <div class="tab-pane p-20" id="fechaEm" role="tabpanel"></div>
                                     <div class="tab-pane p-20" id="usoCFDI" role="tabpanel"></div>
                                     <div class="tab-pane p-20" id="bloqueoDif" role="tabpanel"></div>
+                                    <div class="tab-pane p-20" id="politicasComerciales" role="tabpanel"></div>
                                     <div class="tab-pane p-20" id="bloqueoDeCfdis" role="tabpanel"></div>
                                     <div class="tab-pane p-20" id="permitirPueSiempre" role="tabpanel"></div>
                                 </div>

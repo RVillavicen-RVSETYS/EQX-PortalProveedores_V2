@@ -17,7 +17,7 @@ use PDO;
 
 class SubirFacturaController extends Controller
 {
-    protected $debug = 0;
+    protected $debug = 0; // Debug carga factura administrador
 
     public function __construct()
     {
