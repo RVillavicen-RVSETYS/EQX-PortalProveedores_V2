@@ -2,7 +2,7 @@
 
 class cfdisv40
 {
-    protected $debug = 0;
+    protected $debug = 0; // Debug validación fiscal CFDI 4.0
 
     public function leerCfdi_Ingreso($xmlPath, $version)
     {

@@ -1,3 +1,15 @@
-"id"	"idPagoDet"	"idAcuse"	"OC"	"HES"	"montoPagado"	"saldoInsoluto"	"moneda"	"formaPago"	"formaPagoSAT"	"fechaPago"	"fechaReg (DateTime)"
-"1"	"1"	"1"	"COM-BDG-003182"	"HES-BDG-003152"	"183250"	"0"	"MXN"	"3"	"03"	"28/7/2025"	
-"2"	"3"	"2"	"COM-BDG-003183"	"HES-BDG-003153"	"184000"	"0"	"MXN"	"1"	"01"	"23/10/2025"	
+"id"	"idPagoDet"	"idAcuse"	"OC"	"HES"	"montoPagado"	"saldoInsoluto"	"moneda"	"tipoCambio"	"montoTipoCambio"	"monedaTipoCambio"	"formaPago"	"formaPagoSAT"	"fechaPago"	"fechaReg (DateTime)"
+"1"	"1"	"1"	"COM-BDG-003182"	"HES-BDG-003152"	"183250"	"0"	"MXN"	"1"	"183250"	"MXN"	"3"	"03"	"28/7/2025"	
+"2"	"3"	"2"	"COM-BDG-003183"	"HES-BDG-003153"	"184000"	"0"	"MXN"	"1"	"184000"	"MXN"	"1"	"01"	"23/10/2025"	
+
+DESCRIPCION CAMPOS NUEVOS (PAGO REAL VS APLICADO A FACTURA)
+- tipoCambio: tipo de cambio del pago real (equivalente a Pago:TipoCambioP del CFDI).
+- montoTipoCambio: monto real pagado en la moneda del pago (equivalente a Pago:Monto del CFDI).
+- monedaTipoCambio: moneda real del pago (equivalente a Pago:MonedaP del CFDI).
+
+NOTAS DE USO
+- montoPagado/moneda siguen representando el monto aplicado a la factura (ImpPagado/MonedaDR).
+- Si moneda == monedaTipoCambio, entonces:
+  - tipoCambio = 1
+  - montoTipoCambio = montoPagado
+  - monedaTipoCambio = moneda

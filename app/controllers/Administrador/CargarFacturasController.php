@@ -18,7 +18,7 @@ use App\Globals\Controllers\ValidaOcHes;
 
 class CargarFacturasController extends Controller
 {
-    protected $debug = 0;
+    protected $debug = 0; // Debug carga factura administrador
 
     public function __construct()
     {

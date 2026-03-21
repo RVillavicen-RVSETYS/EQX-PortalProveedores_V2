@@ -160,28 +160,39 @@ class HistorialFacturas_Mdl
         try {
 
             $sql = "SELECT
-                    cpd.id AS IdPagoDet,
-                    cpd.idAcuse AS IdAcuse,
-                    comp.folio AS OC,
-                    GROUP_CONCAT( rec.folio ) AS HES,
-                    cpd.totalPagado AS TotalPagado,
-                    ( cpd.montoTotal - cpd.totalPagado ) AS SaldoInsoluto,
-                    cpd.idSatMonedas AS Moneda,
-                    res.TipoCambio AS TipoCambio,
-                    cpa.idSatFormaPago AS FormaPago,
-                    cpd.fechaPago AS FechaPago
-                FROM
-                    compras_PagosDet cpd
-                    INNER JOIN compras comp ON cpd.idCompra = comp.id
-                    INNER JOIN compras_PagosRecepcion cpr ON cpd.id = cpr.idComprasPagosDet
-                    INNER JOIN recepciones rec ON cpr.idRecepcion = rec.id
-                    INNER JOIN compras_PagosAplicados cpa ON cpd.id = cpa.idComprasPagosDet
-                    LEFT JOIN (SELECT cp.id, cp.tipoCambio AS TipoCambio FROM compras_Pagos cp ) res ON cpa.idComprasPagos = res.id
-                WHERE
-                    DATE_FORMAT( cpd.fechaPago, '%Y-%m-%d' ) BETWEEN :fechaInicial AND :fechaFinal
-                    AND cpd.estatus = 1
-                GROUP BY
-                    cpd.id";
+                        cpd.id AS IdPagoDet,
+                        cpd.idAcuse AS IdAcuse,
+                        com.folio AS OC,
+                        (
+                        SELECT
+                            GROUP_CONCAT( DISTINCT rec.folio ORDER BY rec.folio SEPARATOR ', ' ) 
+                        FROM
+                            compras_PagosRecepcion cpr
+                            INNER JOIN recepciones rec ON cpr.idRecepcion = rec.id 
+                        WHERE
+                            cpr.idComprasPagosDet = cpd.id 
+                        ) AS HES,
+                        cpa.montoPagado AS MontoPagado,
+                        cpa.residual AS SaldoInsoluto,
+                        cp.idSatMoneda AS Moneda,
+                        cp.tipoCambio AS TipoCambio,
+                        ( cpa.montoPagado * cp.tipoCambio ) AS MontoTipoCambio,
+                        cp.monedaTipoCambio AS MonedaTipoCambio,
+                        cp.idSatFormaPago AS FormaPago,
+                        sfp.clave AS FormaPagoSAT,
+                        cp.fechaPago AS FechaPago 
+                    FROM
+                        compras_Pagos cp
+                        INNER JOIN compras_PagosAplicados cpa ON cp.id = cpa.idComprasPagos
+                        INNER JOIN compras_PagosDet cpd ON cpa.idComprasPagosDet = cpd.id
+                        INNER JOIN compras com ON cpd.idCompra = com.id
+                        INNER JOIN sat_formapago sfp ON cp.idSatFormaPago = sfp.id 
+                    WHERE
+                        cpd.fechaPago BETWEEN :fechaInicial AND :fechaFinal
+                        AND cpa.idCatTipoMovimiento <> 'AF'
+                        AND cpd.idAcuse IS NOT NULL
+                        AND EXISTS ( SELECT 1 FROM compras_PagosRecepcion cpr WHERE cpr.idComprasPagosDet = cpd.id ) 
+                        AND cpd.estatus = 1";
 
             // Modo debug para imprimir consulta con parámetros
             if (self::$debug) {
@@ -234,23 +245,29 @@ class HistorialFacturas_Mdl
         }
         try {
 
-            $sql = "INSERT IGNORE INTO pagos_compras ( idPagoDet, idAcuse, OC, HES, montoPagado, saldoInsoluto, moneda, tipoCambio, formaPago, fechaPago)
-                    VALUES ( :idPagoDet, :idAcuse, :OC, :HES, :montoPagado, :saldoInsoluto, :moneda, :tipoCambio, :formaPago, :fechaPago);";
+            $sql = "INSERT IGNORE INTO pagos_compras ( idPagoDet, idAcuse, OC, HES, montoPagado, saldoInsoluto, moneda, tipoCambio, montoTipoCambio, monedaTipoCambio, formaPago, formaPagoSAT, fechaPago, fechaReg)
+                    VALUES ( :idPagoDet, :idAcuse, :OC, :HES, :montoPagado, :saldoInsoluto, :moneda, :tipoCambio, :montoTipoCambio, :monedaTipoCambio, :formaPago, :formaPagoSAT, :fechaPago, NOW());";
 
             // Modo debug para imprimir consulta con parámetros
             if (self::$debug) {
 
                 foreach ($dataPagos as $pago) {
+                    $tipoCambio = $pago['TipoCambio'] ?? null;
+                    $montoTipoCambio = $pago['MontoTipoCambio'] ?? $pago['MontoPagado'];
+                    $monedaTipoCambio = $pago['MonedaTipoCambio'] ?? $pago['Moneda'];
                     $params = [
                         ':idPagoDet' => $pago['IdPagoDet'],
                         ':idAcuse' => $pago['IdAcuse'],
                         ':OC' => $pago['OC'],
                         ':HES' => $pago['HES'],
-                        ':montoPagado' => $pago['TotalPagado'],
+                        ':montoPagado' => $pago['MontoPagado'],
                         ':saldoInsoluto' => $pago['SaldoInsoluto'],
                         ':moneda' => $pago['Moneda'],
-                        ':tipoCambio' => $pago['TipoCambio'],
+                        ':tipoCambio' => ($tipoCambio === null || $tipoCambio === '') ? 1 : $tipoCambio,
+                        ':montoTipoCambio' => $montoTipoCambio,
+                        ':monedaTipoCambio' => $monedaTipoCambio,
                         ':formaPago' => $pago['FormaPago'],
+                        ':formaPagoSAT' => $pago['FormaPagoSAT'],
                         ':fechaPago' => $pago['FechaPago']
                     ];
                     $this->db->imprimirConsulta($sql, $params, 'Actualizar Los Pagos:');
@@ -264,11 +281,17 @@ class HistorialFacturas_Mdl
                 $stmt->bindValue(':idAcuse', $pago['IdAcuse'], PDO::PARAM_INT);
                 $stmt->bindValue(':OC', $pago['OC'], PDO::PARAM_STR);
                 $stmt->bindValue(':HES', $pago['HES'], PDO::PARAM_STR);
-                $stmt->bindValue(':montoPagado', $pago['TotalPagado'], PDO::PARAM_STR);
+                $tipoCambio = $pago['TipoCambio'] ?? null;
+                $montoTipoCambio = $pago['MontoTipoCambio'] ?? $pago['MontoPagado'];
+                $monedaTipoCambio = $pago['MonedaTipoCambio'] ?? $pago['Moneda'];
+                $stmt->bindValue(':montoPagado', $pago['MontoPagado'], PDO::PARAM_STR);
                 $stmt->bindValue(':saldoInsoluto', $pago['SaldoInsoluto'], PDO::PARAM_STR);
                 $stmt->bindValue(':moneda', $pago['Moneda'], PDO::PARAM_STR);
-                $stmt->bindValue(':tipoCambio', $pago['TipoCambio'], PDO::PARAM_STR);
+                $stmt->bindValue(':tipoCambio', ($tipoCambio === null || $tipoCambio === '') ? 1 : $tipoCambio, PDO::PARAM_STR);
+                $stmt->bindValue(':montoTipoCambio', $montoTipoCambio, PDO::PARAM_STR);
+                $stmt->bindValue(':monedaTipoCambio', $monedaTipoCambio, PDO::PARAM_STR);
                 $stmt->bindValue(':formaPago', $pago['FormaPago'], PDO::PARAM_INT);
+                $stmt->bindValue(':formaPagoSAT', $pago['FormaPagoSAT'], PDO::PARAM_STR);
                 $stmt->bindValue(':fechaPago', $pago['FechaPago'], PDO::PARAM_STR);
 
                 $stmt->execute();

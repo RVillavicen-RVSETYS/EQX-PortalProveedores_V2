@@ -160,6 +160,10 @@ if ($debug == 1) {
             [10, 25, 50, "Todo"]
         ],
         info: true,
+        initComplete: function() {
+            var $filter = $('#tableUsoCdfi_filter input[type="search"]');
+            if ($filter.length) $filter.attr('id', 'tableUsoCdfi_search').attr('name', 'tableUsoCdfi_search');
+        },
         buttons: [{
                 extend: 'pdfHtml5',
                 className: 'btn btn-pdf bg-pyme-primary text-white',

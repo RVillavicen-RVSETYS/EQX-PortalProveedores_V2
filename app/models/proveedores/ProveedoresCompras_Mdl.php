@@ -91,7 +91,6 @@ class ProveedoresCompras_Mdl
                     } else {
                         $ordenamiento = 'ORDER BY ' . $orden['campo'] . ' ' . strtoupper($orden['tipo']);
                     }
-                    
                 }
             }
 
@@ -152,7 +151,7 @@ class ProveedoresCompras_Mdl
                                 $filtrosSQL .= ' AND cp.total <= cp.totalPagos';
                             }
                             break;
-                        
+
                         case 'pendientePorProcesar':
                             // Validar que el valor sea true o false
                             if (!in_array($valorFiltro, ['true', 'false'])) {
@@ -247,7 +246,5 @@ class ProveedoresCompras_Mdl
             }
             return ['success' => false, 'message' => 'Problemas al listar Facturas por UUID, Notifica a tu administrador.'];
         }
-
     }
-
 }

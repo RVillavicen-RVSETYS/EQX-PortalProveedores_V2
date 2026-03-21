@@ -16,7 +16,7 @@ require_once __DIR__ . '/../../../../config/BD_Connect.php';
 class RegistroCFDIsv40_Mdl
 {
     private $db;
-    private static $debug = 0; // Debug desactivado
+    private static $debug = 0; // Debug registro CFDI v4.0
 
     public function __construct()
     {
@@ -232,8 +232,8 @@ class RegistroCFDIsv40_Mdl
                 ":tipoCambio" => $dataDeValidacion["dataFactXML"]["Comprobante"]["TipoCambio"],
                 ":version" => $dataDeValidacion["dataFactXML"]["Comprobante"]["Version"],
                 ":tipoComprobante" => $dataDeValidacion["dataFactXML"]["Comprobante"]["TipoDeComprobante"],
-                ":totalImpuestosTrasladados" => $dataDeValidacion["dataFactXML"]["Impuestos"]["TotalImpuestosTrasladados"],
-                ":totalImpuestosRetenidos" => $dataDeValidacion["dataFactXML"]["Impuestos"]["TotalImpuestosRetenidos"],
+                ":totalImpuestosTrasladados" => $dataDeValidacion["dataFactXML"]["Impuestos"]["TotalImpuestosTrasladados"] ?? 0,
+                ":totalImpuestosRetenidos" => $dataDeValidacion["dataFactXML"]["Impuestos"]["TotalImpuestosRetenidos"] ?? 0,
                 ":validada" => "2",
                 ":codigoEstatusSAT" => $dataDeValidacion["ValidFiscal"]["CodigoEstatus"],
                 ":estadoValidaSAT" => $dataDeValidacion["ValidFiscal"]["Estado"],
@@ -264,20 +264,22 @@ class RegistroCFDIsv40_Mdl
             $sqlImpuestos = "INSERT INTO cfdi_facturasImpuestos (idFactura, idCompra, tipo, impuesto, TipoFactor, TasaOCuota, Base, Importe) VALUES ";
             $valuesImpuestos = [];
 
-            foreach ($dataDeValidacion["dataFactXML"]["Impuestos"]["Traslados"] as $impuesto) {
+            $impuestosTrasladados = $dataDeValidacion["dataFactXML"]["Impuestos"]["Traslados"] ?? [];
+            foreach ($impuestosTrasladados as $impuesto) {
                 if (self::$debug) {
                     echo '<br> * Impuesto Traslado: ' . $impuesto["Impuesto"] . '--' . $impuesto["TipoFactor"] . '--' . $impuesto["TasaOCuota"] . '--' . $impuesto["Base"] . '--' . $impuesto["Importe"];
                 }
                 $valuesImpuestos[] = "($idCFDI, '$idCompra', 'Traslado', '{$impuesto["Impuesto"]}', '{$impuesto["TipoFactor"]}', '{$impuesto["TasaOCuota"]}', '{$impuesto["Base"]}', '{$impuesto["Importe"]}')";
             }
 
-            foreach ($dataDeValidacion["dataFactXML"]["Impuestos"]["Retenciones"] as $impuesto) {
+            $impuestosRetenidos = $dataDeValidacion["dataFactXML"]["Impuestos"]["Retenciones"] ?? [];
+            foreach ($impuestosRetenidos as $impuesto) {
                 if (self::$debug) {
                     echo '<br> * Impuesto Retencion: ' . $impuesto["Impuesto"] . '--' . $impuesto["TipoFactor"] . '--' . $impuesto["TasaOCuota"] . '--' . $impuesto["Base"] . '--' . $impuesto["Importe"];
                 }
                 $valuesImpuestos[] = "($idCFDI, '$idCompra', 'Retencion', '{$impuesto["Impuesto"]}', '{$impuesto["TipoFactor"]}', '{$impuesto["TasaOCuota"]}', '{$impuesto["Base"]}', '{$impuesto["Importe"]}')";
             }
-            
+
             if (!empty($valuesImpuestos)) {
                 $sqlImpuestos .= implode(",", $valuesImpuestos);
                 $stmt = $this->db->prepare($sqlImpuestos);
@@ -339,7 +341,8 @@ class RegistroCFDIsv40_Mdl
 
     public function registrarCFDI_Pagosv40($dataDeValidacion)
     {
-        self::$debug = 1; // Activado para pruebas (Complemento de Pago)
+        // No forzar debug off: respeta self::$debug global (evita apagar trazas tras complemento)
+        // self::$debug = 0;
         $response = ["success" => true, "message" => "", "debug" => ""];
         // Inicializar variables usadas en rollback (catch)
         $urlComplementoPDF = null;
@@ -504,12 +507,15 @@ class RegistroCFDIsv40_Mdl
             // Insertar en cfdi_complementoPagoDetalle
             $valuesInsert = '';
             $montosPagadosPorUUID = [];
-            foreach ($dataDeValidacion["dataComplementoXML"]["Pagos"]["Pagos"] as $pago) {
+            $pagosMatch = $dataDeValidacion['pagosMatch'] ?? [];
+            foreach ($dataDeValidacion["dataComplementoXML"]["Pagos"]["Pagos"] as $pagoIndex => $pago) {
                 $fechaPago = $pago["FechaPago"];
                 $formaPago = $pago["FormaDePagoP"];
                 $totalPagado = $pago["Monto"];
                 $idCatTipoMoneda = $pago["MonedaP"];
                 $tipoCambioP = $pago["TipoCambioP"];
+                $idPagosCompras = $pagosMatch[$pagoIndex] ?? null;
+                $idPagosComprasValue = ($idPagosCompras !== null) ? (int) $idPagosCompras : 'NULL';
 
                 foreach ($pago["DoctosRelacionados"] as $docto) {
                     $uuidFact = strtoupper($docto["IdDocumento"] ?? '');
@@ -525,7 +531,7 @@ class RegistroCFDIsv40_Mdl
                     $importePagado = $docto["ImpPagado"];
                     $saldoInsoluto = $docto["ImpSaldoInsoluto"];
 
-                    $valuesInsert .= "($idComplemento, $idCompra, '$fechaPago', '$formaPago', $totalPagado, '$idCatTipoMoneda', '$tipoCambioP', '$uuidFact', '$serie', '$folio',  '$monedaDR', $noParcialidad, $saldoAnterior, $importePagado, $saldoInsoluto), ";
+                    $valuesInsert .= "($idComplemento, $idCompra, $idPagosComprasValue, '$fechaPago', '$formaPago', $totalPagado, '$idCatTipoMoneda', '$tipoCambioP', '$uuidFact', '$serie', '$folio',  '$monedaDR', $noParcialidad, $saldoAnterior, $importePagado, $saldoInsoluto), ";
                     if (isset($montosPagadosPorUUID[$uuidFact])) {
                         $montosPagadosPorUUID[$uuidFact]['montoPagado'] += floatval($importePagado);
                         if ($saldoInsoluto < $montosPagadosPorUUID[$uuidFact]['insoluto']) {
@@ -543,7 +549,7 @@ class RegistroCFDIsv40_Mdl
                 echo '<br><br> Datos para Insert de cfdi_complementoPagoDetalle: ' . $valuesInsert;
             }
 
-            $sqlDetComplemento = "INSERT INTO cfdi_complementoPagoDet(idComplementoPago, idCompra, fechaPago, formaPago, totalPagado, idCatTipoMoneda, tipoCambio, uuidFact, serie, folio, monedaDR, noParcialidad, saldoAnterior, importePagado, saldoInsoluto) 
+            $sqlDetComplemento = "INSERT INTO cfdi_complementoPagoDet(idComplementoPago, idCompra, idPagosCompras, fechaPago, formaPago, totalPagado, idCatTipoMoneda, tipoCambio, uuidFact, serie, folio, monedaDR, noParcialidad, saldoAnterior, importePagado, saldoInsoluto) 
                         VALUES $valuesInsert";
             if (self::$debug) {
                 $this->db->imprimirConsulta($sqlDetComplemento, [], 'Registro de cfdi_complementoPagoDetalle');

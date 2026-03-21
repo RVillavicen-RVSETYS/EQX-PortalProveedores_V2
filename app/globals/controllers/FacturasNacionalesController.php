@@ -15,7 +15,7 @@ use App\Models\PagosProveedores\Pagos_Mdl;
 
 class FacturasNacionalesController extends Controller
 {
-    protected $debug = 0; // Debug desactivado
+    protected $debug = 0; // Debug activo (verificación/registro factura ingresos)
 
     public function __construct()
     {
@@ -335,7 +335,7 @@ class FacturasNacionalesController extends Controller
             'data' => []
         ];
 
-        $this->debug = 1; // Activado para pruebas (Complemento de Pago)
+        $this->debug = 0; // Activado para pruebas (Complemento de Pago)
 
         if ($this->debug == 1) {
             echo '<br>Valores para la carga:';
@@ -394,7 +394,7 @@ class FacturasNacionalesController extends Controller
             }
 
             if ($this->debug == 1) {
-                echo '<br><br>UUIDs Recibidos: ' . $idDocumentos . '<br><br>Pagos recibidos en el complemento: ' . PHP_EOL;
+                echo '<br><br>UUIDs Recibidos: ' . $idDocumentos . '<br>Pagos recibidos en el complemento: ' . $cantPagosRecibidos . PHP_EOL;
             }
 
             if ($cantPagosRecibidos < 1) {
@@ -537,6 +537,7 @@ class FacturasNacionalesController extends Controller
                             'ValidFiscal' => $validaFiscalMente['data'],
                             'dataFacturas' => $comprasPorFacturas['data'],
                             'dataPagos' => $dataPagosProv['data'],
+                            'pagosMatch' => $reglasNegocio['data']['pagosMatch'] ?? [],
                             'dataProv' => $dataProv['data'],
                             'dataComplementoXML' => $dataCFDIXML['data'],
                             'dataEmpresa' => $dataEmpresa['data'],
@@ -830,7 +831,7 @@ class FacturasNacionalesController extends Controller
 
     public function registraNuevoComplementoPago($resultadoDeVerificacion)
     {
-        $this->debug = 1; // Activado para pruebas (Complemento de Pago)
+        $this->debug = 0; // Activado para pruebas (Complemento de Pago)
         if ($this->debug == 1) {
             echo '<br><br>--- Inicia el Registro de Complemento de Pago ---<br>';
             print_r($resultadoDeVerificacion);

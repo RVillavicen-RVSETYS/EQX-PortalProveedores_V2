@@ -1,0 +1,4 @@
+[2026-02-18 21:49:09] app/Models/Proveedores/Excepciones/IgnoraDescuento_Mdl.php -> Se Desactivó El Proveedor: 100029, IdUserReg: 1
+[2026-02-18 21:53:23] app/Models/Proveedores/Excepciones/IgnoraDescuento_Mdl.php -> Se Activó El Proveedor: 100029, IdUserReg: 1
+[2026-03-20 23:44:02] app/Models/Proveedores/Excepciones/IgnoraDescuento_Mdl.php -> Se Agregó El Proveedor: 100073 Con Motivo: 'Prueba', IdUserReg: 1
+[2026-03-20 23:45:09] app/Models/Proveedores/Excepciones/IgnoraDescuento_Mdl.php -> Se Desactivó El Proveedor: 100073, IdUserReg: 1

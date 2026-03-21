@@ -184,6 +184,131 @@ if ($notificaciones['success'] && !empty($notificaciones['data'])) {
                                     <div class="card-header bg-pyme-primary">
                                         <div class="row">
                                             <div class="col-md-10">
+                                                <h4 class="m-b-0 text-white">Carga Complementos de Pago</h4>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-12">
+
+                                                <form class="form" id="Form_CargaComplementoPago" method="post" enctype="multipart/form-data" action="Inicio/registraNuevoComplementoPago">
+                                                    <div id="mensajeComplementoPago" class="form-group" style="display: none;">
+                                                        <div class="alert alert-danger" role="alert" id="textoMensajeComplementoPago"></div>
+                                                    </div>
+
+                                                    <div id="contenedorInputsComplementoPago" style="display: none;">
+                                                        <div class="form-group">
+                                                            <label for="complementoPagoPDF">Complemento de Pago</label>
+                                                            <div class="input-group">
+                                                                <div class="input-group-prepend">
+                                                                    <span class="input-group-text"><i class="far fa-file-pdf text-danger"> </i> &nbsp;PDF</span>
+                                                                </div>
+                                                                <div class="custom-file">
+                                                                    <input type="file" class="custom-file-input" id="complementoPagoPDF" name="complementoPagoPDF" accept=".pdf" required>
+                                                                    <label class="custom-file-label" for="complementoPagoPDF"> Elegir PDF de Complemento de Pago..</label>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="form-group">
+                                                            <div class="input-group">
+                                                                <div class="input-group-prepend">
+                                                                    <span class="input-group-text"><i class="far fa-file-code text-info"></i> &nbsp;XML</span>
+                                                                </div>
+                                                                <div class="custom-file">
+                                                                    <input type="file" class="custom-file-input" id="complementoPagoXML" name="complementoPagoXML" accept=".xml" required>
+                                                                    <label class="custom-file-label" for="complementoPagoXML">Elegir XML de Complemento de Pago..</label>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <hr>
+                                                    <div class="row">
+                                                        <div class="col-md-6 text-right"></div>
+                                                        <div id="desbloquear-btnCP">
+                                                            <button type="reset" class="btn btn-danger waves-effect" onclick="resetFormulario('Form_CargaComplementoPago')"><i class="far fa-trash-alt text-white"></i> <?= $menuModel->txt('Limpiar'); ?></button>
+                                                            <button type="submit" class="btn btn-success waves-effect waves-light">Carga Complemento de Pago</button>
+                                                        </div>
+                                                        <div id="bloquear-btnCP" style="display: none;">
+                                                            <div class="loading text-center"><img src="../assets/images/loadingHorizontal.gif" alt="loading..." /></div>
+                                                        </div>
+                                                    </div>
+                                                </form>
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-12 col-lg-12">
+                                <div class="card border">
+                                    <div class="card-header bg-pyme-primary">
+                                        <div class="row">
+                                            <div class="col-md-10">
+                                                <h4 class="m-b-0 text-white">Carga Notas De Crédito</h4>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-12">
+
+                                                <form class="form" id="Form_CargaNotaCredito" method="post" enctype="multipart/form-data" action="Inicio/registraNuevaNotaCredito">
+                                                    <div class="form-group row">
+                                                        <label for="ordenCompraNC" class="col-3 col-form-label">Orden Compra</label>
+                                                        <div class="col-9">
+                                                            <input class="form-control" type="search" value="" id="ordenCompraNC" name="ordenCompraNC" maxlength="14" onchange="validaOrdCompraNC(this.value);" required>
+                                                            <div class="invalid-feedback" id="invalid_ordenCompraNC">
+                                                                <img src="../assets/images/barLoadign.gif" alt="" />
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="form-group row" id="campoFacturaIngresada" style="display: none;">
+                                                        <label for="idCompraNC" class="col-3 col-form-label">Factura Ingresada</label>
+                                                        <div class="col-9">
+                                                            <select class="form-control custom-select" id="idCompraNC" name="idCompraNC" style="width: 100%; height:36px;" required>
+                                                                <option value="">Seleccione una factura...</option>
+                                                            </select>
+                                                            <div class="invalid-feedback" id="invalid_idCompraNC"></div>
+                                                        </div>
+                                                    </div>
+
+                                                    <div id="contentNotaCreditoNC"></div>
+                                                    <div class="justify-content-end d-none" id="btnNotaCreditoNC">
+                                                        <button type="button" class="btn btn-success mt-2" onclick="cargarFormNotaCredito(lastNotasCredito, 'NC')"><i class="fas fa-plus"></i> Nota de Crédito</button>
+                                                    </div>
+
+                                                    <hr>
+                                                    <div class="row">
+                                                        <div class="col-md-6 text-right"></div>
+
+                                                        <div id="desbloquear-btnNC">
+                                                            <button type="reset" class="btn btn-danger waves-effect" onclick="resetFormulario('Form_CargaNotaCredito')"><i class="far fa-trash-alt text-white"></i> <?= $menuModel->txt('Limpiar'); ?></button>
+                                                            <button type="submit" class="btn btn-success waves-effect waves-light">Carga Nota de Credito</button>
+                                                        </div>
+                                                        <div id="bloquear-btnNC" style="display: none;">
+                                                            <div class="loading text-center"><img src="../assets/images/loadingHorizontal.gif" alt="loading..." /></div>
+                                                        </div>
+                                                    </div>
+                                                </form>
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-12 col-lg-12">
+                                <div class="card border">
+                                    <div class="card-header bg-pyme-primary">
+                                        <div class="row">
+                                            <div class="col-md-10">
                                                 <h4 class="m-b-0 text-white"><?= $menuModel->txt('Carga_Factura'); ?></h4>
                                             </div>
                                         </div>
@@ -292,7 +417,7 @@ if ($notificaciones['success'] && !empty($notificaciones['data'])) {
                                                     echo '<h4>' . $bloqueoCargaFactura['data']['mensajeCierre'] . '</h4><hr>';
                                                 } else {
                                                 ?>
-                                                    <form class="form">
+                                                    <form class="form" id="Form_CargaFacturaAnticipo" method="post" enctype="multipart/form-data">
                                                         <div class="form-group row">
                                                             <label for="codAnticipo" class="col-3 col-form-label"><?= $menuModel->txt('CodigoAnticipo'); ?></label>
                                                             <div class="col-9">
@@ -328,10 +453,13 @@ if ($notificaciones['success'] && !empty($notificaciones['data'])) {
                                                         <div class="row">
                                                             <div class="col-md-6 text-right"></div>
 
-                                                            <div id="desbloquear-btn1">
-                                                                <button type="reset" class="btn btn-danger waves-effect" onclick="resetForm()"><i class="far fa-trash-alt text-white"></i> <?= $menuModel->txt('Limpiar'); ?></button>
+                                                            <div id="desbloquear-btn2">
+                                                                <button type="reset" class="btn btn-danger waves-effect" onclick="resetFormulario('Form_CargaFacturaAnticipo')"><i class="far fa-trash-alt text-white"></i> <?= $menuModel->txt('Limpiar'); ?></button>
 
                                                                 <button type="submit" class="btn btn-success waves-effect waves-light"><?= $menuModel->txt('Carga_Factura'); ?></button>
+                                                            </div>
+                                                            <div id="bloquear-btn2" style="display: none;">
+                                                                <div class="loading text-center"><img src="../assets/images/loadingHorizontal.gif" alt="loading..." /></div>
                                                             </div>
                                                         </div>
                                                     </form>
@@ -475,7 +603,10 @@ if ($notificaciones['success'] && !empty($notificaciones['data'])) {
                                 // Hay HES pendientes, puede cargar factura
                                 // Si hay NC pendientes, mostrar información (opcional)
                                 if (cantNC > 0) {
+                                    lastNotasCredito = response.NC || [];
                                     console.log('Información: Hay notas de crédito pendientes:', response.messageNC);
+                                } else {
+                                    lastNotasCredito = [];
                                 }
                                 
                             } else {
@@ -499,10 +630,82 @@ if ($notificaciones['success'] && !empty($notificaciones['data'])) {
             }
         }
 
+        function validaOrdCompraNC(ordenCompra) {
+            $("#ordenCompraNC").removeClass("is-invalid is-valid");
+            $("#invalid_ordenCompraNC").html("");
+
+            const oc = validarEstructuraOC(ordenCompra);
+            $("#ordenCompraNC").val(oc.valor);
+
+            if (!oc.valido) {
+                $("#ordenCompraNC").addClass("is-invalid");
+                $("#invalid_ordenCompraNC").html("Estructura: COM-XXX-######");
+                return;
+            }
+
+            $.ajax({
+                type: 'POST',
+                url: 'Inicio/verificaOrdenCompraNotaCredito',
+                data: { ordenCompra: oc.valor },
+                dataType: 'json',
+                success: function(response) {
+                    if (response.success) {
+                        $("#ordenCompraNC").addClass("is-valid");
+                        lastNotasCredito = response.NC || [];
+                        obtenerFacturasPorOC(oc.valor);
+                    } else {
+                        $("#ordenCompraNC").addClass("is-invalid");
+                        $("#invalid_ordenCompraNC").html(response.message || 'Error al validar la Orden de Compra para Nota de Crédito');
+                        $('#campoFacturaIngresada').hide();
+                        $('#idCompraNC').empty().append('<option value="">Seleccione una factura...</option>');
+                        $('#contentNotaCreditoNC').empty();
+                        $('#btnNotaCreditoNC').addClass('d-none');
+                    }
+                },
+                error: function() {
+                    $("#ordenCompraNC").addClass("is-invalid");
+                    $("#invalid_ordenCompraNC").html('Error al validar la Orden de Compra para Nota de Crédito');
+                }
+            });
+        }
+
+        function obtenerFacturasPorOC(ordenCompra) {
+            const $selectFactura = $('#idCompraNC');
+            const $campoFactura = $('#campoFacturaIngresada');
+
+            $selectFactura.empty().append('<option value="">Seleccione una factura...</option>');
+            $campoFactura.hide();
+            $('#contentNotaCreditoNC').empty();
+            $('#btnNotaCreditoNC').addClass('d-none');
+
+            $.ajax({
+                type: 'POST',
+                url: 'Inicio/obtenerFacturasPorOC',
+                data: { ordenCompra: ordenCompra },
+                dataType: 'json',
+                success: function(response) {
+                    if (response.success && response.data && response.data.length > 0) {
+                        response.data.forEach(function(factura) {
+                            const text = `${factura.acuse} | ${factura.uuid} | ${factura.fechaReg}`;
+                            $selectFactura.append(new Option(text, factura.idCompra));
+                        });
+                        $campoFactura.show();
+                    } else {
+                        $("#invalid_ordenCompraNC").html(response.message || 'No se encontraron facturas para esta OC');
+                    }
+                },
+                error: function() {
+                    $("#invalid_ordenCompraNC").html('Error al cargar facturas de la OC');
+                }
+            });
+        }
+
         let contadorFormNotas = 0;
 
-        function cargarFormNotaCredito(arrayNotasCredito) {
+        function cargarFormNotaCredito(arrayNotasCredito, tipo = '') {
             contadorFormNotas++;
+            const targetContent = (tipo === 'NC') ? '#contentNotaCreditoNC' : '#contentNotaCredito';
+            const targetBtn = (tipo === 'NC') ? '#btnNotaCreditoNC' : '#btnNotaCredito';
 
             $.ajax({
                 type: 'POST',
@@ -514,7 +717,7 @@ if ($notificaciones['success'] && !empty($notificaciones['data'])) {
                 success: function(response) {
                     // Reemplaza los IDs/for con el número único
                     const formHtml = response.replace(/{{id}}/g, contadorFormNotas);
-                    $('#contentNotaCredito').append(formHtml);
+                    $(targetContent).append(formHtml);
 
                     // Re-inicializa select2 después de insertar el HTML
                     const $select = $(`#notaCredito_${contadorFormNotas}`);
@@ -528,10 +731,10 @@ if ($notificaciones['success'] && !empty($notificaciones['data'])) {
 
                     $select.select2(); // Inicializa select2 en el select ya con opciones
 
-                    $('#btnNotaCredito').removeClass('d-none');
+                    $(targetBtn).removeClass('d-none');
                 },
                 error: function() {
-                    $('#contentNotaCredito').append('<div class="text-danger">Error cargando formulario.</div>');
+                    $(targetContent).append('<div class="text-danger">Error cargando formulario.</div>');
                 }
             });
         }
@@ -668,6 +871,12 @@ if ($notificaciones['success'] && !empty($notificaciones['data'])) {
             let validOC = false;
             let validHES = false;
             let reqAnticipo = false;
+            let validAnt = false;
+
+            $("#Form_CargaFacturaAnticipo").on('submit', function(e) {
+                e.preventDefault();
+                notificaBad('La carga de factura por anticipo aún no está enlazada al servidor en esta versión. Usa «Carga factura» con orden de compra y HES, o contacta a administración.');
+            });
 
             $("#Form_CargaFactura").submit(function(e) {
                 e.preventDefault();
@@ -714,9 +923,90 @@ if ($notificaciones['success'] && !empty($notificaciones['data'])) {
                 });
             });
 
+            $(document).on('change', '#idCompraNC', function() {
+                const idCompra = $(this).val();
+                if (!idCompra) {
+                    $('#contentNotaCreditoNC').empty();
+                    $('#btnNotaCreditoNC').addClass('d-none');
+                    return;
+                }
+                $('#contentNotaCreditoNC').empty();
+                cargarFormNotaCredito(lastNotasCredito, 'NC');
+            });
+
+            $("#Form_CargaNotaCredito").submit(function(e) {
+                e.preventDefault();
+                var formData = new FormData(this);
+                bloquearBtn('btnNC');
+                $.ajax({
+                    type: 'POST',
+                    url: 'Inicio/registraNuevaNotaCredito',
+                    data: formData,
+                    dataType: 'json',
+                    processData: false,
+                    contentType: false,
+                    success: function(response) {
+                        desbloquearBtn('btnNC');
+                        if (response.success) {
+                            notificaSucSweet("Excelente!!", response.message);
+                            resetFormulario("Form_CargaNotaCredito");
+                            $('#campoFacturaIngresada').hide();
+                            $('#idCompraNC').empty().append('<option value="">Seleccione una factura...</option>');
+                            $('#contentNotaCreditoNC').empty();
+                            $('#btnNotaCreditoNC').addClass('d-none');
+                        } else {
+                            notificaBadSweet("Lo sentimos!!", response.message);
+                        }
+                    },
+                    error: function() {
+                        notificaBad('Error al querer cargar Nota de Crédito. Consulta a tu administrador');
+                        desbloquearBtn('btnNC');
+                    }
+                });
+            });
+
+            $("#Form_CargaComplementoPago").submit(function(e) {
+                e.preventDefault();
+                var formData = new FormData(this);
+                bloquearBtn('btnCP');
+                $.ajax({
+                    type: 'POST',
+                    url: 'Inicio/registraNuevoComplementoPago',
+                    data: formData,
+                    dataType: 'json',
+                    processData: false,
+                    contentType: false,
+                    success: function(response) {
+                        desbloquearBtn('btnCP');
+                        if (response.success) {
+                            notificaSucSweet("Excelente!!", response.message);
+                            resetFormulario("Form_CargaComplementoPago");
+                            $('#contenedorInputsComplementoPago').hide();
+                            $('#mensajeComplementoPago').hide();
+                            $('#textoMensajeComplementoPago').html('');
+                            $('#Form_CargaComplementoPago button[type="submit"]').prop('disabled', true);
+                        } else {
+                            notificaBadSweet("Lo sentimos!!", response.message);
+                        }
+                    },
+                    error: function() {
+                        notificaBad('Error al querer cargar complemento de pago. Consulta a tu administrador');
+                        desbloquearBtn('btnCP');
+                    }
+                });
+            });
+
+            $(document).on('click', '#Form_CargaComplementoPago button[type="reset"]', function() {
+                $('#contenedorInputsComplementoPago').hide();
+                $('#mensajeComplementoPago').hide();
+                $('#textoMensajeComplementoPago').html('');
+                $('#Form_CargaComplementoPago button[type="submit"]').prop('disabled', true);
+            });
+
             // Traere datos iniciales
             cargarDatosIniciales();
             cargaTablaUltimasFacturas();
+            VerificaSiDebeComplementosPago();
         });
 
         function cargarDatosIniciales() {
@@ -734,6 +1024,52 @@ if ($notificaciones['success'] && !empty($notificaciones['data'])) {
                 },
                 error: function() {
                     console.log('Error al cargar los datos iniciales. Consulta a tu administrador');
+                }
+            });
+        }
+
+        function VerificaSiDebeComplementosPago() {
+            const $mensajeDiv = $('#mensajeComplementoPago');
+            const $textoMensaje = $('#textoMensajeComplementoPago');
+            const $contenedorInputs = $('#contenedorInputsComplementoPago');
+            const $btnSubmit = $('#Form_CargaComplementoPago button[type="submit"]');
+
+            $mensajeDiv.hide();
+            $contenedorInputs.hide();
+            $btnSubmit.prop('disabled', true);
+            $textoMensaje.html('');
+
+            $.ajax({
+                type: 'POST',
+                url: 'Inicio/VerificaSiDebeComplementosPago',
+                dataType: 'json',
+                success: function(response) {
+                    if (response.success === false) {
+                        notificaBad(response.message || 'Error al verificar complementos de pago');
+                        $('#complementoPagoPDF, #complementoPagoXML').prop('required', false);
+                        return;
+                    }
+
+                    if (response.cantData === 0) {
+                        $textoMensaje.html(response.message || 'No hay facturas que requieran complementos de pago');
+                        $textoMensaje.removeClass('alert-info alert-success').addClass('alert-danger');
+                        $mensajeDiv.show();
+                        $contenedorInputs.hide();
+                        $('#complementoPagoPDF, #complementoPagoXML').prop('required', false);
+                        $btnSubmit.prop('disabled', true);
+                    } else {
+                        $mensajeDiv.hide();
+                        $contenedorInputs.show();
+                        $('#complementoPagoPDF, #complementoPagoXML').prop('required', true);
+                        $btnSubmit.prop('disabled', false);
+                    }
+                },
+                error: function() {
+                    notificaBad('Error al verificar complementos de pago. Consulta a tu administrador');
+                    $mensajeDiv.hide();
+                    $contenedorInputs.hide();
+                    $('#complementoPagoPDF, #complementoPagoXML').prop('required', false);
+                    $btnSubmit.prop('disabled', true);
                 }
             });
         }
@@ -821,20 +1157,20 @@ if ($notificaciones['success'] && !empty($notificaciones['data'])) {
                             validAnt = true;
                             $("#codAnticipo").addClass("is-valid");
                         } else {
-                            validOC = false;
+                            validAnt = false;
                             $("#codAnticipo").addClass("is-invalid");
                             $("#invalid_codAnticipo").html(response.message);
                         }
                     },
                     error: function() {
                         notificaBad('Problemas al consultar el Anticipo. Notifica a tu administrador');
-                        validOC = false;
+                        validAnt = false;
                     }
                 });
             } else {
                 $("#codAnticipo").addClass("is-invalid");
                 $("#invalid_codAnticipo").html("Estructura: ANT-XXX-######");
-                validOC = false;
+                validAnt = false;
             }
         }
 

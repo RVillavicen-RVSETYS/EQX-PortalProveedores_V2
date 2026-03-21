@@ -18,6 +18,7 @@ use App\Globals\Controllers\FacturasNacionalesController;
 use App\Globals\Controllers\CfdisController;
 use App\Globals\Controllers\VerificaFoliosDocumentosController;
 use App\Globals\Controllers\CargaFacturasGlobalController;
+use App\Globals\Controllers\ValidaOcHes;
 
 class InicioController extends Controller
 {
@@ -214,6 +215,14 @@ class InicioController extends Controller
         $globalController->validaHojaEntrada($ordenCompra, $hojaEntrada);
     }
 
+    public function verificaOrdenCompraNotaCredito()
+    {
+        $ordenCompra = $_POST['ordenCompra'] ?? '';
+        $noProveedor = $_SESSION['EQXnoProveedor'] ?? '';
+        $globalController = new VerificaFoliosDocumentosController();
+        $globalController->verificaOrdenCompraNotaCredito($ordenCompra, $noProveedor);
+    }
+
     public function validaAnticipo()
     {
         $anticipo = $_POST['anticipo'] ?? '';
@@ -222,10 +231,43 @@ class InicioController extends Controller
         $globalController->validaAnticipo($anticipo, $noProveedor);
     }
 
+    /**
+     * Alias para la vista: el JS llama a Inicio/validaCodigoAnticipo (misma lógica que validaAnticipo).
+     */
+    public function validaCodigoAnticipo()
+    {
+        $this->validaAnticipo();
+    }
+
     public function registraNuevaFactura()
     {
         $noProveedor = $_SESSION['EQXnoProveedor'] ?? '';
         $globalController = new CargaFacturasGlobalController();
         $globalController->registraNuevaFactura($_POST, $_FILES, $noProveedor, false);
+    }
+
+    public function obtenerFacturasPorOC()
+    {
+        $globalController = new ValidaOcHes();
+        $globalController->obtenerFacturasPorOC();
+    }
+
+    public function VerificaSiDebeComplementosPago()
+    {
+        $noProveedor = $_SESSION['EQXnoProveedor'] ?? '';
+        $globalController = new VerificaFoliosDocumentosController();
+        $globalController->VerificaComplementosPendientesPorProveedor($noProveedor);
+    }
+
+    public function registraNuevaNotaCredito()
+    {
+        $globalController = new CargaFacturasGlobalController();
+        $globalController->registraNuevaNotaCredito($_POST, $_FILES, false);
+    }
+
+    public function registraNuevoComplementoPago()
+    {
+        $globalController = new CargaFacturasGlobalController();
+        $globalController->registraNuevoComplementoPago($_POST, $_FILES, false);
     }
 }
