@@ -105,7 +105,7 @@ class Pagos_Mdl
                         cf.uuid AS UUID,
                         cf.serie AS Serie,
                         cf.folio AS Folio,
-                        com.insolutoPendiente AS Insoluto,
+                        COALESCE(com.insolutoPendiente, cf.monto) AS Insoluto,
                         com.totalComplementos AS Complemento,
                         com.totalPagos AS Pagos
                     FROM
@@ -187,13 +187,13 @@ class Pagos_Mdl
                             $params[':fechaFinal'] = $fechaFinal;
                             break;
                         case 'insoluto':
-                            if (!in_array($valorFiltro, ['true', 'false'])) {
+                            if (!in_array($valorFiltro, ['true', 'false', true, false], true)) {
                                 throw new \Exception('El valor de insolutoPendiente debe ser true o false.');
                             }
-                            if ($valorFiltro == 'true') {
-                                $filtrosSQL .= ' AND com.insolutoPendiente > 0';
+                            if ($valorFiltro === 'true' || $valorFiltro === true) {
+                                $filtrosSQL .= ' AND (com.insolutoPendiente > 0 OR ISNULL(com.insolutoPendiente))';
                             } else {
-                                $filtrosSQL .= ' AND (ISNULL(com.insolutoPendiente) OR com.insolutoPendiente = 0)';
+                                $filtrosSQL .= ' AND com.insolutoPendiente = 0';
                             }
                             break;
                         default:
@@ -224,7 +224,7 @@ class Pagos_Mdl
                         cf.uuid AS UUID,
                         cf.serie AS Serie,
                         cf.folio AS Folio,
-                        com.insolutoPendiente AS Insoluto 
+                        COALESCE(com.insolutoPendiente, cf.monto) AS Insoluto 
                     FROM
                         compras com
                         INNER JOIN proveedores prov ON com.idProveedor = prov.id
@@ -341,17 +341,18 @@ class Pagos_Mdl
             }
 
             $sql = "SELECT
-                        Pagos.IdCompra AS 'Acuse',
-                        CONCAT( cf.serie, cf.folio ) AS 'Serie',
-                        cf.razonSocialEm AS 'Emisor',
-                        Pagos.OrdenCompra AS 'OC',
-                        GROUP_CONCAT( Pagos.Recepcion ) AS 'HES',
-                        GROUP_CONCAT( Pagos.FormaPago ) AS 'FormaPago',
-                        SUM( Pagos.MontoPagado ) AS 'MontoPagado' 
+                        MAX( Pagos.IdCompra ) AS 'Acuse',
+                        GROUP_CONCAT( DISTINCT CONCAT( cf.serie, cf.folio ) SEPARATOR ', ' ) AS 'Serie',
+                        MAX( cf.razonSocialEm ) AS 'Emisor',
+                        MAX( Pagos.OrdenCompra ) AS 'OC',
+                        MAX( Pagos.Recepcion ) AS 'HES',
+                        MAX( Pagos.FormaPago ) AS 'FormaPago',
+                        MAX( Pagos.MontoPagado ) AS 'MontoPagado' 
                     FROM
                         (
                         SELECT
-                            dc.idCompra AS 'IdCompra',
+                            pc.id AS 'IdPago',
+                            MAX( dc.idCompra ) AS 'IdCompra',
                             pc.OC AS 'OrdenCompra',
                             pc.HES AS 'Recepcion',
                             pc.montoPagado AS 'MontoPagado',
@@ -364,25 +365,26 @@ class Pagos_Mdl
                         WHERE
                             $filtrosSQL
                         GROUP BY
-                            pc.HES 
+                            pc.id 
                         ) Pagos
                         INNER JOIN cfdi_facturas cf ON Pagos.IdCompra = cf.idCompra 
                     WHERE
                         Pagos.IdCompra > 0
                     GROUP BY
-                        Pagos.OrdenCompra UNION
+                        Pagos.IdPago UNION
                     SELECT
-                        Pagos.IdCompra AS 'Acuse',
+                        MAX( Pagos.IdCompra ) AS 'Acuse',
                         '' AS 'Serie',
                         '' AS 'Emisor',
-                        Pagos.OrdenCompra AS 'OC',
-                        Pagos.Recepcion AS 'HES',
-                        GROUP_CONCAT( Pagos.FormaPago ) AS 'FormaPago',
-                        SUM( Pagos.MontoPagado ) AS 'MontoPagado' 
+                        MAX( Pagos.OrdenCompra ) AS 'OC',
+                        MAX( Pagos.Recepcion ) AS 'HES',
+                        MAX( Pagos.FormaPago ) AS 'FormaPago',
+                        MAX( Pagos.MontoPagado ) AS 'MontoPagado' 
                     FROM
                         (
                         SELECT
-                            dc.idCompra AS 'IdCompra',
+                            pc.id AS 'IdPago',
+                            MAX( dc.idCompra ) AS 'IdCompra',
                             pc.OC AS 'OrdenCompra',
                             pc.HES AS 'Recepcion',
                             pc.montoPagado AS 'MontoPagado',
@@ -396,12 +398,11 @@ class Pagos_Mdl
                             $filtrosSQL2
                             AND ISNULL( dc.idCompra ) 
                         GROUP BY
-                            pc.HES 
+                            pc.id 
                         ) Pagos
                         LEFT JOIN cfdi_facturas cf ON Pagos.IdCompra = cf.idCompra 
                     GROUP BY
-                        Pagos.OrdenCompra,
-                        Pagos.Recepcion
+                        Pagos.IdPago
                     ORDER BY Acuse $orden
                     $limiteResult";
             if (self::$debug) {

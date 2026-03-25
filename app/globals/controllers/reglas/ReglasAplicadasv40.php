@@ -362,63 +362,29 @@ class ReglasAplicadasv40
             echo "<br>";
         }
 
-        // Aplicar descuentos por notas de crédito si aplica. NOTA IMPORTANTE: Esto es sólo para SilmeAgro vimos que hay facturas donde 
-        //   descuentan el valor de las notas de credito y hay veces que no como el caso de INNOVAK que la factura entra normal .
+        // En lugar de descontar matemáticamente el subtotal del XML (lo cual falla si la recepción es parcial 
+        // y hay diferentes porcentajes por producto), mejor comparamos el subtotal del XML (que ya es el Bruto)
+        // directamente contra el subTotalReal (Bruto/Gross-up) que calcula SilmeAgro para esta recepción específica.
+
+        $subtotalConfig = $configParaValidaciones['datosRecepciones']['Subtotal'] ?? 0;
+
         if (isset($configParaValidaciones['excepcionesProveedor']['DescontarPromocionesAplicables']) && $configParaValidaciones['excepcionesProveedor']['DescontarPromocionesAplicables']) {
+            // Si tiene descuentos aplicables, el portal espera que la factura cuadre con el valor Bruto
+            $subtotalConfig = $configParaValidaciones['datosRecepciones']['SubtotalReal'] ?? $subtotalConfig;
+
             if ($this->debug == 1) {
-                echo "<b>* Proveedor con configuración para descontar promociones aplicables</b>";
-                echo "<br>";
+                echo "<br><b>* Proveedor con configuración para descontar promociones aplicables</b>";
+                echo "<br> Se usará el SubtotalReal (Bruto) de la HES: " . $subtotalConfig . "<br>";
             }
-            $debugMessages[] = "<br>* Proveedor con configuración para descontar promociones aplicables.";
-
-            // Preparación de Subtotal para SilmeAgro donde al subtotal le restamos los porcentaje promocionales aplicables para comparar con el valor de la OC
-            if (isset($configParaValidaciones['notasCreditos']) && is_array($configParaValidaciones['notasCreditos'])) {
-                if ($this->debug == 1) {
-                    echo " Preparando Subtotal para SilmeAgro donde al subtotal le restamos los porcentaje promocionales aplicables para comparar con el valor de la OC";
-                    echo "<br>Notas de Crédito: ";
-                    var_dump($configParaValidaciones['notasCreditos']);
-                    echo "<br>--------------------------------";
-                    echo "<br>";
-                }
-
-                $sumaMontoDescuentos = 0;
-                foreach ($configParaValidaciones['notasCreditos'] as $notaCredito) {
-
-                    if ($notaCredito['idPoliticaComercial'] > 0 && $notaCredito['FormaCobro'] == 'NC') {
-                        if ($this->debug == 1) {
-                            echo "<br>Aplicando nota de crédito: " . $notaCredito['IdNotaCredito'] . " por " . $notaCredito['Descripcion'];
-                        }
-                        if ($notaCredito['TipoDescuento'] == 'AMOUNT') {
-                            // Aplicar descuento por monto
-                            $montoDescuento = $notaCredito['ValorDescuento'] ?? 0;
-                            $subtotalXMLAntesDeDescuentos = $subtotalXML;                
-                            $subtotalXML -= $montoDescuento;
-                            $debugMessages[] = "<br>* OK - $ Descuento aplicado $ $montoDescuento por nota de crédito: <b>$ $montoDescuento</b> al subtotal <b>$subtotalXMLAntesDeDescuentos</b>.";
-                            $sumaMontoDescuentos += $montoDescuento;
-                        } elseif ($notaCredito['TipoDescuento'] == 'PERCENT') {
-                            // Aplicar descuento porcentual
-                            $porcentajeDescuento = $notaCredito['ValorDescuento'] ?? 0;
-                            $montoDescuento = ($subtotalXML * ($porcentajeDescuento / 100));
-                            $subtotalXML -= $montoDescuento;
-                            if ($this->debug == 1) {
-                                echo "<br>Aplicando descuento $porcentajeDescuento %: $" . $montoDescuento;
-                            }
-                            $debugMessages[] = "<br>* OK - % Descuento aplicado $porcentajeDescuento % por nota de crédito: <b>$ $montoDescuento</b> al subtotal <b>$subtotalXML</b>.";
-                            $sumaMontoDescuentos += $montoDescuento;
-                        }
-                    }
-                }
-            }
-            $debugMessages[] = "<br>* Subtotal XML después de aplicar descuentos: <b>$subtotalXML</b>.";
+            $debugMessages[] = "<br>* Proveedor con promociones aplicables. Comparando XML (Bruto) contra HES (SubtotalReal Bruto).";
         } else {
             if ($this->debug == 1) {
                 echo "<br><b>* Proveedor sin configuración para descontar promociones aplicables</b>";
-                echo "<br>";
+                echo "<br> Se usará el Subtotal (Neto) de la HES: " . $subtotalConfig . "<br>";
             }
             $debugMessages[] = "<br>* Proveedor sin configuración para descontar promociones aplicables.";
         }
 
-        $subtotalConfig = $configParaValidaciones['datosRecepciones']['Subtotal'] ?? 0;
         $bloqDiferencia = $configParaValidaciones['excepcionesProveedor']['BloqDiferenciaMonto'] ?? false;
         $tipoRegla = $configParaValidaciones['diferenciaMontos']['tipoRegla'] ?? 1;
 
