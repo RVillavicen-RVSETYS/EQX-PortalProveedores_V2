@@ -149,6 +149,9 @@ class MiPerfilController extends Controller
             }
             
             if ($resultActualizaProveedor['success']) {
+                if (isset($campos['pass'])) {
+                    unset($_SESSION['EQXCambioForzosoPass']);
+                }
                 $response = [
                     'success' => true,
                     'message' => $resultActualizaProveedor['filasAfectadas'].' Registro actualizado correctamente.',

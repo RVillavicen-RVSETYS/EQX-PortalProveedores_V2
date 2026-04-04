@@ -115,8 +115,8 @@ if ($cantCredito != '' && $tiempoCredito != '') {
                         <div class="card">
                             <div class="card-body">
                                 <center class="m-t-30"> <img src="/assets/images/noimg.png" class="rounded-circle" width="150" />
-                                    <h4 class="card-title m-t-10"><?=$data['datosIniciales']['datosProveedores']['RFC'];?></h4>
-                                    <h6 class="card-subtitle"><?=$data['datosIniciales']['datosProveedores']['RazonSocial'];?></h6>
+                                    <h4 class="card-title m-t-10"><?= $data['datosIniciales']['datosProveedores']['RFC']; ?></h4>
+                                    <h6 class="card-subtitle"><?= $data['datosIniciales']['datosProveedores']['RazonSocial']; ?></h6>
                                 </center>
                             </div>
                             <div>
@@ -124,15 +124,15 @@ if ($cantCredito != '' && $tiempoCredito != '') {
                             </div>
                             <div class="card-body">
                                 <small class="text-muted">No. Proveedor </small>
-                                <h6><?=$idProveedor;?></h6>
+                                <h6><?= $idProveedor; ?></h6>
                                 <small class="text-muted p-t-30 db">Regimen Fiscal</small>
-                                <h6><?=$regimenFiscal;?></h6>
+                                <h6><?= $regimenFiscal; ?></h6>
                                 <small class="text-muted p-t-30 db">Pais</small>
-                                <h6><?=$pais;?></h6>
+                                <h6><?= $pais; ?></h6>
                                 <small class="text-muted">Correo </small>
-                                <h6 id="provCorreo"><?=$correo;?></h6>
+                                <h6 id="provCorreo"><?= $correo; ?></h6>
                                 <small class="text-muted p-t-30 db">Plazo de Credito</small>
-                                <h6><?=$plazoCredito;?></h6>
+                                <h6><?= $plazoCredito; ?></h6>
                             </div>
                         </div>
                     </div>
@@ -148,13 +148,13 @@ if ($cantCredito != '' && $tiempoCredito != '') {
                                     <div class="form-group">
                                         <label class="col-md-12">Razon Social</label>
                                         <div class="col-md-12">
-                                            <input type="text" value="<?=$data['datosIniciales']['datosProveedores']['RazonSocial'];?>" class="form-control form-control-line" disabled>
+                                            <input type="text" value="<?= $data['datosIniciales']['datosProveedores']['RazonSocial']; ?>" class="form-control form-control-line" disabled>
                                         </div>
                                     </div>
                                     <div class="form-group">
                                         <label for="correo" class="col-md-12">Correo</label>
                                         <div class="col-md-12">
-                                            <input type="email" value="<?=$data['datosIniciales']['datosProveedores']['Correo'];?>" class="form-control form-control-line" id="correo" name="correo" required>
+                                            <input type="email" value="<?= $data['datosIniciales']['datosProveedores']['Correo']; ?>" class="form-control form-control-line" id="correo" name="correo" required>
                                         </div>
                                     </div>
                                     <div class="form-group">
@@ -172,7 +172,7 @@ if ($cantCredito != '' && $tiempoCredito != '') {
                                         </div>
                                     </div>
                                     <div class="form-group">
-                                        <div class="col-sm-12 text-left" id="btnSubmitActualiza" >
+                                        <div class="col-sm-12 text-left" id="btnSubmitActualiza">
                                             <button type="submit" class="btn bg-pyme-primary">Actualizar Perfil</button>
                                         </div>
                                     </div>
@@ -247,6 +247,7 @@ if ($cantCredito != '' && $tiempoCredito != '') {
     <!--c3 charts -->
     <script src="/assets/libs/select2/dist/js/select2.min.js"></script>
     <script src="/assets/libs/moment/moment.js"></script>
+    <script src="/assets/libs/sweetalert2/dist/sweetalert2.all.min.js"></script>
 
     <script>
         $(document).ready(function() {
@@ -268,8 +269,8 @@ if ($cantCredito != '' && $tiempoCredito != '') {
                 data: formData,
                 dataType: 'json',
                 success: function(response) {
-                    if (response.success) {         
-                        $('#provCorreo').html(response.correo);                   
+                    if (response.success) {
+                        $('#provCorreo').html(response.correo);
                         notificaSuc(response.message); // Muestra el mensaje OK
                     } else {
                         notificaBad(response.message); // Muestra el mensaje de error
@@ -288,24 +289,24 @@ if ($cantCredito != '' && $tiempoCredito != '') {
             var pass2 = $('#password2').val();
 
             if (pass1 == '' && pass2 == '') {
-            return true;
+                return true;
             }
             if (pass1.length < 8) {
-            $('#password1').addClass('is-invalid');
-            $('#password2').addClass('is-invalid');
-            $('#invalid_pass2').html('La contraseña debe tener al menos 8 caracteres');
-            return false;
+                $('#password1').addClass('is-invalid');
+                $('#password2').addClass('is-invalid');
+                $('#invalid_pass2').html('La contraseña debe tener al menos 8 caracteres');
+                return false;
             }
             if (pass1 != pass2) {
-            $('#password1').addClass('is-invalid');
-            $('#password2').addClass('is-invalid');
-            $('#invalid_pass2').html('Las contraseñas no coinciden');
-            return false;
+                $('#password1').addClass('is-invalid');
+                $('#password2').addClass('is-invalid');
+                $('#invalid_pass2').html('Las contraseñas no coinciden');
+                return false;
             } else {
-            $('#password1').removeClass('is-invalid');
-            $('#password2').removeClass('is-invalid');
-            $('#invalid_pass2').html('');
-            return true;
+                $('#password1').removeClass('is-invalid');
+                $('#password2').removeClass('is-invalid');
+                $('#invalid_pass2').html('');
+                return true;
             }
         }
 
@@ -315,6 +316,21 @@ if ($cantCredito != '' && $tiempoCredito != '') {
             $('#invalid_pass2').html('');
         }
     </script>
+
+    <?php if (isset($_SESSION['EQXCambioForzosoPass']) && $_SESSION['EQXCambioForzosoPass'] === true): ?>
+        <script>
+            $(document).ready(function() {
+                Swal.fire({
+                    title: 'Actualización Requerida',
+                    text: 'Por tu seguridad, debes cambiar la contraseña por defecto antes de continuar en el portal.',
+                    type: 'warning',
+                    allowOutsideClick: false,
+                    allowEscapeKey: false,
+                    confirmButtonText: 'Entendido'
+                });
+            });
+        </script>
+    <?php endif; ?>
 </body>
 
 </html>
