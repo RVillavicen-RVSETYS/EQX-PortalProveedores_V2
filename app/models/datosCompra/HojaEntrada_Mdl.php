@@ -53,7 +53,7 @@ class HojaEntrada_Mdl
                 $rep = implode(', ', $hesRepetidas);
                 return ['success' => false, 'message' => "Se encontraron $cantRep Hojas de Entrada repetidas: $rep"];
             }
-            
+
             // Preparar lista de HES para la consulta
             $hesList = implode(', ', array_map(function ($item) {
                 return "'" . addslashes($item) . "'";
@@ -287,13 +287,15 @@ class HojaEntrada_Mdl
                     return ['success' => false, 'message' => 'Se encontraron inconsistencias en las HES.', 'errors' => $errores];
                 }
 
-                // Calcular el subtotal
+                // Calcular el subtotal (Neto y Bruto)
                 $subtotal = array_sum(array_column($resultados, 'subtotal'));
+                $subtotalReal = array_sum(array_column($resultados, 'subTotalReal'));
 
                 return [
                     'success' => true,
                     'data' => [
                         'Subtotal' => $subtotal,
+                        'SubtotalReal' => $subtotalReal,
                         'idCompra' => $resultados[0]['idCompra'],
                         'idProveedor' => $resultados[0]['idProveedor'],
                         'sociedad' => $resultados[0]['sociedad'],

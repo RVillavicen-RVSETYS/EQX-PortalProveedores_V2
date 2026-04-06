@@ -1,0 +1,207 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<cfdi:Comprobante xsi:schemaLocation="http://www.sat.gob.mx/cfd/4 http://www.sat.gob.mx/sitio_internet/cfd/4/cfdv40.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:cfdi="http://www.sat.gob.mx/cfd/4" Version="4.0" Serie="VD-" Folio="197584" Fecha="2025-12-22T18:13:37" Sello="n5K4UDw326SK6jeaLMR5MmuPe61YOxQACbkXnQ03vr0SFw96i83NmhqVz8+KpuZ2SXh7UvCmYPWTyxolAk/VKGqkvR3uIux7JpJhlgAzadUsS/tvREZVJezIp15iHOFou3TunbT+jYwyV9BPGiWM+wvhLJm3QFBPg635TAI2PRkyEho+G207HAQM1H9PCjWsONrOdS8vwYFInVMpz7PWUcdf19WgfHOBev/SLJb7lkzVL7gOZgjOYwodO75OAaFpqXsYe22kDUGFG4AlIsVToSrOckJaTxPPqHs57iLWOUt/YnFQFGBsmQKTj4wZKRaEh340jQ7/pekfQ0gUVCQ3vQ==" FormaPago="99" NoCertificado="00001000000512586951" Certificado="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" CondicionesDePago="30/12/2025" SubTotal="20650.18" Moneda="USD" TipoCambio="17.979200" Total="20650.18" TipoDeComprobante="I" Exportacion="01" MetodoPago="PPD" LugarExpedicion="45050">
+  <cfdi:Emisor Rfc="SCM0012123D6" Nombre="SQM COMERCIAL DE MEXICO" RegimenFiscal="601" />
+  <cfdi:Receptor Rfc="FMO2111062N8" Nombre="FERTYAGRO DE MORELOS" DomicilioFiscalReceptor="62950" RegimenFiscalReceptor="601" UsoCFDI="G01" />
+  <cfdi:Conceptos>
+    <cfdi:Concepto ClaveProdServ="10171605" Cantidad="7.00" ClaveUnidad="TNE" Unidad="MT" Descripcion="Qrop K S" ValorUnitario="1002.1" Importe="7014.70" ObjetoImp="02">
+      <cfdi:Impuestos>
+        <cfdi:Traslados>
+          <cfdi:Traslado Base="7014.70" Impuesto="002" TipoFactor="Tasa" TasaOCuota="0.000000" Importe="0.00" />
+        </cfdi:Traslados>
+      </cfdi:Impuestos>
+    </cfdi:Concepto>
+    <cfdi:Concepto ClaveProdServ="10171607" Cantidad="3.50" ClaveUnidad="TNE" Unidad="MT" Descripcion="Ultrasol Magnit" ValorUnitario="860.1" Importe="3010.35" ObjetoImp="02">
+      <cfdi:Impuestos>
+        <cfdi:Traslados>
+          <cfdi:Traslado Base="3010.35" Impuesto="002" TipoFactor="Tasa" TasaOCuota="0.000000" Importe="0.00" />
+        </cfdi:Traslados>
+      </cfdi:Impuestos>
+    </cfdi:Concepto>
+    <cfdi:Concepto ClaveProdServ="10171603" Cantidad="3.50" ClaveUnidad="TNE" Unidad="MT" Descripcion="Ultrasol MAP" ValorUnitario="1391.1" Importe="4868.85" ObjetoImp="02">
+      <cfdi:Impuestos>
+        <cfdi:Traslados>
+          <cfdi:Traslado Base="4868.85" Impuesto="002" TipoFactor="Tasa" TasaOCuota="0.000000" Importe="0.00" />
+        </cfdi:Traslados>
+      </cfdi:Impuestos>
+    </cfdi:Concepto>
+    <cfdi:Concepto ClaveProdServ="10171602" Cantidad="3.50" ClaveUnidad="TNE" Unidad="MT" Descripcion="Ultrasol NKS-Plus" ValorUnitario="1121.1" Importe="3923.85" ObjetoImp="02">
+      <cfdi:Impuestos>
+        <cfdi:Traslados>
+          <cfdi:Traslado Base="3923.85" Impuesto="002" TipoFactor="Tasa" TasaOCuota="0.000000" Importe="0.00" />
+        </cfdi:Traslados>
+      </cfdi:Impuestos>
+    </cfdi:Concepto>
+    <cfdi:Concepto ClaveProdServ="10171602" Cantidad="1.75" ClaveUnidad="TNE" Unidad="MT" Descripcion="Ultrasol SOP 51" ValorUnitario="1047.1" Importe="1832.43" ObjetoImp="02">
+      <cfdi:Impuestos>
+        <cfdi:Traslados>
+          <cfdi:Traslado Base="1832.43" Impuesto="002" TipoFactor="Tasa" TasaOCuota="0.000000" Importe="0.00" />
+        </cfdi:Traslados>
+      </cfdi:Impuestos>
+    </cfdi:Concepto>
+  </cfdi:Conceptos>
+  <cfdi:Impuestos TotalImpuestosTrasladados="0.00">
+    <cfdi:Traslados>
+      <cfdi:Traslado Base="20650.18" Impuesto="002" TipoFactor="Tasa" TasaOCuota="0.000000" Importe="0.00" />
+    </cfdi:Traslados>
+  </cfdi:Impuestos>
+  <cfdi:Complemento>
+    <tfd:TimbreFiscalDigital UUID="6d9b6a34-a1c3-48aa-b864-5699b1dbad50" FechaTimbrado="2025-12-22T18:18:08" Version="1.1" SelloCFD="n5K4UDw326SK6jeaLMR5MmuPe61YOxQACbkXnQ03vr0SFw96i83NmhqVz8+KpuZ2SXh7UvCmYPWTyxolAk/VKGqkvR3uIux7JpJhlgAzadUsS/tvREZVJezIp15iHOFou3TunbT+jYwyV9BPGiWM+wvhLJm3QFBPg635TAI2PRkyEho+G207HAQM1H9PCjWsONrOdS8vwYFInVMpz7PWUcdf19WgfHOBev/SLJb7lkzVL7gOZgjOYwodO75OAaFpqXsYe22kDUGFG4AlIsVToSrOckJaTxPPqHs57iLWOUt/YnFQFGBsmQKTj4wZKRaEh340jQ7/pekfQ0gUVCQ3vQ==" NoCertificadoSAT="00001000000710582077" SelloSAT="cXPvErR+TbPVZRummDj56qTeTh4QcrBcFgJGNZFDaJxcstS/bOuDU/dpYKJFw6XhwJmEc1wiYi6PuJA2nxRFSPmSuaPuLdzqjcNuQqsNPvUYAlhuWwA3IKYvjcnoI6uub8MsjLT9wsjiTAHJP6Rv5xF3D02G1Y5fM5WVGNvQR7NJzt7hCoRjfBFtWA9BlzUxw79OMODTjrF+glGcilKr7Pb26mdLTcWnH4XbVjG3rxGGlUDsY7MtOvZToyAU5zFMhD2DIcwX3GQ14OQH5EvLOqKGXN6CMVqrPHTNU2+yHt4VujoZAHvpiWzc5x2ZvgVoQ54Yj/6xtsNtcDhBxMKv2A==" RfcProvCertif="MIS1112095W0" xmlns:tfd="http://www.sat.gob.mx/TimbreFiscalDigital" xsi:schemaLocation="http://www.sat.gob.mx/TimbreFiscalDigital http://www.sat.gob.mx/sitio_internet/cfd/TimbreFiscalDigital/TimbreFiscalDigitalv11.xsd" />
+  </cfdi:Complemento>
+  <cfdi:Addenda xmlns:ecfd="http://www.edxsolutions.com/schemas/strict" xsi:schemaLocation="http://www.edxsolutions.com/schemas/strict http://www.edxsolutions.com/schemas/strict/ecfd.xsd">
+    <ecfd:ECFD version="1.0">
+      <ecfd:Documento ID="T33VD-197584">
+        <ecfd:Encabezado>
+          <ecfd:IdDoc>
+            <ecfd:NroAprob>1</ecfd:NroAprob>
+            <ecfd:AnoAprob>1900</ecfd:AnoAprob>
+            <ecfd:Tipo>33</ecfd:Tipo>
+            <ecfd:Serie>VD-</ecfd:Serie>
+            <ecfd:Folio>197584</ecfd:Folio>
+            <ecfd:Estado>ORIGINAL</ecfd:Estado>
+            <ecfd:FechaEmis>2025-12-22T18:13:37</ecfd:FechaEmis>
+            <ecfd:FormaPago>99</ecfd:FormaPago>
+            <ecfd:MedioPago>PPD</ecfd:MedioPago>
+            <ecfd:LugarExpedicion>45050</ecfd:LugarExpedicion>
+            <ecfd:Exportacion>01</ecfd:Exportacion>
+            <ecfd:CondPago>30/12/2025</ecfd:CondPago>
+          </ecfd:IdDoc>
+          <ecfd:ExEmisor>
+            <ecfd:RFCEmisor>SCM0012123D6</ecfd:RFCEmisor>
+            <ecfd:NmbEmisor>SQM COMERCIAL DE MEXICO</ecfd:NmbEmisor>
+          </ecfd:ExEmisor>
+          <ecfd:ExReceptor>
+            <ecfd:RFCRecep>FMO2111062N8</ecfd:RFCRecep>
+            <ecfd:NmbRecep>FERTYAGRO DE MORELOS</ecfd:NmbRecep>
+            <ecfd:DomicilioFiscalReceptor>62950</ecfd:DomicilioFiscalReceptor>
+            <ecfd:RegimenFiscalReceptor>601</ecfd:RegimenFiscalReceptor>
+            <ecfd:UsoCFDI>G01</ecfd:UsoCFDI>
+          </ecfd:ExReceptor>
+          <ecfd:Totales>
+            <ecfd:Moneda>USD</ecfd:Moneda>
+            <ecfd:FctConv>17.979200</ecfd:FctConv>
+            <ecfd:SubTotal>20650.18</ecfd:SubTotal>
+            <ecfd:MntImp>0.00</ecfd:MntImp>
+            <ecfd:VlrPagar>20650.18</ecfd:VlrPagar>
+          </ecfd:Totales>
+          <ecfd:ExImpuestos>
+            <ecfd:Base>20650.18</ecfd:Base>
+            <ecfd:TipoImp>002</ecfd:TipoImp>
+            <ecfd:TipoFactor>Tasa</ecfd:TipoFactor>
+            <ecfd:TasaImp>0.000000</ecfd:TasaImp>
+            <ecfd:MontoImp>0.00</ecfd:MontoImp>
+          </ecfd:ExImpuestos>
+        </ecfd:Encabezado>
+        <ecfd:Detalle>
+          <ecfd:NroLinDet>1</ecfd:NroLinDet>
+          <ecfd:DscLang>ES</ecfd:DscLang>
+          <ecfd:ClaveProdServ>10171605</ecfd:ClaveProdServ>
+          <ecfd:DscItem>Qrop K S</ecfd:DscItem>
+          <ecfd:QtyItem>7.00</ecfd:QtyItem>
+          <ecfd:ClaveUnidad>TNE</ecfd:ClaveUnidad>
+          <ecfd:UnmdItem>MT</ecfd:UnmdItem>
+          <ecfd:PrcBrutoItem>1002.1</ecfd:PrcBrutoItem>
+          <ecfd:PrcNetoItem>0</ecfd:PrcNetoItem>
+          <ecfd:ImpuestosDet>
+            <ecfd:TipoImp>002</ecfd:TipoImp>
+            <ecfd:TasaImp>0.000000</ecfd:TasaImp>
+            <ecfd:MontoImp>0.00</ecfd:MontoImp>
+            <ecfd:MontoBaseImp>7014.70</ecfd:MontoBaseImp>
+            <ecfd:TipoFactor>Tasa</ecfd:TipoFactor>
+          </ecfd:ImpuestosDet>
+          <ecfd:MontoNetoItem>7014.70</ecfd:MontoNetoItem>
+          <ecfd:ObjetoImp>02</ecfd:ObjetoImp>
+        </ecfd:Detalle>
+        <ecfd:Detalle>
+          <ecfd:NroLinDet>2</ecfd:NroLinDet>
+          <ecfd:DscLang>ES</ecfd:DscLang>
+          <ecfd:ClaveProdServ>10171607</ecfd:ClaveProdServ>
+          <ecfd:DscItem>Ultrasol Magnit</ecfd:DscItem>
+          <ecfd:QtyItem>3.50</ecfd:QtyItem>
+          <ecfd:ClaveUnidad>TNE</ecfd:ClaveUnidad>
+          <ecfd:UnmdItem>MT</ecfd:UnmdItem>
+          <ecfd:PrcBrutoItem>860.1</ecfd:PrcBrutoItem>
+          <ecfd:PrcNetoItem>0</ecfd:PrcNetoItem>
+          <ecfd:ImpuestosDet>
+            <ecfd:TipoImp>002</ecfd:TipoImp>
+            <ecfd:TasaImp>0.000000</ecfd:TasaImp>
+            <ecfd:MontoImp>0.00</ecfd:MontoImp>
+            <ecfd:MontoBaseImp>3010.35</ecfd:MontoBaseImp>
+            <ecfd:TipoFactor>Tasa</ecfd:TipoFactor>
+          </ecfd:ImpuestosDet>
+          <ecfd:MontoNetoItem>3010.35</ecfd:MontoNetoItem>
+          <ecfd:ObjetoImp>02</ecfd:ObjetoImp>
+        </ecfd:Detalle>
+        <ecfd:Detalle>
+          <ecfd:NroLinDet>3</ecfd:NroLinDet>
+          <ecfd:DscLang>ES</ecfd:DscLang>
+          <ecfd:ClaveProdServ>10171603</ecfd:ClaveProdServ>
+          <ecfd:DscItem>Ultrasol MAP</ecfd:DscItem>
+          <ecfd:QtyItem>3.50</ecfd:QtyItem>
+          <ecfd:ClaveUnidad>TNE</ecfd:ClaveUnidad>
+          <ecfd:UnmdItem>MT</ecfd:UnmdItem>
+          <ecfd:PrcBrutoItem>1391.1</ecfd:PrcBrutoItem>
+          <ecfd:PrcNetoItem>0</ecfd:PrcNetoItem>
+          <ecfd:ImpuestosDet>
+            <ecfd:TipoImp>002</ecfd:TipoImp>
+            <ecfd:TasaImp>0.000000</ecfd:TasaImp>
+            <ecfd:MontoImp>0.00</ecfd:MontoImp>
+            <ecfd:MontoBaseImp>4868.85</ecfd:MontoBaseImp>
+            <ecfd:TipoFactor>Tasa</ecfd:TipoFactor>
+          </ecfd:ImpuestosDet>
+          <ecfd:MontoNetoItem>4868.85</ecfd:MontoNetoItem>
+          <ecfd:ObjetoImp>02</ecfd:ObjetoImp>
+        </ecfd:Detalle>
+        <ecfd:Detalle>
+          <ecfd:NroLinDet>4</ecfd:NroLinDet>
+          <ecfd:DscLang>ES</ecfd:DscLang>
+          <ecfd:ClaveProdServ>10171602</ecfd:ClaveProdServ>
+          <ecfd:DscItem>Ultrasol NKS-Plus</ecfd:DscItem>
+          <ecfd:QtyItem>3.50</ecfd:QtyItem>
+          <ecfd:ClaveUnidad>TNE</ecfd:ClaveUnidad>
+          <ecfd:UnmdItem>MT</ecfd:UnmdItem>
+          <ecfd:PrcBrutoItem>1121.1</ecfd:PrcBrutoItem>
+          <ecfd:PrcNetoItem>0</ecfd:PrcNetoItem>
+          <ecfd:ImpuestosDet>
+            <ecfd:TipoImp>002</ecfd:TipoImp>
+            <ecfd:TasaImp>0.000000</ecfd:TasaImp>
+            <ecfd:MontoImp>0.00</ecfd:MontoImp>
+            <ecfd:MontoBaseImp>3923.85</ecfd:MontoBaseImp>
+            <ecfd:TipoFactor>Tasa</ecfd:TipoFactor>
+          </ecfd:ImpuestosDet>
+          <ecfd:MontoNetoItem>3923.85</ecfd:MontoNetoItem>
+          <ecfd:ObjetoImp>02</ecfd:ObjetoImp>
+        </ecfd:Detalle>
+        <ecfd:Detalle>
+          <ecfd:NroLinDet>5</ecfd:NroLinDet>
+          <ecfd:DscLang>ES</ecfd:DscLang>
+          <ecfd:ClaveProdServ>10171602</ecfd:ClaveProdServ>
+          <ecfd:DscItem>Ultrasol SOP 51</ecfd:DscItem>
+          <ecfd:QtyItem>1.75</ecfd:QtyItem>
+          <ecfd:ClaveUnidad>TNE</ecfd:ClaveUnidad>
+          <ecfd:UnmdItem>MT</ecfd:UnmdItem>
+          <ecfd:PrcBrutoItem>1047.1</ecfd:PrcBrutoItem>
+          <ecfd:PrcNetoItem>0</ecfd:PrcNetoItem>
+          <ecfd:ImpuestosDet>
+            <ecfd:TipoImp>002</ecfd:TipoImp>
+            <ecfd:TasaImp>0.000000</ecfd:TasaImp>
+            <ecfd:MontoImp>0.00</ecfd:MontoImp>
+            <ecfd:MontoBaseImp>1832.43</ecfd:MontoBaseImp>
+            <ecfd:TipoFactor>Tasa</ecfd:TipoFactor>
+          </ecfd:ImpuestosDet>
+          <ecfd:MontoNetoItem>1832.43</ecfd:MontoNetoItem>
+          <ecfd:ObjetoImp>02</ecfd:ObjetoImp>
+        </ecfd:Detalle>
+        <ecfd:TimeStamp>2025-12-22T18:18:02</ecfd:TimeStamp>
+      </ecfd:Documento>
+      <ecfd:Personalizados>
+        <ecfd:campoString name="template" />
+        <ecfd:campoString name="Correo">gecom01@silmeagro.com; ears1286@yahoo.com.mx; compras@silmeagro.com; admin03@silmeagro.com</ecfd:campoString>
+        <ecfd:campoString name="OrdenDeVenta">PDVT-068598</ecfd:campoString>
+        <ecfd:campoString name="ReferenciaDelCliente">20062025-08 PROGRESO</ecfd:campoString>
+        <ecfd:campoString name="Comentario2" />
+        <ecfd:campoString name="RegimenFiscal">601</ecfd:campoString>
+        <ecfd:campoString name="LugarDeExpedicion">45050</ecfd:campoString>
+      </ecfd:Personalizados>
+    </ecfd:ECFD>
+  </cfdi:Addenda>
+</cfdi:Comprobante>

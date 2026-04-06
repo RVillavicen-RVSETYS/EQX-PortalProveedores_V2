@@ -97,7 +97,7 @@ class DocumentosController extends Controller
         // Preparar la ruta base
         $currentYear = date('Y'); // Año actual
         $currentYearMonth = date('Y-m'); // Mes actual
-        
+
         // Estructura especial para complementos de pago: /complementosPago/anio/proveedor/noProveedor_CPAGO_uuid.pdf
         if ($tipoDocto === 'COMPPAG') {
             $destinationDirSinBasePath = $tipoDoctoNombre . DIRECTORY_SEPARATOR . $currentYear . DIRECTORY_SEPARATOR . $idProveedor;
@@ -169,7 +169,7 @@ class DocumentosController extends Controller
             'success' => false,
             'message' => '',
             'data' => []
-        ]; 
+        ];
         //$this->debug = 1;
         if ($this->debug == 1) {
             echo "<br>URL Recibida: {$url}<br>";
@@ -239,7 +239,7 @@ class DocumentosController extends Controller
         // Tipos MIME aceptados
         $tiposAceptados = [
             'pdf' => 'application/pdf',  // PDF
-            'xml' => ['application/xml', 'text/xml'], // XML
+            'xml' => ['application/xml', 'text/xml', 'text/plain'], // XML
             'jpeg' => 'image/jpeg',      // Imágenes JPEG
             'png' => 'image/png',        // Imágenes PNG
         ];
@@ -388,8 +388,7 @@ class DocumentosController extends Controller
         // Tipos MIME aceptados
         $tiposAceptados = [
             'pdf' => 'application/pdf',  // PDF
-            // XML: algunos navegadores/servidores reportan octet-stream o text/plain
-            'xml' => ['application/xml', 'text/xml', 'application/octet-stream', 'text/plain']
+            'xml' => ['application/xml', 'text/xml', 'text/plain'] // XML
         ];
 
         // Respuesta inicial
@@ -418,9 +417,16 @@ class DocumentosController extends Controller
         }
 
         // Validar que el archivo tenga un tamaño mínimo
-        $minimumFileSize = 0; // Tamaño mínimo en bytes
+        $minimumFileSize = 10; // Tamaño mínimo en bytes
         if ($fileToValidate['size'] < $minimumFileSize) {
-            $response['message'] = 'El archivo parece estar dañado o es demasiado pequeño.'.$fileToValidate['size'];
+            $response['message'] = 'El archivo parece estar dañado o es demasiado pequeño. ' . $fileToValidate['size'];
+            return $response;
+        }
+
+        // Validar que el archivo no sea demasiado grande
+        $maxFileSize = 2 * 1024 * 1024; // Tamaño máximo de 2 MB
+        if ($fileToValidate['size'] > $maxFileSize) {
+            $response['message'] = 'El archivo es demasiado grande. El máximo permitido es 2MB.';
             return $response;
         }
 
@@ -432,22 +438,42 @@ class DocumentosController extends Controller
         }
 
         // Validar el tipo MIME del archivo
-        // $actualMimeType = mime_content_type($fileToValidate['tmp_name']);
-        // $expectedMimeType = $tiposAceptados[$expectedExtension];
-        // if ((is_array($expectedMimeType) && !in_array($actualMimeType, $expectedMimeType)) ||
-        //     (!is_array($expectedMimeType) && $actualMimeType !== $expectedMimeType)
-        // ) {
-        //     $expectedLabel = is_array($expectedMimeType)
-        //         ? implode(', ', $expectedMimeType)
-        //         : $expectedMimeType;
-        //     $response['message'] = "El tipo MIME del archivo no es válido. Se esperaba '$expectedLabel', pero se recibió '$actualMimeType'.";
-        //     return $response;
-        // }
+        $actualMimeType = mime_content_type($fileToValidate['tmp_name']);
+        $expectedMimeType = $tiposAceptados[$expectedExtension];
+
+        if ((is_array($expectedMimeType) && !in_array($actualMimeType, $expectedMimeType)) ||
+            (!is_array($expectedMimeType) && $actualMimeType !== $expectedMimeType)
+        ) {
+            $response['message'] = "El tipo MIME del archivo no es válido. Se recibió '$actualMimeType'.";
+            return $response;
+        }
 
         // Validar que el archivo sea legible
         if (!is_readable($fileToValidate['tmp_name'])) {
             $response['message'] = 'El archivo no es legible.';
             return $response;
+        }
+
+        // Validar que no sea un archivo xml falso
+        if ($expectedExtension === 'xml') {
+
+            libxml_use_internal_errors(true);
+
+            // Prevenir ataques XXE
+            $xmlContent = file_get_contents($fileToValidate['tmp_name']);
+            $xml = simplexml_load_string($xmlContent, 'SimpleXMLElement', LIBXML_NONET);
+
+            if ($xml === false) {
+                $response['message'] = 'El archivo XML no es válido.';
+                return $response;
+            }
+
+            // Validar que sea un comprobante fiscal (CFDI 3.3 o 4.0)
+            $name = $xml->getName();
+            if ($name !== 'Comprobante') {
+                $response['message'] = 'El archivo XML no parece ser un comprobante fiscal válido.';
+                return $response;
+            }
         }
 
         // Si todo está bien, preparar la respuesta
@@ -459,7 +485,8 @@ class DocumentosController extends Controller
             'tmp_name' => $fileToValidate['tmp_name'],
             'error' => $fileToValidate['error'],
             'size' => $fileToValidate['size'],
-            'extension' => $actualExtension
+            'extension' => $actualExtension,
+            'mime' => $actualMimeType
         ];
 
         return $response;

@@ -576,42 +576,6 @@ $nombreMesActual = $meses[$mesActual] ?? '';
     <script src="/dist/js/pages/forms/select2/select2.init.js"></script>
 
     <script>
-        $("#Form_CargaNotaCredito").submit(function(e) {
-            e.preventDefault();
-            var formData = new FormData(this);
-            bloquearBtn('btnNC');
-            $.ajax({
-                type: 'POST',
-                url: 'CargarFacturas/registraNuevaNotaCredito',
-                data: formData,
-                dataType: 'json',
-                processData: false,
-                contentType: false,
-                success: function(response) {
-                    desbloquearBtn('btnNC');
-                    if (response.success) {
-                        resetFormulario("Form_CargaNotaCredito");
-                        notificaSucSweet("Excelente!!", response.message);
-                    } else {
-                        notificaBadSweet("Lo sentimos!!", response.message); // Muestra el mensaje de error
-                    }
-                },
-                error: function() {
-                    notificaBad('Error al querer cargar factura. Consulta a tu administrador');
-                    desbloquearBtn('btnNC');
-                },
-                complete: function() {
-                    // Rehabilitar el botón
-                    desbloquearBtn('btnNC');
-
-                    // Limpiar los campos Inputs
-                    resetFormulario("Form_CargaNotaCredito");
-                    //window.location.reload();
-                    //cargaTablaUltimasFacturas();
-                }
-            });
-        });
-
         let lastNotasCredito = [];
 
         function obtenerFacturas(ordenCompra, politicasNC = []) {
