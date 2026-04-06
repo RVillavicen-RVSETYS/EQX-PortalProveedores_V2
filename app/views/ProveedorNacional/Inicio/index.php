@@ -605,6 +605,8 @@ if ($notificaciones['success'] && !empty($notificaciones['data'])) {
                                 if (cantNC > 0) {
                                     lastNotasCredito = response.NC || [];
                                     console.log('Información: Hay notas de crédito pendientes:', response.messageNC);
+                                    cargarFormNotaCredito(lastNotasCredito);
+                                    $("#btnNotaCredito").removeClass("d-none");
                                 } else {
                                     lastNotasCredito = [];
                                 }

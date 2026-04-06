@@ -235,6 +235,21 @@ class Controller
                     exit();
                 }
             }
+            
+            // Validar si requiere cambio forzoso de contraseña
+            if (isset($_SESSION['EQXCambioForzosoPass']) && $_SESSION['EQXCambioForzosoPass'] === true) {
+                // Permitir ir solo a logout o MiPerfil
+                $requestUri = $_SERVER['REQUEST_URI'];
+                if (strpos($requestUri, 'MiPerfil') === false && strpos($requestUri, 'logout') === false && strpos($requestUri, 'login') === false) {
+                    if ($this->debug == 1) {
+                        echo "Tienes la contraseña por default, seras re-dirigido a MiPerfil.<br>";
+                        exit();
+                    } else {
+                        header('Location: ' . URL_BASE_PROYECT . '/ProveedorNacional/MiPerfil');
+                        exit();
+                    }
+                }
+            }
         } else {
             // Redirigir al login si no existe la sesión
             if ($this->debug == 1) {

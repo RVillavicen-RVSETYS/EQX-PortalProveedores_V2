@@ -1,0 +1,118 @@
+<cfdi:Comprobante xmlns:cfdi="http://www.sat.gob.mx/cfd/4" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:pago20="http://www.sat.gob.mx/Pagos20" Sello="FCpWZOrclObHMbDoZtiqmD4OZLBj8IMclOt93YS9fgM4muf8bIPaxy8MNEm6ZPf8ycNYNlLpZrzlzmT2feMmdETP/fZYMgqS5UYRwcoFDrjQrLBTtUEO8YMWpSaSHpJy/kLrbdYK0q5NhSyIGtChSyq88lmJwCq8KGa8Qow4RyprkFpZZDqAPt8wX8titTKrJL3glULtqv1NZ3aoY0r3swou27MPDfHAHY98AgU6p4V6Mz566JYjf4JY/8miL2RjAn2XDj2YYUddkcDXpToTzxjvyw5nChh77Mv8EDDKQUseHp0cmMEepKG50vhib3CmWwzNZ8oOIAmonCNnLLD9zg==" Fecha="2026-02-03T16:39:28" xsi:schemaLocation="http://www.sat.gob.mx/cfd/4 http://www.sat.gob.mx/sitio_internet/cfd/4/cfdv40.xsd http://www.sat.gob.mx/Pagos20 http://www.sat.gob.mx/sitio_internet/cfd/Pagos/Pagos20.xsd http://www.sat.gob.mx/ComercioExterior20 http://www.sat.gob.mx/sitio_internet/cfd/ComercioExterior20/ComercioExterior20.xsd http://www.sat.gob.mx/detallista http://www.sat.gob.mx/sitio_internet/cfd/detallista/detallista.xsd http://www.sat.gob.mx/CartaPorte31 http://www.sat.gob.mx/sitio_internet/cfd/CartaPorte/CartaPorte31.xsd http://www.sat.gob.mx/implocal http://www.sat.gob.mx/sitio_internet/cfd/implocal/implocal.xsd http://www.sat.gob.mx/leyendasFiscales http://www.sat.gob.mx/sitio_internet/cfd/leyendasFiscales/leyendasFisc.xsd http://www.sat.gob.mx/divisas http://www.sat.gob.mx/sitio_internet/cfd/divisas/divisas.xsd http://www.sat.gob.mx/donat http://www.sat.gob.mx/sitio_internet/cfd/donat/donat11.xsd http://www.sat.gob.mx/servicioparcialconstruccion http://www.sat.gob.mx/sitio_internet/cfd/servicioparcialconstruccion/servicioparcialconstruccion.xsd" Certificado="MIIGJTCCBA2gAwIBAgIUMDAwMDEwMDAwMDA1MTI1ODY5NTEwDQYJKoZIhvcNAQELBQAwggGEMSAwHgYDVQQDDBdBVVRPUklEQUQgQ0VSVElGSUNBRE9SQTEuMCwGA1UECgwlU0VSVklDSU8gREUgQURNSU5JU1RSQUNJT04gVFJJQlVUQVJJQTEaMBgGA1UECwwRU0FULUlFUyBBdXRob3JpdHkxKjAoBgkqhkiG9w0BCQEWG2NvbnRhY3RvLnRlY25pY29Ac2F0LmdvYi5teDEmMCQGA1UECQwdQVYuIEhJREFMR08gNzcsIENPTC4gR1VFUlJFUk8xDjAMBgNVBBEMBTA2MzAwMQswCQYDVQQGEwJNWDEZMBcGA1UECAwQQ0lVREFEIERFIE1FWElDTzETMBEGA1UEBwwKQ1VBVUhURU1PQzEVMBMGA1UELRMMU0FUOTcwNzAxTk4zMVwwWgYJKoZIhvcNAQkCE01yZXNwb25zYWJsZTogQURNSU5JU1RSQUNJT04gQ0VOVFJBTCBERSBTRVJWSUNJT1MgVFJJQlVUQVJJT1MgQUwgQ09OVFJJQlVZRU5URTAeFw0yMjA0MjIxNDAzMDBaFw0yNjA0MjIxNDAzMDBaMIHzMSkwJwYDVQQDEyBTUU0gQ09NRVJDSUFMIERFIE1FWElDTyBTQSBERSBDVjEpMCcGA1UEKRMgU1FNIENPTUVSQ0lBTCBERSBNRVhJQ08gU0EgREUgQ1YxKTAnBgNVBAoTIFNRTSBDT01FUkNJQUwgREUgTUVYSUNPIFNBIERFIENWMSUwIwYDVQQtExxTQ00wMDEyMTIzRDYgLyBGRUdJODgwNDEyRDIwMR4wHAYDVQQFExUgLyBGRUdJODgwNDEySE5FUlJHMDcxKTAnBgNVBAsTIFNRTSBDT01FUkNJQUwgREUgTUVYSUNPIFNBIERFIENWMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEApAsLRbLYOTYry5+lxYeMeHBdyAbJ5d9NDNhb2olk3sXgSlo0fLHN+fP/SvuRiUBesmqmmLQ/XNRUATF34yn3WpeTy5sGjTda3jIsOoUYfUvJDQCMoZRGnXsRf3o1BTIGM+VXrd2qO8zxdgHepMbqEBwiPpz9POTrXJZ1Ngb2FIoBKT/Esxtwh+IVRcpp9vhS4jY1Z5IdGErzOWB2xVKQCPdVYK/t4oekNosGIS9ri+u8fTRMK3z5+aEi5yMFlVwYyunpYeNhMf8HPp2r5v39v4g/hJKlsU1sHUjlq4Rq1z4FDtikqOzPUcITe8fe9jaIc3nZcalRU0DgjSCGeOW6nQIDAQABox0wGzAMBgNVHRMBAf8EAjAAMAsGA1UdDwQEAwIGwDANBgkqhkiG9w0BAQsFAAOCAgEADs4PZISo99z6NELJB5imED9odFKXjnBwd1RJiLthbr0UHlGbJqgZUu83LR23GPmSoZgHKL+SYp4goFO9JAJYw2K9ceU0t8M5NTro96RGsKl3QyLOWLDetl5BcfmA60C564QW4MIlxmg9D1Y5vpX7MzbNCIq/avpMn8JUMic8+VqlUIZ9hh7ujGTjP94TaetFHhT3gp9KIc4i71zZG3cDT0mt4PvW2QGMCufPMYEmRBD0rHLCE3ECQuZM5Jxnp9ZAPAFb/rMRrS13WgmLTetqyxzIOF6LrakkE7gVVDoW/X4ALgkdxhN71Kf/N9fByOFoeDryKbmpgZjBzlECqw1cBdHEefAIUppSbInE7qsg+8QhK8XaR2NaepD7J9BqRE1FyiASPlL2MdPwwtyZQlJ6/LWmtqr7X34z1Fmh4bPdg8UlTO2nToZuKghE/TWuL7TdurudeufwQHrsAdJSi+5UVI9HRlaUC0voIsi8j6pIVAwrByIjA04ofWRyjczFsBjyMqtim8CUM7RMC5R8jj+QHmsO7BYXOdYi0xgl0B6BK1U2xHJvwMKtyJKtecLj6sKLhxq9xTmQdKrxa8Vy/NuGXVweSuz+2YiN8ZYCmU0fAUZ5BRX1wa/lUfLvjqGH8EXmWxg1Do1h6JTPDd24MQK7vntALheqA7ALsKxwi1M7VpM=" NoCertificado="00001000000512586951" Version="4.0" Serie="CO" Folio="2000000188" SubTotal="0" Moneda="XXX" Total="0" TipoDeComprobante="P" Exportacion="01" LugarExpedicion="45050">
+   <cfdi:Emisor Rfc="SCM0012123D6" Nombre="SQM COMERCIAL DE MEXICO" RegimenFiscal="601"/>
+   <cfdi:Receptor Rfc="FMO2111062N8" Nombre="FERTYAGRO DE MORELOS" DomicilioFiscalReceptor="62950" RegimenFiscalReceptor="601" UsoCFDI="CP01"/>
+   <cfdi:Conceptos>
+      <cfdi:Concepto ClaveProdServ="84111506" Cantidad="1" ClaveUnidad="ACT" Descripcion="Pago" ValorUnitario="0" Importe="0" ObjetoImp="01"/>
+   </cfdi:Conceptos>
+   <cfdi:Complemento>
+      <pago20:Pagos Version="2.0">
+         <pago20:Totales TotalTrasladosBaseIVA0="365295.49" TotalTrasladosImpuestoIVA0="0.00" MontoTotalPagos="365295.49"/>
+         <pago20:Pago FechaPago="2026-01-19T12:00:00" FormaDePagoP="03" MonedaP="MXN" TipoCambioP="1" Monto="365295.49">
+            <pago20:DoctoRelacionado IdDocumento="6d9b6a34-a1c3-48aa-b864-5699b1dbad50" MonedaDR="USD" EquivalenciaDR="0.0565300712" NumParcialidad="1" ImpSaldoAnt="3010.35" ImpPagado="3010.35" ImpSaldoInsoluto="0" ObjetoImpDR="02">
+               <pago20:ImpuestosDR>
+                  <pago20:TrasladosDR>
+                     <pago20:TrasladoDR BaseDR="3010.350000" ImpuestoDR="002" TipoFactorDR="Tasa" TasaOCuotaDR="0.000000" ImporteDR="0.00"/>
+                  </pago20:TrasladosDR>
+               </pago20:ImpuestosDR>
+            </pago20:DoctoRelacionado>
+            <pago20:DoctoRelacionado IdDocumento="6d9b6a34-a1c3-48aa-b864-5699b1dbad50" MonedaDR="USD" EquivalenciaDR="0.0565300712" NumParcialidad="1" ImpSaldoAnt="1832.43" ImpPagado="1832.43" ImpSaldoInsoluto="0" ObjetoImpDR="02">
+               <pago20:ImpuestosDR>
+                  <pago20:TrasladosDR>
+                     <pago20:TrasladoDR BaseDR="1832.430000" ImpuestoDR="002" TipoFactorDR="Tasa" TasaOCuotaDR="0.000000" ImporteDR="0.00"/>
+                  </pago20:TrasladosDR>
+               </pago20:ImpuestosDR>
+            </pago20:DoctoRelacionado>
+            <pago20:DoctoRelacionado IdDocumento="6d9b6a34-a1c3-48aa-b864-5699b1dbad50" MonedaDR="USD" EquivalenciaDR="0.0565300712" NumParcialidad="1" ImpSaldoAnt="3923.85" ImpPagado="3923.85" ImpSaldoInsoluto="0" ObjetoImpDR="02">
+               <pago20:ImpuestosDR>
+                  <pago20:TrasladosDR>
+                     <pago20:TrasladoDR BaseDR="3923.850000" ImpuestoDR="002" TipoFactorDR="Tasa" TasaOCuotaDR="0.000000" ImporteDR="0.00"/>
+                  </pago20:TrasladosDR>
+               </pago20:ImpuestosDR>
+            </pago20:DoctoRelacionado>
+            <pago20:DoctoRelacionado IdDocumento="6d9b6a34-a1c3-48aa-b864-5699b1dbad50" MonedaDR="USD" EquivalenciaDR="0.0565300712" NumParcialidad="1" ImpSaldoAnt="7014.70" ImpPagado="7014.70" ImpSaldoInsoluto="0" ObjetoImpDR="02">
+               <pago20:ImpuestosDR>
+                  <pago20:TrasladosDR>
+                     <pago20:TrasladoDR BaseDR="7014.700000" ImpuestoDR="002" TipoFactorDR="Tasa" TasaOCuotaDR="0.000000" ImporteDR="0.00"/>
+                  </pago20:TrasladosDR>
+               </pago20:ImpuestosDR>
+            </pago20:DoctoRelacionado>
+            <pago20:DoctoRelacionado IdDocumento="6d9b6a34-a1c3-48aa-b864-5699b1dbad50" MonedaDR="USD" EquivalenciaDR="0.0565300712" NumParcialidad="1" ImpSaldoAnt="4868.85" ImpPagado="4868.85" ImpSaldoInsoluto="0" ObjetoImpDR="02">
+               <pago20:ImpuestosDR>
+                  <pago20:TrasladosDR>
+                     <pago20:TrasladoDR BaseDR="4868.850000" ImpuestoDR="002" TipoFactorDR="Tasa" TasaOCuotaDR="0.000000" ImporteDR="0.00"/>
+                  </pago20:TrasladosDR>
+               </pago20:ImpuestosDR>
+            </pago20:DoctoRelacionado>
+            <pago20:ImpuestosP>
+               <pago20:TrasladosP>
+                  <pago20:TrasladoP BaseP="365295.49" ImpuestoP="002" TipoFactorP="Tasa" TasaOCuotaP="0.000000" ImporteP="0.00"/>
+               </pago20:TrasladosP>
+            </pago20:ImpuestosP>
+         </pago20:Pago>
+      </pago20:Pagos>
+   <tfd:TimbreFiscalDigital xmlns:tfd="http://www.sat.gob.mx/TimbreFiscalDigital" xsi:schemaLocation="http://www.sat.gob.mx/TimbreFiscalDigital http://www.sat.gob.mx/sitio_internet/cfd/TimbreFiscalDigital/TimbreFiscalDigitalv11.xsd" Version="1.1" UUID="3DB4E68E-38D1-4FC2-AFF3-9C03F7988072" FechaTimbrado="2026-02-03T17:40:35" RfcProvCertif="SST060807KU0" SelloCFD="FCpWZOrclObHMbDoZtiqmD4OZLBj8IMclOt93YS9fgM4muf8bIPaxy8MNEm6ZPf8ycNYNlLpZrzlzmT2feMmdETP/fZYMgqS5UYRwcoFDrjQrLBTtUEO8YMWpSaSHpJy/kLrbdYK0q5NhSyIGtChSyq88lmJwCq8KGa8Qow4RyprkFpZZDqAPt8wX8titTKrJL3glULtqv1NZ3aoY0r3swou27MPDfHAHY98AgU6p4V6Mz566JYjf4JY/8miL2RjAn2XDj2YYUddkcDXpToTzxjvyw5nChh77Mv8EDDKQUseHp0cmMEepKG50vhib3CmWwzNZ8oOIAmonCNnLLD9zg==" NoCertificadoSAT="00001000000711914678" SelloSAT="jSscDFIbGGG4leOvsLh9nHtBkgVZQPG549izFCim/xafIyHOsydpsNK2IzCF0pjSNs4oOBOsDg+mIMYmt9M7lTvYY5fJ42iVxrOSZIbiCVk/u3fiW+izJs4xQQuwJPvKxvDwcyH0X573Kmxtqwt7ZnmCs26EY1PVxjXJ1pM7e7pFKzZSTVm7y9DBruz1yRWvzatbM9kc/dDCp92bRuvsYzyAWGwC5GXbCQ2BGIc9BoEFjpda7lnEKyrQL8rv5+CiMeffPVNnMom6WQpMEi6plcHXCoQjYWVVCEfaE3hDS44pN364QI/qa6OPa+/tI0gJjcVW2lLclZpDWNUxIaJ4jQ=="/></cfdi:Complemento>
+   <cfdi:Addenda>
+      <ECFD version="1.0">
+         <Documento>
+            <ID>T34CO2000000188</ID>
+            <Encabezado>
+               <IdDoc>
+                  <NroAprob>1</NroAprob>
+                  <AnoAprob>1900</AnoAprob>
+                  <Tipo>34</Tipo>
+                  <Serie>CO</Serie>
+                  <Folio>2000000188</Folio>
+                  <Estado>ORIGINAL</Estado>
+                  <FechaEmis>2026-02-03T16:39:28</FechaEmis>
+                  <LugarExpedicion>45050</LugarExpedicion>
+                  <Exportacion>01</Exportacion>
+               </IdDoc>
+               <ExEmisor>
+                  <RFCEmisor>SCM0012123D6</RFCEmisor>
+                  <NmbEmisor>SQM COMERCIAL DE MEXICO</NmbEmisor>
+               </ExEmisor>
+               <ExReceptor>
+                  <RFCRecep>FMO2111062N8</RFCRecep>
+                  <NmbRecep>FERTYAGRO DE MORELOS</NmbRecep>
+                  <DomicilioFiscalReceptor>62950</DomicilioFiscalReceptor>
+                  <RegimenFiscalReceptor>601</RegimenFiscalReceptor>
+                  <UsoCFDI>CP01</UsoCFDI>
+               </ExReceptor>
+               <Totales>
+                  <Moneda>XXX</Moneda>
+                  <SubTotal>0</SubTotal>
+                  <MntImp>0.00 </MntImp>
+                  <VlrPagar>0</VlrPagar>
+               </Totales>
+            </Encabezado>
+            <Detalle>
+               <NroLinDet>1</NroLinDet>
+               <DscLang>ES</DscLang>
+               <CdgItem>
+                  <TpoCodigo>SRV</TpoCodigo>
+               </CdgItem>
+               <ClaveProdServ>84111506</ClaveProdServ>
+               <DscItem>Pago</DscItem>
+               <QtyItem>1</QtyItem>
+               <ClaveUnidad>ACT</ClaveUnidad>
+               <PrcBrutoItem>0</PrcBrutoItem>
+               <PrcNetoItem>0</PrcNetoItem>
+               <MontoNetoItem>0</MontoNetoItem>
+               <ObjetoImp>01</ObjetoImp>
+            </Detalle>
+            <TimeStamp>2026-02-03T16:39:28</TimeStamp>
+         </Documento>
+         <Personalizados>
+            <campoString name="template"/>
+            <campoString name="Correo">gecom01@silmeagro.com</campoString>
+            <campoString name="OrdenDeVenta"/>
+            <campoString name="ReferenciaDelCliente"/>
+            <campoString name="Comentario2"/>
+            <campoString name="RegimenFiscal">601</campoString>
+            <campoString name="LugarDeExpedicion">62950</campoString>
+            <campoString name="MontoLetras">CERO</campoString>
+            <campoString name="Incoterms"/>
+         </Personalizados>
+      </ECFD>
+   </cfdi:Addenda>
+</cfdi:Comprobante>

@@ -128,8 +128,16 @@ class NotasCredito_Mdl
         }
     }
 
-    public function obtenerPoliticaPorIdNotaCredito(int $idNotaCredito)
+    public function obtenerPoliticaPorIdNotaCredito($idNotaCredito)
     {
+        // Si vienen múltiples IDs separados por coma (ej: '21,22'), tomamos el primero para la política principal
+        if (is_string($idNotaCredito) && strpos($idNotaCredito, ',') !== false) {
+            $ids = explode(',', $idNotaCredito);
+            $idNotaCredito = (int)trim($ids[0]);
+        } else {
+            $idNotaCredito = (int)$idNotaCredito;
+        }
+
         self::$debug = 0; // Silencioso por defecto
         if (self::$debug) {
             echo "<br>Buscando política de Nota de Crédito con ID: $idNotaCredito<br>";
