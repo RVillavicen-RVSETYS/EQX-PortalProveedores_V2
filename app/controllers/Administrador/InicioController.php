@@ -41,24 +41,25 @@ class InicioController extends Controller
             exit(0);
         }
 
-        $cfdi_Mdl = new CFDIs_Mdl();
-        $filtrosComplemento = [
-            'saldoInsoluto' => true
+        $provCompras_Mdl = new ProveedoresCompras_Mdl();
+        $filtrosInsolutos = [
+            'estatus' => 2,
+            'insolutoPendiente' => true
         ];
-        $agrupadoComplemento = ['uuidFact'];
-        $valoresComplemento = ['minimoInsoluto'];
-        $resultCompPago = $cfdi_Mdl->obtenerComplementosDePagoAgrupados($filtrosComplemento, $agrupadoComplemento, $valoresComplemento);
+        $agrupadoInsolutos = ['estatus'];
+        $valoresInsolutos = ['cantCompras'];
+        $resultInsolutos = $provCompras_Mdl->obtenerComprasProveedores($filtrosInsolutos, $agrupadoInsolutos, $valoresInsolutos);
         if ($this->debug == 1) {
-            echo '<br>Resultado de Query:';
-            var_dump($resultCompPago);
+            echo '<br>Resultado de Query Insolutos:';
+            var_dump($resultInsolutos);
             echo '<br><br>';
         }
-        if ($resultCompPago['success']) {
-            $data['datosIniciales']['InsolutosPendientes'] = $resultCompPago['cantRes'];
+        if ($resultInsolutos['success']) {
+            $data['datosIniciales']['InsolutosPendientes'] = (empty($resultInsolutos['data'][0]['cantCompras'])) ? 0 : $resultInsolutos['data'][0]['cantCompras'];
         } else {
             $timestamp = date("Y-m-d H:i:s");
-            error_log("[$timestamp] app\controllers\Administrador\InicioController ->Error al buscar los complementos de pago: " . PHP_EOL, 3, LOG_FILE);
-            echo 'No pudimos traer los complementos de pago:' . $resultCompPago['message'];
+            error_log("[$timestamp] app\controllers\Administrador\InicioController ->Error al buscar los insolutos pendientes: " . PHP_EOL, 3, LOG_FILE);
+            echo 'No pudimos traer los insolutos pendientes:' . $resultInsolutos['message'];
             exit(0);
         }
 

@@ -105,7 +105,7 @@ class Pagos_Mdl
                         cf.uuid AS UUID,
                         cf.serie AS Serie,
                         cf.folio AS Folio,
-                        COALESCE(com.insolutoPendiente, cf.monto) AS Insoluto,
+                        (COALESCE(com.insolutoPendiente, cf.monto) - IFNULL(com.totalNotasCredito, 0)) AS Insoluto,
                         com.totalComplementos AS Complemento,
                         com.totalPagos AS Pagos
                     FROM
@@ -191,9 +191,9 @@ class Pagos_Mdl
                                 throw new \Exception('El valor de insolutoPendiente debe ser true o false.');
                             }
                             if ($valorFiltro === 'true' || $valorFiltro === true) {
-                                $filtrosSQL .= ' AND (com.insolutoPendiente > 0 OR ISNULL(com.insolutoPendiente))';
+                                $filtrosSQL .= ' AND ((com.insolutoPendiente - IFNULL(com.totalNotasCredito, 0)) > 0.01 OR ISNULL(com.insolutoPendiente))';
                             } else {
-                                $filtrosSQL .= ' AND com.insolutoPendiente = 0';
+                                $filtrosSQL .= ' AND (com.insolutoPendiente - IFNULL(com.totalNotasCredito, 0)) <= 0.01';
                             }
                             break;
                         default:
@@ -224,7 +224,7 @@ class Pagos_Mdl
                         cf.uuid AS UUID,
                         cf.serie AS Serie,
                         cf.folio AS Folio,
-                        COALESCE(com.insolutoPendiente, cf.monto) AS Insoluto 
+                        (COALESCE(com.insolutoPendiente, cf.monto) - IFNULL(com.totalNotasCredito, 0)) AS Insoluto 
                     FROM
                         compras com
                         INNER JOIN proveedores prov ON com.idProveedor = prov.id

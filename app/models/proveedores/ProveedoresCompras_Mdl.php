@@ -61,7 +61,7 @@ class ProveedoresCompras_Mdl
             'sumaTotalFacturado' => ['sqlSelect' => 'SUM(cp.total) AS totalCompras'],
             'sumaTotalPagado' => ['sqlSelect' => 'SUM(cp.totalPagos) AS totalPagos'],
             'sumaTotalComplementos' => ['sqlSelect' => 'SUM(cp.totalComplementos) AS totalComplementos'],
-            'sumaInsolutos' => ['sqlSelect' => 'SUM(cp.insolutoPendiente) AS totalInsolutos'],
+            'sumaInsolutos' => ['sqlSelect' => 'SUM(cp.insolutoPendiente - IFNULL(cp.totalNotasCredito, 0)) AS totalInsolutos'],
             'datosProveedor' => ['sqlSelect' => 'pv.nombre, pv.razonSocial, 
 	            pv.correo, pv.regimenFiscal, pv.estatus, pv.pais'],
             'minFechaPago' => ['sqlSelect' => 'MIN(cp.fechaProbablePago) AS minFechaPago'],
@@ -134,9 +134,9 @@ class ProveedoresCompras_Mdl
                                 throw new \Exception('El valor de insolutoPendiente debe ser true o false.');
                             }
                             if ($valorFiltro == 'true') {
-                                $filtrosSQL .= ' AND cp.insolutoPendiente > 0';
+                                $filtrosSQL .= ' AND (cp.insolutoPendiente - IFNULL(cp.totalNotasCredito, 0)) > 0.01';
                             } else {
-                                $filtrosSQL .= ' AND (ISNULL(cp.insolutoPendiente) OR cp.insolutoPendiente = 0)';
+                                $filtrosSQL .= ' AND (ISNULL(cp.insolutoPendiente) OR (cp.insolutoPendiente - IFNULL(cp.totalNotasCredito, 0)) <= 0.01)';
                             }
                             break;
 
