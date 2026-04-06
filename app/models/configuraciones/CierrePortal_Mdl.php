@@ -78,14 +78,15 @@ class CierrePortal_Mdl
         try {
             $sql = "SELECT *
                     FROM conf_provFactSiempre 
-                    WHERE estatus = '1'
+                    WHERE estatus = '1' AND idProveedor = :idProveedor
                     ORDER BY id DESC LIMIT 1";
 
             if (self::$debug) {
-                $params = [];
+                $params = [':idProveedor' => $noProveedor];
                 $this->db->imprimirConsulta($sql, $params, 'Busca Bloqueo de Facturas.');
             }
             $stmt = $this->db->prepare($sql);
+            $stmt->bindParam(':idProveedor', $noProveedor, PDO::PARAM_INT);
             $stmt->execute();
             $proveedorExcento = $stmt->fetch(PDO::FETCH_ASSOC);
 
