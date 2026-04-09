@@ -327,8 +327,10 @@ $totalImpuestos = $data['dataCompra']['data']['totalImpuestosTrasladados'] + $da
                                             <div class="dl">
                                                 <?php
                                                 $estatusActual = $nota['estatus'] ?? 1;
+                                                // Deshabilitar de forma permanente si está aceptada (2), rechazada (3) o cancelada (0)
+                                                $isDisabled = (in_array($estatusActual, [0, 2, 3])) ? 'disabled="disabled" title="No es posible cambiar el estatus de un documento finalizado (Aceptado, Rechazado o Cancelado)."' : '';
                                                 ?>
-                                                <select class="custom-select border-0 text-muted cambiarEstatusNC" data-id-nc="<?= $nota['id'] ?? ''; ?>" data-uuid-nc="<?= htmlspecialchars($uuid); ?>" data-estatus-inicial="<?= $estatusActual; ?>">
+                                                <select class="custom-select border-0 text-muted cambiarEstatusNC" <?= $isDisabled; ?> data-id-nc="<?= $nota['id'] ?? ''; ?>" data-uuid-nc="<?= htmlspecialchars($uuid); ?>" data-estatus-inicial="<?= $estatusActual; ?>">
                                                     <option value="1" <?= $estatusActual == 1 ? 'selected' : ''; ?>>Pendiente</option>
                                                     <option value="2" <?= $estatusActual == 2 ? 'selected' : ''; ?>>Aceptada</option>
                                                     <option value="3" <?= $estatusActual == 3 ? 'selected' : ''; ?>>Rechazada</option>
@@ -366,6 +368,15 @@ $totalImpuestos = $data['dataCompra']['data']['totalImpuestosTrasladados'] + $da
                                             <h6 class="mb-0">$ <?= $total; ?> <?= $moneda; ?></h6>
                                         </div>
                                     </div>
+                                    <?php if ($nota['estatus'] == 3 && !empty($nota['motivoRechazo'])) { ?>
+                                        <div class="row mt-2">
+                                            <div class="col-12">
+                                                <div class="alert alert-danger" style="padding: 10px; margin-bottom: 0px; font-size: 12px;">
+                                                    <i class="fas fa-exclamation-circle"></i> <strong>Motivo de rechazo:</strong> <?= htmlspecialchars($nota['motivoRechazo']); ?>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    <?php } ?>
                                 </div>
                                 <div class="comment-footer">
                                     <span class="text-muted float-right"><?= $fechaReg; ?></span>
@@ -454,26 +465,28 @@ $totalImpuestos = $data['dataCompra']['data']['totalImpuestosTrasladados'] + $da
                     ?>
                         <div class="d-flex flex-row comment-row <?= $contadorCP === 1 ? 'm-t-0' : ''; ?>">
                             <div class="comment-text active w-100 <?= $borderClass; ?>">
-                        <div class="d-flex align-items-center p-b-15">
+                                <div class="d-flex align-items-center p-b-15">
                                     <div>
                                         <h4 class="font-medium mb-0">
                                             <i class="fas fa-hand-holding-usd text-success mr-2"></i>Complemento #<?= $contadorCP; ?>
                                         </h4>
                                     </div>
-                            <?php if (!empty($_SESSION['EQXAdmin']) && !empty($data['puedeAutorizar'])) { ?>
-                                <div class="ml-auto">
-                                    <div class="dl">
-                                        <?php
-                                        $estatusActualComp = $complemento['estatus'] ?? 1;
-                                        ?>
-                                        <select class="custom-select border-0 text-muted cambiarEstatusCP" data-id-cp="<?= $complemento['id'] ?? ''; ?>" data-uuid-cp="<?= htmlspecialchars($uuidComp); ?>" data-estatus-inicial="<?= $estatusActualComp; ?>">
-                                            <option value="1" <?= $estatusActualComp == 1 ? 'selected' : ''; ?>>Pendiente</option>
-                                            <option value="2" <?= $estatusActualComp == 2 ? 'selected' : ''; ?>>Aceptado</option>
-                                            <option value="3" <?= $estatusActualComp == 3 ? 'selected' : ''; ?>>Rechazado</option>
-                                        </select>
-                                    </div>
-                                </div>
-                            <?php } ?>
+                                    <?php if (!empty($_SESSION['EQXAdmin']) && !empty($data['puedeAutorizar'])) { ?>
+                                        <div class="ml-auto">
+                                            <div class="dl">
+                                                <?php
+                                                $estatusActualComp = $complemento['estatus'] ?? 1;
+                                                // Deshabilitar el select de forma permanente si ya se encuentra en estatus aceptado (2), rechazado (3) o cancelado (0).
+                                                $isDisabled = (in_array($estatusActualComp, [0, 2, 3])) ? 'disabled="disabled" title="No es posible cambiar el estatus de un documento finalizado (Aceptado, Rechazado o Cancelado)."' : '';
+                                                ?>
+                                                <select class="custom-select border-0 text-muted cambiarEstatusCP" <?= $isDisabled; ?> data-id-cp="<?= $complemento['id'] ?? ''; ?>" data-uuid-cp="<?= htmlspecialchars($uuidComp); ?>" data-estatus-inicial="<?= $estatusActualComp; ?>">
+                                                    <option value="1" <?= $estatusActualComp == 1 ? 'selected' : ''; ?>>Pendiente</option>
+                                                    <option value="2" <?= $estatusActualComp == 2 ? 'selected' : ''; ?>>Aceptado</option>
+                                                    <option value="3" <?= $estatusActualComp == 3 ? 'selected' : ''; ?>>Rechazado</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    <?php } ?>
                                 </div>
                                 <div class="m-b-15">
                                     <div class="row">
@@ -533,6 +546,15 @@ $totalImpuestos = $data['dataCompra']['data']['totalImpuestosTrasladados'] + $da
                                                 <?php } ?>
                                             </tbody>
                                         </table>
+                                    </div>
+                                <?php } ?>
+                                <?php if ($complemento['estatus'] == 3 && !empty($complemento['motivoRechazo'])) { ?>
+                                    <div class="row mt-2">
+                                        <div class="col-12">
+                                            <div class="alert alert-danger" style="padding: 10px; margin-bottom: 0px; font-size: 12px;">
+                                                <i class="fas fa-exclamation-circle"></i> <strong>Motivo de rechazo:</strong> <?= htmlspecialchars($complemento['motivoRechazo']); ?>
+                                            </div>
+                                        </div>
                                     </div>
                                 <?php } ?>
                                 <div class="comment-footer">
@@ -1022,5 +1044,4 @@ $totalImpuestos = $data['dataCompra']['data']['totalImpuestosTrasladados'] + $da
             }
         });
     });
-
 </script>
