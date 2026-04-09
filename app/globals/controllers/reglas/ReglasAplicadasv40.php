@@ -845,10 +845,12 @@ class ReglasAplicadasv40
                 $placeholders[] = $ph;
                 $params[$ph] = $uuid;
             }
-            $sql = "SELECT uuidFact, SUM(importePagado) AS total
-                    FROM cfdi_complementoPagoDet
-                    WHERE uuidFact IN (" . implode(',', $placeholders) . ")
-                    GROUP BY uuidFact";
+            $sql = "SELECT d.uuidFact, SUM(d.importePagado) AS total
+                    FROM cfdi_complementoPagoDet d
+                    INNER JOIN cfdi_complementoPago c ON d.idComplementoPago = c.id
+                    WHERE d.uuidFact IN (" . implode(',', $placeholders) . ")
+                    AND c.estatus IN ('1', '2')
+                    GROUP BY d.uuidFact";
             $stmt = BD_Connect::prepare($sql);
             $stmt->execute($params);
             $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -1095,16 +1097,28 @@ class ReglasAplicadasv40
 
         if ($obtenerNC['success']) {
             if ($obtenerNC['cantRes'] > 0) {
-                if ($this->debug == 1) {
-                    echo "<br> <b>* ERROR -- El UUID de la Nota de Crédito ya existe en la base de datos.</b>";
+                $notasCreditoActivas = array_filter($obtenerNC['data'], function ($nc) {
+                    $estatus = (string)($nc['estatus'] ?? '');
+                    return in_array($estatus, ['1', '2'], true);
+                });
+
+                if (count($notasCreditoActivas) === 0) {
+                    if ($this->debug == 1) {
+                        echo "<br> * El UUID de la Nota de Crédito existe pero está cancelada/rechazada; se permite nuevo registro.";
+                    }
+                    // UUID is duplicated but active ones are 0. Allow registration!
+                } else {
+                    if ($this->debug == 1) {
+                        echo "<br> <b>* ERROR -- El UUID de la Nota de Crédito ya existe y está activa en la base de datos.</b>";
+                    }
+                    $primerActiva = array_values($notasCreditoActivas)[0];
+                    $acuse = $primerActiva['idCompra'] ?? 'N/A';
+                    $identificadorNc = $primerActiva['id'] ?? 'N/A';
+                    $response["success"] = false;
+                    $response["isValid"] = false;
+                    $response["message"] = "Esta Nota de Crédito ya fue registrada previamente en el acuse: {$acuse}. Identificador: {$identificadorNc}.";
+                    return $response;
                 }
-                // Línea corregida según tu solicitud
-                $acuse = $obtenerNC['data'][0]['idCompra'] ?? 'N/A';
-                $identificadorNc = $obtenerNC['data'][0]['id'] ?? 'N/A';
-                $response["success"] = false;
-                $response["isValid"] = false;
-                $response["message"] = "Esta Nota de Crédito ya fue registrada previamente en el acuse: {$acuse}. Identificador: {$identificadorNc}.";
-                return $response;
             } else {
                 if ($this->debug == 1) {
                     echo "<br> * OK - El UUID de la Nota de Crédito no existe en la base de datos. Se puede continuar.";

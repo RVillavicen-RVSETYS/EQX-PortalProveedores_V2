@@ -579,7 +579,8 @@ class Compras_Mdl
                                     nc.fechaPago,
                                     nc.formaDePago,
                                     nc.numOperacion,
-                                    nc.uuidRelacionado
+                                    nc.uuidRelacionado,
+                                    nc.motivoRechazo
                                 FROM cfdi_notasCreditos nc
                                 WHERE nc.idCompra = :idCompra AND nc.estatus > 0
                                 ORDER BY nc.fechaReg DESC";
@@ -626,7 +627,8 @@ class Compras_Mdl
                                             cpd.noParcialidad,
                                             cpd.saldoAnterior,
                                             cpd.importePagado,
-                                            cpd.saldoInsoluto
+                                            cpd.saldoInsoluto,
+                                            cpg.motivoRechazo
                                         FROM cfdi_facturas cf
                                         INNER JOIN cfdi_complementoPagoDet cpd ON cf.uuid = cpd.uuidFact
                                         INNER JOIN cfdi_complementoPago cpg ON cpd.idComplementoPago = cpg.id
@@ -655,6 +657,7 @@ class Compras_Mdl
                                 'fecha' => $row['fecha'],
                                 'fechaReg' => $row['fechaReg'],
                                 'montoTotalPagos' => $row['montoTotalPagos'],
+                                'motivoRechazo' => $row['motivoRechazo'] ?? null,
                                 'detalles' => []
                             ];
                         }
