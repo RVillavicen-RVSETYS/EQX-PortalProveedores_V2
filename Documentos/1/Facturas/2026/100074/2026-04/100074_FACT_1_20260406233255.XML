@@ -1,0 +1,78 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<cfdi:Comprobante xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:catCFDI="http://www.sat.gob.mx/sitio_internet/cfd/catalogos" xmlns:tdCFDI="http://www.sat.gob.mx/sitio_internet/cfd/tipoDatos/tdCFDI" Version="4.0" Serie="B" Folio="017483" Fecha="2025-11-24T00:00:00" Sello="QRoMppAUx05NWVZbAiwJ4aRA2yr2kW/A0Dh/UBUvza1qj3xvMQIgeFbPxP4d0qFcO08unqsbXxDJRJeMoPbnlZynPLDcZ8/PK980dO7TtdoS2aVDDpWomkmgdlcEqUymlHU+RwIcbsqU7YtBeGsQNuUUCpNVAWOsQqbRBc8HQXqBwTccYgp8VLw3p7OwLM0LsErx6Y/FicNeMJ5b8od0DWeG9eRslhVRSAacWiX72RUhBnYBvFViiDii9+iCoaVlb65NlLD9qkoJVG6GQlamCJXQXjKNNtJIaIOlaJp4ofV232ul8/QENdGOS10iKFEeHClcOFuNjSZ05Imbvk9S2w==" FormaPago="99" NoCertificado="00001000000717106607" Certificado="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" CondicionesDePago="60 Días" SubTotal="127506.75" Total="127506.75" Exportacion="01" MetodoPago="PPD" TipoDeComprobante="I" Moneda="MXN" xsi:schemaLocation="http://www.sat.gob.mx/cfd/4 http://www.sat.gob.mx/sitio_internet/cfd/4/cfdv40.xsd" TipoCambio="1" LugarExpedicion="31385" xmlns:cfdi="http://www.sat.gob.mx/cfd/4">
+  <cfdi:Emisor Rfc="IBN070115C65" Nombre="INNOVAK BIOLOGICOS DEL NOROESTE" RegimenFiscal="601" />
+  <cfdi:Receptor Rfc="FMO2111062N8" Nombre="FERTYAGRO DE MORELOS" DomicilioFiscalReceptor="62950" RegimenFiscalReceptor="601" UsoCFDI="G01" />
+  <cfdi:Conceptos>
+    <cfdi:Concepto ClaveProdServ="10171500" Cantidad="50.0" Unidad="L" ClaveUnidad="LTR" NoIdentificacion="1-BALOX__01X0010MXIN" Descripcion="BALOX ENVASE DE 10 LITROS" ValorUnitario="445.5" Importe="22275.00" ObjetoImp="02">
+      <cfdi:Impuestos>
+        <cfdi:Traslados>
+          <cfdi:Traslado Base="22275.00" Impuesto="002" TipoFactor="Tasa" Importe="0.00" TasaOCuota="0.000000" />
+        </cfdi:Traslados>
+      </cfdi:Impuestos>
+    </cfdi:Concepto>
+    <cfdi:Concepto ClaveProdServ="10171500" Cantidad="20.0" Unidad="L" ClaveUnidad="LTR" NoIdentificacion="2-BALOX__01X0020MXIN" Descripcion="BALOX ENVASE DE 20 LITROS" ValorUnitario="408" Importe="8160.00" ObjetoImp="02">
+      <cfdi:Impuestos>
+        <cfdi:Traslados>
+          <cfdi:Traslado Base="8160.00" Impuesto="002" TipoFactor="Tasa" Importe="0.00" TasaOCuota="0.000000" />
+        </cfdi:Traslados>
+      </cfdi:Impuestos>
+    </cfdi:Concepto>
+    <cfdi:Concepto ClaveProdServ="10171500" Cantidad="75.0" Unidad="KG" ClaveUnidad="KGM" NoIdentificacion="3-CXYMICR03X0005MXIN" Descripcion="CARBOXY MICRO CAJA 15 KG" ValorUnitario="221.25" Importe="16593.75" ObjetoImp="02">
+      <cfdi:Impuestos>
+        <cfdi:Traslados>
+          <cfdi:Traslado Base="16593.75" Impuesto="002" TipoFactor="Tasa" Importe="0.00" TasaOCuota="0.000000" />
+        </cfdi:Traslados>
+      </cfdi:Impuestos>
+    </cfdi:Concepto>
+    <cfdi:Concepto ClaveProdServ="10171500" Cantidad="60.0" Unidad="L" ClaveUnidad="LTR" NoIdentificacion="4-CXYPOTA12X0001MXIN" Descripcion="CARBOXY POTASIO CAJA DE 12 LITROS" ValorUnitario="167.25" Importe="10035.00" ObjetoImp="02">
+      <cfdi:Impuestos>
+        <cfdi:Traslados>
+          <cfdi:Traslado Base="10035.00" Impuesto="002" TipoFactor="Tasa" Importe="0.00" TasaOCuota="0.000000" />
+        </cfdi:Traslados>
+      </cfdi:Impuestos>
+    </cfdi:Concepto>
+    <cfdi:Concepto ClaveProdServ="10171500" Cantidad="50.0" Unidad="L" ClaveUnidad="LTR" NoIdentificacion="5-NUTRI_L01X0010MXIN" Descripcion="NUTRISORB L ENVASE DE 10 LITROS" ValorUnitario="276" Importe="13800.00" ObjetoImp="02">
+      <cfdi:Impuestos>
+        <cfdi:Traslados>
+          <cfdi:Traslado Base="13800.00" Impuesto="002" TipoFactor="Tasa" Importe="0.00" TasaOCuota="0.000000" />
+        </cfdi:Traslados>
+      </cfdi:Impuestos>
+    </cfdi:Concepto>
+    <cfdi:Concepto ClaveProdServ="10171500" Cantidad="100.0" Unidad="L" ClaveUnidad="LTR" NoIdentificacion="6-NUTRI_L01X0020MXIN" Descripcion="NUTRISORB L ENVASE DE 20 LITROS" ValorUnitario="250.5" Importe="25050.00" ObjetoImp="02">
+      <cfdi:Impuestos>
+        <cfdi:Traslados>
+          <cfdi:Traslado Base="25050.00" Impuesto="002" TipoFactor="Tasa" Importe="0.00" TasaOCuota="0.000000" />
+        </cfdi:Traslados>
+      </cfdi:Impuestos>
+    </cfdi:Concepto>
+    <cfdi:Concepto ClaveProdServ="10171500" Cantidad="50.0" Unidad="L" ClaveUnidad="LTR" NoIdentificacion="7-PROM_5X01X0010MXIN" Descripcion="PROMESOL 5X ENVASE DE 10 LITROS" ValorUnitario="109.5" Importe="5475.00" ObjetoImp="02">
+      <cfdi:Impuestos>
+        <cfdi:Traslados>
+          <cfdi:Traslado Base="5475.00" Impuesto="002" TipoFactor="Tasa" Importe="0.00" TasaOCuota="0.000000" />
+        </cfdi:Traslados>
+      </cfdi:Impuestos>
+    </cfdi:Concepto>
+    <cfdi:Concepto ClaveProdServ="10191509" Cantidad="12.0" Unidad="L" ClaveUnidad="LTR" NoIdentificacion="8-RYZAN_B12X0001MXIN" Descripcion="RYSAN BIO EN CAJA DE 12 LITROS" ValorUnitario="1096.5" Importe="13158.00" ObjetoImp="02">
+      <cfdi:Impuestos>
+        <cfdi:Traslados>
+          <cfdi:Traslado Base="13158.00" Impuesto="002" TipoFactor="Tasa" Importe="0.00" TasaOCuota="0.000000" />
+        </cfdi:Traslados>
+      </cfdi:Impuestos>
+    </cfdi:Concepto>
+    <cfdi:Concepto ClaveProdServ="10171500" Cantidad="60.0" Unidad="L" ClaveUnidad="LTR" NoIdentificacion="9-CXYKMAX12X0001MXIN" Descripcion="CARBOXY K MAX CAJA DE 12 LITROS" ValorUnitario="216" Importe="12960.00" ObjetoImp="02">
+      <cfdi:Impuestos>
+        <cfdi:Traslados>
+          <cfdi:Traslado Base="12960.00" Impuesto="002" TipoFactor="Tasa" Importe="0.00" TasaOCuota="0.000000" />
+        </cfdi:Traslados>
+      </cfdi:Impuestos>
+    </cfdi:Concepto>
+  </cfdi:Conceptos>
+  <cfdi:Impuestos TotalImpuestosTrasladados="0.00">
+    <cfdi:Traslados>
+      <cfdi:Traslado Impuesto="002" Importe="0.00" Base="127506.75" TipoFactor="Tasa" TasaOCuota="0.000000" />
+    </cfdi:Traslados>
+  </cfdi:Impuestos>
+  <cfdi:Complemento>
+    <tfd:TimbreFiscalDigital Version="1.1" UUID="DF210B3C-1722-4CA5-BDBA-97DC2631535A" FechaTimbrado="2025-11-24T16:36:23" RfcProvCertif="INT020124V62" SelloCFD="QRoMppAUx05NWVZbAiwJ4aRA2yr2kW/A0Dh/UBUvza1qj3xvMQIgeFbPxP4d0qFcO08unqsbXxDJRJeMoPbnlZynPLDcZ8/PK980dO7TtdoS2aVDDpWomkmgdlcEqUymlHU+RwIcbsqU7YtBeGsQNuUUCpNVAWOsQqbRBc8HQXqBwTccYgp8VLw3p7OwLM0LsErx6Y/FicNeMJ5b8od0DWeG9eRslhVRSAacWiX72RUhBnYBvFViiDii9+iCoaVlb65NlLD9qkoJVG6GQlamCJXQXjKNNtJIaIOlaJp4ofV232ul8/QENdGOS10iKFEeHClcOFuNjSZ05Imbvk9S2w==" NoCertificadoSAT="00001000000708361008" SelloSAT="YcZr6Pin8V9sv/91ga5OS1KRTzrcvSe1MLDqWpKsafO9J5Dj+/XYTBOJvjlRIZEAMBc5L3Qjbv2CCDPJFzgpUMGXE+j8GhV4q7jBqKa2Y469BqKDEjrAuToPWrqb4PGrN4UXstSmQktIBkKToWVHXTAQIEwztQEZ58O1EXItoxF2dQKwLHpqPSpHS++jF/PrCQUeNREgr0p9omaW5p9WzeuXT43s9sncxRtsrcjIeH8IbFuwsVENtCG9XqAaNRh2ZEItWbDv9wQDjH4XmZ6Z28YLhC+RXq/mU2uEHwMEjIolnsvmH1BLzFopNemXO8PYBIKX1Jf6AXIA6Zn8fbZ7SQ==" xsi:schemaLocation="http://www.sat.gob.mx/TimbreFiscalDigital http://www.sat.gob.mx/sitio_internet/cfd/TimbreFiscalDigital/TimbreFiscalDigitalv11.xsd" xmlns:tfd="http://www.sat.gob.mx/TimbreFiscalDigital" />
+  </cfdi:Complemento>
+</cfdi:Comprobante>
