@@ -26,6 +26,8 @@ if ($debug == 1) {
     var_dump($datosPagina);
     echo '<br><br>Contenido de tiposMoneda:';
     var_dump($tiposMoneda);
+    echo '<br><br>Contenido de empresas:';
+    var_dump($empresas);
 }
 
 ?>
@@ -122,7 +124,13 @@ if ($debug == 1) {
                                                         <label for="idEmpresa">Empresa:</label>
                                                         <select required name="idEmpresa" id="idEmpresa" class="select2 form-control custom-select" style="width: 100%;">
                                                             <option value="">Selecciona una Empresa</option>
-                                                            <!-- Aquí iterarás tus empresas -->
+                                                            <!-- Aquí iteramos las empresas -->
+                                                            <?php 
+                                                                // Para consultar las empresas al modelo
+                                                                foreach ($empresas['data'] as $empresa) {
+                                                                    echo '<option value="' . $empresa['id'] . '">' . $empresa['nombre'] . '</option>';
+                                                                }
+                                                            ?>
                                                         </select>
                                                     </div>
                                                 </div>
@@ -132,10 +140,10 @@ if ($debug == 1) {
                                                         <select required name="idMoneda" id="idMoneda" class="select2 form-control custom-select" style="width: 100%;">
                                                             <option value="">Selecciona una Moneda</option>
                                                             <?php
-
-                                                            foreach ($tiposMoneda['data'] as $moneda) {
-                                                                echo '<option value="' . $moneda['id'] . '">' . $moneda['descripcion'] . '</option>';
-                                                            }
+                                                                // Para consultar los tipos de moneda al modelo
+                                                                foreach ($tiposMoneda['data'] as $moneda) {
+                                                                    echo '<option value="' . $moneda['id'] . '">' . $moneda['descripcion'] . '</option>';
+                                                                }
                                                             ?>
                                                         </select>
                                                     </div>
@@ -147,7 +155,7 @@ if ($debug == 1) {
                                                     <div class="form-group">
                                                         <label for="tipoRegla">Tipo de Aplicación de Regla:</label>
                                                         <select required name="tipoRegla" id="tipoRegla" class="select2 form-control custom-select" style="width: 100%;" onchange="gestionarInputsTolerancia()">
-                                                            <option value="" selected disabled>Elige la Aplicación de la Regla</option>
+                                                            <option value="" selected>Elige la Aplicación de la Regla</option>
                                                             <option value="1">Solo aplica por Monto</option>
                                                             <option value="2">Solo aplica por Porcentaje</option>
                                                             <option value="3">Aplica Monto y Porcentaje</option>

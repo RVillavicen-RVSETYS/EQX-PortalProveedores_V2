@@ -27,6 +27,8 @@ class Empresas_Mdl
 
     public function listaEmpresas($estatus = 1)
     {
+        self::$debug = 0; // Cambiar a 0 para desactivar mensajes de depuración
+
         $filtraEstatus = ($estatus == 'ALL') ? '' : "WHERE  e.estatus = '$estatus'";
         try {
             if ($estatus != 1 && $estatus != 0 && $estatus != 'ALL') {

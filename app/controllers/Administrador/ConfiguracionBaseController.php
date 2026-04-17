@@ -5,6 +5,7 @@ namespace App\Controllers\Administrador; // Nombre del espacio de trabajo o dire
 use Core\Controller; // Importa la clase Controller del espacio de nombres Core
 use App\Models\Menu_Mdl; // Importa la clase Menu_Mdl del espacio de nombres App\Models\Administrador
 use App\Models\Sat\Sat_Mdl; // Importa la clase Sat_Mdl del espacio de nombres App\Models\Sat
+use App\Models\Empresas\Empresas_Mdl; // Importa la clase Empresas_Mdl del espacio de nombres App\Models\Empresas
 
 
 class ConfiguracionBaseController extends Controller{ // Declaración de clase con extensión de Controller
@@ -32,9 +33,16 @@ class ConfiguracionBaseController extends Controller{ // Declaración de clase c
         $menuModel = new Menu_Mdl();
         $resultIdArea = $menuModel->obtenerIdAreaPorLink($areaLink);
 
+        // Para consultar los tipos de moneda al modelo
+        // Para consultar las empresas al modelo
         $satModel = new Sat_Mdl();
+        $empresaModel = new Empresas_Mdl();
+
         $filtros = ['estatus' => 1];
+        
         $resultTiposMoneda = $satModel->dataTiposMoneda($filtros);
+        $resultEmpresas = $empresaModel->listaEmpresas(estatus:1);
+
 
         if ($resultIdArea['success']) {
             $idArea = $resultIdArea['data'];
@@ -55,6 +63,7 @@ class ConfiguracionBaseController extends Controller{ // Declaración de clase c
                 $data['areaData'] =  $areaData;
                 $data['areaLink'] =  $areaLink;
                 $data['tiposMoneda'] = $resultTiposMoneda;
+                $data['empresas'] = $resultEmpresas;
 
                 // Cargar la vista correspondiente
                 $this->view('Administrador/ConfiguracionBase/index', $data);
