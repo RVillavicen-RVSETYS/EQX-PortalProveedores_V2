@@ -561,7 +561,7 @@ $totalImpuestos = $data['dataCompra']['data']['totalImpuestosTrasladados'] + $da
                                     <span class="text-muted float-right"><?= $fechaRegComp; ?></span>
                                     <span class="label label-rounded <?= $estatusClass; ?>"><?= $estatusBadge; ?></span>
                                     <span class="action-icons active">
-                                        <a href="javascript:void(0)" data-fancybox data-type="pdf" data-preloader="true" data-src="<?= '/Administrador/FacturasNacionales/verDocumento/PDF/' . $urlPDFComp; ?>/#toolbar=0" class="text-danger">
+                                        <a href="javascript:void(0)" data-fancybox data-type="pdf" data-preloader="true" data-src="<?= '/Administrador/FacturasNacionales/verDocumento/PDF/' . $urlPDFComp; ?>/#toolbar=1" class="text-danger">
                                             <i class="far fa-file-pdf"></i> Ver PDF
                                         </a>
                                         <a href="javascript:void(0)" data-fancybox="xml" data-xml-url="<?= '/Administrador/FacturasNacionales/verDocumento/XML/' . $urlXMLComp; ?>" class="text-info">
