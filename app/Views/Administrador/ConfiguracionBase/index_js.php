@@ -53,7 +53,7 @@
         // 3. Petición Asíncrona
         $.ajax({
             // Al estar en el mismo controlador, solo apunta al método
-            url: '/Administrador/ConfiguracionBase/guardarConfiguracion',
+            url: 'ConfiguracionBase/guardarConfiguracion',
             type: 'POST',
             data: formData,
             dataType: 'json',

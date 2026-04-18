@@ -141,9 +141,12 @@ if ($debug == 1) {
                                                             <option value="">Selecciona una Moneda</option>
                                                             <?php
                                                                 // Para consultar los tipos de moneda al modelo
-                                                                // Nota: Sat_Mdl suele devolver 'id' o 'idMoneda'
+                                                                // Se prioriza el campo que contenga el código de moneda (CHAR(5))
                                                                 foreach ($tiposMoneda['data'] as $moneda) {
-                                                                    echo '<option value="' . ($moneda['id'] ?? $moneda['idMoneda']) . '">' . $moneda['descripcion'] . '</option>';
+                                                                    $value = $moneda['idMoneda'] ?? $moneda['codigo'] ?? $moneda['id'] ?? '';
+                                                                    $valueEsc = htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
+                                                                    $descEsc = htmlspecialchars($moneda['descripcion'] ?? '', ENT_QUOTES, 'UTF-8');
+                                                                    echo "<option value=\"$valueEsc\">$descEsc</option>";
                                                                 }
                                                             ?>
                                                         </select>

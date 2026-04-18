@@ -84,7 +84,7 @@ class ConfiguracionBaseController extends Controller{ // Declaración de clase c
         // Contenido de Configuración Base
     }
 
-    // cesa el guardado de la configuración de montos vía AJAX.
+    // Procesa el guardado de la configuración de montos vía AJAX.
     public function guardarConfiguracion() {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             echo json_encode(['success' => false, 'message' => 'Método no permitido.']);
@@ -104,39 +104,25 @@ class ConfiguracionBaseController extends Controller{ // Declaración de clase c
 
         $mdlConfig = new ConfiguracionGral_Mdl();
 
-        // 1. Lógica de validación de negocio: Evitar redundancia con Regla 3
+        // 1. Lógica de negocio: Caso 1 (Existe -> Desactivar) y Caso 2 (No existe -> Directo)
         $existe = $mdlConfig->verificarReglaExistente($idEmpresa, $idMoneda);
         
         if ($existe['success'] && !empty($existe['data'])) {
-            $reglaActual = (int)$existe['data']['tipoRegla'];
-            
-            if ($reglaActual === 3) {
-                echo json_encode([
-                    'success' => false, 
-                    'message' => 'Ya existe una regla de tipo "Ambos" (Monto y Porcentaje) activa para esta empresa y moneda. No es necesario agregar reglas individuales.'
-                ]);
-                return;
-            }
-
-            if ($tipoRegla === 3 && ($reglaActual === 1 || $reglaActual === 2)) {
-                 echo json_encode([
-                    'success' => false, 
-                    'message' => 'Ya existe una regla específica activa. Debes desactivar la regla anterior antes de aplicar la regla combinada (Ambos).'
-                ]);
-                return;
-            }
+            // Caso 1: Si ya existe una regla activa, procedemos a desactivarla(s) 
+            // antes de insertar la nueva configuración.
+            $mdlConfig->desactivarReglasPorEmpresaMoneda($idEmpresa, $idMoneda);
         }
 
-        // 2. Preparar el arreglo para el modelo mapeando valores Sup/Inf
+        // 2. Preparar campos: se asigna el mismo valor a Sup e Inf para simetría.
         $campos = [
             'idEmpresa'     => $idEmpresa,
-            'idMoneda'      => $idMoneda,
+            'tipoMoneda'    => $idMoneda,
             'tipoRegla'     => $tipoRegla,
             'montoSup'      => ($tipoRegla === 1 || $tipoRegla === 3) ? $montoTol : 0,
             'montoInf'      => ($tipoRegla === 1 || $tipoRegla === 3) ? $montoTol : 0,
             'porcentajeSup' => ($tipoRegla === 2 || $tipoRegla === 3) ? $porcentajeTol : 0,
             'porcentajeInf' => ($tipoRegla === 2 || $tipoRegla === 3) ? $porcentajeTol : 0,
-            'estatus'       => 1,
+            'estatus'       => '1', // Se registra como activa (string '1' para el modelo)
             'idUserReg'     => $_SESSION['EQXident'] ?? 0
         ];
 
