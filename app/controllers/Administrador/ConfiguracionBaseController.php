@@ -1,0 +1,140 @@
+<?php
+namespace App\Controllers\Administrador;
+
+use  Core\Controller;
+use App\Models\Menu_Mdl;
+use  App\Models\Empresas\Empresas_Mdl;
+use App\Models\configuraciones\ConfiguracionGral_Mdl;
+
+class ConfiguracionBaseController extends Controller {
+
+protected $debug = 0;
+
+        public function __construct() {
+            if ($this->debug == 1) {
+                echo "<h2> Ya estamos en el Constructor de ConfiguracionBaseController</h2>";
+            }
+                $this -> checkSessionAdmin();
+
+        }
+
+
+        public function index() {
+
+            $data = [];
+
+            $namespaceParts = explode('\\', __NAMESPACE__);
+            $areaLink = end($namespaceParts); // Obtiene el ultimo parametro del NameSpace
+
+            $menuModel = new Menu_Mdl();
+            $resultIdArea = $menuModel->obtenerIdAreaPorLink($areaLink);
+
+            $estatusEmpresa = 1;
+            $empresasModel = new Empresas_Mdl();
+            $resultListaEmpresa = $empresasModel->listaEmpresas($estatusEmpresa);
+
+            if ($resultIdArea['success']) {
+                $idArea = $resultIdArea['data'];
+            } else {
+                $timestamp = date("Y-m-d H:i:s");
+                error_log("[$timestamp] app\controllers\Administrador\ConfiguracionBaseController ->Error al buscar Id del Area (nombre: $areaLink): " . PHP_EOL, 3, LOG_FILE);
+                echo 'No pudimos traer el id del Area:' . $resultIdArea['message'];
+                exit(0);
+            }
+
+                  $menuData = $menuModel->obtenerEstructuraMenu($_SESSION['EQXidNivel'], $idArea);
+        $areaData = $menuModel->listarAreasDisponibles($_SESSION['EQXidNivel']);
+
+        if ($menuData['success']) {
+            if ($areaData['success']) {
+                // Enviar datos a la Vista
+                $data['menuData'] =  $menuData;
+                $data['areaData'] =  $areaData;
+                $data['areaLink'] =  $areaLink;
+                $data['listaEmpresas'] = $resultListaEmpresa;
+
+                // Cargar la vista correspondiente
+                $this->view('Administrador/ConfiguracionBase/index', $data);
+            } else {
+                $timestamp = date("Y-m-d H:i:s");
+                error_log("[$timestamp] app\controllers\Administrador\ConfiguracionBaseController ->Error al listar las Areas: " . PHP_EOL, 3, LOG_FILE);
+                echo 'Problemas con las Areas de Acceso:' . $resultIdArea['message'];
+                exit(0);
+            }
+        } else {
+            $timestamp = date("Y-m-d H:i:s");
+            error_log("[$timestamp] app\controllers\Administrador\ConfiguracionBaseController ->Error al buscar Id del Area (nombre: $areaLink): " . PHP_EOL, 3, LOG_FILE);
+            echo 'No pudimos traer el detallado del Menu:' . $resultIdArea['message'];
+            exit(0);
+        }
+
+        }
+            public function guardarConfiguracionGral() {
+                
+                $diasPago = [];
+                if (isset($_POST['diasPago'])) {
+                    if (is_array($_POST['diasPago'])) {
+                        $diasPago = array_filter($_POST['diasPago'], function ($value) {
+                            return trim($value) !== '';
+                        });
+                    } else {
+                        $diasPago = [trim($_POST['diasPago'])];
+                    }
+                }
+
+                $data = [
+                    'idEmpresa' => isset($_POST['idEmpresa']) ? intval($_POST['idEmpresa']) : null,
+                    'maxComplementosPendientes' => isset($_POST['maxComplementosPendientes']) ? intval($_POST['maxComplementosPendientes']) : null,
+                    'diasPago' => implode(',', $diasPago)
+                ];
+
+                if ($this->debug == 1) {
+                    echo "<br>Contenido de data:<br>";
+                    var_dump($data);
+                    echo "<br>";
+                }
+
+                if (!$data['idEmpresa'] || !$data['maxComplementosPendientes'] || $data['diasPago'] === '') {
+                    header('Content-Type: application/json');
+                    echo json_encode(['success' => false, 'message' => 'Faltan datos requeridos.']);
+                    exit;
+                }
+
+                $configuracionGralModel = new ConfiguracionGral_Mdl();
+                
+                // Verificar si ya existe configuración para esta empresa
+                $resultExiste = $configuracionGralModel->obtenerConfiguracionPorEmpresa($data['idEmpresa']);
+                
+                if ($resultExiste['success']) {
+                    // Si existe, actualizar
+                    $result = $configuracionGralModel->actualizarConfiguracionGral($data);
+                } else {
+                    // Si no existe, insertar
+                    $result = $configuracionGralModel->registrarConfiguracionGral($data);
+                }
+
+                header('Content-Type: application/json');
+                echo json_encode($result);
+                exit;
+            }
+
+            public function obtenerConfiguracionEmpresa() {
+                
+                $idEmpresa = isset($_POST['idEmpresa']) ? intval($_POST['idEmpresa']) : null;
+
+                if (!$idEmpresa) {
+                    header('Content-Type: application/json');
+                    echo json_encode(['success' => false, 'message' => 'ID de empresa no válido.']);
+                    exit;
+                }
+
+                $configuracionGralModel = new ConfiguracionGral_Mdl();
+                $result = $configuracionGralModel->obtenerConfiguracionPorEmpresa($idEmpresa);
+
+                header('Content-Type: application/json');
+                echo json_encode($result);
+                exit;
+            }
+
+        
+}
