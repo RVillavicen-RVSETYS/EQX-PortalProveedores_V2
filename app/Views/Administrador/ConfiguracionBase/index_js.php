@@ -42,7 +42,37 @@
 
     $(document).on('submit', '#formConfiguracionPrecios', function(event) {
         event.preventDefault();
-        // Lógica AJAX para enviar al controlador (se implementará en el siguiente paso)
-        console.log("Formulario serializado:", $(this).serialize());
+        
+        // 1. Recopilación de datos
+        const formData = $(this).serialize();
+        
+        // 2. Feedback visual (Bloqueo de botón)
+        // Esta función global oculta el botón de "Guardar" y muestra el spinner de carga
+        bloqueoBtn('btnGuardarConfig', 1);
+
+        // 3. Petición Asíncrona
+        $.ajax({
+            // Al estar en el mismo controlador, solo apunta al método
+            url: '/Administrador/ConfiguracionBase/guardarConfiguracion',
+            type: 'POST',
+            data: formData,
+            dataType: 'json',
+            success: function(response) {
+                // 4. Manejo de la respuesta del Controlador
+                if (response.success) {
+                    toastr.success(response.message, 'Configuración Guardada');
+                    // Opcional: podrías resetear el formulario si lo deseas
+                } else {
+                    toastr.error(response.message, 'No se pudo guardar');
+                }
+            },
+            error: function(xhr, status, error) {
+                toastr.error('Error de comunicación con el servidor. Intente nuevamente.', 'Error del Sistema');
+            },
+            complete: function() {
+                // 5. Restauración del botón (Unblock)
+                bloqueoBtn('btnGuardarConfig', 2);
+            }
+        });
     });
 </script>

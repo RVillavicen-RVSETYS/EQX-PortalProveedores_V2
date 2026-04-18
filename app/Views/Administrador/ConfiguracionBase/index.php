@@ -141,8 +141,9 @@ if ($debug == 1) {
                                                             <option value="">Selecciona una Moneda</option>
                                                             <?php
                                                                 // Para consultar los tipos de moneda al modelo
+                                                                // Nota: Sat_Mdl suele devolver 'id' o 'idMoneda'
                                                                 foreach ($tiposMoneda['data'] as $moneda) {
-                                                                    echo '<option value="' . $moneda['id'] . '">' . $moneda['descripcion'] . '</option>';
+                                                                    echo '<option value="' . ($moneda['id'] ?? $moneda['idMoneda']) . '">' . $moneda['descripcion'] . '</option>';
                                                                 }
                                                             ?>
                                                         </select>

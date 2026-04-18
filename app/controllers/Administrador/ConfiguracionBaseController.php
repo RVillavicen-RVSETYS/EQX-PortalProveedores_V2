@@ -6,6 +6,7 @@ use Core\Controller; // Importa la clase Controller del espacio de nombres Core
 use App\Models\Menu_Mdl; // Importa la clase Menu_Mdl del espacio de nombres App\Models\Administrador
 use App\Models\Sat\Sat_Mdl; // Importa la clase Sat_Mdl del espacio de nombres App\Models\Sat
 use App\Models\Empresas\Empresas_Mdl; // Importa la clase Empresas_Mdl del espacio de nombres App\Models\Empresas
+use App\Models\Configuraciones\ConfiguracionGral_Mdl; // Importa el modelo de configuración
 
 
 class ConfiguracionBaseController extends Controller{ // Declaración de clase con extensión de Controller
@@ -81,5 +82,68 @@ class ConfiguracionBaseController extends Controller{ // Declaración de clase c
         }
 
         // Contenido de Configuración Base
+    }
+
+    // cesa el guardado de la configuración de montos vía AJAX.
+    public function guardarConfiguracion() {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            echo json_encode(['success' => false, 'message' => 'Método no permitido.']);
+            return;
+        }
+
+        $idEmpresa     = (int)($_POST['idEmpresa'] ?? 0);
+        $idMoneda      = $_POST['idMoneda'] ?? ''; // Quitar (int) si usas códigos como MXN o USD
+        $tipoRegla     = (int)($_POST['tipoRegla'] ?? 0);
+        $montoTol      = $_POST['montoTolerancia'] ?? 0;
+        $porcentajeTol = $_POST['porcentajeTolerancia'] ?? 0;
+
+        if ($idEmpresa === 0 || empty($idMoneda) || $tipoRegla === 0) {
+            echo json_encode(['success' => false, 'message' => 'Faltan campos obligatorios.']);
+            return;
+        }
+
+        $mdlConfig = new ConfiguracionGral_Mdl();
+
+        // 1. Lógica de validación de negocio: Evitar redundancia con Regla 3
+        $existe = $mdlConfig->verificarReglaExistente($idEmpresa, $idMoneda);
+        
+        if ($existe['success'] && !empty($existe['data'])) {
+            $reglaActual = (int)$existe['data']['tipoRegla'];
+            
+            if ($reglaActual === 3) {
+                echo json_encode([
+                    'success' => false, 
+                    'message' => 'Ya existe una regla de tipo "Ambos" (Monto y Porcentaje) activa para esta empresa y moneda. No es necesario agregar reglas individuales.'
+                ]);
+                return;
+            }
+
+            if ($tipoRegla === 3 && ($reglaActual === 1 || $reglaActual === 2)) {
+                 echo json_encode([
+                    'success' => false, 
+                    'message' => 'Ya existe una regla específica activa. Debes desactivar la regla anterior antes de aplicar la regla combinada (Ambos).'
+                ]);
+                return;
+            }
+        }
+
+        // 2. Preparar el arreglo para el modelo mapeando valores Sup/Inf
+        $campos = [
+            'idEmpresa'     => $idEmpresa,
+            'idMoneda'      => $idMoneda,
+            'tipoRegla'     => $tipoRegla,
+            'montoSup'      => ($tipoRegla === 1 || $tipoRegla === 3) ? $montoTol : 0,
+            'montoInf'      => ($tipoRegla === 1 || $tipoRegla === 3) ? $montoTol : 0,
+            'porcentajeSup' => ($tipoRegla === 2 || $tipoRegla === 3) ? $porcentajeTol : 0,
+            'porcentajeInf' => ($tipoRegla === 2 || $tipoRegla === 3) ? $porcentajeTol : 0,
+            'estatus'       => 1,
+            'idUserReg'     => $_SESSION['EQXident'] ?? 0
+        ];
+
+        // 3. Ejecutar inserción
+        $resultado = $mdlConfig->registrarDiferenciaMontos($campos);
+
+        header('Content-Type: application/json');
+        echo json_encode($resultado);
     }
 }
