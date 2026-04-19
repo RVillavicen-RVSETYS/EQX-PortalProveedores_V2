@@ -327,8 +327,8 @@ $totalImpuestos = $data['dataCompra']['data']['totalImpuestosTrasladados'] + $da
                                             <div class="dl">
                                                 <?php
                                                 $estatusActual = $nota['estatus'] ?? 1;
-                                                // Deshabilitar de forma permanente si está aceptada (2), rechazada (3) o cancelada (0)
-                                                $isDisabled = (in_array($estatusActual, [0, 2, 3])) ? 'disabled="disabled" title="No es posible cambiar el estatus de un documento finalizado (Aceptado, Rechazado o Cancelado)."' : '';
+                                                // Deshabilitar de forma permanente si está rechazada (3) o cancelada (0)
+                                                $isDisabled = (in_array($estatusActual, [0, 3])) ? 'disabled="disabled" title="No es posible cambiar el estatus de un documento finalizado (Rechazado o Cancelado)."' : '';
                                                 ?>
                                                 <select class="custom-select border-0 text-muted cambiarEstatusNC" <?= $isDisabled; ?> data-id-nc="<?= $nota['id'] ?? ''; ?>" data-uuid-nc="<?= htmlspecialchars($uuid); ?>" data-estatus-inicial="<?= $estatusActual; ?>">
                                                     <option value="1" <?= $estatusActual == 1 ? 'selected' : ''; ?>>Pendiente</option>
@@ -476,8 +476,8 @@ $totalImpuestos = $data['dataCompra']['data']['totalImpuestosTrasladados'] + $da
                                             <div class="dl">
                                                 <?php
                                                 $estatusActualComp = $complemento['estatus'] ?? 1;
-                                                // Deshabilitar el select de forma permanente si ya se encuentra en estatus aceptado (2), rechazado (3) o cancelado (0).
-                                                $isDisabled = (in_array($estatusActualComp, [0, 2, 3])) ? 'disabled="disabled" title="No es posible cambiar el estatus de un documento finalizado (Aceptado, Rechazado o Cancelado)."' : '';
+                                                // Deshabilitar el select de forma permanente si ya se encuentra en estatus rechazado (3) o cancelado (0).
+                                                $isDisabled = (in_array($estatusActualComp, [0, 3])) ? 'disabled="disabled" title="No es posible cambiar el estatus de un documento finalizado (Rechazado o Cancelado)."' : '';
                                                 ?>
                                                 <select class="custom-select border-0 text-muted cambiarEstatusCP" <?= $isDisabled; ?> data-id-cp="<?= $complemento['id'] ?? ''; ?>" data-uuid-cp="<?= htmlspecialchars($uuidComp); ?>" data-estatus-inicial="<?= $estatusActualComp; ?>">
                                                     <option value="1" <?= $estatusActualComp == 1 ? 'selected' : ''; ?>>Pendiente</option>

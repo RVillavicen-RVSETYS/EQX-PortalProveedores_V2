@@ -603,12 +603,12 @@ class ReglasAplicadasv40
             }
 
             // Verificar que la factura no tenga un complemento anterior con saldo insoluto en 0
-            if ($this->debug == 1) {
-                echo "<br> * La factura no debe tener un complemento de pago con saldo insoluto en 0." . $factura['minInsoluto'] <= 0;
-            }
-            if (!is_null($factura['idUltimoComplemento']) && $factura['minInsoluto'] <= 0) {
-                $errores[] = "* La factura '{$serie}' '{$folio}' con UUID '{$uuid}': Ya tiene un complemento de pago con saldo insoluto en 0.";
-            }
+            // if ($this->debug == 1) {
+            //     echo "<br> * La factura no debe tener un complemento de pago con saldo insoluto en 0." . $factura['minInsoluto'] <= 0;
+            // }
+            // if (!is_null($factura['idUltimoComplemento']) && $factura['minInsoluto'] <= 0) {
+            //     $errores[] = "* La factura '{$serie}' '{$folio}' con UUID '{$uuid}': Ya tiene un complemento de pago con saldo insoluto en 0.";
+            // }
 
             // Verificar que la factura ya haya sido pagada
             if ($this->debug == 1) {
