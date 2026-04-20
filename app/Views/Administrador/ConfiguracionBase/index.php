@@ -364,7 +364,7 @@ if ($debug == 1) {
     <script src="/dist/js/custom.js"></script>
     <script src="/assets/libs/toastr/build/toastr.min.js"></script>
     <script src="/assets/extra-libs/prism/prism.js"></script>
-    <script src="/dist/js/basicFuctions.js"></script>
+
     <script src="/assets/libs/select2/dist/js/select2.full.min.js"></script>
     <script src="/assets/libs/select2/dist/js/select2.min.js"></script>
     <script src="/dist/js/pages/forms/select2/select2.init.js"></script>
@@ -383,6 +383,10 @@ if ($debug == 1) {
     <script src="/assets/libs/chartist-plugin-tooltips/dist/chartist-plugin-tooltip.min.js"></script>
     <script src="/assets/extra-libs/datatables.net/js/pdfmake.min.js"></script>
     <script src="/assets/extra-libs/datatables.net/js/vfs_fonts.js"></script>
+    <script src="/assets/libs/sweetalert2/dist/sweetalert2.js"></script>
+    <script src="/assets/libs/sweetalert2/dist/sweetalert2.all.js"></script>
+    <script src="/assets/libs/sweetalert2/sweet-alert.init.js"></script>
+    <script src="/dist/js/basicFuctions.js"></script>
 
     <?php include 'index_js.php'; ?>
 

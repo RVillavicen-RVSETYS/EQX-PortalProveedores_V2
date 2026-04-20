@@ -45,7 +45,7 @@
         }
 
         $.ajax({
-            url: '<?= URL_BASE_PROYECT ?>/Administrador/ConfiguracionBase/obtenerConfiguracionEmpresa',
+            url: 'ConfiguracionBase/obtenerConfiguracionEmpresa',
             type: 'POST',
             dataType: 'json',
             data: {
@@ -84,13 +84,13 @@
             dataType: 'json',
             success: function(response) {
                 if (response.success) {
-                    toastr.success(response.message, 'Configuración Guardada');
+                    notificaSucSweet('Excelente!!', response.message);
                 } else {
-                    toastr.error(response.message, 'No se pudo guardar');
+                    notificaBadSweet('Error', response.message);
                 }
             },
             error: function(xhr, status, error) {
-                toastr.error('Error de comunicación con el servidor. Intente nuevamente.', 'Error del Sistema');
+                notificaBadSweet('Error', 'Error de comunicación con el servidor. Intente nuevamente.');
             },
             complete: function() {
                 bloqueoBtn('btnGuardarConfig', 2);
@@ -101,10 +101,10 @@
     $(document).on('submit', '#formConfiguracionGral', function(event) {
         event.preventDefault();
 
-        $('#btnGuardar').prop('disabled', true).text('Guardando...');
+        bloqueoBtn('btnGuardar', 1);
 
         $.ajax({
-            url: '<?= URL_BASE_PROYECT ?>/Administrador/ConfiguracionBase/guardarConfiguracionGral',
+            url: 'ConfiguracionBase/guardarConfiguracionGral',
             type: 'POST',
             dataType: 'json',
             data: $(this).serialize(),
@@ -116,11 +116,11 @@
                 } else {
                     notificaBadSweet('Error', respuesta ? respuesta.message : 'Respuesta inválida del servidor.');
                 }
-                $('#btnGuardar').prop('disabled', false).text('Guardar');
+                bloqueoBtn('btnGuardar', 2);
             },
             error: function() {
                 notificaBadSweet('Error', 'No se pudo guardar la configuración. Consulta a tu administrador.');
-                $('#btnGuardar').prop('disabled', false).text('Guardar');
+                bloqueoBtn('btnGuardar', 2);
             }
         });
     });
