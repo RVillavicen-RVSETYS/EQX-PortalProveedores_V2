@@ -356,7 +356,7 @@ class ConfiguracionGral_Mdl
 
     public function dataDiferenciaMontos($filtros = [], INT $cantMaxRes = 0, $orden = 'DESC')
     {
-        self::$debug = 1; // Cambiar a 0 para desactivar mensajes de depuración
+        self::$debug = 0; // Cambiar a 0 para desactivar mensajes de depuración
         if (self::$debug) {
             echo '<br><br>Filtros Recibidos: ';
             var_dump($filtros);
@@ -424,6 +424,8 @@ class ConfiguracionGral_Mdl
             }
 
             $sql = "SELECT
+                        cdm.id,
+                        cdm.estatus,
                         emp.nombre AS Empresa,
                         cdm.tipoMoneda AS TipoMoneda,
                         cdm.tipoRegla AS TipoRegla,

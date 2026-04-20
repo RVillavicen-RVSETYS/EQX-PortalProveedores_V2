@@ -105,7 +105,7 @@ if ($debug == 1) {
 
                                 <!-- Pestañas de -->
                                 <ul class="nav nav-tabs" role="tablist">
-                                    <li class="nav-item"> <a class="nav-link active" data-toggle="tab" href="#Home" role="tab"><span class="hidden-sm-up"><i class="ti-home"></i></span> <span class="hidden-xs-down">Configuración de Precios</span></a> </li>
+                                    <li class="nav-item"> <a class="nav-link active" data-toggle="tab" href="#Home" role="tab"><span class="hidden-sm-up"><i class="fas fa-cogs"></i></span> <span class="hidden-xs-down">Configuración de Tolerancia</span></a> </li>
                                     <li class="nav-item"> <a class="nav-link" data-toggle="tab" href="#proveedores" role="tab"><span class="hidden-sm-up"><i class="ti-user"></i></span> <span class="hidden-xs-down">Proveedores</span></a> </li>
                                     <!--
                                 <li class="nav-item"> <a class="nav-link" data-toggle="tab" href="#messages" role="tab"><span class="hidden-sm-up"><i class="ti-email"></i></span> <span class="hidden-xs-down">Messages</span></a> </li>
@@ -148,7 +148,7 @@ if ($debug == 1) {
                                                                     $value = $moneda['idMoneda'] ?? $moneda['codigo'] ?? $moneda['id'] ?? '';
                                                                     $valueEsc = htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
                                                                     $descEsc = htmlspecialchars($moneda['descripcion'] ?? '', ENT_QUOTES, 'UTF-8');
-                                                                    echo "<option value=\"$valueEsc\">$descEsc</option>";
+                                                                    echo "<option value=\"$valueEsc\">$value $descEsc</option>";
                                                                 }
                                                                 ?>
                                                             </select>
@@ -170,9 +170,9 @@ if ($debug == 1) {
                                                     </div>
                                                 </div>
 
-                                                <div class="row mt-3">
+                                                <div class="row mt-3 align-items-start">
                                                     <!-- Contenedor para Monto -->
-                                                    <div class="col-md-6" id="containerMonto" style="display: none;">
+                                                    <div class="col-md-5" id="containerMonto" style="display: none;">
                                                         <div class="form-group">
                                                             <label for="montoTolerancia">Monto de Tolerancia (±):</label>
                                                             <div class="input-group">
@@ -183,7 +183,7 @@ if ($debug == 1) {
                                                         </div>
                                                     </div>
                                                     <!-- Contenedor para Porcentaje -->
-                                                    <div class="col-md-6" id="containerPorcentaje" style="display: none;">
+                                                    <div class="col-md-5" id="containerPorcentaje" style="display: none;">
                                                         <div class="form-group">
                                                             <label for="porcentajeTolerancia">Porcentaje de Tolerancia (±):</label>
                                                             <div class="input-group">
@@ -193,115 +193,63 @@ if ($debug == 1) {
                                                             <small class="text-muted">Este porcentaje se aplicará como límite superior e inferior.</small>
                                                         </div>
                                                     </div>
-                                                </div>
-
-                                                <div class="row mt-4">
-                                                    <div class="col-12 text-right">
-                                                        <div id="bloquear-btnGuardarConfig" style="display:none;">
+                                                    <!-- Botón de Guardar alineado y fijo al extremo de la derecha -->
+                                                    <div class="col-md d-flex justify-content-md-end justify-content-start align-items-start mt-3 mt-md-0">
+                                                        <div id="bloquear-btnGuardarConfig" style="display:none; margin-top: 32px;">
                                                             <button class="btn btn-primary btn-md" type="button" disabled>
                                                                 <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span> Guardando...
                                                             </button>
                                                         </div>
-                                                        <div id="desbloquear-btnGuardarConfig">
-                                                            <button type="submit" class="btn btn-md btn-outline-primary"><i class="fas fa-save mr-1"></i> Guardar Configuración</button>
+                                                        <div id="desbloquear-btnGuardarConfig" class="ml-2 ml-md-0" style="margin-top: 32px;">
+                                                            <button type="submit" class="btn btn-md btn-outline-primary"><i class="fas fa-save mr-1"></i> Guardar</button>
                                                         </div>
                                                     </div>
                                                 </div>
-                                                
+
                                             </form>
-                                            
+
                                             <!-- Tabla para mostrar las reglas guardadas
                                             Empresa, tipo de moneda, regla y monto/porcentaje de tolerancia -->
 
                                             <?php
-                                            if (empty($listaAlertas['data'])) {
-                                                echo '<div class="row"><div class="col-12 py-3 alert alert-info">No se a configurado ninguna regla.</div></div>';
+                                            if (empty($reglas['data'])) {
+                                                echo '<div class="row"><div class="col-12 py-3 alert alert-info">No se ha configurado ninguna regla actualmente.</div></div>';
                                             } else {
                                             ?>
-                                                <table class="table table-sm" id="tableAlertas">
-                                                    <thead>
+                                                <table class="table table-sm" id="tableReglas">
+                                                    <thead class="">
                                                         <tr>
                                                             <th>#</th>
                                                             <th>Empresa</th>
-                                                            <th>Tipo Moneda</th>
-                                                            <th>Tipo de aplicación de Regla</th>
-                                                            <th>Monto superior</th>
-                                                            <th>Monto Inferior</th>
-                                                            <th>Porcentaje superior</th>
-                                                            <th>Porcentaje inferior</th>
-                                                            <th>Acción</th>
+                                                            <th>Moneda</th>
+                                                            <th>Regla Aplicada</th>
+                                                            <th>Monto Sup.</th>
+                                                            <th>Monto Inf.</th>
+                                                            <th>% Sup.</th>
+                                                            <th>% Inf.</th>
                                                         </tr>
                                                     </thead>
                                                     <tbody>
                                                         <?php
                                                         $cont = 1;
-                                                        foreach ($listaAlertas['data'] as $alertas) {
-                                                            $tipoProv = '';
-                                                            $tipoAlerta = '';
-                                                            $periodo = '';
-
-                                                            switch ($alertas['TipoProveedor']) {
-                                                                case 'NAC':
-                                                                    $tipoProv = 'Nacional';
-                                                                    break;
-                                                                case 'INT':
-                                                                    $tipoProv = 'Internacional';
-                                                                    break;
-                                                            }
-
-                                                            switch ($alertas['TipoMsj']) {
-                                                                case 'INFO':
-                                                                    $tipoAlerta = '<h6 class="text-info"><i class="fa fa-exclamation-circle"></i> ' . $alertas['TipoMsj'] . '</h6>';
-                                                                    break;
-                                                                case 'WARNING':
-                                                                    $tipoAlerta = '<h6 class="text-warning"><i class="fa fa-exclamation-triangle"></i> ' . $alertas['TipoMsj'] . '</h6>';
-                                                                    break;
-                                                                case 'ERROR':
-                                                                    $tipoAlerta = '<h6 class="text-danger"><i class="fas fa-times-circle"></i> ' . $alertas['TipoMsj'] . '</h6>';
-                                                                    break;
-                                                            }
-
-                                                            if ($alertas['TipoPeriodo'] == 2) {
-                                                                $periodo = 'Del ' . $alertas['Inicio'] . ' Al ' . $alertas['Fin'];
-                                                            } else {
-                                                                $periodo = 'Indefinido';
-                                                            }
-
-                                                            if ($alertas['Estatus'] == 1) {
-                                                                $color = 'btn-outline-success';
-                                                                $icono = 'fas fa-check';
-                                                            } else {
-                                                                $color = 'btn-outline-danger';
-                                                                $icono = 'fas fa-times';
-                                                            }
-
+                                                        foreach ($reglas['data'] as $item) {
+                                                            $color = ($item['estatus'] == '1') ? 'btn-outline-success' : 'btn-outline-danger';
+                                                            $icono = ($item['estatus'] == '1') ? 'fas fa-check' : 'fas fa-times';
                                                         ?>
                                                             <tr>
                                                                 <td><?= $cont++; ?></td>
-                                                                <td><?= $tipoProv; ?></td>
-                                                                <td><?= $alertas['Titulo']; ?></td>
-                                                                <td><?= $alertas['Mensaje']; ?></td>
-                                                                <td class="text-left"><?= $tipoAlerta; ?></td>
-                                                                <td><?= $periodo; ?></td>
-
-                                                                <td>
-                                                                    <div id="bloquear-btnEstatus<?= $alertas['IdNotificacion']; ?>" style="display:none;">
-                                                                        <button class="btn btn-xs btn-rounded <?= $color; ?> " type="button" disabled="" style="height: 100%;">
-                                                                            <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
-                                                                        </button>
-                                                                    </div>
-                                                                    <div id="desbloquear-btnEstatus<?= $alertas['IdNotificacion']; ?>">
-                                                                        <button id="btnEstatus<?= $alertas['IdNotificacion']; ?>" onclick="cambiarEstatus(<?= $alertas['Estatus']; ?>, <?= $alertas['IdNotificacion']; ?>)" type="button" class="btn btn-xs btn-rounded <?= $color; ?>"><i class="<?= $icono; ?>"></i></button>
-                                                                    </div>
-                                                                </td>
-
-                                                                <td class="text-center"><button onclick="cargarDatos(<?= $alertas['IdNotificacion']; ?>)" type="button" class="btn btn-xs btn-outline-primary" data-toggle="modal" data-target="#modalEditaAlerta"><i class="fas fa-pencil-alt"></i></button></td>
+                                                                <td><?= $item['Empresa']; ?></td>
+                                                                <td class="text-center"><?= $item['TipoMoneda']; ?></td>
+                                                                <td><?= $item['DescripcionRegla']; ?></td>
+                                                                <td class="text-right">$<?= number_format($item['MontoSuperior'], 2); ?></td>
+                                                                <td class="text-right">$<?= number_format($item['MontoInferior'], 2); ?></td>
+                                                                <td class="text-right"><?= number_format($item['PorcentajeSuperior'], 2); ?>%</td>
+                                                                <td class="text-right"><?= number_format($item['PorcentajeInferior'], 2); ?>%</td>
                                                             </tr>
                                                         <?php
                                                         }
                                                         ?>
                                                     </tbody>
-
                                                 </table>
                                             <?php
                                             }
@@ -309,7 +257,7 @@ if ($debug == 1) {
 
                                             <!-- Fin de la tabla de reglas guardadas $$$$$$$$$$ -->
                                         </div>
-                                        
+
                                     </div>
                                     <!-- Segunda pestaña del Varcenas Peña-->
                                     <div class="tab-pane  p-20" id="proveedores" role="tabpanel">
@@ -485,11 +433,63 @@ if ($debug == 1) {
     <script src="/assets/libs/chartist/dist/chartist.min.js"></script>
     <script src="/assets/libs/chartist-plugin-tooltips/dist/chartist-plugin-tooltip.min.js"></script>
     <script src="/assets/extra-libs/datatables.net/js/pdfmake.min.js"></script>
-    <script src="/assets/extra-libs/datatables.net/js/vfs_fonts.js"></script>
     <script src="/assets/libs/sweetalert2/dist/sweetalert2.js"></script>
     <script src="/assets/libs/sweetalert2/dist/sweetalert2.all.js"></script>
     <script src="/assets/libs/sweetalert2/sweet-alert.init.js"></script>
     <script src="/dist/js/basicFuctions.js"></script>
+
+    <script>
+        /*Este Se Queda Aquí*/
+        $('#tableReglas').DataTable({
+            iDisplayLength: 10,
+            responsive: false,
+            fixedColumns: true,
+            fixedHeader: true,
+            scrollCollapse: true,
+            autoWidth: true,
+            scrollCollapse: true,
+            bSort: true,
+            dom: 'Blfrtip',
+            lengthMenu: [
+                [10, 25, 50, -1],
+                [10, 25, 50, "Todo"]
+            ],
+            info: true,
+            buttons: [{
+                    extend: 'pdfHtml5',
+                    className: 'btn btn-pdf bg-pyme-primary text-white',
+                    orientation: 'landscape',
+                    pageSize: 'LEGAL',
+                    text: "Pdf",
+                },
+
+                {
+                    extend: 'csvHtml5',
+                    className: 'btn btn-pdf bg-pyme-primary text-white',
+                    text: "Csv",
+                    exportOptions: {
+                        columns: ":not(.no-exportar)"
+                    }
+                },
+                {
+                    extend: 'excelHtml5',
+                    className: 'btn btn-pdf bg-pyme-primary text-white',
+                    text: "Excel",
+                    exportOptions: {
+                        columns: ":not(.no-exportar)"
+                    }
+                },
+                {
+                    extend: 'copy',
+                    className: 'btn btn-pdf bg-pyme-primary text-white',
+                    text: "Copiar",
+                    exportOptions: {
+                        columns: ":not(.no-exportar)"
+                    }
+                }
+            ]
+        });
+    </script>
 
     <?php include 'index_js.php'; ?>
 
