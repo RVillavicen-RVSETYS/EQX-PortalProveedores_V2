@@ -170,7 +170,7 @@ if ($debug == 1) {
                                                     </div>
                                                 </div>
 
-                                                <div class="row mt-3 align-items-start">
+                                                <div class="row mt-3 align-items-start" style="margin-bottom: 50;">
                                                     <!-- Contenedor para Monto -->
                                                     <div class="col-md-5" id="containerMonto" style="display: none;">
                                                         <div class="form-group">
@@ -194,7 +194,7 @@ if ($debug == 1) {
                                                         </div>
                                                     </div>
                                                     <!-- Botón de Guardar alineado y fijo al extremo de la derecha -->
-                                                    <div class="col-md d-flex justify-content-md-end justify-content-start align-items-start mt-3 mt-md-0">
+                                                    <div class="col-md d-flex justify-content-md-end justify-content-start align-items-start mt-3 mt-md-0"">
                                                         <div id="bloquear-btnGuardarConfig" style="display:none; margin-top: 32px;">
                                                             <button class="btn btn-primary btn-md" type="button" disabled>
                                                                 <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span> Guardando...
@@ -205,6 +205,7 @@ if ($debug == 1) {
                                                         </div>
                                                     </div>
                                                 </div>
+                                                <hr>
 
                                             </form>
 
