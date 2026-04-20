@@ -85,6 +85,11 @@
             success: function(response) {
                 if (response.success) {
                     notificaSucSweet('Excelente!!', response.message);
+                    
+                    // Limpieza de campos
+                    $('#formConfiguracionPrecios')[0].reset();
+                    $('#formConfiguracionPrecios').find('.select2').val('').trigger('change');
+                    gestionarInputsTolerancia();
                 } else {
                     notificaBadSweet('Error', response.message);
                 }

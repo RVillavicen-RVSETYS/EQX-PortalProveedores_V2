@@ -208,7 +208,7 @@ if ($debug == 1) {
                                             </form>
                                         </div>
                                     </div>
-                                    <!-- Segunda pestaña del Barcenas Peña-->
+                                    <!-- Segunda pestaña del Varcenas Peña-->
                                     <div class="tab-pane  p-20" id="proveedores" role="tabpanel">
                                         <form class="form-horizontal" id="formConfiguracionGral" method="post" action="ConfiguracionBase/guardarConfiguracionGral">
                                             <div class="card-body">
