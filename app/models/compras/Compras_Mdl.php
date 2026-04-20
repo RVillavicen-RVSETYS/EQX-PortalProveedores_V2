@@ -114,7 +114,7 @@ class Compras_Mdl
             $sql = "SELECT c.id AS acuse, c.claseDocto, dc.ordenCompra, c.estatus, c.totalPagos, c.totalComplementos,
                     GROUP_CONCAT(DISTINCT dc.noRecepcion ORDER BY dc.noRecepcion SEPARATOR ', ') AS noRecepcion,
                     c.fechaReg, c.referencia, cf.urlPDF, cf.urlXML, pv.pais, pv.id AS 'IdProveedor', pv.razonSocial AS 'RazonSocial', pv.rfc AS 'RFC',
-                    cf.serie AS 'SerieFact', cf.folio AS 'FolioFact', cf.fechaReg AS 'FechaReg', c.total AS 'Total', c.fechaProbablePago AS 'FechaPago', 
+                    cf.serie AS 'SerieFact',cf.monto AS 'MontoFactura', cf.idCatMetodoPago AS 'MetodoPago', cf.idCatFormaPago AS 'FormaPago', cf.folio AS 'FolioFact', cf.fechaReg AS 'FechaReg', c.total AS 'Total', c.fechaProbablePago AS 'FechaPago', 
                     c.fechaVence AS 'FechaVence', cf.idCatTipoMoneda AS 'TipoMonedaFac', c.notaCredito AS 'NotaCredito', cpd.CantComplementos,
                     COALESCE(ncp.CantNotasPendientes, 0) AS 'CantNotasPendientes',
                     COALESCE(cpp.CantComplementosPendientes, 0) AS 'CantComplementosPendientes'

@@ -18,10 +18,12 @@ if ($debug == 1) {
                 <th class="text-center"># Acuse</th>
                 <th class="">Tipo</th>
                 <th>Proveedor</th>
-                <th>Folio Interno</th>
                 <th>Orden Compra</th>
                 <th>No Recepcion</th>
-                <th>Fecha Recepción</th>
+                <th>Folio Interno</th>
+                <th>Monto a Pagar</th>
+                <th>Metodo Pago</th>
+                <th>Forma Pago</th>
                 <th>Fecha Pago</th>
                 <th>Fecha Limite</th>
                 <th>Estatus Fiscal</th>
@@ -93,10 +95,12 @@ if ($debug == 1) {
                     <td class="text-center">' . $row['acuse'] . '</td>
                     <td>' . $claseDocto . '</td>
                     <td>' . $row['RazonSocial'] . '</td>
-                    <td>' . $row['referencia'] . '</td>
                     <td>' . $row['ordenCompra'] . '</td>
                     <td>' . $recepciones . '</td>
-                    <td>' . $row['fechaReg'] . '</td>
+                    <td>' . $row['referencia'] . '</td>
+                    <td class="text-right">$ ' . number_format($row['MontoFactura'], 4, '.', ',') . ' ' . $row['TipoMonedaFac'] . '</td>
+                    <td>' . $row['MetodoPago'] . '</td>
+                    <td>' . $row['FormaPago'] . '</td>
                     <td>' . $row['FechaPago'] . '</td>
                     <td>' . $row['FechaVence'] . '</td>
                     <td>' . $valida . ' </td>
