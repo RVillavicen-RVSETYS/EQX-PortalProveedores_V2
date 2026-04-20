@@ -1,24 +1,24 @@
-<?php // Para inicializar código php
+<?php
 
-namespace App\Controllers\Administrador; // Nombre del espacio de trabajo o directorio
+namespace App\Controllers\Administrador;
 
-use Core\Controller; // Importa la clase Controller del espacio de nombres Core
-use App\Models\Menu_Mdl; // Importa la clase Menu_Mdl del espacio de nombres App\Models\Administrador
-use App\Models\Sat\Sat_Mdl; // Importa la clase Sat_Mdl del espacio de nombres App\Models\Sat
-use App\Models\Empresas\Empresas_Mdl; // Importa la clase Empresas_Mdl del espacio de nombres App\Models\Empresas
-use App\Models\Configuraciones\ConfiguracionGral_Mdl; // Importa el modelo de configuración
+use Core\Controller;
+use App\Models\Menu_Mdl;
+use App\Models\Sat\Sat_Mdl;
+use App\Models\Empresas\Empresas_Mdl;
+use App\Models\Configuraciones\ConfiguracionGral_Mdl;
 
-
-class ConfiguracionBaseController extends Controller{ // Declaración de clase con extensión de Controller
+class ConfiguracionBaseController extends Controller
+{
 
     protected $debug = 0;
 
-    public function __construct(){
-        
+    public function __construct()
+    {
+
         if ($this->debug == 1) {
             echo "<h2>Ya estamos dentro de controllers\Administrador\ConfiguracionBaseController.php.</h2>";
         }
-        // Llama a checkSession para verificar la sesión y el estatus del usuario
         $this->checkSessionAdmin();
     }
 
@@ -34,15 +34,13 @@ class ConfiguracionBaseController extends Controller{ // Declaración de clase c
         $menuModel = new Menu_Mdl();
         $resultIdArea = $menuModel->obtenerIdAreaPorLink($areaLink);
 
-        // Para consultar los tipos de moneda al modelo
-        // Para consultar las empresas al modelo
         $satModel = new Sat_Mdl();
         $empresaModel = new Empresas_Mdl();
 
         $filtros = ['estatus' => 1];
-        
+
         $resultTiposMoneda = $satModel->dataTiposMoneda($filtros);
-        $resultEmpresas = $empresaModel->listaEmpresas(estatus:1);
+        $resultEmpresas = $empresaModel->listaEmpresas(estatus: 1);
 
 
         if ($resultIdArea['success']) {
@@ -84,15 +82,15 @@ class ConfiguracionBaseController extends Controller{ // Declaración de clase c
         // Contenido de Configuración Base
     }
 
-    // Procesa el guardado de la configuración de montos vía AJAX.
-    public function guardarConfiguracion() {
+    public function guardarConfiguracion()
+    {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             echo json_encode(['success' => false, 'message' => 'Método no permitido.']);
             return;
         }
 
         $idEmpresa     = (int)($_POST['idEmpresa'] ?? 0);
-        $idMoneda      = $_POST['idMoneda'] ?? ''; // Quitar (int) si usas códigos como MXN o USD
+        $idMoneda      = $_POST['idMoneda'] ?? '';
         $tipoRegla     = (int)($_POST['tipoRegla'] ?? 0);
         $montoTol      = $_POST['montoTolerancia'] ?? 0;
         $porcentajeTol = $_POST['porcentajeTolerancia'] ?? 0;
@@ -104,16 +102,13 @@ class ConfiguracionBaseController extends Controller{ // Declaración de clase c
 
         $mdlConfig = new ConfiguracionGral_Mdl();
 
-        // 1. Lógica de negocio: Caso 1 (Existe -> Desactivar) y Caso 2 (No existe -> Directo)
         $existe = $mdlConfig->verificarReglaExistente($idEmpresa, $idMoneda);
-        
+
         if ($existe['success'] && !empty($existe['data'])) {
-            // Caso 1: Si ya existe una regla activa, procedemos a desactivarla(s) 
-            // antes de insertar la nueva configuración.
+
             $mdlConfig->desactivarReglasPorEmpresaMoneda($idEmpresa, $idMoneda);
         }
 
-        // 2. Preparar campos: se asigna el mismo valor a Sup e Inf para simetría.
         $campos = [
             'idEmpresa'     => $idEmpresa,
             'tipoMoneda'    => $idMoneda,
@@ -122,14 +117,82 @@ class ConfiguracionBaseController extends Controller{ // Declaración de clase c
             'montoInf'      => ($tipoRegla === 1 || $tipoRegla === 3) ? $montoTol : 0,
             'porcentajeSup' => ($tipoRegla === 2 || $tipoRegla === 3) ? $porcentajeTol : 0,
             'porcentajeInf' => ($tipoRegla === 2 || $tipoRegla === 3) ? $porcentajeTol : 0,
-            'estatus'       => '1', // Se registra como activa (string '1' para el modelo)
+            'estatus'       => '1',
             'idUserReg'     => $_SESSION['EQXident'] ?? 0
         ];
 
-        // 3. Ejecutar inserción
         $resultado = $mdlConfig->registrarDiferenciaMontos($campos);
 
         header('Content-Type: application/json');
         echo json_encode($resultado);
+    }
+
+    public function guardarConfiguracionGral()
+    {
+
+        $diasPago = [];
+        if (isset($_POST['diasPago'])) {
+            if (is_array($_POST['diasPago'])) {
+                $diasPago = array_filter($_POST['diasPago'], function ($value) {
+                    return trim($value) !== '';
+                });
+            } else {
+                $diasPago = [trim($_POST['diasPago'])];
+            }
+        }
+
+        $data = [
+            'idEmpresa' => isset($_POST['idEmpresa']) ? intval($_POST['idEmpresa']) : null,
+            'maxComplementosPendientes' => isset($_POST['maxComplementosPendientes']) ? intval($_POST['maxComplementosPendientes']) : null,
+            'diasPago' => implode(',', $diasPago)
+        ];
+
+        if ($this->debug == 1) {
+            echo "<br>Contenido de data:<br>";
+            var_dump($data);
+            echo "<br>";
+        }
+
+        if (!$data['idEmpresa'] || !$data['maxComplementosPendientes'] || $data['diasPago'] === '') {
+            header('Content-Type: application/json');
+            echo json_encode(['success' => false, 'message' => 'Faltan datos requeridos.']);
+            exit;
+        }
+
+        $configuracionGralModel = new ConfiguracionGral_Mdl();
+
+        // Verificar si ya existe configuración para esta empresa
+        $resultExiste = $configuracionGralModel->obtenerConfiguracionPorEmpresa($data['idEmpresa']);
+
+        if ($resultExiste['success']) {
+            // Si existe, actualizar
+            $result = $configuracionGralModel->actualizarConfiguracionGral($data);
+        } else {
+            // Si no existe, insertar
+            $result = $configuracionGralModel->registrarConfiguracionGral($data);
+        }
+
+        header('Content-Type: application/json');
+        echo json_encode($result);
+        exit;
+    }
+
+    public function obtenerConfiguracionEmpresa()
+    {
+
+        $idEmpresa = isset($_POST['idEmpresa']) ? intval($_POST['idEmpresa']) : null;
+
+        if (!$idEmpresa) {
+            header('Content-Type: application/json');
+            echo json_encode(['success' => false, 'message' => 'ID de empresa no válido.']);
+            exit;
+        }
+
+        $configuracionGralModel = new ConfiguracionGral_Mdl();
+        $result = $configuracionGralModel->obtenerConfiguracionPorEmpresa($idEmpresa);
+
+        header('Content-Type: application/json');
+        echo json_encode($result);
+        exit;
     }
 }

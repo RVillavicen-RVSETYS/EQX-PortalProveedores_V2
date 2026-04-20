@@ -101,45 +101,45 @@ if ($debug == 1) {
                             <!--  Aqui va el contenido nuevo  -->
                             <div id="configuraciones" class="card-body">
 
-                            <!-- Pestañas de -->
-                            <ul class="nav nav-tabs" role="tablist">
-                                <li class="nav-item"> <a class="nav-link active" data-toggle="tab" href="#Home" role="tab"><span class="hidden-sm-up"><i class="ti-home"></i></span> <span class="hidden-xs-down">Configuración de Precios</span></a> </li>
-                                <li class="nav-item"> <a class="nav-link" data-toggle="tab" href="#profile" role="tab"><span class="hidden-sm-up"><i class="ti-user"></i></span> <span class="hidden-xs-down">Profile</span></a> </li>
-                                <!--
+                                <!-- Pestañas de -->
+                                <ul class="nav nav-tabs" role="tablist">
+                                    <li class="nav-item"> <a class="nav-link active" data-toggle="tab" href="#Home" role="tab"><span class="hidden-sm-up"><i class="ti-home"></i></span> <span class="hidden-xs-down">Configuración de Precios</span></a> </li>
+                                    <li class="nav-item"> <a class="nav-link" data-toggle="tab" href="#proveedores" role="tab"><span class="hidden-sm-up"><i class="ti-user"></i></span> <span class="hidden-xs-down">Proveedores</span></a> </li>
+                                    <!--
                                 <li class="nav-item"> <a class="nav-link" data-toggle="tab" href="#messages" role="tab"><span class="hidden-sm-up"><i class="ti-email"></i></span> <span class="hidden-xs-down">Messages</span></a> </li>
                                 -->
-                            </ul>
-                            <!-- Tab panes -->
-                            <div class="tab-content tabcontent-border">
-                                <!-- Primer pestaña Configuracion de precios de Parral -->
-                                <div class="tab-pane active" id="Home" role="tabpanel">
-                                    <div class="p-20">
-                                        <h4 class="card-title mb-4"><i class="fas fa-building mr-2"></i> Configuración de Diferencia de Montos</h4>
-                                        <p class="text-muted">Define los umbrales de tolerancia permitidos entre el XML y la Hoja de Entrada (HES).</p>
-                                        <hr>
-                                        <form id="formConfiguracionPrecios">
-                                            <div class="row">
-                                                <div class="col-md-6">
-                                                    <div class="form-group">
-                                                        <label for="idEmpresa">Empresa:</label>
-                                                        <select required name="idEmpresa" id="idEmpresa" class="select2 form-control custom-select" style="width: 100%;">
-                                                            <option value="">Selecciona una Empresa</option>
-                                                            <!-- Aquí iteramos las empresas -->
-                                                            <?php 
+                                </ul>
+                                <!-- Tab panes -->
+                                <div class="tab-content tabcontent-border">
+                                    <!-- Primer pestaña Configuracion de precios de Parral -->
+                                    <div class="tab-pane active" id="Home" role="tabpanel">
+                                        <div class="p-20">
+                                            <h4 class="card-title mb-4"><i class="fas fa-building mr-2"></i> Configuración de Diferencia de Montos</h4>
+                                            <p class="text-muted">Define los umbrales de tolerancia permitidos entre el XML y la Hoja de Entrada (HES).</p>
+                                            <hr>
+                                            <form id="formConfiguracionPrecios">
+                                                <div class="row">
+                                                    <div class="col-md-6">
+                                                        <div class="form-group">
+                                                            <label for="idEmpresa">Empresa:</label>
+                                                            <select required name="idEmpresa" id="idEmpresa" class="select2 form-control custom-select" style="width: 100%;">
+                                                                <option value="">Selecciona una Empresa</option>
+                                                                <!-- Aquí iteramos las empresas -->
+                                                                <?php
                                                                 // Para consultar las empresas al modelo
                                                                 foreach ($empresas['data'] as $empresa) {
                                                                     echo '<option value="' . $empresa['id'] . '">' . $empresa['nombre'] . '</option>';
                                                                 }
-                                                            ?>
-                                                        </select>
+                                                                ?>
+                                                            </select>
+                                                        </div>
                                                     </div>
-                                                </div>
-                                                <div class="col-md-6">
-                                                    <div class="form-group">
-                                                        <label for="idMoneda">Tipo de Moneda:</label>
-                                                        <select required name="idMoneda" id="idMoneda" class="select2 form-control custom-select" style="width: 100%;">
-                                                            <option value="">Selecciona una Moneda</option>
-                                                            <?php
+                                                    <div class="col-md-6">
+                                                        <div class="form-group">
+                                                            <label for="idMoneda">Tipo de Moneda:</label>
+                                                            <select required name="idMoneda" id="idMoneda" class="select2 form-control custom-select" style="width: 100%;">
+                                                                <option value="">Selecciona una Moneda</option>
+                                                                <?php
                                                                 // Para consultar los tipos de moneda al modelo
                                                                 // Se prioriza el campo que contenga el código de moneda (CHAR(5))
                                                                 foreach ($tiposMoneda['data'] as $moneda) {
@@ -148,98 +148,189 @@ if ($debug == 1) {
                                                                     $descEsc = htmlspecialchars($moneda['descripcion'] ?? '', ENT_QUOTES, 'UTF-8');
                                                                     echo "<option value=\"$valueEsc\">$descEsc</option>";
                                                                 }
-                                                            ?>
-                                                        </select>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            <div class="row">
-                                                <div class="col-md-12">
-                                                    <div class="form-group">
-                                                        <label for="tipoRegla">Tipo de Aplicación de Regla:</label>
-                                                        <select required name="tipoRegla" id="tipoRegla" class="select2 form-control custom-select" style="width: 100%;" onchange="gestionarInputsTolerancia()">
-                                                            <option value="" selected>Elige la Aplicación de la Regla</option>
-                                                            <option value="1">Solo aplica por Monto</option>
-                                                            <option value="2">Solo aplica por Porcentaje</option>
-                                                            <option value="3">Aplica Monto y Porcentaje</option>
-                                                        </select>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            <div class="row mt-3">
-                                                <!-- Contenedor para Monto -->
-                                                <div class="col-md-6" id="containerMonto" style="display: none;">
-                                                    <div class="form-group">
-                                                        <label for="montoTolerancia">Monto de Tolerancia (±):</label>
-                                                        <div class="input-group">
-                                                            <div class="input-group-prepend"><span class="input-group-text">$</span></div>
-                                                            <input type="number" step="0.01" class="form-control" name="montoTolerancia" id="montoTolerancia" placeholder="0.00">
+                                                                ?>
+                                                            </select>
                                                         </div>
-                                                        <small class="text-muted">Este valor se aplicará como límite superior e inferior.</small>
                                                     </div>
                                                 </div>
-                                                <!-- Contenedor para Porcentaje -->
-                                                <div class="col-md-6" id="containerPorcentaje" style="display: none;">
-                                                    <div class="form-group">
-                                                        <label for="porcentajeTolerancia">Porcentaje de Tolerancia (±):</label>
-                                                        <div class="input-group">
-                                                            <input type="number" step="0.01" class="form-control" name="porcentajeTolerancia" id="porcentajeTolerancia" placeholder="0.00">
-                                                            <div class="input-group-append"><span class="input-group-text">%</span></div>
+
+                                                <div class="row">
+                                                    <div class="col-md-12">
+                                                        <div class="form-group">
+                                                            <label for="tipoRegla">Tipo de Aplicación de Regla:</label>
+                                                            <select required name="tipoRegla" id="tipoRegla" class="select2 form-control custom-select" style="width: 100%;" onchange="gestionarInputsTolerancia()">
+                                                                <option value="" selected>Elige la Aplicación de la Regla</option>
+                                                                <option value="1">Solo aplica por Monto</option>
+                                                                <option value="2">Solo aplica por Porcentaje</option>
+                                                                <option value="3">Aplica Monto y Porcentaje</option>
+                                                            </select>
                                                         </div>
-                                                        <small class="text-muted">Este porcentaje se aplicará como límite superior e inferior.</small>
+                                                    </div>
+                                                </div>
+
+                                                <div class="row mt-3">
+                                                    <!-- Contenedor para Monto -->
+                                                    <div class="col-md-6" id="containerMonto" style="display: none;">
+                                                        <div class="form-group">
+                                                            <label for="montoTolerancia">Monto de Tolerancia (±):</label>
+                                                            <div class="input-group">
+                                                                <div class="input-group-prepend"><span class="input-group-text">$</span></div>
+                                                                <input type="number" step="0.01" class="form-control" name="montoTolerancia" id="montoTolerancia" placeholder="0.00">
+                                                            </div>
+                                                            <small class="text-muted">Este valor se aplicará como límite superior e inferior.</small>
+                                                        </div>
+                                                    </div>
+                                                    <!-- Contenedor para Porcentaje -->
+                                                    <div class="col-md-6" id="containerPorcentaje" style="display: none;">
+                                                        <div class="form-group">
+                                                            <label for="porcentajeTolerancia">Porcentaje de Tolerancia (±):</label>
+                                                            <div class="input-group">
+                                                                <input type="number" step="0.01" class="form-control" name="porcentajeTolerancia" id="porcentajeTolerancia" placeholder="0.00">
+                                                                <div class="input-group-append"><span class="input-group-text">%</span></div>
+                                                            </div>
+                                                            <small class="text-muted">Este porcentaje se aplicará como límite superior e inferior.</small>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="row mt-4">
+                                                    <div class="col-12 text-right">
+                                                        <div id="bloquear-btnGuardarConfig" style="display:none;">
+                                                            <button class="btn btn-primary btn-md" type="button" disabled>
+                                                                <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span> Guardando...
+                                                            </button>
+                                                        </div>
+                                                        <div id="desbloquear-btnGuardarConfig">
+                                                            <button type="submit" class="btn btn-md btn-outline-primary"><i class="fas fa-save mr-1"></i> Guardar Configuración</button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                    <!-- Segunda pestaña del Barcenas Peña-->
+                                    <div class="tab-pane  p-20" id="proveedores" role="tabpanel">
+                                        <form class="form-horizontal" id="formConfiguracionGral" method="post" action="ConfiguracionBase/guardarConfiguracionGral">
+                                            <div class="card-body">
+                                                <h4 class="card-title">Empresas</h4>
+                                                <div class="row">
+                                                    <div class="col-sm-12 col-lg-6">
+                                                        <div class="form-group">
+                                                            <label for="empresa" class="control-label col-form-label">Empresas:</label>
+                                                            <div class="input-group mb-3" data-select2-id="8">
+                                                                <select name="idEmpresa" id="empresa" class="select2 form-control custom-select select2-hidden-accessible" style="width: 100%;" data-select2-id="empresas" tabindex="-1" aria-hidden="true">
+                                                                    <option selected="" value="">Selecione una Empresa</option>
+                                                                    <?php
+                                                                    foreach ($empresas['data'] as $empresa) {
+                                                                        echo '<option value="' . $empresa['id'] . '">' . $empresa['nombre'] . '</option>';
+                                                                    }
+                                                                    ?>
+                                                                </select>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-12 col-lg-6">
+                                                        <div class="form-group">
+                                                            <label for="cantComplemento" class="control-label col-form-label">Limite de Complementos:</label>
+                                                            <input type="number" name="maxComplementosPendientes" class="form-control" id="cantComplemento" placeholder="Cant. Maxima">
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
-                                            
-                                            <div class="row mt-4">
-                                                <div class="col-12 text-right">
-                                                    <div id="bloquear-btnGuardarConfig" style="display:none;">
-                                                        <button class="btn btn-primary btn-md" type="button" disabled>
-                                                            <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span> Guardando...
-                                                        </button>
+                                            <hr>
+                                            <div class="card-body">
+                                                <h4 class="card-title">General</h4>
+                                                <div class="row">
+                                                    <div class="col-sm-12 col-lg-6">
+                                                        <div class="form-group row">
+
+                                                            <div class="card-body">
+                                                                <h4 class="card-title">Seleccione los días de Pago</h4>
+                                                                <div class="form-check form-check-inline">
+                                                                    <div class="custom-control custom-checkbox">
+                                                                        <input type="checkbox" name="diasPago[]" value="1" class="custom-control-input" id="lunes">
+                                                                        <label class="custom-control-label" for="lunes">Lunes</label>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="form-check form-check-inline">
+                                                                    <div class="custom-control custom-checkbox">
+                                                                        <input type="checkbox" name="diasPago[]" value="2" class="custom-control-input" id="martes">
+                                                                        <label class="custom-control-label" for="martes">Martes</label>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="form-check form-check-inline">
+                                                                    <div class="custom-control custom-checkbox">
+                                                                        <input type="checkbox" name="diasPago[]" value="3" class="custom-control-input" id="miercoles">
+                                                                        <label class="custom-control-label" for="miercoles">Miércoles</label>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="form-check form-check-inline">
+                                                                    <div class="custom-control custom-checkbox">
+                                                                        <input type="checkbox" name="diasPago[]" value="4" class="custom-control-input" id="jueves">
+                                                                        <label class="custom-control-label" for="jueves">Jueves</label>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="form-check form-check-inline">
+                                                                    <div class="custom-control custom-checkbox">
+                                                                        <input type="checkbox" name="diasPago[]" value="5" class="custom-control-input" id="viernes">
+                                                                        <label class="custom-control-label" for="viernes">Viernes</label>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="form-check form-check-inline">
+                                                                    <div class="custom-control custom-checkbox">
+                                                                        <input type="checkbox" name="diasPago[]" value="6" class="custom-control-input" id="sabado">
+                                                                        <label class="custom-control-label" for="sabado">Sábado</label>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="form-check form-check-inline">
+                                                                    <div class="custom-control custom-checkbox">
+                                                                        <input type="checkbox" name="diasPago[]" value="7" class="custom-control-input" id="domingo">
+                                                                        <label class="custom-control-label" for="domingo">Domingo</label>
+                                                                    </div>
+                                                                </div>
+
+                                                            </div>
+                                                        </div>
                                                     </div>
-                                                    <div id="desbloquear-btnGuardarConfig">
-                                                        <button type="submit" class="btn btn-md btn-outline-primary"><i class="fas fa-save mr-1"></i> Guardar Configuración</button>
-                                                    </div>
+                                                </div>
+
+                                            </div>
+                                            <hr>
+                                            <div class="card-body">
+                                                <div class="form-group m-b-0 text-right">
+                                                    <button type="submit" id="btnGuardar" class="btn waves-effect waves-light btn-success">Guardar</button>
                                                 </div>
                                             </div>
                                         </form>
                                     </div>
                                 </div>
-                                <!-- Segunda pestaña del Barcenas Peña-->
-                                <div class="tab-pane  p-20" id="profile" role="tabpanel">2</div>
-                                <!--
-                                <div class="tab-pane p-20" id="messages" role="tabpanel">3</div>
-                                -->
-                            </div>
-
                             </div>
 
                         </div>
+
                     </div>
                 </div>
-                <!-- ============================================================== -->
-                <!-- Sales chart -->
-                <!-- ============================================================== -->
             </div>
             <!-- ============================================================== -->
-            <!-- Termina Contenido fluid  -->
+            <!-- Sales chart -->
             <!-- ============================================================== -->
-
-            <!-- ============================================================== -->
-            <!-- footer -->
-            <!-- ============================================================== -->
-            <?php include '../app/Views/Layout/footer.php'; ?>
-            <!-- ============================================================== -->
-            <!-- End footer -->
-            <!-- ============================================================== -->
-
         </div>
         <!-- ============================================================== -->
-        <!-- End Page wrapper  -->
+        <!-- Termina Contenido fluid  -->
         <!-- ============================================================== -->
+
+        <!-- ============================================================== -->
+        <!-- footer -->
+        <!-- ============================================================== -->
+        <?php include '../app/Views/Layout/footer.php'; ?>
+        <!-- ============================================================== -->
+        <!-- End footer -->
+        <!-- ============================================================== -->
+
+    </div>
+    <!-- ============================================================== -->
+    <!-- End Page wrapper  -->
+    <!-- ============================================================== -->
     </div>
     <!-- ============================================================== -->
     <!-- End Wrapper -->
