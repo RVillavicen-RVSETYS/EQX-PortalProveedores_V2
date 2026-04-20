@@ -28,6 +28,8 @@ if ($debug == 1) {
     var_dump($tiposMoneda);
     echo '<br><br>Contenido de empresas:';
     var_dump($empresas);
+    echo '<br><br>Contenido de reglas:';
+    var_dump($reglas);
 }
 
 ?>
@@ -205,8 +207,109 @@ if ($debug == 1) {
                                                         </div>
                                                     </div>
                                                 </div>
+                                                
                                             </form>
+                                            
+                                            <!-- Tabla para mostrar las reglas guardadas
+                                            Empresa, tipo de moneda, regla y monto/porcentaje de tolerancia -->
+
+                                            <?php
+                                            if (empty($listaAlertas['data'])) {
+                                                echo '<div class="row"><div class="col-12 py-3 alert alert-info">No se a configurado ninguna regla.</div></div>';
+                                            } else {
+                                            ?>
+                                                <table class="table table-sm" id="tableAlertas">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>#</th>
+                                                            <th>Empresa</th>
+                                                            <th>Tipo Moneda</th>
+                                                            <th>Tipo de aplicación de Regla</th>
+                                                            <th>Monto superior</th>
+                                                            <th>Monto Inferior</th>
+                                                            <th>Porcentaje superior</th>
+                                                            <th>Porcentaje inferior</th>
+                                                            <th>Acción</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <?php
+                                                        $cont = 1;
+                                                        foreach ($listaAlertas['data'] as $alertas) {
+                                                            $tipoProv = '';
+                                                            $tipoAlerta = '';
+                                                            $periodo = '';
+
+                                                            switch ($alertas['TipoProveedor']) {
+                                                                case 'NAC':
+                                                                    $tipoProv = 'Nacional';
+                                                                    break;
+                                                                case 'INT':
+                                                                    $tipoProv = 'Internacional';
+                                                                    break;
+                                                            }
+
+                                                            switch ($alertas['TipoMsj']) {
+                                                                case 'INFO':
+                                                                    $tipoAlerta = '<h6 class="text-info"><i class="fa fa-exclamation-circle"></i> ' . $alertas['TipoMsj'] . '</h6>';
+                                                                    break;
+                                                                case 'WARNING':
+                                                                    $tipoAlerta = '<h6 class="text-warning"><i class="fa fa-exclamation-triangle"></i> ' . $alertas['TipoMsj'] . '</h6>';
+                                                                    break;
+                                                                case 'ERROR':
+                                                                    $tipoAlerta = '<h6 class="text-danger"><i class="fas fa-times-circle"></i> ' . $alertas['TipoMsj'] . '</h6>';
+                                                                    break;
+                                                            }
+
+                                                            if ($alertas['TipoPeriodo'] == 2) {
+                                                                $periodo = 'Del ' . $alertas['Inicio'] . ' Al ' . $alertas['Fin'];
+                                                            } else {
+                                                                $periodo = 'Indefinido';
+                                                            }
+
+                                                            if ($alertas['Estatus'] == 1) {
+                                                                $color = 'btn-outline-success';
+                                                                $icono = 'fas fa-check';
+                                                            } else {
+                                                                $color = 'btn-outline-danger';
+                                                                $icono = 'fas fa-times';
+                                                            }
+
+                                                        ?>
+                                                            <tr>
+                                                                <td><?= $cont++; ?></td>
+                                                                <td><?= $tipoProv; ?></td>
+                                                                <td><?= $alertas['Titulo']; ?></td>
+                                                                <td><?= $alertas['Mensaje']; ?></td>
+                                                                <td class="text-left"><?= $tipoAlerta; ?></td>
+                                                                <td><?= $periodo; ?></td>
+
+                                                                <td>
+                                                                    <div id="bloquear-btnEstatus<?= $alertas['IdNotificacion']; ?>" style="display:none;">
+                                                                        <button class="btn btn-xs btn-rounded <?= $color; ?> " type="button" disabled="" style="height: 100%;">
+                                                                            <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
+                                                                        </button>
+                                                                    </div>
+                                                                    <div id="desbloquear-btnEstatus<?= $alertas['IdNotificacion']; ?>">
+                                                                        <button id="btnEstatus<?= $alertas['IdNotificacion']; ?>" onclick="cambiarEstatus(<?= $alertas['Estatus']; ?>, <?= $alertas['IdNotificacion']; ?>)" type="button" class="btn btn-xs btn-rounded <?= $color; ?>"><i class="<?= $icono; ?>"></i></button>
+                                                                    </div>
+                                                                </td>
+
+                                                                <td class="text-center"><button onclick="cargarDatos(<?= $alertas['IdNotificacion']; ?>)" type="button" class="btn btn-xs btn-outline-primary" data-toggle="modal" data-target="#modalEditaAlerta"><i class="fas fa-pencil-alt"></i></button></td>
+                                                            </tr>
+                                                        <?php
+                                                        }
+                                                        ?>
+                                                    </tbody>
+
+                                                </table>
+                                            <?php
+                                            }
+                                            ?>
+
+                                            <!-- Fin de la tabla de reglas guardadas $$$$$$$$$$ -->
                                         </div>
+                                        
                                     </div>
                                     <!-- Segunda pestaña del Varcenas Peña-->
                                     <div class="tab-pane  p-20" id="proveedores" role="tabpanel">

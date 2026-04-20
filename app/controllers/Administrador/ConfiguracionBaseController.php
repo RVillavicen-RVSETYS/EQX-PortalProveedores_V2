@@ -34,13 +34,18 @@ class ConfiguracionBaseController extends Controller
         $menuModel = new Menu_Mdl();
         $resultIdArea = $menuModel->obtenerIdAreaPorLink($areaLink);
 
+        // Instanciar modelos
         $satModel = new Sat_Mdl();
         $empresaModel = new Empresas_Mdl();
+        $reglasModel = new ConfiguracionGral_Mdl();
 
+        // Obtener datos de los modelos
         $filtros = ['estatus' => 1];
+        $filtrosReglas = ['estatus' => 1 ];
 
         $resultTiposMoneda = $satModel->dataTiposMoneda($filtros);
         $resultEmpresas = $empresaModel->listaEmpresas(estatus: 1);
+        $resultReglas = $reglasModel->dataDiferenciaMontos($filtrosReglas);
 
 
         if ($resultIdArea['success']) {
@@ -63,6 +68,8 @@ class ConfiguracionBaseController extends Controller
                 $data['areaLink'] =  $areaLink;
                 $data['tiposMoneda'] = $resultTiposMoneda;
                 $data['empresas'] = $resultEmpresas;
+                $data['reglas'] = $resultReglas;
+
 
                 // Cargar la vista correspondiente
                 $this->view('Administrador/ConfiguracionBase/index', $data);
