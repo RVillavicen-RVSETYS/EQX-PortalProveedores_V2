@@ -210,98 +210,138 @@ if ($debug == 1) {
                                     </div>
                                     <!-- Segunda pestaña del Barcenas Peña-->
                                     <div class="tab-pane  p-20" id="proveedores" role="tabpanel">
-                                        <form class="form-horizontal" id="formConfiguracionGral" method="post" action="ConfiguracionBase/guardarConfiguracionGral">
-                                            <div class="card-body">
-                                                <h4 class="card-title">Empresas</h4>
-                                                <div class="row">
-                                                    <div class="col-sm-12 col-lg-6">
-                                                        <div class="form-group">
-                                                            <label for="empresa" class="control-label col-form-label">Empresas:</label>
-                                                            <div class="input-group mb-3" data-select2-id="8">
-                                                                <select name="idEmpresa" id="empresa" class="select2 form-control custom-select select2-hidden-accessible" style="width: 100%;" data-select2-id="empresas" tabindex="-1" aria-hidden="true">
-                                                                    <option selected="" value="">Selecione una Empresa</option>
-                                                                    <?php
-                                                                    foreach ($empresas['data'] as $empresa) {
-                                                                        echo '<option value="' . $empresa['id'] . '">' . $empresa['nombre'] . '</option>';
-                                                                    }
-                                                                    ?>
+                                        <div class="row">
+                                            <!-- Columna izquierda: Formulario -->
+                                            <div class="col-md-8">
+                                                <form class="form-horizontal" id="formConfiguracionGral" method="post" action="ConfiguracionBase/guardarConfiguracionGral">
+                                                    <div class="card-body">
+                                                        <h4 class="card-title">Empresas</h4>
+                                                        <div class="row">
+                                                            <div class="col-sm-12 col-lg-6">
+                                                                <div class="form-group">
+                                                                    <label for="empresa" class="control-label col-form-label">Empresas:</label>
+                                                                    <div class="input-group mb-3" data-select2-id="8">
+                                                                        <select name="idEmpresa" id="empresa" class="select2 form-control custom-select select2-hidden-accessible" style="width: 100%;" data-select2-id="empresas" tabindex="-1" aria-hidden="true">
+                                                                            <option selected="" value="">Selecione una Empresa</option>
+                                                                            <?php
+                                                                            foreach ($empresas['data'] as $empresa) {
+                                                                                echo '<option value="' . $empresa['id'] . '">' . $empresa['nombre'] . '</option>';
+                                                                            }
+                                                                            ?>
+                                                                        </select>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-sm-12 col-lg-6">
+                                                                <div class="form-group">
+                                                                    <label for="cantComplemento" class="control-label col-form-label">Limite de Complementos:</label>
+                                                                    <input type="number" name="maxComplementosPendientes" class="form-control" id="cantComplemento" placeholder="Cant. Maxima">
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <hr>
+                                                    <div class="card-body">
+                                                        <h4 class="card-title">General</h4>
+                                                        <div class="row">
+                                                            <div class="col-sm-12 col-lg-6">
+                                                                <div class="form-group row">
+
+                                                                    <div class="card-body">
+                                                                        <h4 class="card-title">Seleccione los días de Pago</h4>
+                                                                        <div class="form-check form-check-inline">
+                                                                            <div class="custom-control custom-checkbox">
+                                                                                <input type="checkbox" name="diasPago[]" value="1" class="custom-control-input" id="lunes">
+                                                                                <label class="custom-control-label" for="lunes">Lunes</label>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="form-check form-check-inline">
+                                                                            <div class="custom-control custom-checkbox">
+                                                                                <input type="checkbox" name="diasPago[]" value="2" class="custom-control-input" id="martes">
+                                                                                <label class="custom-control-label" for="martes">Martes</label>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="form-check form-check-inline">
+                                                                            <div class="custom-control custom-checkbox">
+                                                                                <input type="checkbox" name="diasPago[]" value="3" class="custom-control-input" id="miercoles">
+                                                                                <label class="custom-control-label" for="miercoles">Miércoles</label>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="form-check form-check-inline">
+                                                                            <div class="custom-control custom-checkbox">
+                                                                                <input type="checkbox" name="diasPago[]" value="4" class="custom-control-input" id="jueves">
+                                                                                <label class="custom-control-label" for="jueves">Jueves</label>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="form-check form-check-inline">
+                                                                            <div class="custom-control custom-checkbox">
+                                                                                <input type="checkbox" name="diasPago[]" value="5" class="custom-control-input" id="viernes">
+                                                                                <label class="custom-control-label" for="viernes">Viernes</label>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="form-check form-check-inline">
+                                                                            <div class="custom-control custom-checkbox">
+                                                                                <input type="checkbox" name="diasPago[]" value="6" class="custom-control-input" id="sabado">
+                                                                                <label class="custom-control-label" for="sabado">Sábado</label>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="form-check form-check-inline">
+                                                                            <div class="custom-control custom-checkbox">
+                                                                                <input type="checkbox" name="diasPago[]" value="7" class="custom-control-input" id="domingo">
+                                                                                <label class="custom-control-label" for="domingo">Domingo</label>
+                                                                            </div>
+                                                                        </div>
+
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+                                                    </div>
+                                                    <hr>
+                                                    <div class="card-body">
+                                                        <div class="form-group m-b-0 text-right">
+                                                            <button type="submit" id="btnGuardar" class="btn waves-effect waves-light btn-success">Guardar</button>
+                                                        </div>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                            <!-- Columna derecha: Widget de clima -->
+                                            <div class="col-md-4">
+                                                <div class="card">
+                                                    <div class="card-body">
+                                                        <div class="d-flex">
+                                                            <h4 class="card-title">Información de la Empresa</h4>
+                                                                <select class="custom-select w-25 ml-auto" id="empresaSelect" name="empresaSelect">
+                                                                     <option selected="" value="">Empresa...</option>
+                                                                            <?php
+                                                                            foreach ($empresas['data'] as $empresa) {
+                                                                                echo '<option value="' . $empresa['id'] . '">' . $empresa['nombre'] . '</option>';
+                                                                            }
+                                                                            ?>
                                                                 </select>
-                                                            </div>
                                                         </div>
-                                                    </div>
-                                                    <div class="col-sm-12 col-lg-6">
-                                                        <div class="form-group">
-                                                            <label for="cantComplemento" class="control-label col-form-label">Limite de Complementos:</label>
-                                                            <input type="number" name="maxComplementosPendientes" class="form-control" id="cantComplemento" placeholder="Cant. Maxima">
+                                                        <div class="d-flex align-items-center flex-row m-t-30">
+                                                            <div class="p-2">
+                                                                <h3 class="m-b-0" id="selectRazonSocial">Empresa</h3><small id="selectRFC">RFC</small></div>
                                                         </div>
+                                                        <table class="table no-border">
+                                                            <tbody>
+                                                                <tr>
+                                                                    <td>Limite de complementos de Pago:</td>
+                                                                    <td class="font-medium" id="limiteComplementos">Limite de Complementos</td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td>Dias de Pago:</td>
+                                                                    <td class="font-medium"  id="diasPago">Dias de Pago</td>
+                                                                </tr>
+                                                            </tbody>
+                                                        </table>
+                                                        <hr>
                                                     </div>
                                                 </div>
                                             </div>
-                                            <hr>
-                                            <div class="card-body">
-                                                <h4 class="card-title">General</h4>
-                                                <div class="row">
-                                                    <div class="col-sm-12 col-lg-6">
-                                                        <div class="form-group row">
-
-                                                            <div class="card-body">
-                                                                <h4 class="card-title">Seleccione los días de Pago</h4>
-                                                                <div class="form-check form-check-inline">
-                                                                    <div class="custom-control custom-checkbox">
-                                                                        <input type="checkbox" name="diasPago[]" value="1" class="custom-control-input" id="lunes">
-                                                                        <label class="custom-control-label" for="lunes">Lunes</label>
-                                                                    </div>
-                                                                </div>
-                                                                <div class="form-check form-check-inline">
-                                                                    <div class="custom-control custom-checkbox">
-                                                                        <input type="checkbox" name="diasPago[]" value="2" class="custom-control-input" id="martes">
-                                                                        <label class="custom-control-label" for="martes">Martes</label>
-                                                                    </div>
-                                                                </div>
-                                                                <div class="form-check form-check-inline">
-                                                                    <div class="custom-control custom-checkbox">
-                                                                        <input type="checkbox" name="diasPago[]" value="3" class="custom-control-input" id="miercoles">
-                                                                        <label class="custom-control-label" for="miercoles">Miércoles</label>
-                                                                    </div>
-                                                                </div>
-                                                                <div class="form-check form-check-inline">
-                                                                    <div class="custom-control custom-checkbox">
-                                                                        <input type="checkbox" name="diasPago[]" value="4" class="custom-control-input" id="jueves">
-                                                                        <label class="custom-control-label" for="jueves">Jueves</label>
-                                                                    </div>
-                                                                </div>
-                                                                <div class="form-check form-check-inline">
-                                                                    <div class="custom-control custom-checkbox">
-                                                                        <input type="checkbox" name="diasPago[]" value="5" class="custom-control-input" id="viernes">
-                                                                        <label class="custom-control-label" for="viernes">Viernes</label>
-                                                                    </div>
-                                                                </div>
-                                                                <div class="form-check form-check-inline">
-                                                                    <div class="custom-control custom-checkbox">
-                                                                        <input type="checkbox" name="diasPago[]" value="6" class="custom-control-input" id="sabado">
-                                                                        <label class="custom-control-label" for="sabado">Sábado</label>
-                                                                    </div>
-                                                                </div>
-                                                                <div class="form-check form-check-inline">
-                                                                    <div class="custom-control custom-checkbox">
-                                                                        <input type="checkbox" name="diasPago[]" value="7" class="custom-control-input" id="domingo">
-                                                                        <label class="custom-control-label" for="domingo">Domingo</label>
-                                                                    </div>
-                                                                </div>
-
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-
-                                            </div>
-                                            <hr>
-                                            <div class="card-body">
-                                                <div class="form-group m-b-0 text-right">
-                                                    <button type="submit" id="btnGuardar" class="btn waves-effect waves-light btn-success">Guardar</button>
-                                                </div>
-                                            </div>
-                                        </form>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
