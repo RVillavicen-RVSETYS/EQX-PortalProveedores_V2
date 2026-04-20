@@ -6,6 +6,9 @@
     function limpiarInfoEmpresa() {
         $('#selectRazonSocial').text('Empresa');
         $('#selectRFC').text('RFC');
+        $('#limiteComplementos').text('Limite de Complementos');
+        $('#diasPago').text('Dias de Pago');
+        $('#logoEmpresa').attr('src', '../assets/images/sinImagen.png');
     }
 
     function formatearDiasPago(diasPago) {
@@ -120,6 +123,11 @@
                     $('#selectRFC').text(config.RFC || 'RFC');
                     $('#limiteComplementos').text(config.maxComplementosPendientes || 'Limite de Complementos');
                     $('#diasPago').text(formatearDiasPago(config.diasPago));
+                    if (config.Logo) {
+                        $('#logoEmpresa').attr('src', '../' + config.Logo);
+                    } else {
+                        $('#logoEmpresa').attr('src', '../assets/images/sinImagen.png');
+                    }
 
                 } else {
                     limpiarInfoEmpresa();

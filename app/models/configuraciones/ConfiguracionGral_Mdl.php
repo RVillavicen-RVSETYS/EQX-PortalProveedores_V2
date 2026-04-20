@@ -58,7 +58,7 @@ class ConfiguracionGral_Mdl
             $filtrosSQL = ltrim($filtrosSQL, ' AND');
             $where = $filtrosSQL ? "WHERE $filtrosSQL" : "";
 
-            $sql = "SELECT cg.*, emp.razonSocial AS Empresa, emp.rfc AS RFC FROM configuracionGral cg INNER JOIN empresas emp ON cg.idEmpresa = emp.id $where ORDER BY cg.id $orden $limiteResult";
+            $sql = "SELECT cg.*, emp.razonSocial AS Empresa, emp.rfc AS RFC, emp.logo AS Logo FROM configuracionGral cg INNER JOIN empresas emp ON cg.idEmpresa = emp.id $where ORDER BY cg.id $orden $limiteResult";
 
             if (self::$debug) {
                 $this->db->imprimirConsulta($sql, $params, 'Listar Configuración General.');
