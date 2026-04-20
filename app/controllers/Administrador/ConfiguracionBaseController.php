@@ -34,13 +34,18 @@ class ConfiguracionBaseController extends Controller
         $menuModel = new Menu_Mdl();
         $resultIdArea = $menuModel->obtenerIdAreaPorLink($areaLink);
 
+        // Instanciar modelos
         $satModel = new Sat_Mdl();
         $empresaModel = new Empresas_Mdl();
+        $reglasModel = new ConfiguracionGral_Mdl();
 
+        // Obtener datos de los modelos
         $filtros = ['estatus' => 1];
+        $filtrosReglas = ['estatus' => 1 ];
 
         $resultTiposMoneda = $satModel->dataTiposMoneda($filtros);
         $resultEmpresas = $empresaModel->listaEmpresas(estatus: 1);
+        $resultReglas = $reglasModel->dataDiferenciaMontos($filtrosReglas);
 
 
         if ($resultIdArea['success']) {
@@ -63,6 +68,8 @@ class ConfiguracionBaseController extends Controller
                 $data['areaLink'] =  $areaLink;
                 $data['tiposMoneda'] = $resultTiposMoneda;
                 $data['empresas'] = $resultEmpresas;
+                $data['reglas'] = $resultReglas;
+
 
                 // Cargar la vista correspondiente
                 $this->view('Administrador/ConfiguracionBase/index', $data);
@@ -161,10 +168,11 @@ class ConfiguracionBaseController extends Controller
 
         $configuracionGralModel = new ConfiguracionGral_Mdl();
 
-        // Verificar si ya existe configuración para esta empresa
-        $resultExiste = $configuracionGralModel->obtenerConfiguracionPorEmpresa($data['idEmpresa']);
 
-        if ($resultExiste['success']) {
+        // Verificar si ya existe configuración para esta empresa usando el método flexible
+        $resultExiste = $configuracionGralModel->listarConfiguracionGral(['idEmpresa' => $data['idEmpresa']], 1);
+
+        if ($resultExiste['success'] && !empty($resultExiste['data'])) {
             // Si existe, actualizar
             $result = $configuracionGralModel->actualizarConfiguracionGral($data);
         } else {
@@ -187,12 +195,18 @@ class ConfiguracionBaseController extends Controller
             echo json_encode(['success' => false, 'message' => 'ID de empresa no válido.']);
             exit;
         }
-
         $configuracionGralModel = new ConfiguracionGral_Mdl();
-        $result = $configuracionGralModel->obtenerConfiguracionPorEmpresa($idEmpresa);
+        $result = $configuracionGralModel->listarConfiguracionGral(['idEmpresa' => $idEmpresa], 1);
+
+        // Para mantener compatibilidad, devolver solo el primer registro si existe
+        if ($result['success'] && !empty($result['data'])) {
+            $response = ['success' => true, 'data' => $result['data'][0]];
+        } else {
+            $response = ['success' => false, 'message' => 'No se encontró configuración para esta empresa.'];
+        }
 
         header('Content-Type: application/json');
-        echo json_encode($result);
+        echo json_encode($response);
         exit;
     }
 }

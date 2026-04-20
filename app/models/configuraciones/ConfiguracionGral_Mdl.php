@@ -23,76 +23,66 @@ class ConfiguracionGral_Mdl
         $this->db = new BD_Connect();
     }
 
-    public function obtenerConfiguracionGral()
+    // Método flexible tipo listar, similar a listarComplementosPago()
+    public function listarConfiguracionGral($filtros = [], INT $cantMaxRes = 0, $orden = 'DESC')
     {
+        self::$debug = 0;
+        $filtrosDisponibles = [
+            'idEmpresa' => ['tipoDato' => 'INT', 'sqlFiltro' => 'idEmpresa = :idEmpresa'],
+            'estatus'   => ['tipoDato' => 'INT', 'sqlFiltro' => 'estatus = :estatus'],
+            // Agrega más filtros si es necesario
+        ];
+
+        $filtrosSQL = '';
+        $params = [];
+
         try {
-            $sql = "SELECT *
-                    FROM configuracionGral
-                    ORDER BY id DESC
-                    LIMIT 1";
+            if (!is_int($cantMaxRes)) {
+                throw new \Exception('El valor de $cantMaxRes debe ser un entero.');
+            }
+            $limiteResult = ($cantMaxRes == 0) ? '' : 'LIMIT ' . $cantMaxRes;
+
+            if (!in_array($orden, ['DESC', 'ASC'])) {
+                throw new \Exception('El orden debe ser DESC o ASC.');
+            } else {
+                $orden = strtoupper($orden);
+            }
+
+            foreach ($filtros as $nombreFiltro => $valorFiltro) {
+                if (isset($filtrosDisponibles[$nombreFiltro]) && $valorFiltro !== null) {
+                    $filtrosSQL .= ' AND ' . $filtrosDisponibles[$nombreFiltro]['sqlFiltro'];
+                    $params[':' . $nombreFiltro] = $valorFiltro;
+                }
+            }
+
+            $filtrosSQL = ltrim($filtrosSQL, ' AND');
+            $where = $filtrosSQL ? "WHERE $filtrosSQL" : "";
+
+            $sql = "SELECT cg.*, emp.razonSocial AS Empresa, emp.rfc AS RFC FROM configuracionGral cg INNER JOIN empresas emp ON cg.idEmpresa = emp.id $where ORDER BY cg.id $orden $limiteResult";
 
             if (self::$debug) {
-                $params = [];
-                $this->db->imprimirConsulta($sql, $params, 'Obtener Configuración General.');
+                $this->db->imprimirConsulta($sql, $params, 'Listar Configuración General.');
             }
             $stmt = $this->db->prepare($sql);
-            $stmt->execute();
-            $configuracionGral = $stmt->fetch(PDO::FETCH_ASSOC);
-
-            if (self::$debug) {
-                echo '<br>Resultado de Query:';
-                var_dump($configuracionGral);
-                echo '<br><br>';
+            foreach ($params as $param => $value) {
+                $stmt->bindValue($param, $value, is_int($value) ? PDO::PARAM_INT : PDO::PARAM_STR);
             }
-            if ($configuracionGral) {
-                return ['success' => true, 'data' => $configuracionGral];
+            $stmt->execute();
+            $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            $cantRes = $stmt->rowCount();
+
+            if ($result) {
+                return ['success' => true, 'cantRes' => $cantRes, 'data' => $result];
             } else {
-                return ['success' => false, 'message' => 'No se encontró la configuración general.'];
+                return ['success' => false, 'cantRes' => 0, 'data' => [], 'message' => 'No se encontró configuración general.'];
             }
         } catch (\Exception $e) {
             $timestamp = date("Y-m-d H:i:s");
-            error_log("[$timestamp] ConfiguracionGral_Mdl::obtenerConfiguracionGral(): " . $e->getMessage() . "\n", 3, "error.log");
-            if (self::$debug) {
-                echo "Error al obtener la configuración general: " . $e->getMessage();
-            }
-            return ['success' => false, 'message' => 'Error al obtener la configuración general, Notifica a tu Administrador.'];
+            error_log("[$timestamp] ConfiguracionGral_Mdl::listarConfiguracionGral(): " . $e->getMessage() . "\n", 3, "error.log");
+            return ['success' => false, 'cantRes' => 0, 'data' => [], 'message' => 'Error al listar la configuración general.'];
         }
     }
 
-    public function obtenerConfiguracionPorEmpresa($idEmpresa)
-    {
-        try {
-            $sql = "SELECT *
-                    FROM configuracionGral
-                    WHERE idEmpresa = :idEmpresa";
-
-            if (self::$debug) {
-                $this->db->imprimirConsulta($sql, ['idEmpresa' => $idEmpresa], 'Obtener Configuración por Empresa.');
-            }
-            $stmt = $this->db->prepare($sql);
-            $stmt->bindParam(':idEmpresa', $idEmpresa, PDO::PARAM_INT);
-            $stmt->execute();
-            $configuracionGral = $stmt->fetch(PDO::FETCH_ASSOC);
-
-            if (self::$debug) {
-                echo '<br>Resultado de Query:';
-                var_dump($configuracionGral);
-                echo '<br><br>';
-            }
-            if ($configuracionGral) {
-                return ['success' => true, 'data' => $configuracionGral];
-            } else {
-                return ['success' => false, 'message' => 'No se encontró configuración para esta empresa.'];
-            }
-        } catch (\Exception $e) {
-            $timestamp = date("Y-m-d H:i:s");
-            error_log("[$timestamp] ConfiguracionGral_Mdl::obtenerConfiguracionPorEmpresa(): " . $e->getMessage() . "\n", 3, "error.log");
-            if (self::$debug) {
-                echo "Error al obtener la configuración: " . $e->getMessage();
-            }
-            return ['success' => false, 'message' => 'Error al obtener la configuración.'];
-        }
-    }
 
     public function registrarConfiguracionGral($data)
     {
@@ -347,6 +337,128 @@ class ConfiguracionGral_Mdl
             $timestamp = date("Y-m-d H:i:s");
             error_log("[$timestamp] ConfiguracionGral_Mdl::actualizarDiferenciaMontos(): " . $e->getMessage() . "\n", 3, LOG_FILE_BD);
             return ['success' => false, 'message' => 'Error al actualizar: ' . $e->getMessage()];
+        }
+    }
+
+
+
+    // Obtener los datos de reglas registradas dentro de la tabla conf_diferenciaMontos
+
+    public function dataDiferenciaMontos($filtros = [], INT $cantMaxRes = 0, $orden = 'DESC')
+    {
+        self::$debug = 0; // Cambiar a 0 para desactivar mensajes de depuración
+        if (self::$debug) {
+            echo '<br><br>Filtros Recibidos: ';
+            var_dump($filtros);
+        }
+        $filtrosDisponibles = [
+            'estatus' => ['tipoDato' => 'INT', 'sqlFiltro' => 'cdm.estatus = :estatus'],
+            /*
+            'empresa' => ['tipoDato' => 'INT', 'sqlFiltro' => 'cdm.idEmpresa = :empresa'],
+            'tipoMoneda' => ['tipoDato' => 'STRING', 'sqlFiltro' => 'cdm.tipoMoneda = :tipoMoneda'],
+            'montosup' => ['tipoDato' => 'DECIMAL', 'sqlFiltro' => 'cdm.montosup = :montosup'],
+            'montoinf' => ['tipoDato' => 'DECIMAL', 'sqlFiltro' => 'cdb.montoinf = :montoinf'],
+            'porcentajesup' => ['tipoDato' => 'DECIMAL', 'sqlFiltro' => 'cdm.porcentajesup = :porcentajesup'],
+            'porcentajeinf' => ['tipoDato' => 'DECIMAL', 'sqlFiltro' => 'cdm.porcentajeinf = :porcentajeinf'],*/
+            // Agrega más filtros según sea necesario
+
+        ];
+
+        $filtrosSQL = '';
+        $params = [];
+
+        try {
+            if (!is_int($cantMaxRes)) {
+                throw new \Exception('El valor de $cantMaxRes debe ser un entero.');
+            }
+            $limiteResult = ($cantMaxRes == 0) ? '' : 'LIMIT ' . $cantMaxRes;
+
+            if (!in_array($orden, ['DESC', 'ASC'])) {
+                throw new \Exception('El orden debe ser DESC o ASC.');
+            } else {
+                $orden = strtoupper($orden);
+            }
+
+            foreach ($filtros as $nombreFiltro => $valorFiltro) {
+                if (isset($filtrosDisponibles[$nombreFiltro]) && $valorFiltro !== null) {
+                    switch ($nombreFiltro) {
+                        case 'entreFechas':
+                            list($fechaInicial, $fechaFinal) = explode(',', $valorFiltro);
+                            if (!strtotime($fechaInicial) || !strtotime($fechaFinal)) {
+                                throw new \Exception('Las fechas proporcionadas no son válidas.');
+                            }
+                            $filtrosSQL .= ' AND ' . $filtrosDisponibles[$nombreFiltro]['sqlFiltro'];
+                            $params[':fechaInicial'] = $fechaInicial;
+                            $params[':fechaFinal'] = $fechaFinal;
+                            break;
+
+                        
+
+                        default:
+                            $filtrosSQL .= ' AND ' . $filtrosDisponibles[$nombreFiltro]['sqlFiltro'];
+                            $params[':' . $nombreFiltro] = $valorFiltro;
+                            break;
+                    }
+                }
+            }
+
+            if (empty($filtrosSQL)) {
+                throw new \Exception('No se encontró ningún parámetro válido.');
+            }
+            $filtrosSQL = ltrim($filtrosSQL, ' AND');
+
+            if (self::$debug) {
+                echo '<br><br>Parametros: ';
+                var_dump($params);
+                echo '<br><br>';
+            }
+
+            $sql = "SELECT
+                        cdm.id,
+                        cdm.estatus,
+                        emp.nombre AS Empresa,
+                        cdm.tipoMoneda AS TipoMoneda,
+                        cdm.tipoRegla AS TipoRegla,
+                        trm.descripcion AS DescripcionRegla,
+                        cdm.montoSup AS MontoSuperior,
+                        cdm.montoInf AS MontoInferior,
+                        cdm.porcentajeSup AS PorcentajeSuperior,
+                        cdm.porcentajeInf AS PorcentajeInferior
+                    FROM
+                        conf_diferenciaMontos cdm
+                        INNER JOIN empresas emp ON cdm.idEmpresa = emp.id
+                        INNER JOIN cat_tiposReglasMontos trm ON cdm.tipoRegla = trm.id
+                        WHERE $filtrosSQL
+                    ORDER BY cdm.id $orden
+                    $limiteResult";
+
+            if (self::$debug) {
+                $this->db->imprimirConsulta($sql, $params, 'Lista de Reglas Guardadas: ');
+            }
+            $stmt = $this->db->prepare($sql);
+            foreach ($params as $param => $value) {
+                $stmt->bindValue($param, $value, is_int($value) ? PDO::PARAM_INT : PDO::PARAM_STR);
+            }
+            $stmt->execute();
+            $comprasresult = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            // Obtener la cantidad de registros
+            $cantCompras = $stmt->rowCount();
+
+            if (self::$debug) {
+                echo '<br>Resultado de Query:';
+                var_dump($comprasresult);
+                echo '<br><br>';
+            }
+
+            return ['success' => true, 'cantRes' => $cantCompras, 'data' => $comprasresult];
+        } catch (\Exception $e) {
+            $timestamp = date("Y-m-d H:i:s");
+            error_log("[$timestamp] app/Models/configuraciones/ConfiguracionGral_Mdl.php ->Error buscar Reglas guardadas: " . $e->getMessage(), 3, LOG_FILE_BD);
+            if (self::$debug) {
+                echo "<br>Error al listar las Reglas guardadas: " . $e->getMessage(); // Mostrar error en modo depuración
+            }
+            return ['success' => false, 'message' => 'Problemas al listar las Reglas guardadas.'];
         }
     }
 }

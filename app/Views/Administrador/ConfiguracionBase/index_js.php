@@ -1,8 +1,35 @@
 <script>
     $(document).ready(function() {
         gestionarInputsTolerancia();
-
     });
+
+    function limpiarInfoEmpresa() {
+        $('#selectRazonSocial').text('Empresa');
+        $('#selectRFC').text('RFC');
+    }
+
+    function formatearDiasPago(diasPago) {
+        const diasSemana = {
+            '1': 'Lunes',
+            '2': 'Martes',
+            '3': 'Miercoles',
+            '4': 'Jueves',
+            '5': 'Viernes',
+            '6': 'Sabado',
+            '7': 'Domingo'
+        };
+
+        if (!diasPago) {
+            return 'Dias de Pago';
+        }
+
+        return diasPago
+            .split(',')
+            .map(function(dia) {
+                return diasSemana[dia.trim()] || dia.trim();
+            })
+            .join(', ');
+    }
 
     function gestionarInputsTolerancia() {
         const tipoRegla = $('#tipoRegla').val();
@@ -65,7 +92,42 @@
                 }
             },
             error: function() {
-                console.log('No se pudo cargar la configuración de la empresa.');
+                console.log('No se pudo cargar la configuraciÃ³n de la empresa.');
+            }
+        });
+    });
+
+    $(document).on('change', '#empresaSelect', function() {
+        const idEmpresa = $(this).val();
+
+        if (!idEmpresa) {
+            limpiarInfoEmpresa();
+            return;
+        }
+
+        $.ajax({
+            url: 'ConfiguracionBase/obtenerConfiguracionEmpresa',
+            type: 'POST',
+            dataType: 'json',
+            data: {
+                idEmpresa: idEmpresa
+            },
+            success: function(respuesta) {
+                if (respuesta && respuesta.success && respuesta.data) {
+                    const config = respuesta.data;
+
+                    $('#selectRazonSocial').text(config.Empresa || 'Empresa');
+                    $('#selectRFC').text(config.RFC || 'RFC');
+                    $('#limiteComplementos').text(config.maxComplementosPendientes || 'Limite de Complementos');
+                    $('#diasPago').text(formatearDiasPago(config.diasPago));
+
+                } else {
+                    limpiarInfoEmpresa();
+                }
+            },
+            error: function() {
+                limpiarInfoEmpresa();
+                console.log('No se pudo cargar la configuraciÃ³n de la empresa.');
             }
         });
     });
@@ -85,12 +147,16 @@
             success: function(response) {
                 if (response.success) {
                     notificaSucSweet('Excelente!!', response.message);
+
+                    setTimeout(function() {
+                        window.location.reload();
+                    }, 1200);
                 } else {
                     notificaBadSweet('Error', response.message);
                 }
             },
             error: function(xhr, status, error) {
-                notificaBadSweet('Error', 'Error de comunicación con el servidor. Intente nuevamente.');
+                notificaBadSweet('Error', 'Error de comunicaciÃ³n con el servidor. Intente nuevamente.');
             },
             complete: function() {
                 bloqueoBtn('btnGuardarConfig', 2);
@@ -114,12 +180,12 @@
                     $('#formConfiguracionGral')[0].reset();
                     $('#empresa').val('').trigger('change');
                 } else {
-                    notificaBadSweet('Error', respuesta ? respuesta.message : 'Respuesta inválida del servidor.');
+                    notificaBadSweet('Error', respuesta ? respuesta.message : 'Respuesta invÃ¡lida del servidor.');
                 }
                 bloqueoBtn('btnGuardar', 2);
             },
             error: function() {
-                notificaBadSweet('Error', 'No se pudo guardar la configuración. Consulta a tu administrador.');
+                notificaBadSweet('Error', 'No se pudo guardar la configuraciÃ³n. Consulta a tu administrador.');
                 bloqueoBtn('btnGuardar', 2);
             }
         });
