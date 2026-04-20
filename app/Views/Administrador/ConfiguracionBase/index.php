@@ -360,12 +360,12 @@ if ($debug == 1) {
                                             </div>
                                             <!-- Columna derecha: Widget de clima -->
                                             <div class="col-md-4">
-                                                <div class="card">
+                                                <div class="card border-left border-success border-bottom border-success">
                                                     <div class="card-body">
                                                         <div class="d-flex">
-                                                            <h4 class="card-title">Información de la Empresa</h4>
-                                                                <select class="custom-select w-25 ml-auto" id="empresaSelect" name="empresaSelect">
-                                                                     <option selected="" value="">Empresa...</option>
+                                                            <h4 class="card-title">Seleccione </h4>
+                                                                <select class="custom-select w-75 ml-auto" id="empresaSelect" name="empresaSelect" style="width: 60%;">
+                                                                     <option selected="" value="">Empresa</option>
                                                                             <?php
                                                                             foreach ($empresas['data'] as $empresa) {
                                                                                 echo '<option value="' . $empresa['id'] . '">' . $empresa['nombre'] . '</option>';
@@ -374,6 +374,8 @@ if ($debug == 1) {
                                                                 </select>
                                                         </div>
                                                         <div class="d-flex align-items-center flex-row m-t-30">
+                                                            <div class="p-2 display-5 text-info"><img src="../assets/images/sinImagen.png" id="logoEmpresa" alt="user" class="rounded-circle" width="100"></div>
+
                                                             <div class="p-2">
                                                                 <h3 class="m-b-0" id="selectRazonSocial">Empresa</h3><small id="selectRFC">RFC</small></div>
                                                         </div>
