@@ -222,6 +222,27 @@ class FacturasNacionalesController extends Controller
         }
 
         if ($resultActualizaFactura['success']) {
+            // Rechazar en cascada las notas de crédito asociadas
+            try {
+                $MDL_NotasCredito = new NotasCredito_Mdl();
+                $idUser = $_SESSION['EQXident'] ?? 0;
+                $camposNC = [
+                    'estatus' => 3,
+                    'idUserRechaza' => $idUser,
+                    'fechaRechaza' => date('Y-m-d H:i:s'),
+                    'motivoRechazo' => 'Rechazo automático por rechazo de Factura Principal: ' . $motivo,
+                    'idUserValida' => null,
+                    'fechaValida' => null
+                ];
+                $filtrosNC = [
+                    'idCompra' => $acuse
+                ];
+                $MDL_NotasCredito->actualizarNotaCredito($camposNC, $filtrosNC);
+            } catch (\Exception $e) {
+                $timestamp = date("Y-m-d H:i:s");
+                error_log("[$timestamp] Error al rechazar NC asociadas a factura rechazada (acuse: $acuse): " . $e->getMessage() . PHP_EOL, 3, LOG_FILE);
+            }
+
             $response = [
                 'success' => true,
                 'message' => $resultActualizaFactura['message']
