@@ -430,7 +430,7 @@ class CFDIs_Mdl
                 echo '<br><br>';
             }
 
-            $sql = "SELECT fc.*, c.id AS acuse
+            $sql = "SELECT fc.*, c.id AS acuse, c.estatus AS estatusCompra
                     FROM cfdi_facturas fc
                     INNER JOIN compras c ON fc.idCompra = c.id
                     WHERE $filtrosSQL

@@ -15,10 +15,11 @@ if ($debug == 1) {
                 <th class="">Tipo</th>
                 <th>Proveedor</th>
                 <th>Orden Compra</th>
-                <th>HES</th>
+                <th>No Recepcion</th>
                 <th>Folio Interno</th>
                 <th>Monto Factura</th>
-                <th>Moneda</th>
+                <th>Metodo Pago</th>
+                <th>Forma Pago</th>
                 <th>Fecha Recepción</th>
                 <th>Estatus Fiscal</th>
                 <th>Ver</th>
@@ -92,8 +93,9 @@ if ($debug == 1) {
                     <td>' . $row['ordenCompra'] . '</td>
                     <td>' . $recepciones . '</td>
                     <td>' . $row['referencia'] . '</td>
-                    <td>$' . number_format($row['MontoFactura'], 2) . '</td>
-                    <td>' . $row['TipoMonedaFac'] . '</td>
+                    <td class="text-right">$ ' . number_format($row['MontoFactura'], 4, '.', ',') . ' ' . $row['TipoMonedaFac'] . '</td>
+                    <td>' . $row['MetodoPago'] . '</td>
+                    <td>' . $row['FormaPago'] . '</td>
                     <td>' . $row['fechaReg'] . '</td>
                     <td>' . $valida . ' </td>
                     <td> <button class="btn btn-sm btn-success" onClick="detalleCompra(\'' . $row['acuse'] . '\',' . $row['IdProveedor'] . ');"><i class="text-white icon-doc"></i></button> </td>

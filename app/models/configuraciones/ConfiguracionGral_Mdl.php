@@ -84,6 +84,23 @@ class ConfiguracionGral_Mdl
     }
 
 
+    /*public function obtenerConfiguracionGral($filtros = [], INT $cantMaxRes = 1, $orden = 'DESC')
+    {
+        $resultado = $this->listarConfiguracionGral($filtros, $cantMaxRes, $orden);
+
+        if (!$resultado['success'] || empty($resultado['data'])) {
+            return [
+                'success' => false,
+                'message' => $resultado['message'] ?? 'No se encontro configuracion general.'
+            ];
+        }
+
+        return [
+            'success' => true,
+            'data' => $resultado['data'][0]
+        ];
+    }*/
+
     public function registrarConfiguracionGral($data)
     {
         try {
@@ -392,7 +409,7 @@ class ConfiguracionGral_Mdl
                             $params[':fechaFinal'] = $fechaFinal;
                             break;
 
-                        
+
 
                         default:
                             $filtrosSQL .= ' AND ' . $filtrosDisponibles[$nombreFiltro]['sqlFiltro'];

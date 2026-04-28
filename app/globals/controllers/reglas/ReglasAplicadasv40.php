@@ -33,14 +33,28 @@ class ReglasAplicadasv40
         $obtenerFacturas = $cfdis_Mdl->obtenerFacturasPorUUID($filtrosFact);
         if ($obtenerFacturas['success']) {
             if ($obtenerFacturas['cantRes'] > 0) {
-                if ($this->debug == 1) {
-                    echo "<br> * ERROR -- El UUID de la Factura ya existe en la base de datos.";
+                $facturasActivas = array_filter($obtenerFacturas['data'], function ($fact) {
+                    $estatus = (string)($fact['estatusCompra'] ?? '');
+                    return in_array($estatus, ['1', '2'], true);
+                });
+
+                if (count($facturasActivas) === 0) {
+                    if ($this->debug == 1) {
+                        echo "<br> * El UUID de la Factura existe pero está cancelada/rechazada; se permite nuevo registro.";
+                    }
+                } else {
+                    if ($this->debug == 1) {
+                        echo "<br> * ERROR -- El UUID de la Factura ya existe y está activo en la base de datos.";
+                    }
+                    $primerActiva = array_values($facturasActivas)[0];
+                    $acuse = $primerActiva['acuse'] ?? 'N/A';
+                    $estatus = $primerActiva['estatusCompra'] ?? 'N/A';
+                    $estatusTexto = ['0' => 'Cancelada', '1' => 'Pendiente', '2' => 'Aceptada', '3' => 'Rechazada'][$estatus] ?? "Estatus $estatus";
+                    $response["success"] = false;
+                    $response["message"] = "Esa Factura ya fue registrada en el acuse: {$acuse} con estatus: {$estatusTexto}.";
+                    $response["debug"] = " * ERROR - El UUID de la Factura ya existe y está activo en la base de datos (estatus: $estatus).";
+                    return $response;
                 }
-                $acuse = $obtenerFacturas['data'][0]['acuse'] ?? 'N/A';
-                $response["success"] = false;
-                $response["message"] = "Esa Factura ya fue registrada en el acuse: {$acuse}.";
-                $response["debug"] = " * ERROR - El UUID dla Factura ya existe en la base de datos.";
-                return $response;
             } else {
                 if ($this->debug == 1) {
                     echo "<br> * El UUID de la Factura no existe en la base de datos.";
@@ -530,20 +544,19 @@ class ReglasAplicadasv40
                     if ($this->debug == 1) {
                         echo "<br> * El UUID del complemento de pago existe pero está cancelado/rechazado; se permite nuevo registro.";
                     }
+                } else {
+                    if ($this->debug == 1) {
+                        echo "<br> * ERROR -- El UUID del complemento de pago ya existe y está activo en la base de datos.";
+                    }
+                    $primerActivo = array_values($complementosActivos)[0];
+                    $fechaRegistro = $primerActivo['fechaReg'] ?? 'N/A';
+                    $estatus = $primerActivo['estatus'] ?? 'N/A';
+                    $estatusTexto = ['0' => 'Cancelado', '1' => 'Pendiente', '2' => 'Aceptado', '3' => 'Rechazado'][$estatus] ?? "Estatus $estatus";
+                    $response["success"] = false;
+                    $response["message"] = "Ese complemento de pago ya fue registrado el {$fechaRegistro} con estatus: {$estatusTexto}.";
+                    $response["debug"] = " * ERROR - El UUID del complemento de pago ya existe y está activo en la base de datos (estatus: $estatus).";
                     return $response;
                 }
-
-                if ($this->debug == 1) {
-                    echo "<br> * ERROR -- El UUID del complemento de pago ya existe y está activo en la base de datos.";
-                }
-                $primerActivo = array_values($complementosActivos)[0];
-                $fechaRegistro = $primerActivo['fechaReg'] ?? 'N/A';
-                $estatus = $primerActivo['estatus'] ?? 'N/A';
-                $estatusTexto = ['0' => 'Cancelado', '1' => 'Pendiente', '2' => 'Aceptado', '3' => 'Rechazado'][$estatus] ?? "Estatus $estatus";
-                $response["success"] = false;
-                $response["message"] = "Ese complemento de pago ya fue registrado el {$fechaRegistro} con estatus: {$estatusTexto}.";
-                $response["debug"] = " * ERROR - El UUID del complemento de pago ya existe y está activo en la base de datos (estatus: $estatus).";
-                return $response;
             } else {
                 if ($this->debug == 1) {
                     echo "<br> * El UUID del complemento de pago no existe activo en la base de datos (puede haber sido rechazado antes).";

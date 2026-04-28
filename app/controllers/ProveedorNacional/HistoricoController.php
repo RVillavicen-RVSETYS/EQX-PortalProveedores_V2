@@ -97,9 +97,12 @@ class HistoricoController extends Controller
             var_dump($complementosPendientes);
         }
 
-        if ($complementosPendientes['success']) {    
+        if ($complementosPendientes['success']) {
             $MDL_configuracionGral = new ConfiguracionGral_Mdl();
-            $configuracionGral = $MDL_configuracionGral->obtenerConfiguracionGral();
+            $filtrosConfiguracionGral = [
+                'estatus' => 1
+            ];
+            $configuracionGral = $MDL_configuracionGral->listarConfiguracionGral($filtrosConfiguracionGral);
 
             if ($configuracionGral['success']) {
 
@@ -114,12 +117,12 @@ class HistoricoController extends Controller
                 }
 
                 if ($comprasPorProveedor['success']) {
-                    $oldData = (empty($complementosPendientes['oldData'])) ? date('Y-m-d H:i:s') :$complementosPendientes['oldData'];
+                    $oldData = (empty($complementosPendientes['oldData'])) ? date('Y-m-d H:i:s') : $complementosPendientes['oldData'];
                     $response = [
                         'success' => true,
                         'cantComplementos' => $complementosPendientes['cantData'],
                         'oldComplementos' => $oldData,
-                        'maxComplementosPendientes' => $configuracionGral['data']['maxComplementosPendientes'],
+                        'maxComplementosPendientes' => $configuracionGral['data'][0]['maxComplementosPendientes'],
                         'cantCompras' => $comprasPorProveedor['data']['cantCompras']
                     ];
                 } else {
@@ -128,14 +131,12 @@ class HistoricoController extends Controller
                         'message' => $errorMessage
                     ];
                 }
-
             } else {
                 $errorMessage = $configuracionGral['message'];
                 $response = [
                     'message' => $errorMessage
                 ];
             }
-            
         } else {
             $errorMessage = $complementosPendientes['message'];
             $response = [
@@ -239,7 +240,7 @@ class HistoricoController extends Controller
                 echo "<br>Falta el PDF del Complemento de Pago";
             }
         }
-        
+
         if (empty($_FILES['complementoXML'])) {
             if ($this->debug == 1) {
                 echo "<br>Falta el XML del Complemento de Pago";
@@ -276,8 +277,8 @@ class HistoricoController extends Controller
                 if ($verificaComplemento['success']) {
                     if ($this->debug == 1) {
                         echo '<br><h1>Hasta aqui ya se verifico el Complemento de Pago y pasamos al registro</h1>';
-                    } 
-                    
+                    }
+
                     //7.- Registrar Complemento de Pago
                     $registraComplemento = $Ctrl_FactNacionales->registraNuevoComplementoPago($verificaComplemento['data']);
                     if ($this->debug == 1) {
@@ -287,41 +288,31 @@ class HistoricoController extends Controller
 
                     if ($registraComplemento['success']) {
                         if ($this->debug == 1) {
-                        echo '<br><h1>Hasta aqui ya se registro el Complemento de Pago todo OK</h1>';
+                            echo '<br><h1>Hasta aqui ya se registro el Complemento de Pago todo OK</h1>';
                         }
-
                     } else {
                         echo json_encode([
                             'success' => false,
                             'message' => 'Problemas al Registrar el Complemento: ' . $registraComplemento['message']
                         ]);
                     }
-
                 } else {
                     echo json_encode([
                         'success' => false,
                         'message' => $verificaComplemento['message']
                     ]);
                 }
-
             } else {
-                    echo json_encode([
-                        'success' => false,
-                        'message' => $ComplementoXML['message']
-                    ]);
-                }
-            
+                echo json_encode([
+                    'success' => false,
+                    'message' => $ComplementoXML['message']
+                ]);
+            }
         } else {
-                    echo json_encode([
-                        'success' => false,
-                        'message' => $complementoPDF['message']
-                    ]);
-                }
-
-
-
-
-
-
+            echo json_encode([
+                'success' => false,
+                'message' => $complementoPDF['message']
+            ]);
+        }
     }
 }
