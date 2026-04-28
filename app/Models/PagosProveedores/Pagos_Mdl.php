@@ -347,7 +347,8 @@ class Pagos_Mdl
                         MAX( Pagos.OrdenCompra ) AS 'OC',
                         MAX( Pagos.Recepcion ) AS 'HES',
                         MAX( Pagos.FormaPago ) AS 'FormaPago',
-                        MAX( Pagos.MontoPagado ) AS 'MontoPagado' 
+                        MAX( Pagos.MontoPagado ) AS 'MontoPagado',
+                        MAX( Pagos.TipoMoneda ) AS 'TipoMoneda' 
                     FROM
                         (
                         SELECT
@@ -356,6 +357,7 @@ class Pagos_Mdl
                             pc.OC AS 'OrdenCompra',
                             pc.HES AS 'Recepcion',
                             pc.montoPagado AS 'MontoPagado',
+                            pc.monedaTipoCambio AS 'TipoMoneda',
                             fp.nombre AS 'FormaPago'
                         FROM
                             pagos_compras pc
@@ -379,7 +381,8 @@ class Pagos_Mdl
                         MAX( Pagos.OrdenCompra ) AS 'OC',
                         MAX( Pagos.Recepcion ) AS 'HES',
                         MAX( Pagos.FormaPago ) AS 'FormaPago',
-                        MAX( Pagos.MontoPagado ) AS 'MontoPagado' 
+                        MAX( Pagos.MontoPagado ) AS 'MontoPagado',
+                        MAX( Pagos.TipoMoneda ) AS 'TipoMoneda' 
                     FROM
                         (
                         SELECT
@@ -388,6 +391,7 @@ class Pagos_Mdl
                             pc.OC AS 'OrdenCompra',
                             pc.HES AS 'Recepcion',
                             pc.montoPagado AS 'MontoPagado',
+                            pc.monedaTipoCambio AS 'TipoMoneda',
                             fp.nombre AS 'FormaPago' 
                         FROM
                             pagos_compras pc
