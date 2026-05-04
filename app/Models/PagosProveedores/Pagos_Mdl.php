@@ -270,7 +270,6 @@ class Pagos_Mdl
 
     public function listarPagosRealizados($filtros = [], INT $cantMaxRes = 0, $orden = 'DESC')
     {
-        self::$debug = 1;
         if (self::$debug) {
             echo '<br><br>Filtros Recibidos: ';
             var_dump($filtros);
