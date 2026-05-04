@@ -4,6 +4,7 @@ namespace App\Globals\Controllers;
 
 use Core\Controller;
 use App\Globals\Controllers\SubirFacturaController;
+use App\Models\Proveedores\Proveedores_Mdl;
 
 class CargaFacturasGlobalController extends Controller
 {
@@ -40,6 +41,18 @@ class CargaFacturasGlobalController extends Controller
             echo json_encode(['success' => false, 'message' => 'Error Crítico: El número de proveedor no fue encontrado.']);
             return;
         }
+
+        // Validación de País del Proveedor
+        $MDL_Proveedores = new Proveedores_Mdl();
+        $datosProvPais = $MDL_Proveedores->obtenerDatosProveedor($noProveedor);
+        if (!$datosProvPais['success'] || empty($datosProvPais['data']['Pais'])) {
+            echo json_encode([
+                'success' => false,
+                'message' => 'No es posible cargar documentos fiscales: El proveedor no tiene un País definido en su perfil. '
+            ]);
+            return;
+        }
+
 
         $ordenCompra = $postData['ordenCompra'] ?? '';
         if (empty($ordenCompra)) {
@@ -146,6 +159,17 @@ class CargaFacturasGlobalController extends Controller
 
         if (empty($noProveedor) || empty($ordenCompra) || empty($idCompra) || empty($notasCreditoPost)) {
             echo json_encode(['success' => false, 'message' => 'Error Crítico: Faltan datos esenciales (Proveedor, OC, Factura Ingresada o Notas de Crédito).']);
+            return;
+        }
+
+        // Validación de País del Proveedor
+        $MDL_Proveedores = new Proveedores_Mdl();
+        $datosProvPais = $MDL_Proveedores->obtenerDatosProveedor($noProveedor);
+        if (!$datosProvPais['success'] || empty($datosProvPais['data']['Pais'])) {
+            echo json_encode([
+                'success' => false,
+                'message' => 'No es posible cargar documentos fiscales: El proveedor no tiene un País definido en su perfil. '
+            ]);
             return;
         }
 
@@ -309,6 +333,17 @@ class CargaFacturasGlobalController extends Controller
 
         if (empty($noProveedor)) {
             echo json_encode(['success' => false, 'message' => 'Error Crítico: El número de proveedor es obligatorio.']);
+            return;
+        }
+
+        // Validación de País del Proveedor
+        $MDL_Proveedores = new Proveedores_Mdl();
+        $datosProvPais = $MDL_Proveedores->obtenerDatosProveedor($noProveedor);
+        if (!$datosProvPais['success'] || empty($datosProvPais['data']['Pais'])) {
+            echo json_encode([
+                'success' => false,
+                'message' => 'No es posible cargar documentos fiscales: El proveedor no tiene un País definido en su perfil. '
+            ]);
             return;
         }
 

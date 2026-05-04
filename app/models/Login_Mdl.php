@@ -76,6 +76,15 @@ class Login_Mdl
                     return ['success' => false, 'message' => 'El Proveedor no tiene Razon Social Registrada.'];
                 }
 
+                // Verificar si el proveedor tiene un País definido
+                if (empty($usuarioData['pais'])) {
+                    if (self::$debug) {
+                        echo "El Proveedor no tiene un País definido en su perfil.<br>"; // Mostrar error en modo depuración
+                    }
+                    return ['success' => false, 'message' => 'Al Proveedor le hacen falta datos en su perfil. Contacta al administrador.'];
+                }
+
+
                 // Verificar si la contraseña es correcta
                 if (password_verify($password, $usuarioData['pass'])) {
                     return ['success' => true, 'data' => $usuarioData]; // Retornar datos si la autenticación es exitosa
@@ -185,7 +194,7 @@ class Login_Mdl
             // Registro del error
             $timestamp = date("Y-m-d H:i:s");
             error_log("[$timestamp] Error en verificarEstatusUsuario (id: $userId): " . $e->getMessage(), 3, LOG_FILE_BD);
-    
+
             return [
                 'success' => false,
                 'message' => 'Error al verificar el estatus del usuario. Notifica a tu Administrador'
