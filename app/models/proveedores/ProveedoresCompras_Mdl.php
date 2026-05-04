@@ -48,7 +48,8 @@ class ProveedoresCompras_Mdl
             'pendientePorPagar' => ['tipoDato' => 'STRING', 'sqlFiltro' => ''], //Se usa true o false
             'pendientePorProcesar' => ['tipoDato' => 'STRING', 'sqlFiltro' => ''], //Se usa true o false
             'estatus' => ['tipoDato' => 'INT', 'sqlFiltro' => 'cp.estatus = :estatus'],
-            'entreFechas' => ['tipoDato' => 'STRING', 'sqlFiltro' => '(cp.fechaReg BETWEEN :fechaInicial AND :fechaFinal)']
+            'entreFechas' => ['tipoDato' => 'STRING', 'sqlFiltro' => '(cp.fechaReg BETWEEN :fechaInicial AND :fechaFinal)'],
+            'omitirPUE' => ['tipoDato' => 'STRING', 'sqlFiltro' => "cp.id NOT IN (SELECT idCompra FROM cfdi_facturas WHERE idCatMetodoPago = 'PUE')"]
         ];
 
         $agrupadosDisponibles = [
@@ -62,8 +63,7 @@ class ProveedoresCompras_Mdl
             'sumaTotalPagado' => ['sqlSelect' => 'SUM(cp.totalPagos) AS totalPagos'],
             'sumaTotalComplementos' => ['sqlSelect' => 'SUM(cp.totalComplementos) AS totalComplementos'],
             'sumaInsolutos' => ['sqlSelect' => 'SUM(cp.insolutoPendiente - IFNULL(cp.totalNotasCredito, 0)) AS totalInsolutos'],
-            'datosProveedor' => ['sqlSelect' => 'pv.nombre, pv.razonSocial, 
-	            pv.correo, pv.regimenFiscal, pv.estatus, pv.pais'],
+            'datosProveedor' => ['sqlSelect' => 'pv.nombre, pv.razonSocial, pv.correo, pv.regimenFiscal, pv.estatus, pv.pais'],
             'minFechaPago' => ['sqlSelect' => 'MIN(cp.fechaProbablePago) AS minFechaPago'],
             'maxFechaPago' => ['sqlSelect' => 'MAX(cp.fechaProbablePago) AS maxFechaPago']
         ];
@@ -161,6 +161,13 @@ class ProveedoresCompras_Mdl
                                 $filtrosSQL .= ' AND (cp.estatus = 1 AND cp.totalPagos = 0)';
                             } else {
                                 $filtrosSQL .= ' AND cp.estatus = 2';
+                            }
+                            break;
+
+                        case 'omitirPUE':
+                            // Validar que el valor sea true o false
+                            if (in_array($valorFiltro, ['true', true, 1], true)) {
+                                $filtrosSQL .= ' AND ' . $filtrosDisponibles[$nombreFiltro]['sqlFiltro'];
                             }
                             break;
 

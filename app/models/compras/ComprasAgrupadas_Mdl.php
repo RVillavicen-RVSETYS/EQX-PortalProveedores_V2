@@ -45,7 +45,8 @@ class ComprasAgrupadas_Mdl
             'pendientePorPagar' => ['tipoDato' => 'STRING', 'sqlFiltro' => ''], //Se usa true o false
             'pendientePorProcesar' => ['tipoDato' => 'STRING', 'sqlFiltro' => ''], //Se usa true o false
             'estatus' => ['tipoDato' => 'INT', 'sqlFiltro' => 'cp.estatus = :estatus'],
-            'entreFechas' => ['tipoDato' => 'STRING', 'sqlFiltro' => '(cp.fechaReg BETWEEN :fechaInicial AND :fechaFinal)']
+            'entreFechas' => ['tipoDato' => 'STRING', 'sqlFiltro' => '(cp.fechaReg BETWEEN :fechaInicial AND :fechaFinal)'],
+            'omitirPUE' => ['tipoDato' => 'STRING', 'sqlFiltro' => "cp.id NOT IN (SELECT idCompra FROM cfdi_facturas WHERE idCatMetodoPago = 'PUE')"]
         ];
 
         $agrupadosDisponibles = [
@@ -81,7 +82,6 @@ class ComprasAgrupadas_Mdl
                     } else {
                         $ordenamiento = 'ORDER BY ' . $orden['campo'] . ' ' . strtoupper($orden['tipo']);
                     }
-                    
                 }
             }
 
@@ -130,7 +130,7 @@ class ComprasAgrupadas_Mdl
                                 $filtrosSQL .= ' AND cp.total <= cp.totalPagos';
                             }
                             break;
-                        
+
                         case 'pendientePorProcesar':
                             // Validar que el valor sea true o false
                             if (!in_array($valorFiltro, ['true', 'false'])) {
@@ -140,6 +140,13 @@ class ComprasAgrupadas_Mdl
                                 $filtrosSQL .= ' AND (cp.estatus = 1 AND cp.totalPagos = 0)';
                             } else {
                                 $filtrosSQL .= ' AND cp.estatus = 2';
+                            }
+                            break;
+
+                        case 'omitirPUE':
+                            // Validar que el valor sea true o false
+                            if (in_array($valorFiltro, ['true', true, 1], true)) {
+                                $filtrosSQL .= ' AND ' . $filtrosDisponibles[$nombreFiltro]['sqlFiltro'];
                             }
                             break;
 

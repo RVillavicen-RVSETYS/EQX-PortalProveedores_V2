@@ -45,12 +45,14 @@ if (empty($listaCompras)) {
         <?php
         foreach ($listaCompras as $facturas) {
 
-            $conFactura = 'fas fa-check text-success';
+            $conFactura = 'text-success';
+            $conFacturaTxt = '✓';
 
-            $conComplemento = ($facturas['CantComplementos'] > 0) ? 'fas fa-check text-success' : 'fas fa-times text-danger';
+            $conComplemento = ($facturas['CantComplementos'] > 0) ? ' text-success' : ' text-danger';
+            $conComplementoTxt = ($facturas['CantComplementos'] > 0) ? '✓' : '✗';
 
-            $conNotaCredito = ($facturas['NotaCredito'] == 1) ? 'fas fa-check text-success' : 'fas fa-times text-danger';
-
+            $conNotaCredito = ($facturas['NotaCredito'] == 1) ? ' text-success' : ' text-danger';
+            $conNotaCreditoTxt = ($facturas['NotaCredito'] == 1) ? '✓' : '✗';
 
         ?>
             <tr class="search-items">
@@ -64,7 +66,7 @@ if (empty($listaCompras)) {
                 </td>
                 <td class="text-right"><?= $facturas['acuse']; ?></td>
                 <td>
-                    <div class="d-flex align-items-center">
+                    <div class="d-flex align-✓tems-center">
                         <div class="ml-2">
                             <div class="user-meta-info">
                                 <h5 class="user-name mb-0"><?= $facturas['RazonSocial']; ?></h5>
@@ -77,9 +79,9 @@ if (empty($listaCompras)) {
                 <td class="text-right"><span>$ <?= number_format($facturas['Total'], 2, '.', ','); ?></span></td>
                 <td class="text-right"><span><?= $facturas['SerieFact']; ?><?= $facturas['FolioFact']; ?></span></td>
                 <td><span><?= $facturas['FechaReg']; ?></span></td>
-                <td class="text-center"><i class="<?= $conFactura; ?>"></i></td>
-                <td class="text-center"><i class="<?= $conComplemento; ?>"></i></td>
-                <td class="text-center"><i class="<?= $conNotaCredito; ?>"></i></td>
+                <td class="text-center"><span class="<?= $conFactura; ?>"><?= $conFacturaTxt; ?></span></td>
+                <td class="text-center"><span class="<?= $conComplemento; ?>"><?= $conComplementoTxt; ?></span></td>
+                <td class="text-center"> <span class="<?= $conNotaCredito; ?>"><?= $conNotaCreditoTxt; ?></span></td>
                 <td class="text-center">
                     <button type="button" onclick="descargarAcuse(<?= $facturas['acuse']; ?>);" class="btn btn-sm waves-effect waves-light btn-outline-success">
                         <i class="fas fa-download"></i>

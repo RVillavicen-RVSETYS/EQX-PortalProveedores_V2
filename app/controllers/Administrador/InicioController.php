@@ -177,7 +177,8 @@ class InicioController extends Controller
             case 'ComplementosMasViejos':
                 $filtrosComplemento = [
                     'estatus' => 2,
-                    'debeComplemento' => true
+                    'debeComplemento' => true,
+                    'omitirPUE' => true
                 ];
                 $agrupadoComplemento = ['idProveedor'];
                 $valoresComplemento = ['cantCompras', 'sumaTotalFacturado', 'sumaTotalPagado', 'sumaTotalComplementos', 'minFechaPago', 'datosProveedor'];
@@ -190,7 +191,8 @@ class InicioController extends Controller
             case 'MasComplementos':
                 $filtrosComplemento = [
                     'estatus' => 2,
-                    'debeComplemento' => true
+                    'debeComplemento' => true,
+                    'omitirPUE' => true
                 ];
                 $agrupadoComplemento = ['idProveedor'];
                 $valoresComplemento = ['cantCompras', 'sumaTotalFacturado', 'sumaTotalPagado', 'sumaTotalComplementos', 'minFechaPago', 'datosProveedor'];
@@ -203,7 +205,8 @@ class InicioController extends Controller
             case 'InsolutosPendientes':
                 $filtrosComplemento = [
                     'estatus' => 2,
-                    'insolutoPendiente' => true
+                    'insolutoPendiente' => true,
+                    'omitirPUE' => true
                 ];
                 $agrupadoComplemento = ['idProveedor'];
                 $valoresComplemento = ['cantCompras', 'minFechaPago', 'sumaInsolutos', 'datosProveedor'];

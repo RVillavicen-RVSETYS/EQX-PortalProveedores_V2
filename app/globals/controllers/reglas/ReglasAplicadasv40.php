@@ -879,6 +879,9 @@ class ReglasAplicadasv40
         $pagosMatch = [];
         $aplicadoEnEsteComplemento = [];
         $xmlGrouped = [];
+        $noValidarFechas = !empty($configParaValidaciones['Excepciones']['NoValidarFechasPago']);
+        $noValidarFormas = !empty($configParaValidaciones['Excepciones']['NoValidarFormasPago']);
+
         foreach ($dataXML['Pagos']['Pagos'] as $pagoIndex => $pagoNodo) {
             $montoXMLPago = round(floatval($pagoNodo['Monto']), 2);
             $monedaXMLPago = $pagoNodo['MonedaP'];
@@ -897,11 +900,11 @@ class ReglasAplicadasv40
                     continue;
                 }
                 $lastPagoBD = $pagoBD;
-                $montoMatch = abs($pagoBD['montoPagoReal'] - $montoXMLPago) < 0.01;
+                // Permitimos un margen de hasta 5 centavos para diferencias de redondeo con tipo de cambio
+                $montoMatch = abs($pagoBD['montoPagoReal'] - $montoXMLPago) <= 0.05;
                 $monedaMatch = ($pagoBD['monedaPagoReal'] === $monedaXMLPago);
-                // $fechaMatch = empty($pagoBD['fechaPago']) || $pagoBD['fechaPago'] === $fechaXMLPago;
-                $fechaMatch = true;
-                $formaMatch = empty($pagoBD['formaPagoSAT']) || $pagoBD['formaPagoSAT'] === $formaXMLPago;
+                $fechaMatch = $noValidarFechas || empty($pagoBD['fechaPago']) || $pagoBD['fechaPago'] === $fechaXMLPago;
+                $formaMatch = $noValidarFormas || empty($pagoBD['formaPagoSAT']) || $pagoBD['formaPagoSAT'] === $formaXMLPago;
                 if ($montoMatch && $monedaMatch && $fechaMatch && $formaMatch) {
                     $matchId = $pagoBD['id'];
                     $pagoBD['usado'] = true;
