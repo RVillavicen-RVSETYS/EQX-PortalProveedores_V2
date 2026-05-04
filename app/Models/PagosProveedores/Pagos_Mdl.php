@@ -27,7 +27,6 @@ class Pagos_Mdl
 
     public function listarComplementosPago($filtros = [], INT $cantMaxRes = 0, $orden = 'DESC')
     {
-        self::$debug = 0;
         if (self::$debug) {
             echo '<br><br>Filtros Recibidos: ';
             var_dump($filtros);
@@ -263,6 +262,7 @@ class Pagos_Mdl
 
     public function listarPagosRealizados($filtros = [], INT $cantMaxRes = 0, $orden = 'DESC')
     {
+        self::$debug = 1;
         if (self::$debug) {
             echo '<br><br>Filtros Recibidos: ';
             var_dump($filtros);
@@ -348,7 +348,9 @@ class Pagos_Mdl
                         MAX( Pagos.Recepcion ) AS 'HES',
                         MAX( Pagos.FormaPago ) AS 'FormaPago',
                         MAX( Pagos.MontoPagado ) AS 'MontoPagado',
-                        MAX( Pagos.TipoMoneda ) AS 'TipoMoneda' 
+                        MAX( Pagos.TipoMoneda ) AS 'TipoMoneda',
+                        MAX( cf.idCatMetodoPago ) AS 'MetodoPago',
+                        MAX( cf.idCatFormaPago ) AS 'FormaPagoCfdi'
                     FROM
                         (
                         SELECT
@@ -382,7 +384,9 @@ class Pagos_Mdl
                         MAX( Pagos.Recepcion ) AS 'HES',
                         MAX( Pagos.FormaPago ) AS 'FormaPago',
                         MAX( Pagos.MontoPagado ) AS 'MontoPagado',
-                        MAX( Pagos.TipoMoneda ) AS 'TipoMoneda' 
+                        MAX( Pagos.TipoMoneda ) AS 'TipoMoneda',
+                        MAX( cf.idCatMetodoPago ) AS 'MetodoPago',
+                        MAX( cf.idCatFormaPago ) AS 'FormaPagoCfdi'
                     FROM
                         (
                         SELECT
@@ -392,7 +396,7 @@ class Pagos_Mdl
                             pc.HES AS 'Recepcion',
                             pc.montoPagado AS 'MontoPagado',
                             pc.monedaTipoCambio AS 'TipoMoneda',
-                            fp.nombre AS 'FormaPago' 
+                            fp.nombre AS 'FormaPago'
                         FROM
                             pagos_compras pc
                             LEFT JOIN detcompras dc ON pc.OC = dc.ordenCompra

@@ -17,12 +17,14 @@ if (empty($listaPagos)) {
     <thead>
         <tr>
             <th>Acuse</th>
-            <th>Serie</th>
             <th>Proveedor</th>
+            <th>Serie</th>
+            <th>Forma Pago Cfdi</th>
+            <th>Metodo Pago</th>
             <th>Orden Compra</th>
             <th>Recepción</th>
-            <th>Forma Pago</th>
             <th>Monto Pagado</th>
+            <th>Forma Pago</th>
             <th>Tipo Moneda</th>
         </tr>
     </thead>
@@ -32,12 +34,14 @@ if (empty($listaPagos)) {
         ?>
             <tr>
                 <th class="text-center"><?= $pago['Acuse']; ?></th>
-                <th><?= $pago['Serie']; ?></th>
                 <th><?= $pago['Emisor']; ?></th>
+                <th><?= $pago['Serie']; ?></th>
+                <th><?= $pago['FormaPagoCfdi']; ?></th>
+                <th><?= $pago['MetodoPago']; ?></th>
                 <th><?= $pago['OC']; ?></th>
                 <th><?= $pago['HES']; ?></th>
-                <th><?= $pago['FormaPago']; ?></th>
                 <th class="text-right">$ <?= number_format($pago['MontoPagado'], 2, '.', ','); ?></th>
+                <th><?= $pago['FormaPago']; ?></th>
                 <th><?= $pago['TipoMoneda']; ?></th>
             </tr>
         <?php
