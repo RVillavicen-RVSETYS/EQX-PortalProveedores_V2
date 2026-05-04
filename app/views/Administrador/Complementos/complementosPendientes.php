@@ -11,12 +11,15 @@ if ($debug == 1) {
 <table class="table table-sm" id="tablaPagosRealizados">
     <thead>
         <tr>
-            <th>Proveedor</th>
-            <th>Correo</th>
             <th>Acuse</th>
-            <th>UUID</th>
+            <th>Proveedor</th>
             <th>Serie Y Folio</th>
+            <th>Orden Compra</th> <!-- Falta datos -->
             <th>Complemento Pendiente</th>
+            <th>Método de Pago</th> <!-- Falta datos -->
+            <th>Forma de Pago</th> <!-- Falta datos -->
+            <th>Correo</th>
+            <th>UUID</th>
         </tr>
     </thead>
     <tbody>
@@ -27,12 +30,17 @@ if ($debug == 1) {
 
         ?>
             <tr>
-                <th><?= $complemento['NoProveedor']; ?> - <?= $complemento['Proveedor']; ?></th>
-                <th><?= $complemento['Correo']; ?></th>
                 <th class="text-center"><?= $complemento['Acuse']; ?></th>
-                <th><?= $complemento['UUID']; ?></th>
+                <th><?= $complemento['NoProveedor']; ?> - <?= $complemento['Proveedor']; ?></th>
                 <th class="text-right"><?= $complemento['Serie']; ?> <?= $complemento['Folio']; ?></th>
-                <th class="text-right">$<?= number_format($totalComplemento, 4, '.', ','); ?></th>
+                <th class="text-right"><?= $complemento['OrdenCompra']; ?></th>
+                <th class="text-center">$<?= number_format($totalComplemento, 4, '.', ','); ?></th>
+                <th class="text-center"><?= $complemento['MetodoPago']; ?></th>
+                <th class="text-center"><?= $complemento['FormaPago']; ?></th>
+                <th class="text-right"><?= $complemento['Correo']; ?></th>
+                <th class="text-right"><?= $complemento['UUID']; ?></th>
+
+
             </tr>
         <?php
         }

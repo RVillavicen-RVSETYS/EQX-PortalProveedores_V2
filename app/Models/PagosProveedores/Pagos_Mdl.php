@@ -105,13 +105,21 @@ class Pagos_Mdl
                         cf.uuid AS UUID,
                         cf.serie AS Serie,
                         cf.folio AS Folio,
+                        cf.idCatMetodoPago AS MetodoPago,
+                        cf.idCatFormaPago AS FormaPago,
+                        dc.ordenCompra AS OrdenCompra,
                         (COALESCE(com.insolutoPendiente, cf.monto) - IFNULL(com.totalNotasCredito, 0)) AS Insoluto,
                         com.totalComplementos AS Complemento,
                         com.totalPagos AS Pagos
                     FROM
                         compras com
                         INNER JOIN proveedores prov ON com.idProveedor = prov.id
-                        INNER JOIN cfdi_facturas cf ON com.id = cf.idCompra 
+                        INNER JOIN cfdi_facturas cf ON com.id = cf.idCompra
+                        LEFT JOIN (
+                            SELECT idCompra, GROUP_CONCAT(DISTINCT ordenCompra SEPARATOR ', ') AS ordenCompra 
+                            FROM detcompras 
+                            GROUP BY idCompra
+                        ) dc ON com.id = dc.idCompra
                     WHERE
                         $filtrosSQL";
             if (self::$debug) {
