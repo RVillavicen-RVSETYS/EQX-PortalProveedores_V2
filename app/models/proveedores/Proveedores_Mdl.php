@@ -847,7 +847,8 @@ class Proveedores_Mdl
                         prov.nombre AS Proveedor,
                         prov.correo AS Correo,
                         prov.rfc AS RFC,
-                        c.sociedad AS RazonSocial
+                        prov.razonSocial AS RazonSocial,
+                        c.fechaVal AS FechaVal
                     FROM compras c
                     INNER JOIN proveedores prov ON c.idProveedor = prov.id
                     WHERE c.id = :idCompra";

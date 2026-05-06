@@ -2,6 +2,8 @@
 
 namespace App\Controllers\Administrador;
 
+require_once __DIR__ . '/../../Globals/Services/Correo/Controller/correos.php';
+
 use Core\Controller;
 use App\Models\Menu_Mdl;
 use App\Models\Proveedores\Proveedores_Mdl;
@@ -210,6 +212,28 @@ class FacturasInternacionalesController extends Controller
         }
 
         if ($resultActualizaFactura['success']) {
+
+            /* ================================
+            Para enviar notificación por correo
+               =============================== */
+            try {
+                $MDL_proveedores = new Proveedores_Mdl();
+                $datosProv = $MDL_proveedores->obtenerCorreoProveedorPorCompra($acuse);
+
+                if ($datosProv['success'] && !empty($datosProv['data']['Correo'])) {
+                    enviarCorreoRechazoFactura(
+                        $datosProv['data'],
+                        $acuse,
+                        $motivo,
+                        '' // Copia al admin se configurará después
+                    );
+                }
+            } catch (\Exception $e) {
+                $timestamp = date("Y-m-d H:i:s");
+                error_log("[$timestamp] Error enviando correo internacional (Acuse: $acuse): " . $e->getMessage(), 3, LOG_FILE);
+            }
+            // -------------------------------------------------
+
             $response = [
                 'success' => true,
                 'message' => $resultActualizaFactura['message']

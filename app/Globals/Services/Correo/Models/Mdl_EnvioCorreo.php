@@ -32,7 +32,7 @@ class EnvioCorreo extends PHPMailer
         $passwordRemitente,
         $asunto,
         $_haylogo = true,
-        $rutaLogo = "assets/images/logo-Silmeagro.png",
+        $rutaLogo = "assets/images/silmeAgroLogo1.png",
         $RGBColor = "#000000",
         $debug = 0
     ) {
@@ -54,7 +54,7 @@ class EnvioCorreo extends PHPMailer
             $this->_haylogo = $_haylogo;
             // Normalizar ruta del logo
             $rutaLogoNormalizada = ltrim(str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $rutaLogo), DIRECTORY_SEPARATOR);
-            
+
             // Buscar en la carpeta public del Portal (5 niveles arriba desde Models)
             $rutaBasePortal = dirname(__DIR__, 5);
             $rutaLogoFisica = $rutaBasePortal . DIRECTORY_SEPARATOR . 'public' . DIRECTORY_SEPARATOR . $rutaLogoNormalizada;
@@ -63,7 +63,7 @@ class EnvioCorreo extends PHPMailer
                 $this->addEmbeddedImage($rutaLogoFisica, 'logo_2u');
             } else {
                 // Ruta de respaldo
-                $rutaLogoRespaldo = $rutaBasePortal . DIRECTORY_SEPARATOR . 'public' . DIRECTORY_SEPARATOR . 'assets' . DIRECTORY_SEPARATOR . 'images' . DIRECTORY_SEPARATOR . 'logo-Silmeagro.png';
+                $rutaLogoRespaldo = $rutaBasePortal . DIRECTORY_SEPARATOR . 'public' . DIRECTORY_SEPARATOR . 'assets' . DIRECTORY_SEPARATOR . 'images' . DIRECTORY_SEPARATOR . 'silmeAgroLogo1.png';
                 if (file_exists($rutaLogoRespaldo)) {
                     $this->addEmbeddedImage($rutaLogoRespaldo, 'logo_2u');
                 } else {
