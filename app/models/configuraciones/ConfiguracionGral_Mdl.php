@@ -478,4 +478,176 @@ class ConfiguracionGral_Mdl
             return ['success' => false, 'message' => 'Problemas al listar las Reglas guardadas.'];
         }
     }
+
+    /* ==========================================================================
+       Inserta por primera vez los correos de una empresa.
+       ========================================================================= */
+    public function registrarCorreosNotificacion(array $campos)
+    {
+        $camposValidos = [
+            'idEmpresa'            => ['tipo' => PDO::PARAM_INT],
+            'correoRechazoFactura' => ['tipo' => PDO::PARAM_STR],
+            'idUserReg'            => ['tipo' => PDO::PARAM_INT]
+        ];
+
+        try {
+            if (empty($campos)) {
+                throw new \Exception("Los datos a registrar no pueden estar vacíos.");
+            }
+
+            $columnas = [];
+            $placeholders = [];
+            $params = [];
+
+            foreach ($campos as $nombre => $valor) {
+                if (array_key_exists($nombre, $camposValidos)) {
+                    $columnas[] = $nombre;
+                    $placeholders[] = ":$nombre";
+                    $params[$nombre] = [
+                        'valor' => $valor,
+                        'tipo'  => $camposValidos[$nombre]['tipo']
+                    ];
+                }
+            }
+
+            $columnas[] = "fechaReg";
+            $placeholders[] = "NOW()";
+
+            $sql = "INSERT INTO configuracionCorreosNotificaciones (" . implode(', ', $columnas) . ") 
+                    VALUES (" . implode(', ', $placeholders) . ")";
+
+            $stmt = BD_Connect::prepare($sql);
+
+            foreach ($params as $nombre => $data) {
+                $stmt->bindValue(":$nombre", $data['valor'], $data['tipo']);
+            }
+
+            $stmt->execute();
+
+            if ($stmt->rowCount() > 0) {
+                return ['success' => true, 'message' => 'Configuración de correos registrada correctamente.'];
+            } else {
+                return ['success' => false, 'message' => 'No se pudo registrar la configuración.'];
+            }
+        } catch (\Exception $e) {
+            $timestamp = date("Y-m-d H:i:s");
+            error_log("[$timestamp] ConfiguracionGral_Mdl::registrarCorreosNotificacion(): " . $e->getMessage() . "\n", 3, LOG_FILE_BD);
+            return ['success' => false, 'message' => 'Error al registrar: ' . $e->getMessage()];
+        }
+    }
+
+    /* ===============================================
+      Actualiza los correos existentes de una empresa.
+       =============================================== */
+    public function actualizarCorreosNotificacion(array $campos)
+    {
+        $camposValidos = [
+            'correoRechazoFactura' => ['tipo' => PDO::PARAM_STR],
+            'idUserModifica'       => ['tipo' => PDO::PARAM_INT]
+        ];
+
+        try {
+            if (empty($campos)) {
+                throw new \Exception("Los datos a actualizar no pueden estar vacíos.");
+            }
+
+            $setClause = [];
+            $params = [];
+
+            foreach ($campos as $nombre => $valor) {
+                if (array_key_exists($nombre, $camposValidos)) {
+                    $setClause[] = "$nombre = :$nombre";
+                    $params[$nombre] = [
+                        'valor' => $valor,
+                        'tipo'  => $camposValidos[$nombre]['tipo']
+                    ];
+                }
+            }
+
+            $setClause[] = "fechaModifica = NOW()";
+
+            $sql = "UPDATE configuracionCorreosNotificaciones 
+                    SET " . implode(', ', $setClause) . " 
+                    WHERE idEmpresa = :idEmpresa";
+
+            $stmt = BD_Connect::prepare($sql);
+
+            // Bind idEmpresa explicitamente
+            $stmt->bindValue(":idEmpresa", $campos['idEmpresa'], PDO::PARAM_INT);
+
+            foreach ($params as $nombre => $data) {
+                $stmt->bindValue(":$nombre", $data['valor'], $data['tipo']);
+            }
+
+            $stmt->execute();
+
+            if ($stmt->rowCount() > 0) {
+                return ['success' => true, 'message' => 'Configuración de correos actualizada correctamente.'];
+            } else {
+                return ['success' => false, 'message' => 'No se realizaron cambios en la configuración.'];
+            }
+        } catch (\Exception $e) {
+            $timestamp = date("Y-m-d H:i:s");
+            error_log("[$timestamp] ConfiguracionGral_Mdl::actualizarCorreosNotificacion(): " . $e->getMessage() . "\n", 3, LOG_FILE_BD);
+            return ['success' => false, 'message' => 'Error al actualizar: ' . $e->getMessage()];
+        }
+    }
+
+    /* ==================================================
+      Consulta los correos configurados para una empresa.
+       ================================================== */
+    public function dataCorreosNotificacion($filtros = [], INT $cantMaxRes = 0, $orden = 'DESC')
+    {
+        self::$debug = 0; // Cambiar a 0 para desactivar mensajes de depuración
+        if (self::$debug) {
+            echo '<br><br>Filtros Recibidos: ';
+            var_dump($filtros);
+        }
+
+        $filtrosDisponibles = [
+            'idEmpresa' => ['tipoDato' => 'INT', 'sqlFiltro' => 'idEmpresa = :idEmpresa']
+        ];
+
+        $filtrosSQL = '';
+        $params = [];
+
+        foreach ($filtros as $key => $value) {
+            if (array_key_exists($key, $filtrosDisponibles)) {
+                $filtrosSQL .= ($filtrosSQL === '' ? ' WHERE ' : ' AND ') . $filtrosDisponibles[$key]['sqlFiltro'];
+                $params[$key] = [
+                    'valor' => $value,
+                    'tipo' => $filtrosDisponibles[$key]['tipoDato'] === 'INT' ? PDO::PARAM_INT : PDO::PARAM_STR
+                ];
+            }
+        }
+
+        try {
+            $sql = "SELECT correoRechazoFactura FROM configuracionCorreosNotificaciones" . $filtrosSQL;
+
+            if ($orden === 'ASC' || $orden === 'DESC') {
+                $sql .= " ORDER BY id " . $orden;
+            }
+            if ($cantMaxRes > 0) {
+                $sql .= " LIMIT " . intval($cantMaxRes);
+            }
+
+            $stmt = BD_Connect::prepare($sql);
+
+            foreach ($params as $nombre => $data) {
+                $stmt->bindValue(":$nombre", $data['valor'], $data['tipo']);
+            }
+
+            $stmt->execute();
+            $res = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            return [
+                'success' => true,
+                'data' => $res
+            ];
+        } catch (\Exception $e) {
+            $timestamp = date("Y-m-d H:i:s");
+            error_log("[$timestamp] ConfiguracionGral_Mdl::dataCorreosNotificacion(): " . $e->getMessage() . "\n", 3, LOG_FILE_BD);
+            return ['success' => false, 'message' => 'Error al consultar correos configurados.'];
+        }
+    }
 }
