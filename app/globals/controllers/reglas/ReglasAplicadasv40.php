@@ -391,7 +391,7 @@ class ReglasAplicadasv40
                         if ($notaCredito['TipoDescuento'] == 'AMOUNT') {
                             // Aplicar descuento por monto
                             $montoDescuento = $notaCredito['ValorDescuento'] ?? 0;
-                            $subtotalXMLAntesDeDescuentos = $subtotalXML;                
+                            $subtotalXMLAntesDeDescuentos = $subtotalXML;
                             $subtotalXML -= $montoDescuento;
                             $debugMessages[] = "<br>* OK - $ Descuento aplicado $ $montoDescuento por nota de crédito: <b>$ $montoDescuento</b> al subtotal <b>$subtotalXMLAntesDeDescuentos</b>.";
                             $sumaMontoDescuentos += $montoDescuento;
@@ -556,7 +556,7 @@ class ReglasAplicadasv40
         if ($obtenerCompDePago['success']) {
             if ($obtenerCompDePago['cantRes'] > 0) {
                 $complementosActivos = array_filter($obtenerCompDePago['data'], function ($comp) {
-                    $estatus = (string)($comp['estatus'] ?? '');
+                    $estatus = (string) ($comp['estatus'] ?? '');
                     return in_array($estatus, ['1', '2'], true);
                 });
 
@@ -637,12 +637,12 @@ class ReglasAplicadasv40
             }
 
             // Verificar que la factura no tenga un complemento anterior con saldo insoluto en 0
-            if ($this->debug == 1) {
-                echo "<br> * La factura no debe tener un complemento de pago con saldo insoluto en 0." . $factura['minInsoluto'] <= 0;
-            }
-            if (!is_null($factura['idUltimoComplemento']) && $factura['minInsoluto'] <= 0) {
-                $errores[] = "* La factura '{$serie}' '{$folio}' con UUID '{$uuid}': Ya tiene un complemento de pago con saldo insoluto en 0.";
-            }
+            //if ($this->debug == 1) {
+            //    echo "<br> * La factura no debe tener un complemento de pago con saldo insoluto en 0." . $factura['minInsoluto'] <= 0;
+            //}
+            //if (!is_null($factura['idUltimoComplemento']) && $factura['minInsoluto'] <= 0) {
+            //    $errores[] = "* La factura '{$serie}' '{$folio}' con UUID '{$uuid}': Ya tiene un complemento de pago con saldo insoluto en 0.";
+            //}
 
             // Verificar que la factura ya haya sido pagada
             if ($this->debug == 1) {
@@ -805,11 +805,12 @@ class ReglasAplicadasv40
 
     public function validarReglasNegocioNacional_Pagos($dataXML, $dataCompras, $dataPagos, $configParaValidaciones = [])
     {
+        $this->debug = 0; // Se pone en 1 para activar Debug, en 0 para desactivar
         $response = [
             "success" => false,
             "message" => "",
             "isValid" => false,
-            "debug"   => ""
+            "debug" => ""
         ];
 
         $excepcionesDisponibles = [
@@ -879,10 +880,12 @@ class ReglasAplicadasv40
                 $placeholders[] = $ph;
                 $params[$ph] = $uuid;
             }
-            $sql = "SELECT uuidFact, SUM(importePagado) AS total
-                    FROM cfdi_complementoPagoDet
-                    WHERE uuidFact IN (" . implode(',', $placeholders) . ")
-                    GROUP BY uuidFact";
+            $sql = "SELECT d.uuidFact, SUM(d.importePagado) AS total
+                    FROM cfdi_complementoPagoDet d
+                    INNER JOIN cfdi_complementoPago c ON d.idComplementoPago = c.id
+                    WHERE d.uuidFact IN (" . implode(',', $placeholders) . ")
+                    AND c.estatus IN ('1', '2')
+                    GROUP BY d.uuidFact";
             $stmt = BD_Connect::prepare($sql);
             $stmt->execute($params);
             $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -908,45 +911,77 @@ class ReglasAplicadasv40
                 echo "<br>-- Pago XML {$pagoIndex}: monto={$montoXMLPago}, moneda={$monedaXMLPago}, forma={$formaXMLPago}, fecha={$fechaXMLPago} --";
             }
 
-            // Buscar match en pagos_compras por pago real
-            $matchId = null;
-            $lastPagoBD = null;
-            foreach ($pagosDisponibles as &$pagoBD) {
-                if ($pagoBD['usado']) {
-                    continue;
-                }
-                $lastPagoBD = $pagoBD;
-                $montoMatch = abs($pagoBD['montoPagoReal'] - $montoXMLPago) < 0.01;
-                $monedaMatch = ($pagoBD['monedaPagoReal'] === $monedaXMLPago);
-                // $fechaMatch = empty($pagoBD['fechaPago']) || $pagoBD['fechaPago'] === $fechaXMLPago;
-                $fechaMatch = true;
-                $formaMatch = empty($pagoBD['formaPagoSAT']) || $pagoBD['formaPagoSAT'] === $formaXMLPago;
-                if ($montoMatch && $monedaMatch && $fechaMatch && $formaMatch) {
-                    $matchId = $pagoBD['id'];
-                    $pagoBD['usado'] = true;
-                    break;
-                }
-            }
-            unset($pagoBD);
+            // NUEVA LOGICA: Validacion granular por DoctoRelacionado
+            $numPago = $pagoIndex + 1;
 
-            if (empty($matchId)) {
-                $errores[] = "* Pago XML {$pagoIndex}: no se encontró un pago registrado que coincida con Monto/Moneda/Fecha/Forma.";
+            foreach ($pagoNodo['DoctosRelacionados'] as $dr) {
+                $uuidDR = strtoupper($dr['IdDocumento'] ?? '');
+                $impPagadoDR = round(floatval($dr['ImpPagado'] ?? 0), 2);
+
                 if ($this->debug == 1) {
-                    $uuidDebug = $pagoNodo['DoctosRelacionados'][0]['IdDocumento'] ?? 'N/A';
-                    echo "<br> * ERROR: Pago XML {$pagoIndex}: no se encontró un pago registrado que coincida con Monto/Moneda/Fecha/Forma. UUID: {$uuidDebug}.";
-                    if (!empty($lastPagoBD)) {
-                        echo "<br> * Monto: {$montoXMLPago} VS Monto Registrado: {$lastPagoBD['montoPagoReal']} - {$lastPagoBD['montoPagado']}";
-                        echo "<br> * Moneda: {$monedaXMLPago} VS Moneda Registrada: {$lastPagoBD['monedaPagoReal']}";
-                        echo "<br> * Fecha: {$fechaXMLPago} VS Fecha Registrada: {$lastPagoBD['fechaPago']}";
-                        echo "<br> * Forma: {$formaXMLPago} VS Forma Registrada: {$lastPagoBD['formaPagoSAT']}";
-                    } else {
-                        echo "<br> * No hay pagos registrados disponibles para comparar.";
+                    echo "<br> * Buscando BD para DoctoRelacionado: UUID={$uuidDR}, ImpPagado={$impPagadoDR}";
+                }
+
+                $matchIdDR = null;
+                foreach ($pagosDisponibles as $key => &$pagoBD) {
+                    if ($pagoBD['usado']) {
+                        continue;
+                    }
+
+                    $montoMatch = abs($pagoBD['montoPagoReal'] - $impPagadoDR) < 0.01;
+                    $monedaMatch = ($pagoBD['monedaPagoReal'] === $monedaXMLPago);
+                    $fechaMatch = empty($pagoBD['fechaPago']) || substr($pagoBD['fechaPago'], 0, 10) === $fechaXMLPago;
+                    $formaMatch = empty($pagoBD['formaPagoSAT']) || $pagoBD['formaPagoSAT'] === $formaXMLPago;
+                    $uuidMatch = strtoupper($pagoBD['uuid'] ?? '') === $uuidDR;
+
+                    if ($montoMatch && $monedaMatch && $fechaMatch && $formaMatch && $uuidMatch) {
+                        $matchIdDR = $pagoBD['id'];
+                        $pagoBD['usado'] = true;
+                        break;
                     }
                 }
-            } else {
-                $pagosMatch[$pagoIndex] = $matchId;
-                if ($this->debug == 1) {
-                    echo "<br> * MATCH: Pago XML {$pagoIndex} -> pagos_compras.id={$matchId}";
+                unset($pagoBD);
+
+                if (empty($matchIdDR)) {
+                    $errores[] = "* El abono de $ {$impPagadoDR} asignado al documento UUID {$uuidDR} no coincide con los pagos registrados (diferencia en Fecha de Pago, Monto, Moneda, o Forma de Pago).";
+
+                    if ($this->debug == 1) {
+                        echo "<br> * ERROR: No se encontró un registro en BD que cuadre para el UUID {$uuidDR} con monto {$impPagadoDR}.";
+                        $hayDisponibles = false;
+                        foreach ($pagosDisponibles as $idx => $pBD) {
+                            if (!$pBD['usado'] && strtoupper($pBD['uuid'] ?? '') === $uuidDR) {
+                                $hayDisponibles = true;
+                                $fallas = [];
+                                if (abs($pBD['montoPagoReal'] - $impPagadoDR) >= 0.01) {
+                                    $fallas[] = "Monto (XML: {$impPagadoDR} vs BD: {$pBD['montoPagoReal']})";
+                                }
+                                if ($pBD['monedaPagoReal'] !== $monedaXMLPago) {
+                                    $fallas[] = "Moneda (XML: {$monedaXMLPago} vs BD: {$pBD['monedaPagoReal']})";
+                                }
+                                if (!empty($pBD['formaPagoSAT']) && $pBD['formaPagoSAT'] !== $formaXMLPago) {
+                                    $fallas[] = "Forma Pago (XML: {$formaXMLPago} vs BD: {$pBD['formaPagoSAT']})";
+                                }
+                                if (!empty($pBD['fechaPago']) && substr($pBD['fechaPago'], 0, 10) !== $fechaXMLPago) {
+                                    $fallas[] = "Fecha Pago (XML: {$fechaXMLPago} vs BD: " . substr($pBD['fechaPago'], 0, 10) . ")";
+                                }
+
+                                $strFallas = implode(', ', $fallas);
+                                if (empty($strFallas)) {
+                                    $strFallas = "No cuadró por otro parámetro oculto";
+                                }
+                                echo "<br> &nbsp;&nbsp; -> Pago BD [id: {$pBD['id']}, UUID: {$pBD['uuid']}] no cuadró por: " . $strFallas;
+                            }
+                        }
+                        if (!$hayDisponibles) {
+                            echo "<br> * No hay pagos registrados disponibles (o no están pagados) para el UUID {$uuidDR}.";
+                        }
+                    }
+                } else {
+                    // Guardamos el matchId especifico para este PagoIndex y este UUID
+                    $pagosMatch[$pagoIndex][$uuidDR] = $matchIdDR;
+                    if ($this->debug == 1) {
+                        echo "<br> * MATCH EXITOSO: XML Docto UUID {$uuidDR} -> pagos_compras.id={$matchIdDR}";
+                    }
                 }
             }
 
@@ -955,13 +990,13 @@ class ReglasAplicadasv40
                 $docId = $dr['IdDocumento'];
                 if (!isset($xmlGrouped[$docId])) {
                     $xmlGrouped[$docId] = [
-                        'impPagado'  => 0.0,
+                        'impPagado' => 0.0,
                         'monedaDR' => $dr['MonedaDR'] ?? '',
                         'monedaP' => $monedaXMLPago,
                         'tipoCambioP' => $tipoCambioP,
                     ];
                 }
-                $xmlGrouped[$docId]['impPagado']  += floatval($dr['ImpPagado']);
+                $xmlGrouped[$docId]['impPagado'] += floatval($dr['ImpPagado']);
                 $xmlGrouped[$docId]['monedaDR'] = $dr['MonedaDR'] ?? $xmlGrouped[$docId]['monedaDR'];
                 $xmlGrouped[$docId]['monedaP'] = $monedaXMLPago;
                 $xmlGrouped[$docId]['tipoCambioP'] = $tipoCambioP;
@@ -1063,12 +1098,12 @@ class ReglasAplicadasv40
             $response['success'] = false;
             $response['isValid'] = false;
             $response['message'] = implode("<br>", $errores);
-            $response['debug']   = implode("<br>", $errores);
+            $response['debug'] = implode("<br>", $errores);
         } else {
             $response['success'] = true;
             $response['isValid'] = true;
             $response['message'] = "Todo OK";
-            $response['debug']   = "No se encontraron errores.";
+            $response['debug'] = "No se encontraron errores.";
         }
 
         return $response;
@@ -1306,7 +1341,7 @@ class ReglasAplicadasv40
         }
 
         // 4. Validar Montos
-        $totalNC = (float)($dataXML['Comprobante']['Total'] ?? 0);
+        $totalNC = (float) ($dataXML['Comprobante']['Total'] ?? 0);
         $idCompraOriginal = $configParaValidaciones['facturaOriginal']['acuse'];
 
         // Obtener los totales actualizados de la compra
@@ -1322,7 +1357,7 @@ class ReglasAplicadasv40
             if ($this->debug == 1) {
                 echo "<br> * OK - Totales de la factura original obtenidos correctamente.";
             }
-            $saldoReal = (float)($totalesCompra['data']['saldoCalculado'] ?? 0);
+            $saldoReal = (float) ($totalesCompra['data']['saldoCalculado'] ?? 0);
             $saldoReal_f = number_format($saldoReal, 2);
             $debugMessages[] = "OK - Saldo Real de la Factura: $ $saldoReal_f (<b>Total: {$totalesCompra['data']['totalFactura']} - NCs: {$totalesCompra['data']['totalNotasCredito']} - Pagos: {$totalesCompra['data']['totalPagado']}</b>).";
 

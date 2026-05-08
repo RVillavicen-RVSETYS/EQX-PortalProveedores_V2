@@ -165,18 +165,18 @@ class CargaFacturasGlobalController extends Controller
                 'idPlantilla' => $idPlantilla,
                 'idNotaCredito' => $idNotaCredito, // Puede ser un ID único o múltiples IDs separados por coma
                 'pdf' => [
-                    'name'     => $archivosNotas['name'][$idPlantilla]['pdf'] ?? '',
-                    'type'     => $archivosNotas['type'][$idPlantilla]['pdf'] ?? '',
+                    'name' => $archivosNotas['name'][$idPlantilla]['pdf'] ?? '',
+                    'type' => $archivosNotas['type'][$idPlantilla]['pdf'] ?? '',
                     'tmp_name' => $archivosNotas['tmp_name'][$idPlantilla]['pdf'] ?? '',
-                    'error'    => $archivosNotas['error'][$idPlantilla]['pdf'] ?? '',
-                    'size'     => $archivosNotas['size'][$idPlantilla]['pdf'] ?? ''
+                    'error' => $archivosNotas['error'][$idPlantilla]['pdf'] ?? '',
+                    'size' => $archivosNotas['size'][$idPlantilla]['pdf'] ?? ''
                 ],
                 'xml' => [
-                    'name'     => $archivosNotas['name'][$idPlantilla]['xml'] ?? '',
-                    'type'     => $archivosNotas['type'][$idPlantilla]['xml'] ?? '',
+                    'name' => $archivosNotas['name'][$idPlantilla]['xml'] ?? '',
+                    'type' => $archivosNotas['type'][$idPlantilla]['xml'] ?? '',
                     'tmp_name' => $archivosNotas['tmp_name'][$idPlantilla]['xml'] ?? '',
-                    'error'    => $archivosNotas['error'][$idPlantilla]['xml'] ?? '',
-                    'size'     => $archivosNotas['size'][$idPlantilla]['xml'] ?? ''
+                    'error' => $archivosNotas['error'][$idPlantilla]['xml'] ?? '',
+                    'size' => $archivosNotas['size'][$idPlantilla]['xml'] ?? ''
                 ]
             ];
         }
@@ -386,7 +386,7 @@ class CargaFacturasGlobalController extends Controller
             return;
         }
 
-        echo json_encode(['success' => true, 'message' => 'Complemento de Pago registrado con éxito. Se revisará manualmente si hace referencia a las facturas correctas.']);
+        echo json_encode(['success' => true, 'message' => 'Complemento de Pago registrado con éxito.']);
         return;
     }
 }
