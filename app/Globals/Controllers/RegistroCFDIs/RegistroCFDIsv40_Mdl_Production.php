@@ -16,7 +16,7 @@ require_once __DIR__ . '/../../../../config/BD_Connect.php';
 class RegistroCFDIsv40_Mdl
 {
     private $db;
-    private static $debug = 0; // Debug registro CFDI v4.0
+    private static $debug = 0; // Debug desactivado
 
     public function __construct()
     {
@@ -341,8 +341,7 @@ class RegistroCFDIsv40_Mdl
 
     public function registrarCFDI_Pagosv40($dataDeValidacion)
     {
-        // No forzar debug off: respeta self::$debug global (evita apagar trazas tras complemento)
-        // self::$debug = 0;
+        self::$debug = 0; // Activado para pruebas (Complemento de Pago)
         $response = ["success" => true, "message" => "", "debug" => ""];
         // Inicializar variables usadas en rollback (catch)
         $urlComplementoPDF = null;
@@ -514,18 +513,17 @@ class RegistroCFDIsv40_Mdl
                 $totalPagado = $pago["Monto"];
                 $idCatTipoMoneda = $pago["MonedaP"];
                 $tipoCambioP = $pago["TipoCambioP"];
+                $idPagosCompras = $pagosMatch[$pagoIndex] ?? null;
+                $idPagosComprasValue = ($idPagosCompras !== null) ? (int) $idPagosCompras : 'NULL';
+
                 foreach ($pago["DoctosRelacionados"] as $docto) {
                     $uuidFact = strtoupper($docto["IdDocumento"] ?? '');
                     $idCompra = $idCompraPorUuid[$uuidFact] ?? null;
                     if (empty($idCompra)) {
                         throw new \Exception("No se encontró el idCompra para el UUID relacionado: $uuidFact");
                     }
-                    
-                    $idPagosCompras = $pagosMatch[$pagoIndex][$uuidFact] ?? null;
-                    $idPagosComprasValue = ($idPagosCompras !== null) ? (int) $idPagosCompras : 'NULL';
-
-                    $serie = $docto["Serie"] ?? '';
-                    $folio = $docto["Folio"] ?? '';
+                    $serie = $docto["Serie"];
+                    $folio = $docto["Folio"];
                     $monedaDR = $docto["MonedaDR"];
                     $noParcialidad = $docto["NumParcialidad"];
                     $saldoAnterior = $docto["ImpSaldoAnt"];
