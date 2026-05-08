@@ -112,7 +112,7 @@ class EnvioCorreo extends PHPMailer
             $this->SMTPSecure = 'tls';
             $this->Port = 587;
 
-            $this->setFrom($this->correoRemitente, 'Portal de Proveedores EQX');
+            $this->setFrom($this->correoRemitente, 'Portal de Proveedores SILMEAGRO');
 
             foreach ($this->correosDestino as $nombre => $correo) {
                 $this->addAddress($correo, is_string($nombre) ? $nombre : '');

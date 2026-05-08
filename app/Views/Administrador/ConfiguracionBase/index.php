@@ -402,15 +402,15 @@ if ($debug == 1) {
                                 <!-- Tercera pestaña: Configuración de Correo para contacto-->
                                 <div class="tab-pane" id="Correo" role="tabpanel">
                                     <div class="p-20">
-                                        <h4 class="card-title mb-4"><i class="fas fa-envelope mr-2"></i> Configuración de Correo</h4>
-                                        <p class="text-muted">Define el correo al que se le enviara una copia de la notificación del Rechazo de una Factura</p>
+                                        <h3 class="card-title mb-4"><i class="fas fa-envelope mr-2"></i> Configuración de Correo</h3>
                                         <hr>
                                         <form id="formConfiguracionCorreo">
                                             <input type="hidden" name="idEmpresa" id="idEmpresaCorreo">
                                             <div class="row">
                                                 <!-- Correos para Notificaciones -->
-                                                <div class="col-md-12">
-                                                    <label class="control-label" for="correoRechazoFactura">Rechazo de Factura</label>
+                                                <div class="col-md-8">
+                                                    <h5 class="card-title mb-4"><i class=""></i>Rechazo de Factura</h5>
+                                                    <p class="text-muted">Define el correo al que se le enviara una copia de la notificación del Rechazo de una Factura</p>
                                                     <textarea required rows="10" id="correoRechazoFactura" autocomplete="off" name="correoRechazoFactura"
                                                         placeholder="ejemplo1@mail.com, ejemplo2@mail.com"
                                                         class="form-control validate"></textarea>

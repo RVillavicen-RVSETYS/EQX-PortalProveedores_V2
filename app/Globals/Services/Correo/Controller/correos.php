@@ -41,7 +41,17 @@ function enviarCorreoRechazoFactura($datosProveedor, $acuse, $motivo, $correoAdm
     }
 
     if (!empty($correoAdmin)) {
-        $destino["Administrador"] = trim($correoAdmin);
+        // 1. Separamos por coma
+        $adicionales = explode(',', $correoAdmin);
+
+        // 2. Recorremos y agregamos cada uno al arreglo de destino
+        foreach ($adicionales as $index => $email) {
+            $emailLimpio = trim($email);
+            if (filter_var($emailLimpio, FILTER_VALIDATE_EMAIL)) {
+                // Usamos un índice único para que no se sobreescriban
+                $destino["CopiaAdmin_" . $index] = $emailLimpio;
+            }
+        }
     }
 
     if (empty($destino)) {
@@ -70,11 +80,12 @@ function crearContenidoHTMLRechazo($datos, $acuse, $motivo)
 {
     $numProveedor = htmlspecialchars($datos['IdProveedor'], ENT_QUOTES, 'UTF-8');
     $proveedor = htmlspecialchars($datos['Proveedor'], ENT_QUOTES, 'UTF-8');
-    $rfc = htmlspecialchars($datos['RFC'], ENT_QUOTES, 'UTF-8');
-    $razonSocialEmpresa = htmlspecialchars($datos['RazonSocial'], ENT_QUOTES, 'UTF-8');
+    $rfc = htmlspecialchars($datos['RFCEmpresa'], ENT_QUOTES, 'UTF-8');
+    $razonSocialEmpresa = htmlspecialchars($datos['RazonSocialEmpresa'], ENT_QUOTES, 'UTF-8');
     $folioAcuse = htmlspecialchars($acuse, ENT_QUOTES, 'UTF-8');
     $fechaActual = htmlspecialchars($datos['FechaVal'], ENT_QUOTES, 'UTF-8');
     $motivoRechazo = nl2br(htmlspecialchars($motivo, ENT_QUOTES, 'UTF-8'));
+
 
     return "
     <div style='margin:0; padding:24px 0; font-family:Segoe UI, Arial, sans-serif; color:#243127;'>

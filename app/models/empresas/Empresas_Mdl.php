@@ -21,7 +21,7 @@ class Empresas_Mdl
         if (self::$debug) {
             echo "<h2>Ya estamos dentro de la Clase Empresas_Mdl.</h2>";
         }
-        
+
         $this->db = new BD_Connect(); // Instancia de la conexión a la base de datos
     }
 
@@ -41,7 +41,7 @@ class Empresas_Mdl
             $sql = "SELECT *
                     FROM empresas e
                     $filtraEstatus
-                    ORDER BY e.nombre ASC"; 
+                    ORDER BY e.nombre ASC";
 
             if (self::$debug) {
                 $this->db->imprimirConsulta($sql, 'NA', 'Lista ultimas Compras');
@@ -59,11 +59,10 @@ class Empresas_Mdl
                 echo '<br><br>';
             }
 
-            return ['success' => true, 'cantRes' => $cantEmpresas, 'data' => $empresasresult]; 
-            
+            return ['success' => true, 'cantRes' => $cantEmpresas, 'data' => $empresasresult];
         } catch (\Exception $e) {
             $timestamp = date("Y-m-d H:i:s");
-            error_log("[$timestamp] app/Models/empresas/Empresas_Mdl.php ->Error buscar Empresas: " . $e->getMessage(), 3, LOG_FILE_BD); 
+            error_log("[$timestamp] app/Models/empresas/Empresas_Mdl.php ->Error buscar Empresas: " . $e->getMessage(), 3, LOG_FILE_BD);
             if (self::$debug) {
                 echo "Error al listar Empresas: " . $e->getMessage(); // Mostrar error en modo depuración
             }
@@ -80,8 +79,8 @@ class Empresas_Mdl
                 $sql = "SELECT e.*, cg.diasPago, cg.maxComplementosPendientes
                         FROM empresas e
                         INNER JOIN configuracionGral cg ON e.id = cg.idEmpresa
-                        WHERE e.id = :idempresa"; 
-    
+                        WHERE e.id = :idempresa";
+
                 if (self::$debug) {
                     $params = [':idempresa' => $idEmpresa];
                     $this->db->imprimirConsulta($sql, $params, 'Datos de Empresa');
@@ -90,23 +89,22 @@ class Empresas_Mdl
                 $stmt->bindParam(':idempresa', $idEmpresa, PDO::PARAM_INT);
                 $stmt->execute();
                 $empresasresult = $stmt->fetch(PDO::FETCH_ASSOC);
-        
+
                 if (self::$debug) {
                     echo '<br>Resultado de Query:';
                     var_dump($empresasresult);
                     echo '<br><br>';
                 }
-    
-                return ['success' => true, 'data' => $empresasresult]; 
-                
+
+                return ['success' => true, 'data' => $empresasresult];
             } catch (\Exception $e) {
                 $timestamp = date("Y-m-d H:i:s");
-                error_log("[$timestamp] app/Models/empresas/Empresas_Mdl.php ->Error buscar Empresas por Id: " . $e->getMessage(), 3, LOG_FILE_BD); 
+                error_log("[$timestamp] app/Models/empresas/Empresas_Mdl.php ->Error buscar Empresas por Id: " . $e->getMessage(), 3, LOG_FILE_BD);
                 if (self::$debug) {
                     echo "Error al bucar Empresa: " . $e->getMessage(); // Mostrar error en modo depuración
                 }
                 return ['success' => false, 'message' => 'Problemas al buscar la Empresa, Notifica a tu administrador.'];
             }
-        }        
+        }
     }
 }

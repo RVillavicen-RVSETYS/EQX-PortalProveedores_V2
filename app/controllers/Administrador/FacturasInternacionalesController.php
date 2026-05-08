@@ -9,6 +9,8 @@ use App\Models\Menu_Mdl;
 use App\Models\Proveedores\Proveedores_Mdl;
 use App\Models\Compras\Compras_Mdl;
 use App\Globals\Controllers\DocumentosController;
+use App\Models\Configuraciones\ConfiguracionGral_Mdl;
+use App\Models\Empresas\Empresas_Mdl;
 
 class FacturasInternacionalesController extends Controller
 {
@@ -221,11 +223,32 @@ class FacturasInternacionalesController extends Controller
                 $datosProv = $MDL_proveedores->obtenerCorreoProveedorPorCompra($acuse);
 
                 if ($datosProv['success'] && !empty($datosProv['data']['Correo'])) {
+
+                    // --- NUEVA LÓGICA: Obtener correos CC de la configuración ---
+                    $mdlConfig = new ConfiguracionGral_Mdl();
+                    $resCC = $mdlConfig->dataCorreosNotificacion(['idEmpresa' => $_SESSION['EQXidEmpresa']], 1);
+
+                    // Para jalar datos de la empresa con el usuario de sesión activa
+                    $MDL_empresa = new Empresas_Mdl();
+                    $datosEmp = $MDL_empresa->empresaPorId($_SESSION['EQXidEmpresa']);
+
+                    $correosCC = ''; // Inicializamos vacío
+                    if ($resCC['success'] && !empty($resCC['data'])) {
+                        $correosCC = $resCC['data'][0]['correoRechazoFactura']; // Traemos el string "mail1, mail2"
+                    }
+
+                    // Usar los datos de la empresa
+                    if ($datosEmp['success'] && !empty($datosEmp['data'])) {
+                        // Sobreescribimos los datos de la firma con los de la EMPRESA
+                        $datosProv['data']['RazonSocialEmpresa'] = $datosEmp['data']['razonSocial'];
+                        $datosProv['data']['RFCEmpresa']         = $datosEmp['data']['rfc'];
+                    }
+
                     enviarCorreoRechazoFactura(
                         $datosProv['data'],
                         $acuse,
                         $motivo,
-                        '' // Copia al admin se configurará después
+                        $correosCC // Copia al admin se configurará después
                     );
                 }
             } catch (\Exception $e) {
