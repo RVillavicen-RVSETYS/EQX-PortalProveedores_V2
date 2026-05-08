@@ -41,7 +41,7 @@ class ConfiguracionBaseController extends Controller
 
         // Obtener datos de los modelos
         $filtros = ['estatus' => 1];
-        $filtrosReglas = ['estatus' => 1 ];
+        $filtrosReglas = ['estatus' => 1];
 
         $resultTiposMoneda = $satModel->dataTiposMoneda($filtros);
         $resultEmpresas = $empresaModel->listaEmpresas(estatus: 1);
@@ -208,5 +208,67 @@ class ConfiguracionBaseController extends Controller
         header('Content-Type: application/json');
         echo json_encode($response);
         exit;
+    }
+
+    /* =============================================================
+       Metodo para GUARDAR el/los correos en la nueva tabla de la BD
+       ============================================================= */
+    public function guardarConfiguracionCorreo()
+    {
+        $idEmpresa = $_SESSION['EQXidEmpresa'] ?? 0;
+        $correos = $_POST['correoRechazoFactura'] ?? '';
+
+        // Validaciones básicas
+        if (!$idEmpresa) {
+            echo json_encode(['success' => false, 'message' => 'Debe iniciar sesión para identificar su empresa.']);
+            return;
+        }
+
+        if (empty($correos)) {
+            echo json_encode(['success' => false, 'message' => 'Debe ingresar al menos un correo.']);
+            return;
+        }
+
+        $mdl = new ConfiguracionGral_Mdl();
+        $datos = [
+            'idEmpresa' => $idEmpresa,
+            'correoRechazoFactura' => $correos
+        ];
+
+        // --- LÓGICA DE VALIDACIÓN EN EL CONTROLADOR ---
+
+        // 1. Verificamos si ya existe el registro usando el método dinámico
+        $check = $mdl->dataCorreosNotificacion(['idEmpresa' => $idEmpresa], 1);
+
+        if ($check['success'] && !empty($check['data'])) {
+            // Ya existe -> Mandamos a Actualizar
+            $datos['idUserModifica'] = $_SESSION['EQXident'] ?? 0;
+            $resultado = $mdl->actualizarCorreosNotificacion($datos);
+        } else {
+            // No existe -> Mandamos a Registrar por primera vez
+            $datos['idUserReg'] = $_SESSION['EQXident'] ?? 0;
+            $resultado = $mdl->registrarCorreosNotificacion($datos);
+        }
+
+        echo json_encode($resultado);
+    }
+
+    /* =============================================================
+       Metodo para CONSULTAR el/los correos en la nueva tabla de la BD
+       ============================================================= */
+    public function obtenerConfiguracionCorreo()
+    {
+        $idEmpresa = $_SESSION['EQXidEmpresa'] ?? 0;
+        $mdl = new ConfiguracionGral_Mdl();
+
+        $resultado = $mdl->dataCorreosNotificacion(['idEmpresa' => $idEmpresa], 1);
+
+        // Adaptamos la respuesta para que el JS reciba directamente el string de correos
+        $correosStr = '';
+        if ($resultado['success'] && !empty($resultado['data'])) {
+            $correosStr = $resultado['data'][0]['correoRechazoFactura'];
+        }
+
+        echo json_encode(['success' => true, 'data' => $correosStr]);
     }
 }

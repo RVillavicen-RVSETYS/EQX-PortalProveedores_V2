@@ -2,6 +2,8 @@
 
 namespace App\Controllers\Administrador;
 
+require_once __DIR__ . '/../../Globals/Services/Correo/Controller/correos.php';
+
 use Core\Controller;
 use App\Models\Menu_Mdl;
 use App\Models\Proveedores\Proveedores_Mdl;
@@ -11,6 +13,8 @@ use App\Models\Facturas\Nacionales_Mdl;
 use App\Models\DatosCompra\NotasCredito_Mdl;
 use App\Globals\Services\Api\SilmeApi\NotificarNotaCreditoController;
 use App\Models\DatosCFDIs\CFDIs_Mdl;
+use App\Models\Configuraciones\ConfiguracionGral_Mdl;
+use App\Models\Empresas\Empresas_Mdl;
 
 Error_reporting(E_ALL);
 class FacturasNacionalesController extends Controller
@@ -222,6 +226,48 @@ class FacturasNacionalesController extends Controller
         }
 
         if ($resultActualizaFactura['success']) {
+
+            /* =======================================
+            Para enviar Notificación por correo 
+               ====================================== */
+            try {
+                $MDL_proveedores = new Proveedores_Mdl();
+                $datosProv = $MDL_proveedores->obtenerCorreoProveedorPorCompra($acuse);
+
+                if ($datosProv['success'] && !empty($datosProv['data']['Correo'])) {
+                    // --- NUEVA LÓGICA: Obtener correos CC de la configuración ---
+                    $mdlConfig = new ConfiguracionGral_Mdl();
+                    $resCC = $mdlConfig->dataCorreosNotificacion(['idEmpresa' => $_SESSION['EQXidEmpresa']], 1);
+
+                    // Para jalar datos de la empresa con el usuario de sesión activa
+                    $MDL_empresa = new Empresas_Mdl();
+                    $datosEmp = $MDL_empresa->empresaPorId($_SESSION['EQXidEmpresa']);
+
+                    $correosCC = ''; // Inicializamos vacío
+                    if ($resCC['success'] && !empty($resCC['data'])) {
+                        $correosCC = $resCC['data'][0]['correoRechazoFactura']; // Traemos el string "mail1, mail2"
+                    }
+
+                    // Usar los datos de la empresa
+                    if ($datosEmp['success'] && !empty($datosEmp['data'])) {
+                        // Sobreescribimos los datos de la firma con los de la EMPRESA
+                        $datosProv['data']['RazonSocialEmpresa'] = $datosEmp['data']['razonSocial'];
+                        $datosProv['data']['RFCEmpresa']         = $datosEmp['data']['rfc'];
+                    }
+
+
+                    enviarCorreoRechazoFactura(
+                        $datosProv['data'],
+                        $acuse,
+                        $motivo,
+                        $correosCC // Copia al admin se configurará después
+                    );
+                }
+            } catch (\Exception $e) {
+                $timestamp = date("Y-m-d H:i:s");
+                error_log("[$timestamp] Error enviando correo (Acuse: $acuse): " . $e->getMessage(), 3, LOG_FILE);
+            }
+
             // Rechazar en cascada las notas de crédito asociadas
             try {
                 $MDL_NotasCredito = new NotasCredito_Mdl();
@@ -510,7 +556,7 @@ class FacturasNacionalesController extends Controller
                             'success' => false,
                             'message' => $respuestaAPI['message']
                         ];
-                    }else {
+                    } else {
                         $responseApi = [
                             'success' => true,
                             'message' => 'Estatus de nota de crédito notificado correctamente a Silme.'
