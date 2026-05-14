@@ -23,11 +23,13 @@ if (empty($listaPagos)) {
             <th>UUID Fac</th>
             <th>Metodo Pago</th>
             <th>Monto Egreso</th>
-            <th>Folio NC</th>
-            <th>UUID NC</th>
+            <th>Fecha de Pago</th>
+            <th>Tipo de Cambio</th>
             <th>Folio CP</th>
             <th>UUID CP</th>
-            <th>Fecha Factura</th>
+            <th>Folio NC</th>
+            <th>UUID NC</th>
+            <th>Banco y N° de Cuenta</th>
         </tr>
     </thead>
     <tbody>
@@ -42,11 +44,13 @@ if (empty($listaPagos)) {
                 <th><?= $pago['UUIDFac']; ?></th>
                 <th><?= $pago['MetodoPago']; ?></th>
                 <th class="text-right">$ <?= number_format($pago['MontoEgreso'], 2, '.', ','); ?></th>
-                <th><?= $pago['FolioNC']; ?></th>
-                <th><?= $pago['UUIDNC']; ?></th>
+                <th class="text-center"><?= $pago['FechaPago']; ?></th>
+                <th><?= $pago['TipoCambio']; ?></th>
                 <th><?= $pago['FolioCP']; ?></th>
                 <th><?= $pago['UUIDCP']; ?></th>
-                <th class="text-center"><?= $pago['FechaFactura']; ?></th>
+                <th><?= $pago['FolioNC']; ?></th>
+                <th><?= $pago['UUIDNC']; ?></th>
+                <th><?= $pago['CuentaBanco']; ?></th>
             </tr>
         <?php
         }
