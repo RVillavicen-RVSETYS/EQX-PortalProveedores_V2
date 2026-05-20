@@ -197,6 +197,23 @@
         });
     }
 
+    function cargarAnulacionValidacionFechaPagoProveedor() {
+        $.ajax({
+            type: 'POST',
+            url: EXCEPCIONES_AJAX_BASE + '/listaAnulacionValidacionFechaPagoProveedor',
+            data: {},
+            success: function(response) {
+                $('#fechaPagoProveedor').html(response);
+            },
+            error: function() {
+                $('#fechaPagoProveedor').html('Error al cargar la sección. Consulta a tu administrador.');
+            },
+            beforeSend: function() {
+                $('#fechaPagoProveedor').html('<div class="loading text-center"><img src="../assets/images/loading.gif" alt="loading" /><br/>Un momento, por favor...</div>');
+            }
+        });
+    }
+
     function deshabilitarPermisoPUE(idConf, idProveedor) {
         var idBtn = 'bloquear-btnEstatus6' + idConf;
         Swal.fire({

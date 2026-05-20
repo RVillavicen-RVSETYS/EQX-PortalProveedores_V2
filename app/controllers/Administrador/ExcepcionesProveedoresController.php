@@ -12,6 +12,7 @@ use App\Models\Proveedores\Excepciones\BloqDiferencias_Mdl;
 use App\Models\Proveedores\Excepciones\ExcepcionesProveedores_Mdl;
 use App\Models\Proveedores\Excepciones\PermitirPueSiempre_Mdl;
 use App\Models\Proveedores\Excepciones\PoliticasComerciales_Mdl;
+use App\Models\Proveedores\Excepciones\IgnorarFechaPago_Mdl;
 use App\Models\Proveedores\Proveedores_Mdl;
 
 class ExcepcionesProveedoresController extends Controller
@@ -418,6 +419,46 @@ class ExcepcionesProveedoresController extends Controller
             $timestamp = date("Y-m-d H:i:s");
             error_log("[$timestamp] app\\controllers\\Administrador\\ExcepcionesProveedoresController ->Error al buscar Id del Area (nombre: $areaLink): " . PHP_EOL, 3, LOG_FILE);
             echo 'No pudimos traer el detallado del Menu:' . $resultIdArea['message'];
+            exit(0);
+        }
+    }
+
+    public function listaAnulacionValidacionFechaPagoProveedor()
+    {
+        $data = [];
+        $namespaceParts = explode('\\', __NAMESPACE__);
+        $areaLink = end($namespaceParts);
+
+        $menuModel = new Menu_Mdl();
+        $resultIdArea = $menuModel->obtenerIdAreaPorLink($areaLink);
+
+        $ignorafechaPago = new IgnorarFechaPago_Mdl();
+        //$resultActivos = $politicasModel->obtenerProveedoresConPoliticaActiva();
+        $listaDisponibles = $ignorafechaPago->getProveedoresDisponibles();
+
+        if ($resultIdArea['success']) {
+            $idArea = $resultIdArea['data'];
+        } else {
+            $timestamp = date('Y-m-d H:i:s');
+            error_log("[$timestamp] app\\controllers\\Administrador\\ExcepcionesProveedoresController -> listaPoliticasComerciales: " . $resultIdArea['message'], 3, LOG_FILE);
+            echo 'No pudimos traer el id del Area:' . $resultIdArea['message'];
+            exit(0);
+        }
+
+        $menuData = $menuModel->obtenerEstructuraMenu($_SESSION['EQXidNivel'], $idArea);
+        $areaData = $menuModel->listarAreasDisponibles($_SESSION['EQXidNivel']);
+
+        if ($menuData['success'] && $areaData['success']) {
+            $data['menuData'] = $menuData;
+            $data['areaData'] = $areaData;
+            $data['areaLink'] = $areaLink;
+            //$data['proveedoresPoliticaActiva'] = $resultActivos;
+            $data['listaProveedores'] = $listaDisponibles;
+            $this->view('Administrador/ExcepcionesProveedores/fechaPagoProveedor', $data);
+        } else {
+            $timestamp = date('Y-m-d H:i:s');
+            error_log("[$timestamp] app\\controllers\\Administrador\\ExcepcionesProveedoresController -> listaAnulacionValidacionFechaPagoProveedor: error menu o areas", 3, LOG_FILE);
+            echo 'Problemas al cargar menú o áreas.';
             exit(0);
         }
     }
@@ -908,6 +949,47 @@ class ExcepcionesProveedoresController extends Controller
             echo json_encode([
                 'success' => false,
                 'message' => $resultExcepciones['message']
+            ]);
+        }
+    }
+
+    // Metodo para agregar Proveedor a tabla para excepcion Ignora Fecha Pago
+    public function agregarProveedorIFP()
+    {
+        $data = []; // Aquí puedes pasar datos a la vista si es necesario
+        $idProveedor = $_POST['idProveedor'] ?? '';
+        $motivo = $_POST['motivo'] ?? '';
+
+
+        if ($this->debug == 1) {
+            echo "<br>Contenido de data:<br>";
+            var_dump($data);
+            echo "<br>Contenido de IdProveedor: $idProveedor <br>";
+        }
+
+        $ignorarFechaPagoModel = new IgnorarFechaPago_Mdl();
+        
+        // Preparar campos siguiendo el patrón de consumo
+        $campos = [
+            'idProveedor' => $idProveedor,
+            'motivo' => $motivo,
+            'estatus' => 1,
+            'idUserReg' => $_SESSION['EQXident'] ?? 0
+        ];
+
+        $resultExcepciones = $ignorarFechaPagoModel->registraIgnoraFechaPago($campos);
+
+        if ($resultExcepciones['success']) {
+            $Message = $resultExcepciones['message'];
+            echo json_encode([
+                'success' => true,
+                'message' => $Message
+            ]);
+        } else {
+            $errorMessage = $resultExcepciones['message'];
+            echo json_encode([
+                'success' => false,
+                'message' => $errorMessage
             ]);
         }
     }
