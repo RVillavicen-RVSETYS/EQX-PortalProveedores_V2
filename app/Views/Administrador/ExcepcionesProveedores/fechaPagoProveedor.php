@@ -1,7 +1,7 @@
 <?php
 $debug = 0;
 if ($debug == 1) {
-    var_dump($proveedoresPoliticaActiva ?? null, $listaProveedores ?? null);
+    var_dump($proveedoresFechaPagoIgnorada ?? null, $listaProveedores ?? null);
 }
 ?>
 
@@ -50,9 +50,9 @@ if ($debug == 1) {
     </div>
 
     <div class="col-md-8">
-        <?php if (empty($proveedoresPoliticaActiva['success'])) { ?>
+        <?php if (empty($proveedoresFechaPagoIgnorada['success'])) { ?>
             <div class="alert alert-info">
-                <?= htmlspecialchars($proveedoresPoliticaActiva['message'] ?? 'No hay proveedores con ajuste de políticas comerciales activo.'); ?>
+                <?= htmlspecialchars($proveedoresFechaPagoIgnorada['message'] ?? 'No hay proveedores con ajuste de fecha pago activo.'); ?>
             </div>
         <?php } else { ?>
             <table class="table table-sm" id="tableFechaPagoProveedor">
@@ -65,7 +65,7 @@ if ($debug == 1) {
                     </tr>
                 </thead>
                 <tbody>
-                    <?php foreach ($proveedoresPoliticaActiva['data'] as $proveedor) { ?>
+                    <?php foreach ($proveedoresFechaPagoIgnorada['data'] as $proveedor) { ?>
                         <tr>
                             <td class="text-right"><?= (int) $proveedor['IdProveedor']; ?></td>
                             <td><?= htmlspecialchars($proveedor['Proveedor'] ?? ''); ?></td>
@@ -78,7 +78,7 @@ if ($debug == 1) {
                                 </div>
                                 <div id="desbloquear-btnFechaPago<?= (int) $proveedor['IdProveedor']; ?>">
                                     <button type="button" class="btn btn-xs btn-rounded btn-outline-danger"
-                                        onclick="eliminarPoliticaComercial(<?= (int) $proveedor['IdProveedor']; ?>)"
+                                        onclick="eliminarProveedorFechaPagoIgnorada(<?= (int) $proveedor['IdProveedor']; ?>)"
                                         title="Desactivar ajuste (pone el campo en 0)">
                                         <i class="fas fa-trash-alt"></i>
                                     </button>

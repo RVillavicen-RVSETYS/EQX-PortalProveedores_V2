@@ -433,7 +433,7 @@ class ExcepcionesProveedoresController extends Controller
         $resultIdArea = $menuModel->obtenerIdAreaPorLink($areaLink);
 
         $ignorafechaPago = new IgnorarFechaPago_Mdl();
-        //$resultActivos = $politicasModel->obtenerProveedoresConPoliticaActiva();
+        $resultActivos = $ignorafechaPago->obtenerProveedoresConFechaPagoIgnorada();
         $listaDisponibles = $ignorafechaPago->getProveedoresDisponibles();
 
         if ($resultIdArea['success']) {
@@ -452,7 +452,7 @@ class ExcepcionesProveedoresController extends Controller
             $data['menuData'] = $menuData;
             $data['areaData'] = $areaData;
             $data['areaLink'] = $areaLink;
-            //$data['proveedoresPoliticaActiva'] = $resultActivos;
+            $data['proveedoresFechaPagoIgnorada'] = $resultActivos;
             $data['listaProveedores'] = $listaDisponibles;
             $this->view('Administrador/ExcepcionesProveedores/fechaPagoProveedor', $data);
         } else {
@@ -536,7 +536,7 @@ class ExcepcionesProveedoresController extends Controller
         }
 
         $nuevoEstatus = ($estatus == 1) ? 0 : 1;
-        
+
         // Preparar campos y filtros siguiendo el patrón de consumo
         $campos = [
             'estatus' => $nuevoEstatus
@@ -681,7 +681,7 @@ class ExcepcionesProveedoresController extends Controller
         }
 
         $ignoraDescuentoModel = new IgnoraDescuento_Mdl();
-        
+
         // Preparar campos siguiendo el patrón de consumo
         $campos = [
             'idProveedor' => $idProveedor,
@@ -719,7 +719,7 @@ class ExcepcionesProveedoresController extends Controller
         }
 
         $exentoAnoFiscModel = new ExentoAnoFisc_Mdl();
-        
+
         // Preparar campos siguiendo el patrón de consumo
         $campos = [
             'idProveedor' => $idProveedor,
@@ -756,7 +756,7 @@ class ExcepcionesProveedoresController extends Controller
         }
 
         $exentoFechaEmisionModel = new ExentoFechaEmision_Mdl();
-        
+
         // Preparar campos siguiendo el patrón de consumo
         $campos = [
             'idProveedor' => $idProveedor,
@@ -795,7 +795,7 @@ class ExcepcionesProveedoresController extends Controller
         }
 
         $usoCfdiDistintoModel = new UsoCfdiDistinto_Mdl();
-        
+
         // Preparar campos siguiendo el patrón de consumo
         $campos = [
             'idProveedor' => $idProveedor,
@@ -835,7 +835,7 @@ class ExcepcionesProveedoresController extends Controller
         }
 
         $bloqDiferenciasModel = new BloqDiferencias_Mdl();
-        
+
         // Preparar campos siguiendo el patrón de consumo
         $campos = [
             'idProveedor' => $idProveedor,
@@ -883,6 +883,21 @@ class ExcepcionesProveedoresController extends Controller
 
         $model = new PoliticasComerciales_Mdl();
         $result = $model->desactivarDescontarPromociones($idProveedor, $idUser);
+
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode([
+            'success' => $result['success'],
+            'message' => $result['message'] ?? ($result['success'] ? 'OK' : 'Error'),
+        ]);
+    }
+
+    public function eliminarProveedorFechaPagoIgnorada()
+    {
+        $idProveedor = (int) ($_POST['idProveedor'] ?? 0);
+        $idUser = $_SESSION['EQXident'] ?? 0;
+
+        $model = new IgnorarFechaPago_Mdl();
+        $result = $model->eliminarIgnoraFechaPago($idProveedor, $idUser);
 
         header('Content-Type: application/json; charset=utf-8');
         echo json_encode([
@@ -953,31 +968,29 @@ class ExcepcionesProveedoresController extends Controller
         }
     }
 
-    // Metodo para agregar Proveedor a tabla para excepcion Ignora Fecha Pago
     public function agregarProveedorIFP()
     {
         $data = []; // Aquí puedes pasar datos a la vista si es necesario
         $idProveedor = $_POST['idProveedor'] ?? '';
         $motivo = $_POST['motivo'] ?? '';
 
-
         if ($this->debug == 1) {
             echo "<br>Contenido de data:<br>";
             var_dump($data);
             echo "<br>Contenido de IdProveedor: $idProveedor <br>";
+            echo "<br>Contenido de motivo: $motivo <br>";
         }
 
-        $ignorarFechaPagoModel = new IgnorarFechaPago_Mdl();
-        
+        $ignoraFechaPagoModel = new IgnorarFechaPago_Mdl();
+
         // Preparar campos siguiendo el patrón de consumo
         $campos = [
             'idProveedor' => $idProveedor,
             'motivo' => $motivo,
-            'estatus' => 1,
             'idUserReg' => $_SESSION['EQXident'] ?? 0
         ];
 
-        $resultExcepciones = $ignorarFechaPagoModel->registraIgnoraFechaPago($campos);
+        $resultExcepciones = $ignoraFechaPagoModel->registraIgnoraFechaPago($campos);
 
         if ($resultExcepciones['success']) {
             $Message = $resultExcepciones['message'];

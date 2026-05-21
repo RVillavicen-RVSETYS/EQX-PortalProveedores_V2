@@ -60,6 +60,34 @@ class IgnorarFechaPago_Mdl
         }
     }
 
+    // Proveedores que ya tienen la regla de Ignorar Fecha de Pago Activa
+    public function obtenerProveedoresConFechaPagoIgnorada()
+    {
+        try {
+            $sql = "SELECT
+                        confProv.id AS Id,
+                        confProv.idProveedor AS IdProveedor,
+                        prov.nombre AS Proveedor,
+                        confProv.motivo AS Motivo,
+                        confProv.estatus AS Estatus
+                    FROM
+                        {$this->tabla} confProv
+                        INNER JOIN proveedores prov ON prov.id = confProv.idProveedor
+                    ORDER BY confProv.idProveedor";
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute();
+            $dataResul = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            if ($dataResul && count($dataResul) > 0) {
+                return ['success' => true, 'data' => $dataResul];
+            }
+            return ['success' => false, 'message' => 'No hay proveedores con la regla de Ignorar Fecha de Pago.'];
+        } catch (\PDOException $e) {
+            $timestamp = date('Y-m-d H:i:s');
+            error_log("[$timestamp] IgnorarFechaPago_Mdl::obtenerProveedoresConFechaPagoIgnorada: " . $e->getMessage(), 3, LOG_FILE_BD);
+            return ['success' => false, 'message' => 'Error al obtener la lista. Notifica a tu administrador.'];
+        }
+    }
+
     // Metodo para agregar el proveedor a la tabla de la regla
     public function registraIgnoraFechaPago($campos)
     {
@@ -127,6 +155,31 @@ class IgnorarFechaPago_Mdl
             return ['success' => false, 'message' => 'Error: ' . $e->getMessage(), 'filasAfectadas' => 0];
         }
     }
+
+    // Elimina un Proveedor de la tabla conf_provIngoraFechaPago
+    public function eliminarIgnoraFechaPago(int $idProveedor, $idUserReg): array
+    {
+        if ($idProveedor <= 0) {
+            return ['success' => false, 'message' => 'Identificador de proveedor no válido.'];
+        }
+        try {
+            $sql = "DELETE FROM {$this->tabla} WHERE idProveedor = :idProveedor";
+            $stmt = $this->db->prepare($sql);
+            $stmt->bindValue(':idProveedor', $idProveedor, PDO::PARAM_INT);
+            $stmt->execute();
+            $filas = $stmt->rowCount();
+            if ($filas >= 1) {
+                $this->writeLog('ELIMINAR', $idProveedor, '(eliminado de la lista)', $idUserReg);
+                return ['success' => true, 'message' => 'Proveedor eliminado correctamente.'];
+            }
+            return ['success' => false, 'message' => 'No se encontró el registro del proveedor.'];
+        } catch (\PDOException $e) {
+            $timestamp = date('Y-m-d H:i:s');
+            error_log("[$timestamp] IgnorarFechaPago_Mdl::eliminarIgnoraFechaPago: " . $e->getMessage(), 3, LOG_FILE_BD);
+            return ['success' => false, 'message' => 'Error al eliminar. Notifica a tu administrador.'];
+        }
+    }
+
 
     private function writeLog(string $accion, int $idProveedor, string $motivo, $idUserReg): void
     {
