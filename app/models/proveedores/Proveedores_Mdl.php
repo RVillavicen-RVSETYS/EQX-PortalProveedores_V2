@@ -409,14 +409,16 @@ class Proveedores_Mdl
                     ucd.usoCfdi AS UsoCfdi, 
                     IFNULL(bd.idProveedor, 0) AS BloqDiferenciaMonto,
                     IFNULL( pps.idProveedor, 0 ) AS PermitirPueSiempre,
-                    pps.fechaExpiracion AS FechaExpiracionPueSiempre
+                    pps.fechaExpiracion AS FechaExpiracionPueSiempre,
+                    IFNULL( ifp.idProveedor, 0 ) AS IgnoraFechaPago
                 FROM proveedores p 
                 LEFT JOIN conf_provIgnoraDescuento iDesc ON p.id = iDesc.idProveedor
                 LEFT JOIN conf_provExentoAnoFisc exanio ON p.id = exanio.idProveedor AND exanio.estatus = '1'
                 LEFT JOIN conf_provExentoFechaEmision exemi ON p.id = exemi.idProveedor AND exemi.estatus = '1'
                 LEFT JOIN conf_provUsoCfdiDistinto ucd ON p.id = ucd.idProveedor AND ucd.estatus = '1'
                 LEFT JOIN conf_provBloqDiferencias bd ON p.id = bd.idProveedor 
-                LEFT JOIN conf_provPermitirPueSiempre pps ON p.id = pps.idProveedor AND pps.estatus = '1' 
+                LEFT JOIN conf_provPermitirPueSiempre pps ON p.id = pps.idProveedor AND pps.estatus = '1'
+                LEFT JOIN conf_provIgnoraFechaPago ifp ON p.id = ifp.idProveedor AND ifp.estatus = '1' 
                 WHERE p.id = :idProveedor
             ";
 
@@ -457,7 +459,8 @@ class Proveedores_Mdl
                 'BloqDiferenciaMonto' => $result['BloqDiferenciaMonto'] == $idProveedor,
                 'DescontarPromocionesAplicables' => $result['descontarPromocionesAplicables'] == 1,
                 'PermitirPueSiempre' => $result['PermitirPueSiempre'] == $idProveedor,
-                'FechaExpiracionPueSiempre' => $result['FechaExpiracionPueSiempre'] ?? null
+                'FechaExpiracionPueSiempre' => $result['FechaExpiracionPueSiempre'] ?? null,
+                'IgnoraFechaPago' => $result['IgnoraFechaPago'] == $idProveedor
             ];
 
             return ['success' => true, 'message' => 'Todo OK', 'data' => $responseData];

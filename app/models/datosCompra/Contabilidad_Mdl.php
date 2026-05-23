@@ -113,7 +113,7 @@ class Contabilidad_Mdl
                         COALESCE(GROUP_CONCAT(DISTINCT NULLIF(cp.uuid, '') SEPARATOR ', '), 'N/A') AS UUIDCP,
                         COALESCE(DATE_FORMAT(cf.fechaFac, '%d/%m/%Y'), 'N/A') AS FechaFactura,
                         COALESCE(DATE_FORMAT(pc.fechaPago, '%d/%m/%Y'), 'N/A') AS FechaPago,
-                        COALESCE(GROUP_CONCAT(DISTINCT NULLIF(CONCAT_WS('-', NULLIF(pc.idClaveBanco, ''), NULLIF(pc.noCuenta, '')), '') SEPARATOR ', '), 'N/A') AS CuentaBanco,
+                        COALESCE(GROUP_CONCAT(DISTINCT NULLIF(CONCAT_WS(' - ', NULLIF(cb.nombreCorto, ''), NULLIF(pc.noCuenta, '')), '') SEPARATOR ', '), 'N/A') AS CuentaBanco,
                         COALESCE(GROUP_CONCAT(DISTINCT NULLIF(pc.tipoCambio, '') SEPARATOR ', '), 'N/A') AS TipoCambio
                     FROM
                         compras com
@@ -122,6 +122,7 @@ class Contabilidad_Mdl
                         LEFT JOIN cfdi_complementoPago cp ON cpd.idComplementoPago = cp.id AND cp.estatus = '2'
                         LEFT JOIN cfdi_notasCreditos nc ON (com.id = nc.idCompra OR cf.uuid = nc.uuidRelacionado) AND nc.estatus NOT IN ('0', '3')
                         LEFT JOIN pagos_compras pc ON com.id = pc.idAcuse
+                        LEFT JOIN cat_bancos cb ON pc.idClaveBanco = cb.id
                     WHERE
                         $filtrosSQL
                     GROUP BY cf.id

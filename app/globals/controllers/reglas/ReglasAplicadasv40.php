@@ -899,9 +899,13 @@ class ReglasAplicadasv40
             foreach ($pagoNodo['DoctosRelacionados'] as $dr) {
                 $uuidDR = strtoupper($dr['IdDocumento'] ?? '');
                 $impPagadoDR = round(floatval($dr['ImpPagado'] ?? 0), 2);
+                $equivalenciaDR = floatval($dr['EquivalenciaDR'] ?? 1);
+                if ($equivalenciaDR <= 0) $equivalenciaDR = 1;
+                $montoConvertidoDR = round($impPagadoDR * $equivalenciaDR, 2);
+                $montoConvertidoAlternoDR = round($impPagadoDR / $equivalenciaDR, 2); // Por si el proveedor envía el recíproco (ej. 0.05 en vez de 17)
 
                 if ($this->debug == 1) {
-                    echo "<br> * Buscando BD para DoctoRelacionado: UUID={$uuidDR}, ImpPagado={$impPagadoDR}";
+                    echo "<br> * Buscando BD para DoctoRelacionado: UUID={$uuidDR}, ImpPagado={$impPagadoDR} (Conv: {$montoConvertidoDR} / Alt: {$montoConvertidoAlternoDR})";
                 }
 
                 $matchIdDR = null;
@@ -910,10 +914,17 @@ class ReglasAplicadasv40
                         continue;
                     }
 
-                    $montoMatch = abs($pagoBD['montoPagoReal'] - $impPagadoDR) < 0.01;
+                    // Se puede hacer match exacto por el monto original de la factura O por el monto real pagado usando EquivalenciaDR
+                    // Se aumentó la tolerancia a 0.05 (5 centavos) para ignorar pequeñas diferencias de redondeo del proveedor
+                    $montoOriginalMatch = abs($pagoBD['montoPagado'] - $impPagadoDR) <= 0.05;
+                    $montoConvertidoMatch = abs($pagoBD['montoPagoReal'] - $montoConvertidoDR) <= 0.05 || abs($pagoBD['montoPagoReal'] - $montoConvertidoAlternoDR) <= 0.05;
+                    // También verificamos contra montoPagoReal directo por retrocompatibilidad
+                    $montoRealDirectoMatch = abs($pagoBD['montoPagoReal'] - $impPagadoDR) <= 0.05;
+                    
+                    $montoMatch = $montoOriginalMatch || $montoConvertidoMatch || $montoRealDirectoMatch;
                     $monedaMatch = ($pagoBD['monedaPagoReal'] === $monedaXMLPago);
-                    $fechaMatch = empty($pagoBD['fechaPago']) || substr($pagoBD['fechaPago'], 0, 10) === $fechaXMLPago;
-                    $formaMatch = empty($pagoBD['formaPagoSAT']) || $pagoBD['formaPagoSAT'] === $formaXMLPago;
+                    $fechaMatch = $noValidarFechas || empty($pagoBD['fechaPago']) || substr($pagoBD['fechaPago'], 0, 10) === $fechaXMLPago;
+                    $formaMatch = $noValidarFormas || empty($pagoBD['formaPagoSAT']) || $pagoBD['formaPagoSAT'] === $formaXMLPago;
                     $uuidMatch = strtoupper($pagoBD['uuid'] ?? '') === $uuidDR;
 
                     if ($montoMatch && $monedaMatch && $fechaMatch && $formaMatch && $uuidMatch) {
@@ -934,16 +945,21 @@ class ReglasAplicadasv40
                             if (!$pBD['usado'] && strtoupper($pBD['uuid'] ?? '') === $uuidDR) {
                                 $hayDisponibles = true;
                                 $fallas = [];
-                                if (abs($pBD['montoPagoReal'] - $impPagadoDR) >= 0.01) {
-                                    $fallas[] = "Monto (XML: {$impPagadoDR} vs BD: {$pBD['montoPagoReal']})";
+                                
+                                $montoOriginalMatch = abs($pBD['montoPagado'] - $impPagadoDR) <= 0.20;
+                                $montoConvertidoMatch = abs($pBD['montoPagoReal'] - $montoConvertidoDR) <= 0.20 || abs($pBD['montoPagoReal'] - $montoConvertidoAlternoDR) <= 0.20;
+                                $montoRealDirectoMatch = abs($pBD['montoPagoReal'] - $impPagadoDR) <= 0.20;
+                                
+                                if (!$montoOriginalMatch && !$montoConvertidoMatch && !$montoRealDirectoMatch) {
+                                    $fallas[] = "Monto (XML: {$impPagadoDR} vs BD Orig: {$pBD['montoPagado']} | Real: {$pBD['montoPagoReal']})";
                                 }
                                 if ($pBD['monedaPagoReal'] !== $monedaXMLPago) {
                                     $fallas[] = "Moneda (XML: {$monedaXMLPago} vs BD: {$pBD['monedaPagoReal']})";
                                 }
-                                if (!empty($pBD['formaPagoSAT']) && $pBD['formaPagoSAT'] !== $formaXMLPago) {
+                                if (!$noValidarFormas && !empty($pBD['formaPagoSAT']) && $pBD['formaPagoSAT'] !== $formaXMLPago) {
                                     $fallas[] = "Forma Pago (XML: {$formaXMLPago} vs BD: {$pBD['formaPagoSAT']})";
                                 }
-                                if (!empty($pBD['fechaPago']) && substr($pBD['fechaPago'], 0, 10) !== $fechaXMLPago) {
+                                if (!$noValidarFechas && !empty($pBD['fechaPago']) && substr($pBD['fechaPago'], 0, 10) !== $fechaXMLPago) {
                                     $fallas[] = "Fecha Pago (XML: {$fechaXMLPago} vs BD: " . substr($pBD['fechaPago'], 0, 10) . ")";
                                 }
 

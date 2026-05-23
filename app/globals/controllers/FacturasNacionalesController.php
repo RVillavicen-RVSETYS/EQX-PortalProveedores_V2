@@ -494,7 +494,7 @@ class FacturasNacionalesController extends Controller
 
                 // Ejecutar el método validarReglasNegocioNacional_Pagos
                 $configParaValidaciones = array();
-                $configParaValidaciones['Excepciones']['NoValidarFechasPago'] = 1;
+                $configParaValidaciones['Excepciones']['NoValidarFechasPago'] = !empty($exepcionesProv['data']['IgnoraFechaPago']) ? 1 : 0;
                 $configParaValidaciones['Excepciones']['NoValidarFormasPago'] = 1;
 
                 $reglasNegocio = $class_Validaciones->validarReglasNegocioNacional_Pagos($dataCFDIXML['data'], $comprasPorFacturas['data'], $dataPagosProv['data'], $configParaValidaciones);

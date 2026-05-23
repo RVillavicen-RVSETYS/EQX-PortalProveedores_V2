@@ -13,23 +13,16 @@ if (empty($listaPagos)) {
 
 ?>
 
-<table class="table table-sm" id="tablaReporteContable">
+<table class="table table-sm" id="tablaPagosRealizados">
     <thead>
         <tr>
-            <th class="text-center">Acuse</th>
-            <th>Razón Social</th>
-            <th>RFC</th>
-            <th>Folio Fac</th>
-            <th>UUID Fac</th>
-            <th>Metodo Pago</th>
-            <th>Monto Egreso</th>
-            <th>Fecha de Pago</th>
-            <th>Tipo de Cambio</th>
-            <th>Folio CP</th>
-            <th>UUID CP</th>
-            <th>Folio NC</th>
-            <th>UUID NC</th>
-            <th>Banco y N° de Cuenta</th>
+            <th>Acuse</th>
+            <th>Serie</th>
+            <th>Proveedor</th>
+            <th>Orden Compra</th>
+            <th>Recepción</th>
+            <th>Forma Pago</th>
+            <th>Monto Pagado</th>
         </tr>
     </thead>
     <tbody>
@@ -38,19 +31,12 @@ if (empty($listaPagos)) {
         ?>
             <tr>
                 <th class="text-center"><?= $pago['Acuse']; ?></th>
-                <th><?= $pago['RazonSocial']; ?></th>
-                <th><?= $pago['RFC']; ?></th>
-                <th><?= $pago['FolioFac']; ?></th>
-                <th><?= $pago['UUIDFac']; ?></th>
-                <th><?= $pago['MetodoPago']; ?></th>
-                <th class="text-right">$ <?= number_format($pago['MontoEgreso'], 2, '.', ','); ?></th>
-                <th class="text-center"><?= $pago['FechaPago']; ?></th>
-                <th><?= $pago['TipoCambio']; ?></th>
-                <th><?= str_replace(',', ',<br>', $pago['FolioCP']); ?></th>
-                <th><?= str_replace(', ', ',<br>', $pago['UUIDCP']); ?></th>
-                <th><?= str_replace(',', ',<br>', $pago['FolioNC']); ?></th>
-                <th><?= str_replace(', ', ',<br>', $pago['UUIDNC']); ?></th>
-                <th><?= str_replace(', ', ',<br>', $pago['CuentaBanco']); ?></th>
+                <th><?= $pago['Serie']; ?></th>
+                <th><?= $pago['Emisor']; ?></th>
+                <th><?= $pago['OC']; ?></th>
+                <th><?= $pago['HES']; ?></th>
+                <th><?= $pago['FormaPago']; ?></th>
+                <th class="text-right">$ <?= number_format($pago['MontoPagado'], 2, '.', ','); ?></th>
             </tr>
         <?php
         }
@@ -59,7 +45,7 @@ if (empty($listaPagos)) {
 </table>
 
 <script>
-    $('#tablaReporteContable').DataTable({
+    $('#tablaPagosRealizados').DataTable({
         iDisplayLength: 25,
         responsive: false,
         fixedColumns: true,
@@ -67,6 +53,9 @@ if (empty($listaPagos)) {
         scrollCollapse: true,
         autoWidth: true,
         bSort: true,
+        order: [
+            [0, "desc"]
+        ],
         dom: 'Blfrtip',
         lengthMenu: [
             [10, 25, 50, -1],

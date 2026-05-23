@@ -33,8 +33,8 @@ if (empty($listaCompras)) {
         <th class="text-dark font-weight-bold">Acuse</th>
         <th class="text-dark font-weight-bold">Proveedor</th>
         <th class="text-dark font-weight-bold">Orden Compra</th>
-        <th class="text-dark font-weight-bold">Monto</th>
         <th class="text-dark font-weight-bold">Folio</th>
+        <th class="text-dark font-weight-bold">Forma y Metodo Pago</th>
         <th class="text-dark font-weight-bold">Fecha Recepción</th>
         <th class="text-dark font-weight-bold">Factura</th>
         <th class="text-dark font-weight-bold">Complemento</th>
@@ -76,8 +76,8 @@ if (empty($listaCompras)) {
                     </div>
                 </td>
                 <td><span><?= $facturas['ordenCompra']; ?></span></td>
-                <td class="text-right"><span>$ <?= number_format($facturas['Total'], 2, '.', ','); ?></span></td>
                 <td class="text-right"><span><?= $facturas['SerieFact']; ?><?= $facturas['FolioFact']; ?></span></td>
+                <td class="text-center"><span><?= $facturas['FormaPago']; ?> / <?= $facturas['MetodoPago']; ?></span></td>
                 <td><span><?= $facturas['FechaReg']; ?></span></td>
                 <td class="text-center"><span class="<?= $conFactura; ?>"><?= $conFacturaTxt; ?></span></td>
                 <td class="text-center"><span class="<?= $conComplemento; ?>"><?= $conComplementoTxt; ?></span></td>
