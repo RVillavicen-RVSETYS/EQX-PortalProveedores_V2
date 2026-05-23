@@ -12,6 +12,7 @@ use App\Models\Proveedores\Excepciones\BloqDiferencias_Mdl;
 use App\Models\Proveedores\Excepciones\ExcepcionesProveedores_Mdl;
 use App\Models\Proveedores\Excepciones\PermitirPueSiempre_Mdl;
 use App\Models\Proveedores\Excepciones\PoliticasComerciales_Mdl;
+use App\Models\Proveedores\Excepciones\IgnorarFechaPago_Mdl;
 use App\Models\Proveedores\Proveedores_Mdl;
 
 class ExcepcionesProveedoresController extends Controller
@@ -422,6 +423,46 @@ class ExcepcionesProveedoresController extends Controller
         }
     }
 
+    public function listaAnulacionValidacionFechaPagoProveedor()
+    {
+        $data = [];
+        $namespaceParts = explode('\\', __NAMESPACE__);
+        $areaLink = end($namespaceParts);
+
+        $menuModel = new Menu_Mdl();
+        $resultIdArea = $menuModel->obtenerIdAreaPorLink($areaLink);
+
+        $ignorafechaPago = new IgnorarFechaPago_Mdl();
+        $resultActivos = $ignorafechaPago->obtenerProveedoresConFechaPagoIgnorada();
+        $listaDisponibles = $ignorafechaPago->getProveedoresDisponibles();
+
+        if ($resultIdArea['success']) {
+            $idArea = $resultIdArea['data'];
+        } else {
+            $timestamp = date('Y-m-d H:i:s');
+            error_log("[$timestamp] app\\controllers\\Administrador\\ExcepcionesProveedoresController -> listaPoliticasComerciales: " . $resultIdArea['message'], 3, LOG_FILE);
+            echo 'No pudimos traer el id del Area:' . $resultIdArea['message'];
+            exit(0);
+        }
+
+        $menuData = $menuModel->obtenerEstructuraMenu($_SESSION['EQXidNivel'], $idArea);
+        $areaData = $menuModel->listarAreasDisponibles($_SESSION['EQXidNivel']);
+
+        if ($menuData['success'] && $areaData['success']) {
+            $data['menuData'] = $menuData;
+            $data['areaData'] = $areaData;
+            $data['areaLink'] = $areaLink;
+            $data['proveedoresFechaPagoIgnorada'] = $resultActivos;
+            $data['listaProveedores'] = $listaDisponibles;
+            $this->view('Administrador/ExcepcionesProveedores/fechaPagoProveedor', $data);
+        } else {
+            $timestamp = date('Y-m-d H:i:s');
+            error_log("[$timestamp] app\\controllers\\Administrador\\ExcepcionesProveedoresController -> listaAnulacionValidacionFechaPagoProveedor: error menu o areas", 3, LOG_FILE);
+            echo 'Problemas al cargar menú o áreas.';
+            exit(0);
+        }
+    }
+
     public function cfdisPorProveedor()
     {
         $data = []; // Aquí puedes pasar datos a la vista si es necesario
@@ -495,7 +536,7 @@ class ExcepcionesProveedoresController extends Controller
         }
 
         $nuevoEstatus = ($estatus == 1) ? 0 : 1;
-        
+
         // Preparar campos y filtros siguiendo el patrón de consumo
         $campos = [
             'estatus' => $nuevoEstatus
@@ -640,7 +681,7 @@ class ExcepcionesProveedoresController extends Controller
         }
 
         $ignoraDescuentoModel = new IgnoraDescuento_Mdl();
-        
+
         // Preparar campos siguiendo el patrón de consumo
         $campos = [
             'idProveedor' => $idProveedor,
@@ -678,7 +719,7 @@ class ExcepcionesProveedoresController extends Controller
         }
 
         $exentoAnoFiscModel = new ExentoAnoFisc_Mdl();
-        
+
         // Preparar campos siguiendo el patrón de consumo
         $campos = [
             'idProveedor' => $idProveedor,
@@ -715,7 +756,7 @@ class ExcepcionesProveedoresController extends Controller
         }
 
         $exentoFechaEmisionModel = new ExentoFechaEmision_Mdl();
-        
+
         // Preparar campos siguiendo el patrón de consumo
         $campos = [
             'idProveedor' => $idProveedor,
@@ -754,7 +795,7 @@ class ExcepcionesProveedoresController extends Controller
         }
 
         $usoCfdiDistintoModel = new UsoCfdiDistinto_Mdl();
-        
+
         // Preparar campos siguiendo el patrón de consumo
         $campos = [
             'idProveedor' => $idProveedor,
@@ -794,7 +835,7 @@ class ExcepcionesProveedoresController extends Controller
         }
 
         $bloqDiferenciasModel = new BloqDiferencias_Mdl();
-        
+
         // Preparar campos siguiendo el patrón de consumo
         $campos = [
             'idProveedor' => $idProveedor,
@@ -842,6 +883,21 @@ class ExcepcionesProveedoresController extends Controller
 
         $model = new PoliticasComerciales_Mdl();
         $result = $model->desactivarDescontarPromociones($idProveedor, $idUser);
+
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode([
+            'success' => $result['success'],
+            'message' => $result['message'] ?? ($result['success'] ? 'OK' : 'Error'),
+        ]);
+    }
+
+    public function eliminarProveedorFechaPagoIgnorada()
+    {
+        $idProveedor = (int) ($_POST['idProveedor'] ?? 0);
+        $idUser = $_SESSION['EQXident'] ?? 0;
+
+        $model = new IgnorarFechaPago_Mdl();
+        $result = $model->eliminarIgnoraFechaPago($idProveedor, $idUser);
 
         header('Content-Type: application/json; charset=utf-8');
         echo json_encode([
@@ -908,6 +964,45 @@ class ExcepcionesProveedoresController extends Controller
             echo json_encode([
                 'success' => false,
                 'message' => $resultExcepciones['message']
+            ]);
+        }
+    }
+
+    public function agregarProveedorIFP()
+    {
+        $data = []; // Aquí puedes pasar datos a la vista si es necesario
+        $idProveedor = $_POST['idProveedor'] ?? '';
+        $motivo = $_POST['motivo'] ?? '';
+
+        if ($this->debug == 1) {
+            echo "<br>Contenido de data:<br>";
+            var_dump($data);
+            echo "<br>Contenido de IdProveedor: $idProveedor <br>";
+            echo "<br>Contenido de motivo: $motivo <br>";
+        }
+
+        $ignoraFechaPagoModel = new IgnorarFechaPago_Mdl();
+
+        // Preparar campos siguiendo el patrón de consumo
+        $campos = [
+            'idProveedor' => $idProveedor,
+            'motivo' => $motivo,
+            'idUserReg' => $_SESSION['EQXident'] ?? 0
+        ];
+
+        $resultExcepciones = $ignoraFechaPagoModel->registraIgnoraFechaPago($campos);
+
+        if ($resultExcepciones['success']) {
+            $Message = $resultExcepciones['message'];
+            echo json_encode([
+                'success' => true,
+                'message' => $Message
+            ]);
+        } else {
+            $errorMessage = $resultExcepciones['message'];
+            echo json_encode([
+                'success' => false,
+                'message' => $errorMessage
             ]);
         }
     }

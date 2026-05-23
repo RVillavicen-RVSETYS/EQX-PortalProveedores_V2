@@ -1,7 +1,7 @@
 <?php
 $debug = 0;
 if ($debug == 1) {
-    var_dump($proveedoresPoliticaActiva ?? null, $listaProveedores ?? null);
+    var_dump($proveedoresFechaPagoIgnorada ?? null, $listaProveedores ?? null);
 }
 ?>
 
@@ -12,11 +12,11 @@ if ($debug == 1) {
                 <h4 class="card-title mb-0">Lista de proveedores</h4>
             </div>
             <div class="card-body border">
-                <form id="agregarProveedorPoliticaComercial">
+                <form id="agregarAnulacionValidacionFechaPagoProveedor">
                     <div class="row">
-                        <label for="idProveedorPolitica">Proveedores</label>
+                        <label for="idProveedorfechaPago">Proveedores</label>
                         <div class="input-group mb-3">
-                            <select name="idProveedor" id="idProveedorPolitica" class="select2 form-control custom-select" style="width: 100%;">
+                            <select name="idProveedor" id="idProveedorfechaPago" class="select2 form-control custom-select" style="width: 100%;">
                                 <option value="">Selecciona un proveedor</option>
                                 <?php
                                 if (!empty($listaProveedores['success']) && !empty($listaProveedores['data'])) {
@@ -31,17 +31,17 @@ if ($debug == 1) {
                         </div>
                     </div>
                     <div class="row">
-                        <label for="motivoPoliticaComercial">Motivo</label>
-                        <textarea class="form-control" name="motivo" id="motivoPoliticaComercial" rows="3" style="resize: none;" placeholder="Describe el motivo del ajuste..."></textarea>
+                        <label for="motivoFechaPagoSinValidacion">Motivo</label>
+                        <textarea class="form-control" name="motivo" id="motivoFechaPagoSinValidacion" rows="3" style="resize: none;" placeholder="Describe el motivo del ajuste..."></textarea>
                     </div>
                     <div class="row">
-                        <div id="bloquear-btnAgregaProveedorPolitica" style="display:none;">
+                        <div id="bloquear-btnAgregaProveedorFechaPagoInvalidada" style="display:none;">
                             <button class="btn btn-primary btn-md" type="button" disabled="" style="height: 100%;">
                                 <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
                             </button>
                         </div>
-                        <div id="desbloquear-btnAgregaProveedorPolitica">
-                            <button type="submit" id="btnAgregaProveedorPolitica" class="btn btn-md btn-outline-primary mx-2 mt-3">Guardar</button>
+                        <div id="desbloquear-btnAgregaProveedorFechaPagoInvalidada">
+                            <button type="submit" id="btnAgregaProveedorFechaPagoInvalidada" class="btn btn-md btn-outline-primary mx-2 mt-3">Guardar</button>
                         </div>
                     </div>
                 </form>
@@ -50,35 +50,35 @@ if ($debug == 1) {
     </div>
 
     <div class="col-md-8">
-        <?php if (empty($proveedoresPoliticaActiva['success'])) { ?>
+        <?php if (empty($proveedoresFechaPagoIgnorada['success'])) { ?>
             <div class="alert alert-info">
-                <?= htmlspecialchars($proveedoresPoliticaActiva['message'] ?? 'No hay proveedores con ajuste de políticas comerciales activo.'); ?>
+                <?= htmlspecialchars($proveedoresFechaPagoIgnorada['message'] ?? 'No hay proveedores con ajuste de fecha pago activo.'); ?>
             </div>
         <?php } else { ?>
-            <table class="table table-sm" id="tablePoliticasComercial">
+            <table class="table table-sm" id="tableFechaPagoProveedor">
                 <thead>
                     <tr>
                         <th>No. proveedor</th>
                         <th>Proveedor</th>
-                        <th>Razón social</th>
+                        <th>Motivo</th>
                         <th class="text-center">Quitar</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <?php foreach ($proveedoresPoliticaActiva['data'] as $proveedor) { ?>
+                    <?php foreach ($proveedoresFechaPagoIgnorada['data'] as $proveedor) { ?>
                         <tr>
                             <td class="text-right"><?= (int) $proveedor['IdProveedor']; ?></td>
                             <td><?= htmlspecialchars($proveedor['Proveedor'] ?? ''); ?></td>
-                            <td><?= htmlspecialchars($proveedor['RazonSocial'] ?? ''); ?></td>
+                            <td><?= htmlspecialchars($proveedor['Motivo'] ?? ''); ?></td>
                             <td class="text-center">
-                                <div id="bloquear-btnPolitica<?= (int) $proveedor['IdProveedor']; ?>" style="display:none;">
+                                <div id="bloquear-btnFechaPago<?= (int) $proveedor['IdProveedor']; ?>" style="display:none;">
                                     <button class="btn btn-xs btn-rounded btn-danger" type="button" disabled="">
                                         <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
                                     </button>
                                 </div>
-                                <div id="desbloquear-btnPolitica<?= (int) $proveedor['IdProveedor']; ?>">
+                                <div id="desbloquear-btnFechaPago<?= (int) $proveedor['IdProveedor']; ?>">
                                     <button type="button" class="btn btn-xs btn-rounded btn-outline-danger"
-                                        onclick="eliminarPoliticaComercial(<?= (int) $proveedor['IdProveedor']; ?>)"
+                                        onclick="eliminarProveedorFechaPagoIgnorada(<?= (int) $proveedor['IdProveedor']; ?>)"
                                         title="Desactivar ajuste (pone el campo en 0)">
                                         <i class="fas fa-trash-alt"></i>
                                     </button>
@@ -97,8 +97,8 @@ if ($debug == 1) {
 <script src="/dist/js/pages/forms/select2/select2.init.js"></script>
 
 <script>
-    if ($.fn.DataTable && $('#tablePoliticasComercial').length) {
-        $('#tablePoliticasComercial').DataTable({
+    if ($.fn.DataTable && $('#tableFechaPagoProveedor').length) {
+        $('#tableFechaPagoProveedor').DataTable({
             iDisplayLength: 10,
             responsive: false,
             fixedColumns: true,
@@ -110,8 +110,8 @@ if ($debug == 1) {
             lengthMenu: [[10, 25, 50, -1], [10, 25, 50, 'Todo']],
             info: true,
             initComplete: function() {
-                var $filter = $('#tablePoliticasComercial_filter input[type="search"]');
-                if ($filter.length) $filter.attr('id', 'tablePoliticasComercial_search').attr('name', 'tablePoliticasComercial_search');
+                var $filter = $('#tableFechaPagoProveedor_filter input[type="search"]');
+                if ($filter.length) $filter.attr('id', 'tableFechaPagoProveedor_search').attr('name', 'tableFechaPagoProveedor_search');
             },
             buttons: [
                 { extend: 'pdfHtml5', className: 'btn btn-pdf bg-pyme-primary text-white', orientation: 'landscape', pageSize: 'LEGAL', text: 'Pdf' },
