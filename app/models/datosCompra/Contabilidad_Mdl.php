@@ -39,6 +39,7 @@ class Contabilidad_Mdl
         $filtrosDisponibles = [
             'idProveedor' => ['tipoDato' => 'INT', 'sqlFiltro' => 'com.idProveedor = :idProveedor'],
             'entreFechas' => ['tipoDato' => 'STRING', 'sqlFiltro' => '(com.fechaReg BETWEEN :fechaInicial AND :fechaFinal)'],
+            'idLiquidado' => ['tipoDato' => 'INT', 'sqlFiltro' => ''],
         ];
 
         $filtrosSQL = '';
@@ -83,6 +84,18 @@ class Contabilidad_Mdl
                             $filtrosSQL .= ' AND ' . $filtrosDisponibles[$nombreFiltro]['sqlFiltro'];
                             $params[':' . $nombreFiltro] = $valorFiltro;
                             break;
+                        case 'idLiquidado':
+                            if (!in_array($valorFiltro, ['0', '1'], true)) {
+                                throw new \Exception('El valor de idLiquidado debe ser 0 o 1.');
+                            }
+                            if ($valorFiltro == 1) {
+                                // LIQUIDADA: total - NC - pagos <= 0.01 (considerando tolerancia decimal)
+                                $filtrosSQL .= ' AND (com.total - COALESCE(com.totalNotasCredito, 0) - COALESCE(com.totalPagos, 0)) <= 0.01';
+                            } else {
+                                // NO LIQUIDADA: total - NC - pagos > 0.01
+                                $filtrosSQL .= ' AND (com.total - COALESCE(com.totalNotasCredito, 0) - COALESCE(com.totalPagos, 0)) > 0.01';
+                            }
+                            break;
                     }
                 }
             }
@@ -107,6 +120,9 @@ class Contabilidad_Mdl
                         cf.uuid AS UUIDFac,
                         cf.monto AS MontoEgreso,
                         cf.idCatMetodoPago AS MetodoPago,
+                        com.total AS TotalFactura,
+                        com.totalPagos AS TotalPagos,
+                        com.totalNotasCredito AS TotalNotasCredito,
                         COALESCE(GROUP_CONCAT(DISTINCT NULLIF(CONCAT_WS('-', NULLIF(nc.serie, ''), NULLIF(nc.folio, '')), '') SEPARATOR ', '), 'N/A') AS FolioNC,
                         COALESCE(GROUP_CONCAT(DISTINCT NULLIF(nc.uuid, '') SEPARATOR ', '), 'N/A') AS UUIDNC,
                         COALESCE(GROUP_CONCAT(DISTINCT NULLIF(CONCAT_WS('-', NULLIF(cp.serie, ''), NULLIF(cp.folio, '')), '') SEPARATOR ', '), 'N/A') AS FolioCP,

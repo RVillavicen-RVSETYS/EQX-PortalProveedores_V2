@@ -85,6 +85,11 @@ class ReporteContableController extends Controller
             $filtros['entreFechas'] = date('Y-m-1') . ',' . date('Y-m-t');
         }
 
+        // Validacion para filtro de liquidados y No Liquidados
+        if (isset($_POST['idLiquidado'])) {
+            $filtros['idLiquidado'] = $_POST['idLiquidado'];
+        }
+
         $MDL_contabilidad = new Contabilidad_Mdl();
         $listaPagos = $MDL_contabilidad->listarReporteContable($filtros, 0, 'DESC');
 

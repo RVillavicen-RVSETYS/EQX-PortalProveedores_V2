@@ -131,6 +131,19 @@ $fechaFinal = date("Y-m-t");
                                             </div>
                                         </div>
 
+                                        <!--Sección para el filtro de Liguidado y No Liquidado -->
+                                        <div class="col-md-3">
+                                            <label for="idLiquidado">Estado de Liquidación</label>
+                                            <div class="input-group mb-3">
+                                                <select name="idLiquidado" id="idLiquidado" class="select2 form-control custom-select" style="width: 100%;">
+                                                    <option value="">Selecciona el Estado de Liquidación</option>
+                                                    <option value="1">Liquidados</option>
+                                                    <option value="0">No Liquidados</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <!--FIN de Sección para el filtro de Liguidado y No Liquidado -->
+
                                         <div class="col-md-1 align-self-center">
                                             <button type="submit" class="btn btn-success mt-3" name="btnFiltros" id="btnFiltros">Consultar</button>
                                         </div>
