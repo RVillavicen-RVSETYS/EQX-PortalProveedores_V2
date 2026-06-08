@@ -920,11 +920,11 @@ class ReglasAplicadasv40
                     $montoConvertidoMatch = abs($pagoBD['montoPagoReal'] - $montoConvertidoDR) <= 0.05 || abs($pagoBD['montoPagoReal'] - $montoConvertidoAlternoDR) <= 0.05;
                     // También verificamos contra montoPagoReal directo por retrocompatibilidad
                     $montoRealDirectoMatch = abs($pagoBD['montoPagoReal'] - $impPagadoDR) <= 0.05;
-                    
+
                     $montoMatch = $montoOriginalMatch || $montoConvertidoMatch || $montoRealDirectoMatch;
                     $monedaMatch = ($pagoBD['monedaPagoReal'] === $monedaXMLPago);
                     $fechaMatch = $noValidarFechas || empty($pagoBD['fechaPago']) || substr($pagoBD['fechaPago'], 0, 10) === $fechaXMLPago;
-                    $formaMatch = $noValidarFormas || empty($pagoBD['formaPagoSAT']) || $pagoBD['formaPagoSAT'] === $formaXMLPago;
+                    $formaMatch = $noValidarFormas || $pagoBD['formaPagoSAT'] === $formaXMLPago;
                     $uuidMatch = strtoupper($pagoBD['uuid'] ?? '') === $uuidDR;
 
                     if ($montoMatch && $monedaMatch && $fechaMatch && $formaMatch && $uuidMatch) {
@@ -935,28 +935,85 @@ class ReglasAplicadasv40
                 }
                 unset($pagoBD);
 
+                if (empty($matchIdDR) && $formaXMLPago === '17') {
+                    // LOGICA DE AGRUPACIÓN (COMPENSACIÓN)
+                    if ($this->debug == 1) {
+                        echo "<br> &nbsp;&nbsp; <i>* Match 1 a 1 falló. Intentando Match por Agrupación (Compensación) para UUID={$uuidDR}</i>";
+                    }
+                    $sumaAcumulada = 0;
+                    $matchesParaEsteDR = [];
+                    $toleranciaTotal = 0.05; // tolerancia para la suma total
+
+                    foreach ($pagosDisponibles as $key => &$pagoBD) {
+                        if ($pagoBD['usado']) {
+                            continue;
+                        }
+
+                        $monedaMatch = ($pagoBD['monedaPagoReal'] === $monedaXMLPago);
+                        $fechaMatch = $noValidarFechas || empty($pagoBD['fechaPago']) || substr($pagoBD['fechaPago'], 0, 10) === $fechaXMLPago;
+                        $formaMatch = $noValidarFormas || $pagoBD['formaPagoSAT'] === $formaXMLPago;
+                        $uuidMatch = strtoupper($pagoBD['uuid'] ?? '') === $uuidDR;
+
+                        if ($monedaMatch && $fechaMatch && $formaMatch && $uuidMatch) {
+                            $sumaAcumulada += floatval($pagoBD['montoPagoReal']);
+
+                            $matchesParaEsteDR[] = [
+                                'id' => $pagoBD['id'],
+                                'monto' => floatval($pagoBD['montoPagoReal']),
+                                'ref_key' => $key
+                            ];
+
+                            if ($this->debug == 1) {
+                                echo "<br> &nbsp;&nbsp;&nbsp;&nbsp; [+] Agregando ID {$pagoBD['id']} a la bolsa. Suma Acumulada: {$sumaAcumulada}";
+                            }
+
+                            // Verificamos si la suma ya alcanzó el ImpPagadoDR
+                            if (abs($sumaAcumulada - $impPagadoDR) <= $toleranciaTotal || abs($sumaAcumulada - $montoConvertidoDR) <= $toleranciaTotal || abs($sumaAcumulada - $montoConvertidoAlternoDR) <= $toleranciaTotal) {
+                                // EXITO!
+                                foreach ($matchesParaEsteDR as $m) {
+                                    $pagosDisponibles[$m['ref_key']]['usado'] = true;
+                                }
+
+                                $cleanMatches = [];
+                                foreach ($matchesParaEsteDR as $m) {
+                                    $cleanMatches[] = [
+                                        'id' => $m['id'],
+                                        'monto' => $m['monto']
+                                    ];
+                                }
+                                $matchIdDR = $cleanMatches; // Se guarda como arreglo
+                                if ($this->debug == 1) {
+                                    echo "<br> &nbsp;&nbsp; <b>[✓ MATCH AGRUPADO EXITOSO]</b> La suma cuadra perfectamente con el XML ({$impPagadoDR}).";
+                                }
+                                break;
+                            }
+                        }
+                    }
+                    unset($pagoBD);
+                }
+
                 if (empty($matchIdDR)) {
                     $errores[] = "* El abono de $ {$impPagadoDR} asignado al documento UUID {$uuidDR} no coincide con los pagos registrados (diferencia en Fecha de Pago, Monto, Moneda, o Forma de Pago).";
 
                     if ($this->debug == 1) {
-                        echo "<br> * ERROR: No se encontró un registro en BD que cuadre para el UUID {$uuidDR} con monto {$impPagadoDR}.";
+                        echo "<br> <b>* ERROR:</b> No se encontró un registro en BD que cuadre para el UUID {$uuidDR} con monto {$impPagadoDR}.";
                         $hayDisponibles = false;
                         foreach ($pagosDisponibles as $idx => $pBD) {
                             if (!$pBD['usado'] && strtoupper($pBD['uuid'] ?? '') === $uuidDR) {
                                 $hayDisponibles = true;
                                 $fallas = [];
-                                
+
                                 $montoOriginalMatch = abs($pBD['montoPagado'] - $impPagadoDR) <= 0.20;
                                 $montoConvertidoMatch = abs($pBD['montoPagoReal'] - $montoConvertidoDR) <= 0.20 || abs($pBD['montoPagoReal'] - $montoConvertidoAlternoDR) <= 0.20;
                                 $montoRealDirectoMatch = abs($pBD['montoPagoReal'] - $impPagadoDR) <= 0.20;
-                                
+
                                 if (!$montoOriginalMatch && !$montoConvertidoMatch && !$montoRealDirectoMatch) {
-                                    $fallas[] = "Monto (XML: {$impPagadoDR} vs BD Orig: {$pBD['montoPagado']} | Real: {$pBD['montoPagoReal']})";
+                                    $fallas[] = "Monto (XML: {$impPagadoDR} vs BD: {$pBD['montoPagado']})";
                                 }
                                 if ($pBD['monedaPagoReal'] !== $monedaXMLPago) {
                                     $fallas[] = "Moneda (XML: {$monedaXMLPago} vs BD: {$pBD['monedaPagoReal']})";
                                 }
-                                if (!$noValidarFormas && !empty($pBD['formaPagoSAT']) && $pBD['formaPagoSAT'] !== $formaXMLPago) {
+                                if (!$noValidarFormas && $pBD['formaPagoSAT'] !== $formaXMLPago) {
                                     $fallas[] = "Forma Pago (XML: {$formaXMLPago} vs BD: {$pBD['formaPagoSAT']})";
                                 }
                                 if (!$noValidarFechas && !empty($pBD['fechaPago']) && substr($pBD['fechaPago'], 0, 10) !== $fechaXMLPago) {
@@ -967,18 +1024,19 @@ class ReglasAplicadasv40
                                 if (empty($strFallas)) {
                                     $strFallas = "No cuadró por otro parámetro oculto";
                                 }
-                                echo "<br> &nbsp;&nbsp; -> Pago BD [id: {$pBD['id']}, UUID: {$pBD['uuid']}] no cuadró por: " . $strFallas;
+                                echo "<br> &nbsp;&nbsp; -> Fragmento BD [id: {$pBD['id']}] descartado por: " . $strFallas;
                             }
                         }
                         if (!$hayDisponibles) {
-                            echo "<br> * No hay pagos registrados disponibles (o no están pagados) para el UUID {$uuidDR}.";
+                            echo "<br> &nbsp;&nbsp; -> No hay pagos registrados disponibles (o ya fueron usados) para el UUID {$uuidDR}.";
                         }
                     }
                 } else {
                     // Guardamos el matchId especifico para este PagoIndex y este UUID
                     $pagosMatch[$pagoIndex][$uuidDR] = $matchIdDR;
                     if ($this->debug == 1) {
-                        echo "<br> * MATCH EXITOSO: XML Docto UUID {$uuidDR} -> pagos_compras.id={$matchIdDR}";
+                        $strMatch = is_array($matchIdDR) ? 'MULTIPLE (Agrupado)' : $matchIdDR;
+                        echo "<br> <b>[✓ MATCH EXITOSO FINAL]</b> XML Docto UUID {$uuidDR} -> pagos_compras.id = {$strMatch}";
                     }
                 }
             }
