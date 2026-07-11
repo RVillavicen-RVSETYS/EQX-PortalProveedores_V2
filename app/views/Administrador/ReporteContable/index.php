@@ -131,6 +131,17 @@ $fechaFinal = date("Y-m-t");
                                             </div>
                                         </div>
 
+                                        <div class="col-md-2">
+                                            <label for="estatusPago">Estatus Pago</label>
+                                            <div class="input-group mb-3">
+                                                <select name="estatusPago" id="estatusPago" class="select2 form-control custom-select" style="width: 100%;">
+                                                    <option value="">Selecciona Un Estatus</option>
+                                                    <option value="1">Pagadas</option>
+                                                    <option value="0">No Pagadas</option>
+                                                </select>
+                                            </div>
+                                        </div>
+
                                         <div class="col-md-1 align-self-center">
                                             <button type="submit" class="btn btn-success mt-3" name="btnFiltros" id="btnFiltros">Consultar</button>
                                         </div>

@@ -39,6 +39,7 @@ class Contabilidad_Mdl
         $filtrosDisponibles = [
             'idProveedor' => ['tipoDato' => 'INT', 'sqlFiltro' => 'com.idProveedor = :idProveedor'],
             'entreFechas' => ['tipoDato' => 'STRING', 'sqlFiltro' => '(com.fechaReg BETWEEN :fechaInicial AND :fechaFinal)'],
+            'estatusPago' => ['tipoDato' => 'INT', 'sqlFiltro' => '']
         ];
 
         $filtrosSQL = '';
@@ -77,6 +78,13 @@ class Contabilidad_Mdl
                                 $filtrosSQL .= ' AND (com.insolutoPendiente > 0 OR ISNULL(com.insolutoPendiente))';
                             } else {
                                 $filtrosSQL .= ' AND com.insolutoPendiente = 0';
+                            }
+                            break;
+                        case 'estatusPago':
+                            if ($valorFiltro === '1') {
+                                $filtrosSQL .= ' AND com.totalPagos + com.totalNotasCredito >= com.total';
+                            } else if ($valorFiltro === '0') {
+                                $filtrosSQL .= ' AND (com.totalPagos + com.totalNotasCredito) < com.total';
                             }
                             break;
                         default:
