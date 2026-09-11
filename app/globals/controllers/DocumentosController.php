@@ -326,7 +326,7 @@ class DocumentosController extends Controller
 
     public function generadorDeRutas($rutaRelativa, $fileExtension)
     {
-        //$this->debug = 1;
+        //$this->debug = 0;
         $rutaRelativa = base64_decode($rutaRelativa);
 
         if ($this->debug) {

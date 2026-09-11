@@ -205,7 +205,7 @@ function generaSeccionUserMenu($areaData, $areaLink)
 
         default:
             $linkPerfil = 'MiPerfil';
-            $linkSoporte = 'soporteProveedor';
+            $linkSoporte = 'SoporteProveedor';
             $linkLogout = URL_BASE_PROYECT . '/logout.php';
             $nameUser = $_SESSION['EQXnombreUserCto'];
             $subText = $_SESSION['EQXcorreo'];
@@ -232,7 +232,7 @@ function generaSeccionUserMenu($areaData, $areaLink)
 		    <li><a class="' . $estatus . '" href="' . URL_BASE_PROYECT . '/' . $item['link'] . '/' . $item['menu_link'] . '"><i class="' . $item['icono'] . '"></i> ' . $item['nombre'] . '</a></li>';
     }
 
-    ?>
+?>
     <li aria-haspopup="true"><a href="#"><i class="fas fa-user-tie"></i><?= $nameUser; ?><span class="wsarrow"></span>
         </a>
         <ul class="sub-menu sub-session">
@@ -247,47 +247,48 @@ function generaSeccionUserMenu($areaData, $areaLink)
             </div>
             <?= $arsLinks; ?>
             <hr>
-            <li><a id="menuMiPerfil" href="<?=$linkPerfil;?>"><i class="fas fa-user-tie"></i> <?= $textPerfil;?></a></li>
-            <li><a id="menuCentroAyuda" href="<?= $linkSoporte;?>"><i class="fas fa-question-circle"></i> <?= $textSoporte; ?></a></li>
+            <li><a id="menuMiPerfil" href="<?= $linkPerfil; ?>"><i class="fas fa-user-tie"></i> <?= $textPerfil; ?></a></li>
+            <li><a id="menuCentroAyuda" href="<?= $linkSoporte; ?>"><i class="fas fa-question-circle"></i> <?= $textSoporte; ?></a></li>
             <hr>
             <li><a href="<?= $linkLogout; ?>"><i class="fas fa-sign-out-alt"></i> <?= $textlogout; ?></a></li>
         </ul>
     </li>
-    <?php
+<?php
 
 
 }
 
-function generaNotificacionStatica($tipoMensaje, $titulo, $mensaje){
+function generaNotificacionStatica($tipoMensaje, $titulo, $mensaje)
+{
     switch ($tipoMensaje) {
         case 'INFO':
             $noti = '
                 <div class="col-12">
                     <div class="alert alert-info">
                         <button type="button" class="close" data-dismiss="alert" aria-label="Close"> <span aria-hidden="true">&times;</span> </button>
-                        <h3 class="text-info"><i class="fa fa-exclamation-circle"></i> '.$titulo.'</h3> '.$mensaje.'
+                        <h3 class="text-info"><i class="fa fa-exclamation-circle"></i> ' . $titulo . '</h3> ' . $mensaje . '
                     </div>
                 </div>
                     ';
             break;
-    
+
         case 'WARNING':
             $noti = '
                 <div class="col-12">
                     <div class="alert alert-warning">
                         <button type="button" class="close" data-dismiss="alert" aria-label="Close"> <span aria-hidden="true">&times;</span> </button>
-                        <h3 class="text-warning"><i class="fa fa-exclamation-triangle"></i> '.$titulo.'</h3> '.$mensaje.'
+                        <h3 class="text-warning"><i class="fa fa-exclamation-triangle"></i> ' . $titulo . '</h3> ' . $mensaje . '
                     </div>
                 </div>
                     ';
             break;
-        
+
         case 'ERROR':
             $noti = '
                 <div class="col-12">
                     <div class="alert alert-danger">
                         <button type="button" class="close" data-dismiss="alert" aria-label="Close"> <span aria-hidden="true">&times;</span> </button>
-                        <h3 class="text-danger"><i class="fas fa-ban"></i> '.$titulo.'</h3> '.$mensaje.'
+                        <h3 class="text-danger"><i class="fas fa-ban"></i> ' . $titulo . '</h3> ' . $mensaje . '
                     </div>
                 </div>
                     ';
