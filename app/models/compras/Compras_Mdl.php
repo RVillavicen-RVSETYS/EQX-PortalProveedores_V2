@@ -430,8 +430,15 @@ class Compras_Mdl
                             // Validar que el valor sea una cadena de UUIDs separados por comas
                             $uuids = explode(',', $valorFiltro);
                             $uuids = array_map('trim', $uuids); // Limpiar espacios en blanco
-                            $filtrosSQL .= ' AND ' . $filtrosDisponibles[$nombreFiltro]['sqlFiltro'];
-                            $params[':uuids'] = implode(',', $uuids); // Convertir a cadena separada por comas
+                            
+                            $inQuery = [];
+                            foreach ($uuids as $i => $uuid) {
+                                $inQuery[] = ":uuid_$i";
+                                $params[":uuid_$i"] = $uuid;
+                            }
+                            $inQueryStr = implode(',', $inQuery);
+                            $filtroOriginal = $filtrosDisponibles[$nombreFiltro]['sqlFiltro'];
+                            $filtrosSQL .= ' AND ' . str_replace(':uuids', $inQueryStr, $filtroOriginal);
                             break;
 
                         case 'estatusPagado':

@@ -1,6 +1,19 @@
 <script>
     $(document).ready(function() {
         gestionarInputsTolerancia();
+
+        // Cargar correos de la empresa de la sesión al iniciar
+        $.ajax({
+            url: 'ConfiguracionBase/obtenerConfiguracionCorreo',
+            type: 'POST',
+            dataType: 'json',
+            success: function(res) {
+                if (res.success) {
+                    $('#correoRechazoFactura').val(res.data);
+                }
+            }
+        });
+
     });
 
     function limpiarInfoEmpresa() {
@@ -67,6 +80,8 @@
     $(document).on('change', '#empresa', function() {
         const idEmpresa = $(this).val();
 
+        $('#idEmpresaCorreo').val(idEmpresa); // Sincroniza el ID para la pestaña de correos
+
         $('#cantComplemento').val('');
         $('input[name="diasPago[]"]').prop('checked', false);
 
@@ -98,6 +113,22 @@
                 console.log('No se pudo cargar la configuraciÃ³n de la empresa.');
             }
         });
+
+        // Cargar correos de notificación
+        $.ajax({
+            url: 'ConfiguracionBase/obtenerConfiguracionCorreo',
+            type: 'POST',
+            dataType: 'json',
+            data: {
+                idEmpresa: idEmpresa
+            },
+            success: function(res) {
+                if (res.success) {
+                    $('#correoRechazoFactura').val(res.data); // Llena el textarea con lo que hay en BD
+                }
+            }
+        });
+
     });
 
     $(document).on('change', '#empresaSelect', function() {
@@ -198,4 +229,80 @@
             }
         });
     });
+
+    $(document).on('submit', '#formConfiguracionCorreo', function(event) {
+        event.preventDefault(); // Evita que la página se recargue
+
+        // 2. Validar formato de los correos (NUEVO)
+        // Pasamos el ID del textarea y un nombre para el mensaje de error
+        if (!validarCorreosMultiples('correoRechazoFactura', 'Rechazo de Factura')) {
+            return; // Si no es válido, se detiene aquí y no llega al AJAX
+        }
+
+        const formData = $(this).serialize();
+
+        // Puedes usar la función de bloqueo que ya tienes para mostrar el spinner
+        // Asegúrate de que el ID del botón coincida o usa uno genérico
+        bloqueoBtn('btnGuardarCorreo', 1);
+
+        $.ajax({
+            url: 'ConfiguracionBase/guardarConfiguracionCorreo', // Esta ruta la debes crear en el controlador
+            type: 'POST',
+            data: formData,
+            dataType: 'json',
+            success: function(response) {
+                if (response.success) {
+                    // Notificación premium que ya usas en el proyecto
+                    notificaSucSweet('¡Guardado!', response.message);
+
+                    // OPCIONAL: Si quieres "limpiar" visualmente o actualizar algo más
+                    // pero no hace falta recargar.
+                } else {
+                    notificaBadSweet('Error', response.message);
+                }
+            },
+            error: function() {
+                notificaBadSweet('Error', 'Error de comunicación con el servidor.');
+            },
+            complete: function() {
+                bloqueoBtn('btnGuardarCorreo', 2); // Desbloquea el botón
+            }
+        });
+    });
+
+    // =====================================================
+    // Metodo para Validar los campos de correos
+    // =====================================================
+    function validarCorreosMultiples(idCampo, nombreSeccion) {
+        let valor = $("#" + idCampo).val().trim();
+        //if (valor === "") return true; // Si está vacío es válido (aunque el textarea sea required)
+
+        // 1. Limpiamos saltos de línea y dividimos por comas
+        let lista = valor.split(',')
+            .map(correo => correo.trim().replace(/[\n\r]/g, ""))
+            .filter(correo => correo !== "");
+
+        // 2. Expresión regular para validar formato
+        let regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        let errorEncontrado = false;
+        let correoMal = "";
+
+        for (let email of lista) {
+            if (!regex.test(email)) {
+                errorEncontrado = true;
+                correoMal = email;
+                break;
+            }
+        }
+
+        if (errorEncontrado) {
+            // Usamos la notificación Sweet que ya tienes en el proyecto
+            notificaBadSweet('Correo Inválido', "El correo '" + correoMal + "' en '" + nombreSeccion + "' no tiene un formato válido.");
+            return false;
+        }
+
+        // 3. Devolvemos el campo limpio al textarea (formateado: correo1, correo2)
+        $("#" + idCampo).val(lista.join(', '));
+        return true;
+    }
 </script>

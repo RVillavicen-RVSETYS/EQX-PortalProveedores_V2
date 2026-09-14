@@ -830,4 +830,42 @@ class Proveedores_Mdl
             return ['success' => false, 'message' => 'Error: ' . $e->getMessage()];
         }
     }
+
+    // Para usar en la notificacion al correo al rechazar factura
+    /**
+     * Obtiene los datos del proveedor y de la empresa (sociedad) asociados a una compra.
+     * Útil para enviar notificaciones de rechazo.
+     * 
+     * @param int $idCompra - ID de la compra (acuse)
+     * @return array
+     */
+    public function obtenerCorreoProveedorPorCompra($idCompra)
+    {
+        try {
+            $sql = "SELECT 
+                        prov.id AS IdProveedor,
+                        prov.nombre AS Proveedor,
+                        prov.correo AS Correo,
+                        prov.rfc AS RFC,
+                        prov.razonSocial AS RazonSocial,
+                        c.fechaVal AS FechaVal
+                    FROM compras c
+                    INNER JOIN proveedores prov ON c.idProveedor = prov.id
+                    WHERE c.id = :idCompra";
+
+            $stmt = $this->db->prepare($sql);
+            $stmt->bindParam(':idCompra', $idCompra, PDO::PARAM_INT);
+            $stmt->execute();
+            $resultado = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if ($resultado) {
+                return ['success' => true, 'data' => $resultado];
+            }
+            return ['success' => false, 'message' => 'No se encontró el proveedor asociado a este acuse.'];
+        } catch (\Exception $e) {
+            $timestamp = date("Y-m-d H:i:s");
+            error_log("[$timestamp] app/Models/Proveedores/Proveedores_Mdl.php -> Error al obtener correo proveedor: " . $e->getMessage(), 3, LOG_FILE_BD);
+            return ['success' => false, 'message' => 'Error al consultar datos para el correo.'];
+        }
+    }
 }
