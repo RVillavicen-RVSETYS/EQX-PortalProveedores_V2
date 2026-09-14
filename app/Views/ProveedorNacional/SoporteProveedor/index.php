@@ -114,7 +114,7 @@ if ($debug == 1) {
             <div class="container-fluid">
 
                 <div class="container-fluid note-has-grid">
-                    <ul class="nav nav-pills p-3 bg-pyme-primary mb-3 rounded-pill align-items-center">
+                    <ul class="nav nav-pills p-3 bg-pyme-primary mb-3 align-items-center">
                         <li class="nav-item"> <a href="javascript:void(0)" class="nav-link rounded-pill note-link d-flex align-items-center active px-2 px-md-3 mr-0 mr-md-2" id="Manuales">
                                 <i class="icon-book-open mr-1"></i><span class="d-none d-md-block">Manual de Usuario</span></a>
                         </li>
