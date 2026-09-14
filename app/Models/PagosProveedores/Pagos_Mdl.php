@@ -356,6 +356,7 @@ class Pagos_Mdl
                         MAX( Pagos.FormaPago ) AS 'FormaPago',
                         MAX( Pagos.MontoPagado ) AS 'MontoPagado',
                         MAX( Pagos.TipoMoneda ) AS 'TipoMoneda',
+                        MAX( Pagos.FechaPago ) AS 'FechaPago',
                         MAX( cf.idCatMetodoPago ) AS 'MetodoPago',
                         MAX( cf.idCatFormaPago ) AS 'FormaPagoCfdi'
                     FROM
@@ -367,7 +368,8 @@ class Pagos_Mdl
                             pc.HES AS 'Recepcion',
                             pc.montoPagado AS 'MontoPagado',
                             pc.monedaTipoCambio AS 'TipoMoneda',
-                            fp.nombre AS 'FormaPago'
+                            fp.nombre AS 'FormaPago',
+                            DATE_FORMAT(pc.fechaPago, '%d/%m/%Y') AS 'FechaPago'
                         FROM
                             pagos_compras pc
                             LEFT JOIN detcompras dc ON pc.OC = dc.ordenCompra
@@ -392,6 +394,7 @@ class Pagos_Mdl
                         MAX( Pagos.FormaPago ) AS 'FormaPago',
                         MAX( Pagos.MontoPagado ) AS 'MontoPagado',
                         MAX( Pagos.TipoMoneda ) AS 'TipoMoneda',
+                        MAX( Pagos.FechaPago ) AS 'FechaPago',
                         MAX( cf.idCatMetodoPago ) AS 'MetodoPago',
                         MAX( cf.idCatFormaPago ) AS 'FormaPagoCfdi'
                     FROM
@@ -403,7 +406,8 @@ class Pagos_Mdl
                             pc.HES AS 'Recepcion',
                             pc.montoPagado AS 'MontoPagado',
                             pc.monedaTipoCambio AS 'TipoMoneda',
-                            fp.nombre AS 'FormaPago'
+                            fp.nombre AS 'FormaPago',
+                            DATE_FORMAT(pc.fechaPago, '%d/%m/%Y') AS 'FechaPago'
                         FROM
                             pagos_compras pc
                             LEFT JOIN detcompras dc ON pc.OC = dc.ordenCompra
@@ -420,6 +424,7 @@ class Pagos_Mdl
                         Pagos.IdPago
                     ORDER BY Acuse $orden
                     $limiteResult";
+
             if (self::$debug) {
                 $this->db->imprimirConsulta($sql, $params, 'Lista De Pagos Realizados: ');
             }
