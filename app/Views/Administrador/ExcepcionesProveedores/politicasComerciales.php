@@ -12,10 +12,6 @@ if ($debug == 1) {
                 <h4 class="card-title mb-0">Lista de proveedores</h4>
             </div>
             <div class="card-body border">
-                <p class="text-muted small mb-3">
-                    Activa <strong>descontar promociones aplicables</strong> en la factura (campo <code>proveedores.descontarPromocionesAplicables</code>).
-                    El motivo queda registrado en la bitácora del sistema.
-                </p>
                 <form id="agregarProveedorPoliticaComercial">
                     <div class="row">
                         <label for="idProveedorPolitica">Proveedores</label>

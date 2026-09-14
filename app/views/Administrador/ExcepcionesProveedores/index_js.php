@@ -163,6 +163,32 @@
         });
     }
 
+    function eliminarProveedorFechaPagoIgnorada(idProveedor){
+        var idBtn = 'bloquear-btnFechaPago' + idProveedor;
+        $.ajax({
+            url: EXCEPCIONES_AJAX_BASE + '/eliminarProveedorFechaPagoIgnorada',
+            type: 'POST',
+            dataType: 'json',
+            data: { idProveedor: idProveedor },
+            success: function(respuesta) {
+                if (respuesta && respuesta.success) {
+                    notificaSuc(respuesta.message);
+                    cargarAnulacionValidacionFechaPagoProveedor();
+                } else {
+                    notificaBad((respuesta && respuesta.message) || 'No se pudo quitar el proveedor.');
+                }
+                if ($('#' + idBtn).length) bloqueoBtn(idBtn, 2);
+            },
+            beforeSend: function() {
+                if ($('#' + idBtn).length) bloqueoBtn(idBtn, 1);
+            },
+            error: function(xhr) {
+                notificaBad(xhr.status === 404 ? 'Ruta no encontrada.' : 'Error al eliminar.');
+                if ($('#' + idBtn).length) bloqueoBtn(idBtn, 2);
+            }
+        });
+    }
+
     function cargarBloqueoDeCFDIs() {
         $.ajax({
             type: 'POST',
@@ -254,6 +280,27 @@
                 });
             }
         });
+    }
+
+    // Para el nuevo apartado de Ignorar Fecha Pago
+    function cargarAnulacionValidacionFechaPagoProveedor() {
+        $.ajax({
+            type: 'POST',
+            url: EXCEPCIONES_AJAX_BASE + '/listaAnulacionValidacionFechaPagoProveedor',
+            data: {},
+            success: function(response) {
+                $('#fechaPagoProveedor').html(response);
+            },
+            error: function() {
+                $('#fechaPagoProveedor').html('Error al cargar la sección. Consulta a tu administrador.');
+            },
+            beforeSend: function() {
+                $('#fechaPagoProveedor').html('<div class="loading text-center"><img src="../assets/images/loading.gif" alt="loading" /><br/>Un momento, por favor...</div>');
+            }
+        });
+    }
+
+    function agregarAnulacionValidacionFechaPagoProveedor() {
     }
 
     function cambiarEstatus(estatus, ident, tabla, idProveedor) {
@@ -522,6 +569,30 @@
             },
             beforeSend: function() {
                 bloqueoBtn('bloquear-btnAgregaProveedorPUE', 1);
+            }
+        });
+    });
+
+    $(document).on('submit', '#agregarAnulacionValidacionFechaPagoProveedor', function(event) {
+
+        event.preventDefault();
+
+        $.ajax({
+            url: EXCEPCIONES_AJAX_BASE + '/agregarProveedorIFP',
+            type: 'POST',
+            data: $(this).serialize(),
+            success: function(response) {
+                var respuesta = typeof response === 'string' ? JSON.parse(response) : response;
+                if (respuesta.success) {
+                    notificaSuc(respuesta.message);
+                    cargarAnulacionValidacionFechaPagoProveedor();
+                } else {
+                    notificaBad(respuesta.message);
+                    bloqueoBtn('bloquear-btnAgregaProveedorFechaPagoInvalidada', 2);
+                }
+            },
+            beforeSend: function() {
+                bloqueoBtn('bloquear-btnAgregaProveedorFechaPagoInvalidada', 1);
             }
         });
     });

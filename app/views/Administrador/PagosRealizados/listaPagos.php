@@ -45,6 +45,7 @@ if (empty($listaPagos)) {
                 <th><?= $pago['FormaPago']; ?></th>
                 <th><?= $pago['TipoMoneda']; ?></th>
                 <th><?= $pago['FechaPago']; ?></th>
+                <th><?= $pago['Moneda']; ?></th>
             </tr>
         <?php
         }

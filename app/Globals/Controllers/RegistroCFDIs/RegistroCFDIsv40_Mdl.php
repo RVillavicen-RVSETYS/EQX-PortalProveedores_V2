@@ -342,7 +342,7 @@ class RegistroCFDIsv40_Mdl
     public function registrarCFDI_Pagosv40($dataDeValidacion)
     {
         // No forzar debug off: respeta self::$debug global (evita apagar trazas tras complemento)
-        // self::$debug = 0;
+        self::$debug = 0;
         $response = ["success" => true, "message" => "", "debug" => ""];
         // Inicializar variables usadas en rollback (catch)
         $urlComplementoPDF = null;
@@ -353,7 +353,6 @@ class RegistroCFDIsv40_Mdl
             // Iniciar transacción
             BD_Connect::beginTransaction();
 
-            //self::$debug = 1;
             $complementoAlmacenado = 0;
 
             if (self::$debug) {
@@ -520,29 +519,84 @@ class RegistroCFDIsv40_Mdl
                     if (empty($idCompra)) {
                         throw new \Exception("No se encontró el idCompra para el UUID relacionado: $uuidFact");
                     }
-                    
                     $idPagosCompras = $pagosMatch[$pagoIndex][$uuidFact] ?? null;
-                    $idPagosComprasValue = ($idPagosCompras !== null) ? (int) $idPagosCompras : 'NULL';
 
                     $serie = $docto["Serie"] ?? '';
                     $folio = $docto["Folio"] ?? '';
                     $monedaDR = $docto["MonedaDR"];
                     $noParcialidad = $docto["NumParcialidad"];
                     $saldoAnterior = $docto["ImpSaldoAnt"];
-                    $importePagado = $docto["ImpPagado"];
+                    $importePagadoXML = $docto["ImpPagado"];
                     $saldoInsoluto = $docto["ImpSaldoInsoluto"];
 
-                    $valuesInsert .= "($idComplemento, $idCompra, $idPagosComprasValue, '$fechaPago', '$formaPago', $totalPagado, '$idCatTipoMoneda', '$tipoCambioP', '$uuidFact', '$serie', '$folio',  '$monedaDR', $noParcialidad, $saldoAnterior, $importePagado, $saldoInsoluto), ";
-                    if (isset($montosPagadosPorUUID[$uuidFact])) {
-                        $montosPagadosPorUUID[$uuidFact]['montoPagado'] += floatval($importePagado);
-                        if ($saldoInsoluto < $montosPagadosPorUUID[$uuidFact]['insoluto']) {
-                            $montosPagadosPorUUID[$uuidFact]['insoluto'] = floatval($saldoInsoluto);
+                    if (is_array($idPagosCompras)) {
+                        // MULTIPLE MATCH (Compensación)
+                        if (self::$debug) {
+                            echo "<br> * [DEBUG] Procesando inserción fragmentada (Compensación) para el UUID {$uuidFact}. Total a fragmentar: {$importePagadoXML}";
+                        }
+                        $saldoAnteriorActual = floatval($saldoAnterior);
+                        $sumaAcumulada = 0;
+                        $countMatches = count($idPagosCompras);
+                        $i = 0;
+
+                        foreach ($idPagosCompras as $match) {
+                            $i++;
+                            $idPagosComprasValue = (int)$match['id'];
+                            $importePagadoParcial = floatval($match['monto']);
+
+                            // Si es el último, forzamos que absorba cualquier diferencia de centavos para cuadrar con el XML
+                            if ($i === $countMatches) {
+                                $importePagadoParcial = floatval($importePagadoXML) - $sumaAcumulada;
+                                $saldoInsolutoParcial = floatval($saldoInsoluto);
+                            } else {
+                                $saldoInsolutoParcial = $saldoAnteriorActual - $importePagadoParcial;
+                            }
+                            $sumaAcumulada += $importePagadoParcial;
+
+                            // Evitar números negativos muy pequeños por redondeo
+                            if ($saldoInsolutoParcial < 0 && $saldoInsolutoParcial > -0.1) {
+                                $saldoInsolutoParcial = 0;
+                            }
+
+                            if (self::$debug) {
+                                echo "<br> &nbsp;&nbsp; -> Insertando fragmento $i/$countMatches: ID Pago BD {$idPagosComprasValue} | Importe: {$importePagadoParcial} | Saldo Ant: {$saldoAnteriorActual} | Saldo Ins: {$saldoInsolutoParcial}";
+                            }
+
+                            $valuesInsert .= "($idComplemento, $idCompra, $idPagosComprasValue, '$fechaPago', '$formaPago', $totalPagado, '$idCatTipoMoneda', '$tipoCambioP', '$uuidFact', '$serie', '$folio',  '$monedaDR', $noParcialidad, $saldoAnteriorActual, $importePagadoParcial, $saldoInsolutoParcial), ";
+
+                            if (isset($montosPagadosPorUUID[$uuidFact])) {
+                                $montosPagadosPorUUID[$uuidFact]['montoPagado'] += $importePagadoParcial;
+                                if ($saldoInsolutoParcial < $montosPagadosPorUUID[$uuidFact]['insoluto']) {
+                                    $montosPagadosPorUUID[$uuidFact]['insoluto'] = $saldoInsolutoParcial;
+                                }
+                            } else {
+                                $montosPagadosPorUUID[$uuidFact]['montoPagado'] = $importePagadoParcial;
+                                $montosPagadosPorUUID[$uuidFact]['insoluto'] = $saldoInsolutoParcial;
+                            }
+                            $montosPagadosPorUUID[$uuidFact]['idCompra'] = $idCompra;
+
+                            $saldoAnteriorActual = $saldoInsolutoParcial;
                         }
                     } else {
-                        $montosPagadosPorUUID[$uuidFact]['montoPagado'] = floatval($importePagado);
-                        $montosPagadosPorUUID[$uuidFact]['insoluto'] = floatval($saldoInsoluto);
+                        // MATCH 1 a 1 NORMAL
+                        if (self::$debug) {
+                            echo "<br> * [DEBUG] Procesando inserción normal 1 a 1 para el UUID {$uuidFact}";
+                        }
+                        $idPagosComprasValue = ($idPagosCompras !== null) ? (int) $idPagosCompras : 'NULL';
+                        $importePagado = $importePagadoXML;
+
+                        $valuesInsert .= "($idComplemento, $idCompra, $idPagosComprasValue, '$fechaPago', '$formaPago', $totalPagado, '$idCatTipoMoneda', '$tipoCambioP', '$uuidFact', '$serie', '$folio',  '$monedaDR', $noParcialidad, $saldoAnterior, $importePagado, $saldoInsoluto), ";
+                        if (isset($montosPagadosPorUUID[$uuidFact])) {
+                            $montosPagadosPorUUID[$uuidFact]['montoPagado'] += floatval($importePagado);
+                            if ($saldoInsoluto < $montosPagadosPorUUID[$uuidFact]['insoluto']) {
+                                $montosPagadosPorUUID[$uuidFact]['insoluto'] = floatval($saldoInsoluto);
+                            }
+                        } else {
+                            $montosPagadosPorUUID[$uuidFact]['montoPagado'] = floatval($importePagado);
+                            $montosPagadosPorUUID[$uuidFact]['insoluto'] = floatval($saldoInsoluto);
+                        }
+                        $montosPagadosPorUUID[$uuidFact]['idCompra'] = $idCompra;
                     }
-                    $montosPagadosPorUUID[$uuidFact]['idCompra'] = $idCompra;
                 }
             }
             $valuesInsert = rtrim($valuesInsert, ', ');

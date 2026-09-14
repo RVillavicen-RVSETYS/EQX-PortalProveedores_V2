@@ -339,7 +339,8 @@ class cfdisv40
         return $response;
     }
 
-    public function validarCFDIv1($dataXML) {
+    public function validarCFDIv1($dataXML)
+    {
         $response = [
             "success" => true,
             "message" => "",
@@ -385,7 +386,7 @@ class cfdisv40
             echo '<br><br>===============================<br> RESULTADO DE WEBSERVICE<br>';
             //echo '<br>SOAP Enviado: ';
             //echo htmlspecialchars($soap);
-            echo '<br>Expresion del CFDI: '.$expresionImpresa;
+            echo '<br>Expresion del CFDI: ' . $expresionImpresa;
             echo '<br><br>';
         }
 

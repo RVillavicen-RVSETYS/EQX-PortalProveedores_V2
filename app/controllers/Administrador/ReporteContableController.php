@@ -85,6 +85,10 @@ class ReporteContableController extends Controller
             $filtros['entreFechas'] = date('Y-m-1') . ',' . date('Y-m-t');
         }
 
+        if (isset($_POST['estatusPago'])) {
+            $filtros['estatusPago'] = $_POST['estatusPago'];
+        }
+
         $MDL_contabilidad = new Contabilidad_Mdl();
         $listaPagos = $MDL_contabilidad->listarReporteContable($filtros, 0, 'DESC');
 

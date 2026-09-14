@@ -357,6 +357,7 @@ class Pagos_Mdl
                         MAX( Pagos.MontoPagado ) AS 'MontoPagado',
                         MAX( Pagos.TipoMoneda ) AS 'TipoMoneda',
                         MAX( Pagos.FechaPago ) AS 'FechaPago',
+                        MAX( Pagos.Moneda ) AS 'Moneda',
                         MAX( cf.idCatMetodoPago ) AS 'MetodoPago',
                         MAX( cf.idCatFormaPago ) AS 'FormaPagoCfdi'
                     FROM
@@ -370,6 +371,8 @@ class Pagos_Mdl
                             pc.monedaTipoCambio AS 'TipoMoneda',
                             fp.nombre AS 'FormaPago',
                             DATE_FORMAT(pc.fechaPago, '%d/%m/%Y') AS 'FechaPago'
+                            pc.moneda AS 'Moneda',
+                            fp.nombre AS 'FormaPago'
                         FROM
                             pagos_compras pc
                             LEFT JOIN detcompras dc ON pc.OC = dc.ordenCompra
@@ -395,6 +398,7 @@ class Pagos_Mdl
                         MAX( Pagos.MontoPagado ) AS 'MontoPagado',
                         MAX( Pagos.TipoMoneda ) AS 'TipoMoneda',
                         MAX( Pagos.FechaPago ) AS 'FechaPago',
+                        MAX( Pagos.Moneda ) AS 'Moneda',
                         MAX( cf.idCatMetodoPago ) AS 'MetodoPago',
                         MAX( cf.idCatFormaPago ) AS 'FormaPagoCfdi'
                     FROM
@@ -408,6 +412,8 @@ class Pagos_Mdl
                             pc.monedaTipoCambio AS 'TipoMoneda',
                             fp.nombre AS 'FormaPago',
                             DATE_FORMAT(pc.fechaPago, '%d/%m/%Y') AS 'FechaPago'
+                            pc.moneda AS 'Moneda',
+                            fp.nombre AS 'FormaPago'
                         FROM
                             pagos_compras pc
                             LEFT JOIN detcompras dc ON pc.OC = dc.ordenCompra

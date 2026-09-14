@@ -39,6 +39,7 @@ class Contabilidad_Mdl
         $filtrosDisponibles = [
             'idProveedor' => ['tipoDato' => 'INT', 'sqlFiltro' => 'com.idProveedor = :idProveedor'],
             'entreFechas' => ['tipoDato' => 'STRING', 'sqlFiltro' => '(com.fechaReg BETWEEN :fechaInicial AND :fechaFinal)'],
+            'estatusPago' => ['tipoDato' => 'INT', 'sqlFiltro' => '']
         ];
 
         $filtrosSQL = '';
@@ -79,6 +80,13 @@ class Contabilidad_Mdl
                                 $filtrosSQL .= ' AND com.insolutoPendiente = 0';
                             }
                             break;
+                        case 'estatusPago':
+                            if ($valorFiltro === '1') {
+                                $filtrosSQL .= ' AND com.totalPagos + com.totalNotasCredito >= com.total';
+                            } else if ($valorFiltro === '0') {
+                                $filtrosSQL .= ' AND (com.totalPagos + com.totalNotasCredito) < com.total';
+                            }
+                            break;
                         default:
                             $filtrosSQL .= ' AND ' . $filtrosDisponibles[$nombreFiltro]['sqlFiltro'];
                             $params[':' . $nombreFiltro] = $valorFiltro;
@@ -111,17 +119,23 @@ class Contabilidad_Mdl
                         COALESCE(GROUP_CONCAT(DISTINCT NULLIF(nc.uuid, '') SEPARATOR ', '), 'N/A') AS UUIDNC,
                         COALESCE(GROUP_CONCAT(DISTINCT NULLIF(CONCAT_WS('-', NULLIF(cp.serie, ''), NULLIF(cp.folio, '')), '') SEPARATOR ', '), 'N/A') AS FolioCP,
                         COALESCE(GROUP_CONCAT(DISTINCT NULLIF(cp.uuid, '') SEPARATOR ', '), 'N/A') AS UUIDCP,
-                        DATE_FORMAT(cf.fechaFac, '%d/%m/%Y') AS FechaFactura
+                        COALESCE(DATE_FORMAT(cf.fechaFac, '%d/%m/%Y'), 'N/A') AS FechaFactura,
+                        COALESCE(DATE_FORMAT(pc.fechaPago, '%d/%m/%Y'), 'N/A') AS FechaPago,
+                        COALESCE(GROUP_CONCAT(DISTINCT NULLIF(CONCAT_WS(' - ', NULLIF(cb.nombreCorto, ''), NULLIF(pc.noCuenta, '')), '') SEPARATOR ', '), 'N/A') AS CuentaBanco,
+                        COALESCE(GROUP_CONCAT(DISTINCT NULLIF(pc.tipoCambio, '') SEPARATOR ', '), 'N/A') AS TipoCambio
                     FROM
                         compras com
                         INNER JOIN cfdi_facturas cf ON com.id = cf.idCompra 
                         LEFT JOIN cfdi_complementoPagoDet cpd ON cf.uuid = cpd.uuidFact 
                         LEFT JOIN cfdi_complementoPago cp ON cpd.idComplementoPago = cp.id AND cp.estatus = '2'
                         LEFT JOIN cfdi_notasCreditos nc ON (com.id = nc.idCompra OR cf.uuid = nc.uuidRelacionado) AND nc.estatus NOT IN ('0', '3')
+                        LEFT JOIN pagos_compras pc ON com.id = pc.idAcuse
+                        LEFT JOIN cat_bancos cb ON pc.idClaveBanco = cb.id
                     WHERE
                         $filtrosSQL
                     GROUP BY cf.id
                     ORDER BY com.id $orden";
+
             if (self::$debug) {
                 $this->db->imprimirConsulta($sql, $params, 'Lista De Pagos Realizados: ');
             }

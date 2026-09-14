@@ -103,6 +103,7 @@ function crearContenidoHTMLRechazo($datos, $acuse, $motivo)
                                             <div style='font-size:12px; letter-spacing:1.8px; text-transform:uppercase; color:#dff5dc; font-weight:700; margin-bottom:8px;'>Aviso de Portal de Proveedores</div>
                                             <div style='font-size:28px; line-height:34px; font-weight:800; color:#ffffff; margin-bottom:10px;'>Factura Rechazada</div>
                                             <div style='font-size:15px; line-height:24px; color:#dff5dc;'>Se ha revisado su documento y se ha detectado una inconsistencia que requiere su atención.</div>
+                                            <div style='font-size:15px; line-height:24px; color:#dff5dc;'>Este es un correo automático, por favor no responda a este mensaje.</div>
                                         </td>
                                     </tr>
                                 </table>
@@ -171,9 +172,6 @@ function crearContenidoHTMLRechazo($datos, $acuse, $motivo)
                             </td>
                         </tr>
                     </table>
-                    <div style='padding:20px; font-size:11px; color:#999; text-align:center;'>
-                        Este es un correo automático, por favor no responda a este mensaje.
-                    </div>
                 </td>
             </tr>
         </table>

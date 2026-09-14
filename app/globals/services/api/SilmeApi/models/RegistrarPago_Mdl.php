@@ -112,7 +112,7 @@ class RegistrarPago_Mdl
             $this->db->beginTransaction();
 
             // 2. Armar SQL base
-            $sql = "INSERT INTO pagos_compras ( idPagoDet, idAcuse, OC, HES, montoPagado, saldoInsoluto, moneda, tipoCambio, montoTipoCambio, monedaTipoCambio, formaPago, formaPagoSAT, fechaPago, fechaReg ) VALUES ";
+            $sql = "INSERT INTO pagos_compras ( idPagoDet, idAcuse, OC, HES, montoPagado, saldoInsoluto, moneda, tipoCambio, montoTipoCambio, monedaTipoCambio, formaPago, formaPagoSAT, noCuenta, idClaveBanco, fechaPago, fechaReg ) VALUES ";
 
             $placeholders = [];
             $values = [];
@@ -120,7 +120,7 @@ class RegistrarPago_Mdl
 
             foreach ($pagos as $index => $pago) {
 
-                $placeholders[] = "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())";
+                $placeholders[] = "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())";
 
                 $values[] = $pago['IdPagoDet'];
                 $values[] = $pago['IdAcuse'];
@@ -138,6 +138,8 @@ class RegistrarPago_Mdl
                 $values[] = $monedaTipoCambio;
                 $values[] = $pago['FormaPago'] ?? null;
                 $values[] = $pago['FormaPagoSAT'] ?? null;
+                $values[] = $pago['NoCuenta'] ?? null;
+                $values[] = $pago['Banco'] ?? null;
                 $values[] = $pago['FechaPago'];
 
                 // Guardar idAcuse para actualizar después

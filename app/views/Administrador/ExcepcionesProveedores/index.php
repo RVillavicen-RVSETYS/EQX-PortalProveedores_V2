@@ -296,6 +296,21 @@ if ($debug == 1) {
                                         </a>
                                     </li>
 
+                                    <li class="nav-item">
+                                        <a class="nav-link" data-toggle="tab" href="#fechaPagoProveedor" role="tab" onclick="cargarAnulacionValidacionFechaPagoProveedor();">
+                                            <span class="hidden-xs-down">Ignorar Fecha de Pago</span>
+                                            <span class="hidden-sm-up">
+                                                <div class="tooltip-container">
+                                                    <span><i class="fas fa-info-circle font-12"></i></span>
+                                                    <div class="tooltip-text">
+                                                        <strong>Ignorar Fecha de Pago</strong>
+                                                        <p>Al cargar una factura no se tomara en cuenta la validación de fecha de pago</p>
+                                                    </div>
+                                                </div>
+                                            </span>
+                                        </a>
+                                    </li>
+
                                 </ul>
                                 <!-- Tab panes -->
                                 <div class="tab-content">
@@ -307,6 +322,7 @@ if ($debug == 1) {
                                     <div class="tab-pane p-20" id="politicasComerciales" role="tabpanel"></div>
                                     <div class="tab-pane p-20" id="bloqueoDeCfdis" role="tabpanel"></div>
                                     <div class="tab-pane p-20" id="permitirPueSiempre" role="tabpanel"></div>
+                                    <div class="tab-pane p-20" id="fechaPagoProveedor" role="tabpanel"></div>
                                 </div>
                             </div>
                         </div>
