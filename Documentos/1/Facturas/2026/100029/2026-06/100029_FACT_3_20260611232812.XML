@@ -1,0 +1,65 @@
+﻿<?xml version="1.0" encoding="utf-8"?><cfdi:Comprobante xmlns:cfdi="http://www.sat.gob.mx/cfd/4" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" Sello="ODFrnmAori4BIuWUptONlA/y1mINN6TcFoeAkhvF7y+7BwQunB68VcGW1+sVIrCZ4faQbzIAheJU+W1OG3iKWPLsOCQDLi29XOh9LUCL2XnYrGd72QZLu6nAlFXmvACn2gzDVGbStcLUONH2GK9OvGNvYCEu4p72EfXCPVbOp3Yd7VcQ9CdKmEcjh3vEqOglQiazmLaMsdddqUE9KfPXHl8m5oWQyuSQuQ3pF60oPzAQ+ayZ+ARM1JAMdL1YyB1MAZbyZxlRZRUp5Spv2sS/Ng4iC/EpmR3r+ncKnmLQWD/PwKgOdSJkwzNELMD/6LFVraRr84tynXR9W+0dZgNJhg==" Fecha="2026-05-14T12:05:03" xsi:schemaLocation="http://www.sat.gob.mx/cfd/4 http://www.sat.gob.mx/sitio_internet/cfd/4/cfdv40.xsd http://www.sat.gob.mx/Pagos20 http://www.sat.gob.mx/sitio_internet/cfd/Pagos/Pagos20.xsd http://www.sat.gob.mx/ComercioExterior20 http://www.sat.gob.mx/sitio_internet/cfd/ComercioExterior20/ComercioExterior20.xsd http://www.sat.gob.mx/detallista http://www.sat.gob.mx/sitio_internet/cfd/detallista/detallista.xsd http://www.sat.gob.mx/CartaPorte31 http://www.sat.gob.mx/sitio_internet/cfd/CartaPorte/CartaPorte31.xsd http://www.sat.gob.mx/implocal http://www.sat.gob.mx/sitio_internet/cfd/implocal/implocal.xsd http://www.sat.gob.mx/leyendasFiscales http://www.sat.gob.mx/sitio_internet/cfd/leyendasFiscales/leyendasFisc.xsd http://www.sat.gob.mx/divisas http://www.sat.gob.mx/sitio_internet/cfd/divisas/divisas.xsd http://www.sat.gob.mx/donat http://www.sat.gob.mx/sitio_internet/cfd/donat/donat11.xsd http://www.sat.gob.mx/servicioparcialconstruccion http://www.sat.gob.mx/sitio_internet/cfd/servicioparcialconstruccion/servicioparcialconstruccion.xsd" Certificado="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" NoCertificado="00001000000712259742" Version="4.0" Serie="01" Folio="2701022494" FormaPago="99" CondicionesDePago="60 DíAS" SubTotal="65565.42" Moneda="MXN" Total="65565.42" TipoDeComprobante="I" Exportacion="01" MetodoPago="PPD" LugarExpedicion="66484">
+   <cfdi:Emisor Rfc="COS780701AU8" Nombre="COSMOCEL" RegimenFiscal="601" />
+   <cfdi:Receptor Rfc="FMO2111062N8" Nombre="FERTYAGRO DE MORELOS" DomicilioFiscalReceptor="62950" RegimenFiscalReceptor="601" UsoCFDI="G01" />
+   <cfdi:Conceptos>
+      <cfdi:Concepto ClaveProdServ="10171608" NoIdentificacion="000000005000020263" Cantidad="20.000" ClaveUnidad="KGM" Unidad="KILOGRAMO" Descripcion="KELATEX FE FORTE 1 KG" ValorUnitario="213.750000" Importe="4275.000000" ObjetoImp="02">
+         <cfdi:Impuestos>
+            <cfdi:Traslados>
+               <cfdi:Traslado Base="4275.000000" Impuesto="002" TipoFactor="Tasa" TasaOCuota="0.000000" Importe="0.000000" />
+            </cfdi:Traslados>
+         </cfdi:Impuestos>
+      </cfdi:Concepto>
+      <cfdi:Concepto ClaveProdServ="10171605" NoIdentificacion="000000005000019916" Cantidad="40.000" ClaveUnidad="KGM" Unidad="KILOGRAMO" Descripcion="TRICEL-20 AMINO 1 KG" ValorUnitario="192.745500" Importe="7709.820000" ObjetoImp="02">
+         <cfdi:Impuestos>
+            <cfdi:Traslados>
+               <cfdi:Traslado Base="7709.820000" Impuesto="002" TipoFactor="Tasa" TasaOCuota="0.000000" Importe="0.000000" />
+            </cfdi:Traslados>
+         </cfdi:Impuestos>
+      </cfdi:Concepto>
+      <cfdi:Concepto ClaveProdServ="10171611" NoIdentificacion="000000005000019489" Cantidad="300.000" ClaveUnidad="LTR" Unidad="LITRO" Descripcion="MAINSTAY CALCIO+ 20 LT" ValorUnitario="82.400000" Importe="24720.000000" ObjetoImp="02">
+         <cfdi:Impuestos>
+            <cfdi:Traslados>
+               <cfdi:Traslado Base="24720.000000" Impuesto="002" TipoFactor="Tasa" TasaOCuota="0.000000" Importe="0.000000" />
+            </cfdi:Traslados>
+         </cfdi:Impuestos>
+      </cfdi:Concepto>
+      <cfdi:Concepto ClaveProdServ="10171504" NoIdentificacion="000000005000019395" Cantidad="200.000" ClaveUnidad="LTR" Unidad="LITRO" Descripcion="VIGORIZER 20 LT" ValorUnitario="75.780000" Importe="15156.000000" ObjetoImp="02">
+         <cfdi:Impuestos>
+            <cfdi:Traslados>
+               <cfdi:Traslado Base="15156.000000" Impuesto="002" TipoFactor="Tasa" TasaOCuota="0.000000" Importe="0.000000" />
+            </cfdi:Traslados>
+         </cfdi:Impuestos>
+      </cfdi:Concepto>
+      <cfdi:Concepto ClaveProdServ="10171504" NoIdentificacion="000000005000019396" Cantidad="60.000" ClaveUnidad="LTR" Unidad="LITRO" Descripcion="VIGORIZER 5 LT MX/1027/es" ValorUnitario="94.730000" Importe="5683.800000" ObjetoImp="02">
+         <cfdi:Impuestos>
+            <cfdi:Traslados>
+               <cfdi:Traslado Base="5683.800000" Impuesto="002" TipoFactor="Tasa" TasaOCuota="0.000000" Importe="0.000000" />
+            </cfdi:Traslados>
+         </cfdi:Impuestos>
+      </cfdi:Concepto>
+      <cfdi:Concepto ClaveProdServ="10171608" NoIdentificacion="000000005000018622" Cantidad="40.000" ClaveUnidad="LTR" Unidad="LITRO" Descripcion="POWERPLEX + 5 LT" ValorUnitario="200.520000" Importe="8020.800000" ObjetoImp="02">
+         <cfdi:Impuestos>
+            <cfdi:Traslados>
+               <cfdi:Traslado Base="8020.800000" Impuesto="002" TipoFactor="Tasa" TasaOCuota="0.000000" Importe="0.000000" />
+            </cfdi:Traslados>
+         </cfdi:Impuestos>
+      </cfdi:Concepto>
+   </cfdi:Conceptos>
+   <cfdi:Impuestos TotalImpuestosTrasladados="0.00">
+      <cfdi:Traslados>
+         <cfdi:Traslado Base="65565.42" Impuesto="002" TipoFactor="Tasa" TasaOCuota="0.000000" Importe="0.00" />
+      </cfdi:Traslados>
+   </cfdi:Impuestos><cfdi:Complemento><tfd:TimbreFiscalDigital xmlns:tfd="http://www.sat.gob.mx/TimbreFiscalDigital" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sat.gob.mx/TimbreFiscalDigital http://www.sat.gob.mx/sitio_internet/cfd/TimbreFiscalDigital/TimbreFiscalDigitalv11.xsd" Version="1.1" UUID="424D45E6-6A79-47F2-BAA3-8F749E3E2CCB" FechaTimbrado="2026-05-14T12:05:17" RfcProvCertif="SST060807KU0" SelloCFD="ODFrnmAori4BIuWUptONlA/y1mINN6TcFoeAkhvF7y+7BwQunB68VcGW1+sVIrCZ4faQbzIAheJU+W1OG3iKWPLsOCQDLi29XOh9LUCL2XnYrGd72QZLu6nAlFXmvACn2gzDVGbStcLUONH2GK9OvGNvYCEu4p72EfXCPVbOp3Yd7VcQ9CdKmEcjh3vEqOglQiazmLaMsdddqUE9KfPXHl8m5oWQyuSQuQ3pF60oPzAQ+ayZ+ARM1JAMdL1YyB1MAZbyZxlRZRUp5Spv2sS/Ng4iC/EpmR3r+ncKnmLQWD/PwKgOdSJkwzNELMD/6LFVraRr84tynXR9W+0dZgNJhg==" NoCertificadoSAT="00001000000711914678" SelloSAT="ameSEq9JA1ixgq8EGvUiMzG7kEgS1174oo1w7tbJcbIjM6ERSX1JNTelwlZ+hwfnO/I6CdqUbI75Wg0EvTMXKm5J5PU8WdL+pKtnOcDqjlCgi8pb7YLmzxJVWCFoujdZuMhJzR6LpuwhF8HKYbH9G/WHYSJfdbqriF3cEqd0NX+YbPhbIwdbePYNCAPSpJpTir+WMF/AD1H7JLzc2T3V25Yag9Vka5ICurCu/UqKrm/u+9eVuaeAX/tCNVITGnRjskaXStv6ZsaL3eWyF0PAOau60wLFGN/HczntAia11NCHHnExEqlrfWBX+A0fEmb3LKrtsMpnbEAXZUzHpfP6AQ==" /></cfdi:Complemento>
+   <cfdi:Addenda>
+      <AddendaEmisor>
+         <SAPAddenda e-mail="CHRISTIAN.SECUNDINO@COSMOCEL.ROVENSA.COM;compras@silmeagro.com;admin01@silmeagro.com;" cliente="0001026130" fechadoc="20260514" fechavencimiento="13.07.2026" refpago="Bank Transfer - Incoming Paym.-99" ordendeventa="2701018635" ref="Pedido 2 May 26" fexpedicion="14.05.2026" condentrega="ZMN-MOR" cabecera="" comentario="" noentrega="2705122035" invoice_nr="2730020873">
+            <DetallesConceptos codigoProducto="000000005000020263" noentregaC="2705122035" comentarioC=" KELATEX FE FORTE 1 KG&#xD;&#xA;" />
+            <DetallesConceptos codigoProducto="000000005000019916" noentregaC="2705122035" comentarioC=" TRICEL-20 AMINO 1 KG&#xD;&#xA;" />
+            <DetallesConceptos codigoProducto="000000005000019489" noentregaC="2705122035" comentarioC=" MAINSTAY CALCIO+ 20 LT&#xD;&#xA;" />
+            <DetallesConceptos codigoProducto="000000005000019395" noentregaC="2705122035" comentarioC=" VIGORIZER 20 LT&#xD;&#xA;" />
+            <DetallesConceptos codigoProducto="000000005000019396" noentregaC="2705122035" comentarioC="" />
+            <DetallesConceptos codigoProducto="000000005000018622" noentregaC="2705122035" comentarioC=" POWERPLEX + 5 LT&#xD;&#xA;" />
+         </SAPAddenda>
+      </AddendaEmisor>
+   </cfdi:Addenda>
+</cfdi:Comprobante>
