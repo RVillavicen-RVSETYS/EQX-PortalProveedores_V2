@@ -356,6 +356,7 @@ class Pagos_Mdl
                         MAX( Pagos.FormaPago ) AS 'FormaPago',
                         MAX( Pagos.MontoPagado ) AS 'MontoPagado',
                         MAX( Pagos.TipoMoneda ) AS 'TipoMoneda',
+                        MAX( Pagos.FechaPago) AS 'FechaPago',
                         MAX( Pagos.Moneda ) AS 'Moneda',
                         MAX( cf.idCatMetodoPago ) AS 'MetodoPago',
                         MAX( cf.idCatFormaPago ) AS 'FormaPagoCfdi'
@@ -368,6 +369,7 @@ class Pagos_Mdl
                             pc.HES AS 'Recepcion',
                             pc.montoPagado AS 'MontoPagado',
                             pc.monedaTipoCambio AS 'TipoMoneda',
+                            DATE_FORMAT(pc.fechaPago, '%d/%m/%Y') AS 'FechaPago',
                             pc.moneda AS 'Moneda',
                             fp.nombre AS 'FormaPago'
                         FROM
@@ -394,6 +396,7 @@ class Pagos_Mdl
                         MAX( Pagos.FormaPago ) AS 'FormaPago',
                         MAX( Pagos.MontoPagado ) AS 'MontoPagado',
                         MAX( Pagos.TipoMoneda ) AS 'TipoMoneda',
+                        MAX( Pagos.FechaPago ) AS 'FechaPago',
                         MAX( Pagos.Moneda ) AS 'Moneda',
                         MAX( cf.idCatMetodoPago ) AS 'MetodoPago',
                         MAX( cf.idCatFormaPago ) AS 'FormaPagoCfdi'
@@ -406,6 +409,7 @@ class Pagos_Mdl
                             pc.HES AS 'Recepcion',
                             pc.montoPagado AS 'MontoPagado',
                             pc.monedaTipoCambio AS 'TipoMoneda',
+                            DATE_FORMAT(pc.fechaPago, '%d/%m/%Y') AS 'FechaPago',
                             pc.moneda AS 'Moneda',
                             fp.nombre AS 'FormaPago'
                         FROM

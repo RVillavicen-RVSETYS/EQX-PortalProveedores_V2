@@ -122,7 +122,7 @@ class Compras_Mdl
                     INNER JOIN proveedores pv ON c.idProveedor = pv.id
                     INNER JOIN detcompras dc ON c.id = dc.idCompra
                     LEFT JOIN cfdi_facturas cf ON cf.idCompra = c.id
-                    LEFT JOIN (SELECT cpd.uuidFact, COUNT(cpd.id) AS 'CantComplementos' FROM cfdi_complementoPagoDet cpd GROUP BY uuidFact) cpd ON cf.uuid = cpd.uuidFact
+                    LEFT JOIN (SELECT cpd.uuidFact, cpd.idCompra, COUNT(cpd.id) AS 'CantComplementos' FROM cfdi_complementoPagoDet cpd GROUP BY cpd.uuidFact, cpd.idCompra) cpd ON cf.uuid = cpd.uuidFact AND (cpd.idCompra = c.id OR cpd.idCompra IS NULL)
                     LEFT JOIN (SELECT idCompra, COUNT(id) AS 'CantNotasPendientes' FROM cfdi_notasCreditos WHERE estatus = 1 GROUP BY idCompra) ncp ON ncp.idCompra = c.id
                     LEFT JOIN (
                         SELECT cpd.idCompra, COUNT(DISTINCT cpd.idComplementoPago) AS 'CantComplementosPendientes'
@@ -395,7 +395,8 @@ class Compras_Mdl
             'formaPago' => ['tipoDato' => 'STRING', 'sqlFiltro' => 'fc.idCatFormaPago =:formaPago'],
             'estatusPagado' => ['tipoDato' => 'STRING', 'sqlFiltro' => 'cp.idPago'], // Se usa con 0 si no está pagado o con 1 si está pagado
             'idProveedor' => ['tipoDato' => 'INT', 'sqlFiltro' => 'c.idProveedor = :idProveedor'],
-            'entreFechas' => ['tipoDato' => 'STRING', 'sqlFiltro' => '(c.fechaReg BETWEEN :fechaInicial AND :fechaFinal)']
+            'entreFechas' => ['tipoDato' => 'STRING', 'sqlFiltro' => '(c.fechaReg BETWEEN :fechaInicial AND :fechaFinal)'],
+            'estatusDiferenteDe' => ['tipoDato' => 'INT', 'sqlFiltro' => 'cp.estatus != :estatusDiferenteDe']
         ];
 
         $filtrosSQL = '';
@@ -430,7 +431,7 @@ class Compras_Mdl
                             // Validar que el valor sea una cadena de UUIDs separados por comas
                             $uuids = explode(',', $valorFiltro);
                             $uuids = array_map('trim', $uuids); // Limpiar espacios en blanco
-                            
+
                             $inQuery = [];
                             foreach ($uuids as $i => $uuid) {
                                 $inQuery[] = ":uuid_$i";
@@ -473,7 +474,7 @@ class Compras_Mdl
             $sql = "SELECT cp.*, fc.*, MAX(cpd.idComplementoPago) AS idUltimoComplemento, MAX(cpd.noParcialidad) AS ultimaParcialidad, MIN(cpd.saldoInsoluto) AS minInsoluto
                     FROM compras cp
                     INNER JOIN cfdi_facturas fc ON cp.id = fc.idCompra
-                    LEFT JOIN cfdi_complementoPagoDet cpd ON fc.uuid = cpd.uuidFact
+                    LEFT JOIN cfdi_complementoPagoDet cpd ON fc.uuid = cpd.uuidFact AND (cpd.idCompra = cp.id OR cpd.idCompra IS NULL)
                     WHERE $filtrosSQL
                     GROUP BY fc.uuid
                     ORDER BY fc.fechaFac $orden
@@ -547,7 +548,7 @@ class Compras_Mdl
                             GROUP BY fi.idFactura
                         )dfi ON cf.id = dfi.idFactura
                         LEFT JOIN cfdi_notasCreditos nc ON c.id = nc.idCompra
-                        LEFT JOIN cfdi_complementoPagoDet cpd ON cf.uuid = cpd.uuidFact
+                        LEFT JOIN cfdi_complementoPagoDet cpd ON cf.uuid = cpd.uuidFact AND (cpd.idCompra = cf.idCompra OR cpd.idCompra IS NULL)
                         LEFT JOIN cfdi_complementoPago cpg ON cpd.idComplementoPago = cpg.id
                         LEFT JOIN sat_catUsoCFDI cuc ON cf.usoCfdi = cuc.id
                         WHERE c.id = :acuse $validaUsuario
@@ -637,7 +638,7 @@ class Compras_Mdl
                                             cpd.saldoInsoluto,
                                             cpg.motivoRechazo
                                         FROM cfdi_facturas cf
-                                        INNER JOIN cfdi_complementoPagoDet cpd ON cf.uuid = cpd.uuidFact
+                                        INNER JOIN cfdi_complementoPagoDet cpd ON cf.uuid = cpd.uuidFact AND (cpd.idCompra = cf.idCompra OR cpd.idCompra IS NULL)
                                         INNER JOIN cfdi_complementoPago cpg ON cpd.idComplementoPago = cpg.id
                                         WHERE cf.idCompra = :idCompra
                                         ORDER BY cpg.fechaReg DESC, cpd.noParcialidad DESC";
@@ -738,7 +739,7 @@ class Compras_Mdl
                             INNER JOIN proveedores prov ON c.idProveedor = prov.id
                             INNER JOIN cfdi_facturas cf ON c.id = cf.idCompra
                             LEFT JOIN cfdi_notasCreditos nc ON c.id = nc.idCompra
-                            LEFT JOIN cfdi_complementoPagoDet cpd ON cf.uuid = cpd.uuidFact
+                            LEFT JOIN cfdi_complementoPagoDet cpd ON cf.uuid = cpd.uuidFact AND (cpd.idCompra = cf.idCompra OR cpd.idCompra IS NULL)
                             LEFT JOIN cfdi_complementoPago cpg ON cpd.idComplementoPago = cpg.id 
                         WHERE
                             c.id IN ($listaAcuses)";

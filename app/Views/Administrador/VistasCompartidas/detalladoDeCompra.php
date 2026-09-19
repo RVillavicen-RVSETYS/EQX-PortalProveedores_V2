@@ -8,7 +8,8 @@ if ($debug == 1) {
 }
 
 $puedeAutorizar = (isset($data['puedeAutorizar']) && $data['dataCompra']['data']['CpaEstatus'] == '1') ? $data['puedeAutorizar'] : 0;
-$puedeRechazar = (isset($data['puedeRechazar']) && $data['dataCompra']['data']['totalComplementos'] == 0 && $data['dataCompra']['data']['totalPagos'] == 0) ? $data['puedeRechazar'] : 0;
+$esPPD = ($data['dataCompra']['data']['FacMetodoPago'] ?? '') === 'PPD';
+$puedeRechazar = (isset($data['puedeRechazar']) && (float)$data['dataCompra']['data']['totalPagos'] == 0 && (!$esPPD || (float)$data['dataCompra']['data']['totalComplementos'] == 0)) ? $data['puedeRechazar'] : 0;
 $fechaMin = date('Y-m-d', strtotime('-1 day'));
 
 $totalImpuestos = 0;

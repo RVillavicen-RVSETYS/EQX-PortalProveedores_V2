@@ -915,11 +915,11 @@ class ReglasAplicadasv40
                     }
 
                     // Se puede hacer match exacto por el monto original de la factura O por el monto real pagado usando EquivalenciaDR
-                    // Se aumentó la tolerancia a 0.05 (5 centavos) para ignorar pequeñas diferencias de redondeo del proveedor
-                    $montoOriginalMatch = abs($pagoBD['montoPagado'] - $impPagadoDR) <= 0.05;
-                    $montoConvertidoMatch = abs($pagoBD['montoPagoReal'] - $montoConvertidoDR) <= 0.05 || abs($pagoBD['montoPagoReal'] - $montoConvertidoAlternoDR) <= 0.05;
+                    // Se aumentó la tolerancia a 0.60 (60 centavos) para ignorar pequeñas diferencias de redondeo del proveedor
+                    $montoOriginalMatch = abs($pagoBD['montoPagado'] - $impPagadoDR) <= 0.60;
+                    $montoConvertidoMatch = abs($pagoBD['montoPagoReal'] - $montoConvertidoDR) <= 0.60 || abs($pagoBD['montoPagoReal'] - $montoConvertidoAlternoDR) <= 0.60;
                     // También verificamos contra montoPagoReal directo por retrocompatibilidad
-                    $montoRealDirectoMatch = abs($pagoBD['montoPagoReal'] - $impPagadoDR) <= 0.05;
+                    $montoRealDirectoMatch = abs($pagoBD['montoPagoReal'] - $impPagadoDR) <= 0.60;
 
                     $montoMatch = $montoOriginalMatch || $montoConvertidoMatch || $montoRealDirectoMatch;
                     $monedaMatch = ($pagoBD['monedaPagoReal'] === $monedaXMLPago);
@@ -942,7 +942,7 @@ class ReglasAplicadasv40
                     }
                     $sumaAcumulada = 0;
                     $matchesParaEsteDR = [];
-                    $toleranciaTotal = 0.05; // tolerancia para la suma total
+                    $toleranciaTotal = 0.60; // tolerancia para la suma total
 
                     foreach ($pagosDisponibles as $key => &$pagoBD) {
                         if ($pagoBD['usado']) {
@@ -993,42 +993,55 @@ class ReglasAplicadasv40
                 }
 
                 if (empty($matchIdDR)) {
-                    $errores[] = "* El abono de $ {$impPagadoDR} asignado al documento UUID {$uuidDR} no coincide con los pagos registrados (diferencia en Fecha de Pago, Monto, Moneda, o Forma de Pago).";
+                    $detallesDescarte = [];
+                    $hayDisponibles = false;
+                    foreach ($pagosDisponibles as $pBD) {
+                        if (strtoupper($pBD['uuid'] ?? '') === $uuidDR) {
+                            $hayDisponibles = true;
+                            if ($pBD['usado']) {
+                                $detallesDescarte[] = "El pago ID {$pBD['id']} ya fue usado en otra validación de este complemento";
+                                continue;
+                            }
+                            $motivos = [];
+                            $montoOriginalMatch = abs($pBD['montoPagado'] - $impPagadoDR) <= 0.60;
+                            $montoConvertidoMatch = abs($pBD['montoPagoReal'] - $montoConvertidoDR) <= 0.60 || abs($pBD['montoPagoReal'] - $montoConvertidoAlternoDR) <= 0.60;
+                            $montoRealDirectoMatch = abs($pBD['montoPagoReal'] - $impPagadoDR) <= 0.60;
+
+                            if (!$montoOriginalMatch && !$montoConvertidoMatch && !$montoRealDirectoMatch) {
+                                $motivos[] = "Monto (XML: {$impPagadoDR} vs BD: {$pBD['montoPagado']}, dif: " . round(abs($pBD['montoPagado'] - $impPagadoDR), 4) . " que excede la tolerancia de 0.60)";
+                            }
+                            if ($pBD['monedaPagoReal'] !== $monedaXMLPago) {
+                                $motivos[] = "Moneda (XML: {$monedaXMLPago} vs BD: {$pBD['monedaPagoReal']})";
+                            }
+                            if (!$noValidarFormas && $pBD['formaPagoSAT'] !== $formaXMLPago) {
+                                $motivos[] = "Forma Pago (XML: {$formaXMLPago} vs BD: {$pBD['formaPagoSAT']})";
+                            }
+                            if (!$noValidarFechas && !empty($pBD['fechaPago']) && substr($pBD['fechaPago'], 0, 10) !== $fechaXMLPago) {
+                                $motivos[] = "Fecha Pago (XML: {$fechaXMLPago} vs BD: " . substr($pBD['fechaPago'], 0, 10) . ")";
+                            }
+
+                            if (!empty($motivos)) {
+                                $detallesDescarte[] = "Pago registrado ID {$pBD['id']}: " . implode(', ', $motivos);
+                            } else {
+                                $detallesDescarte[] = "Pago registrado ID {$pBD['id']} no cuadró por otro parámetro oculto o inconsistencia de decimales";
+                            }
+                        }
+                    }
+
+                    if (!empty($detallesDescarte)) {
+                        $errores[] = "* El abono de $ {$impPagadoDR} asignado al documento UUID {$uuidDR} no coincide con los pagos registrados (" . implode('; ', $detallesDescarte) . ").";
+                    } else {
+                        $errores[] = "* El abono de $ {$impPagadoDR} asignado al documento UUID {$uuidDR} no coincide con los pagos registrados (No se encontraron registros de pago asociados a esta factura en la base de datos).";
+                    }
 
                     if ($this->debug == 1) {
                         echo "<br> <b>* ERROR:</b> No se encontró un registro en BD que cuadre para el UUID {$uuidDR} con monto {$impPagadoDR}.";
-                        $hayDisponibles = false;
-                        foreach ($pagosDisponibles as $idx => $pBD) {
-                            if (!$pBD['usado'] && strtoupper($pBD['uuid'] ?? '') === $uuidDR) {
-                                $hayDisponibles = true;
-                                $fallas = [];
-
-                                $montoOriginalMatch = abs($pBD['montoPagado'] - $impPagadoDR) <= 0.20;
-                                $montoConvertidoMatch = abs($pBD['montoPagoReal'] - $montoConvertidoDR) <= 0.20 || abs($pBD['montoPagoReal'] - $montoConvertidoAlternoDR) <= 0.20;
-                                $montoRealDirectoMatch = abs($pBD['montoPagoReal'] - $impPagadoDR) <= 0.20;
-
-                                if (!$montoOriginalMatch && !$montoConvertidoMatch && !$montoRealDirectoMatch) {
-                                    $fallas[] = "Monto (XML: {$impPagadoDR} vs BD: {$pBD['montoPagado']})";
-                                }
-                                if ($pBD['monedaPagoReal'] !== $monedaXMLPago) {
-                                    $fallas[] = "Moneda (XML: {$monedaXMLPago} vs BD: {$pBD['monedaPagoReal']})";
-                                }
-                                if (!$noValidarFormas && $pBD['formaPagoSAT'] !== $formaXMLPago) {
-                                    $fallas[] = "Forma Pago (XML: {$formaXMLPago} vs BD: {$pBD['formaPagoSAT']})";
-                                }
-                                if (!$noValidarFechas && !empty($pBD['fechaPago']) && substr($pBD['fechaPago'], 0, 10) !== $fechaXMLPago) {
-                                    $fallas[] = "Fecha Pago (XML: {$fechaXMLPago} vs BD: " . substr($pBD['fechaPago'], 0, 10) . ")";
-                                }
-
-                                $strFallas = implode(', ', $fallas);
-                                if (empty($strFallas)) {
-                                    $strFallas = "No cuadró por otro parámetro oculto";
-                                }
-                                echo "<br> &nbsp;&nbsp; -> Fragmento BD [id: {$pBD['id']}] descartado por: " . $strFallas;
+                        if ($hayDisponibles) {
+                            foreach ($detallesDescarte as $detalle) {
+                                echo "<br> &nbsp;&nbsp; -> " . $detalle;
                             }
-                        }
-                        if (!$hayDisponibles) {
-                            echo "<br> &nbsp;&nbsp; -> No hay pagos registrados disponibles (o ya fueron usados) para el UUID {$uuidDR}.";
+                        } else {
+                            echo "<br> &nbsp;&nbsp; -> No hay pagos registrados disponibles para el UUID {$uuidDR}.";
                         }
                     }
                 } else {
@@ -1079,7 +1092,7 @@ class ReglasAplicadasv40
                 if ($this->debug == 1) {
                     echo "<br> * UUID {$uuidFact}: totalPagosBD={$totalPagosBD}, totalComplementosBD={$totalComplementosBD}, pendiente={$pendiente}, aplicadoComplemento={$aplicadoEnEsteComplemento[$uuidFact]}";
                 }
-                if ($aplicadoEnEsteComplemento[$uuidFact] > $pendiente + 0.01) {
+                if ($aplicadoEnEsteComplemento[$uuidFact] > $pendiente + 0.20) {
                     $errores[] = "* UUID {$uuidFact}: el pago del complemento excede el pendiente disponible. Pendiente: {$pendiente}, aplicado en complemento: {$aplicadoEnEsteComplemento[$uuidFact]}.";
                 }
             }

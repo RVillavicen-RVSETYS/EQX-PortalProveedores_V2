@@ -407,7 +407,8 @@ class FacturasNacionalesController extends Controller
 
             //Traemos los datos de las compras y facturas recibidas que empatan con los UUIDS del Complemento de Pago
             $filtrosPorFacturas = [
-                'uuids' => $idDocumentos
+                'uuids' => $idDocumentos,
+                'estatusDiferenteDe' => 3
             ];
 
             $MDL_Compras = new Compras_Mdl();
