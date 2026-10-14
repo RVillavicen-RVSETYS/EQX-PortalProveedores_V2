@@ -26,6 +26,7 @@ if (empty($listaPagos)) {
             <th>Monto Pagado</th>
             <th>Forma Pago</th>
             <th>Tipo Moneda</th>
+            <th>Fecha Pago</th>
         </tr>
     </thead>
     <tbody>
@@ -42,6 +43,8 @@ if (empty($listaPagos)) {
                 <th><?= $pago['HES']; ?></th>
                 <th class="text-right">$ <?= number_format($pago['MontoPagado'], 2, '.', ','); ?></th>
                 <th><?= $pago['FormaPago']; ?></th>
+                <th><?= $pago['TipoMoneda']; ?></th>
+                <th><?= $pago['FechaPago']; ?></th>
                 <th><?= $pago['Moneda']; ?></th>
             </tr>
         <?php

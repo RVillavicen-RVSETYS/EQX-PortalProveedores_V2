@@ -428,6 +428,7 @@ class Pagos_Mdl
                         Pagos.IdPago
                     ORDER BY Acuse $orden
                     $limiteResult";
+
             if (self::$debug) {
                 $this->db->imprimirConsulta($sql, $params, 'Lista De Pagos Realizados: ');
             }

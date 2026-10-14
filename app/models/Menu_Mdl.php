@@ -24,7 +24,8 @@ class Menu_Mdl
         $this->db = new BD_Connect(); // Instancia de la conexión a la base de datos
     }
 
-    public function obtenerIdAreaPorLink($areaLink){
+    public function obtenerIdAreaPorLink($areaLink)
+    {
         if (self::$debug) {
             echo "Nombre de Area a buscar: $areaLink <br>";
         }
@@ -58,7 +59,7 @@ class Menu_Mdl
             // Registro del error
             $timestamp = date("Y-m-d H:i:s");
             error_log("[$timestamp] Error al buscar Id del Area (nombre: $areaLink): " . $e->getMessage(), 3, LOG_FILE_BD);
-    
+
             return [
                 'success' => false,
                 'message' => 'Error al buscar Id del Area. Notifica a tu Administrador'
@@ -154,7 +155,8 @@ class Menu_Mdl
         }
     }
 
-    public function listarAreasDisponibles($nivel){
+    public function listarAreasDisponibles($nivel)
+    {
         if (self::$debug) {
             echo "Nivel Recibido: $nivel <br>";
         }
