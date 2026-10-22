@@ -482,4 +482,113 @@ class NotasCredito_Mdl
             return ['success' => false, 'message' => $mensajeUsuario];
         }
     }
+
+    public function obtenerNotasCreditoPendientes($filtros = [], INT $cantMaxRes = 0, $orden = 'DESC')
+    {
+        self::$debug = 0; // Cambiar a 1 para activar mensajes de depuración
+        if (self::$debug) {
+            echo '<br><br>Filtros Recibidos en obtenerNotasCreditoPendientes: ';
+            var_dump($filtros);
+        }
+
+        $filtrosDisponibles = [
+            'idProveedor' => ['tipoDato' => 'INT', 'sqlFiltro' => 'p.noProveedor = :idProveedor'],
+            'moneda'      => ['tipoDato' => 'STRING', 'sqlFiltro' => 'nc.Moneda = :moneda'],
+            'obligatoria' => ['tipoDato' => 'INT', 'sqlFiltro' => 'nc.Obligatoria = :obligatoria'],
+            'entreFechas' => ['tipoDato' => 'DATES', 'sqlFiltro' => 'c.fechaCompra BETWEEN :fechaInicial AND :fechaFinal']
+        ];
+
+        $filtrosSQL = '';
+        $params = [];
+
+        try {
+            if (!is_int($cantMaxRes)) {
+                throw new \Exception('El valor de $cantMaxRes debe ser un entero.');
+            }
+            $limiteResult = ($cantMaxRes == 0) ? '' : 'LIMIT ' . $cantMaxRes;
+
+            if (!in_array($orden, ['DESC', 'ASC'])) {
+                throw new \Exception('El orden debe ser DESC o ASC.');
+            } else {
+                $orden = strtoupper($orden);
+            }
+
+            foreach ($filtros as $nombreFiltro => $valorFiltro) {
+                if (isset($filtrosDisponibles[$nombreFiltro]) && $valorFiltro !== null && $valorFiltro !== '') {
+                    switch ($nombreFiltro) {
+                        case 'entreFechas':
+                            list($fechaInicial, $fechaFinal) = explode(',', $valorFiltro);
+                            if (!strtotime($fechaInicial) || !strtotime($fechaFinal)) {
+                                throw new \Exception('Las fechas proporcionadas no son válidas.');
+                            }
+                            $filtrosSQL .= ' AND ' . $filtrosDisponibles[$nombreFiltro]['sqlFiltro'];
+                            $params[':fechaInicial'] = $fechaInicial;
+                            $params[':fechaFinal'] = $fechaFinal;
+                            break;
+
+                        default:
+                            $filtrosSQL .= ' AND ' . $filtrosDisponibles[$nombreFiltro]['sqlFiltro'];
+                            $params[':' . $nombreFiltro] = $valorFiltro;
+                            break;
+                    }
+                }
+            }
+
+            $whereSQL = '';
+            if (!empty($filtrosSQL)) {
+                $whereSQL = 'WHERE ' . ltrim($filtrosSQL, ' AND');
+            }
+
+            $sql = "SELECT 
+                        nc.IdNotaCredito,
+                        nc.IdCompra,
+                        nc.FolioCompra,
+                        c.idProveedor,
+                        COALESCE(p.nombre, 'PROVEEDOR NO IDENTIFICADO') AS NombreProveedor,
+                        c.fechaCompra AS FechaCompra,
+                        c.fechaReg AS FechaRegCompra,
+                        cnc.fechaReg AS FechaNotaCredito,
+                        nc.Descripcion,
+                        nc.Moneda,
+                        nc.Monto,
+                        nc.TipoDescuento,
+                        nc.ValorDescuento,
+                        nc.Obligatoria
+                    FROM vw_ext_PortalProveedores_NotasCredito nc
+                    INNER JOIN compras c ON nc.IdCompra = c.id
+                    LEFT JOIN proveedores p ON c.idProveedor = p.id
+                    LEFT JOIN compras_NotasCredito cnc ON nc.IdNotaCredito = cnc.id
+                    $whereSQL
+                    ORDER BY nc.IdNotaCredito $orden
+                    $limiteResult";
+
+            if (self::$debug) {
+                $this->dbHES->imprimirConsulta($sql, $params, 'Listar Notas Credito Pendientes');
+            }
+
+            $stmt = $this->dbHES->prepare($sql);
+            foreach ($params as $param => $value) {
+                $stmt->bindValue($param, $value, is_int($value) ? PDO::PARAM_INT : PDO::PARAM_STR);
+            }
+            $stmt->execute();
+            $dataResult = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            $cantResult = count($dataResult);
+
+            if (self::$debug) {
+                echo '<br>Resultado de Query:';
+                var_dump($dataResult);
+                echo '<br><br>';
+            }
+
+            return ['success' => true, 'cantResult' => $cantResult, 'data' => $dataResult];
+        } catch (\Exception $e) {
+            $timestamp = date("Y-m-d H:i:s");
+            $errorMessage = $e->getMessage();
+            error_log("[$timestamp] app/Models/DatosCompra/NotasCredito_Mdl.php ->Error en obtenerNotasCreditoPendientes: " . $errorMessage, 3, LOG_FILE_BD);
+            if (self::$debug) {
+                echo "<br>Error al listar Notas Credito Pendientes: " . $errorMessage;
+            }
+            return ['success' => false, 'message' => 'Problemas al listar las Notas De Crédito pendientes, notifica a tu administrador.'];
+        }
+    }
 }

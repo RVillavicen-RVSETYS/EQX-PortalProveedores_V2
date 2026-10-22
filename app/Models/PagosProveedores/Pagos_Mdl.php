@@ -369,8 +369,7 @@ class Pagos_Mdl
                             pc.HES AS 'Recepcion',
                             pc.montoPagado AS 'MontoPagado',
                             pc.monedaTipoCambio AS 'TipoMoneda',
-                            fp.nombre AS 'FormaPago',
-                            DATE_FORMAT(pc.fechaPago, '%d/%m/%Y') AS 'FechaPago'
+                            DATE_FORMAT(pc.fechaPago, '%d/%m/%Y') AS 'FechaPago',
                             pc.moneda AS 'Moneda',
                             fp.nombre AS 'FormaPago'
                         FROM
@@ -410,8 +409,7 @@ class Pagos_Mdl
                             pc.HES AS 'Recepcion',
                             pc.montoPagado AS 'MontoPagado',
                             pc.monedaTipoCambio AS 'TipoMoneda',
-                            fp.nombre AS 'FormaPago',
-                            DATE_FORMAT(pc.fechaPago, '%d/%m/%Y') AS 'FechaPago'
+                            DATE_FORMAT(pc.fechaPago, '%d/%m/%Y') AS 'FechaPago',
                             pc.moneda AS 'Moneda',
                             fp.nombre AS 'FormaPago'
                         FROM

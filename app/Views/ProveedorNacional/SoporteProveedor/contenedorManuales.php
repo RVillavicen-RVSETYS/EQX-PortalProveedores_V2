@@ -1,5 +1,5 @@
 <?php
-$rutaManual = 'Manuales\Manual_de_Portal_proveedores.pdf';
+$rutaManual = 'Manuales/Manual_de_Portal_proveedores.pdf';
 $urlPDF = base64_encode($rutaManual);
 ?>
 <div id="note-full-container" class="note-has-grid row">
