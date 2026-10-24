@@ -238,7 +238,7 @@ class Compras_Mdl
                 $params[':fechaPagoFinal_nc'] = $fechaFinal;
                 $params[':fechaPagoInicial_cp'] = $fechaInicial;
                 $params[':fechaPagoFinal_cp'] = $fechaFinal;
-                $whereFactura[] = '(c.fechaProbablePago BETWEEN :fechaPagoInicial_fact AND :fechaPagoFinal_fact)';
+                $whereFactura[] = '(c.fechaReg BETWEEN :fechaPagoInicial_fact AND :fechaPagoFinal_fact)';
                 $whereNC[] = '(nc.fechaReg BETWEEN :fechaPagoInicial_nc AND :fechaPagoFinal_nc)';
                 $whereCP[] = '(cp.fechaReg BETWEEN :fechaPagoInicial_cp AND :fechaPagoFinal_cp)';
             }
@@ -430,7 +430,7 @@ class Compras_Mdl
                             // Validar que el valor sea una cadena de UUIDs separados por comas
                             $uuids = explode(',', $valorFiltro);
                             $uuids = array_map('trim', $uuids); // Limpiar espacios en blanco
-                            
+
                             $inQuery = [];
                             foreach ($uuids as $i => $uuid) {
                                 $inQuery[] = ":uuid_$i";
