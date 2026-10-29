@@ -6,6 +6,36 @@ if ($debug == 1) {
     var_dump($listaNotasCredito);
 }
 
+$hoy          = new DateTime();
+$inicioSemana = (clone $hoy)->modify('monday this week')->setTime(0, 0, 0);
+$finSemana    = (clone $hoy)->modify('sunday this week')->setTime(23, 59, 59);
+$mesActual    = $hoy->format('Y-m');
+$anioActual   = $hoy->format('Y');
+
+$cantSemana = 0;
+$cantMes = 0;
+$cantAno = 0;
+$cantTotal = 0;
+
+foreach ($notasParaCards as $nota) {
+    $cantTotal++;
+
+    if (!empty($nota['FechaNotaCredito'])) {
+        //$fechaRefrencia = new DateTime($nota['FechaNotaCredito']);
+        $fechaRefrencia = DateTime::createFromFormat('d/m/Y', $nota['FechaNotaCredito']);
+
+        if ($fechaRefrencia >= $inicioSemana && $fechaRefrencia <= $finSemana) {
+            $cantSemana++;
+        }
+        if ($fechaRefrencia->format('Y-m') == $mesActual) {
+            $cantMes++;
+        }
+        if ($fechaRefrencia->format('Y') == $anioActual) {
+            $cantAno++;
+        }
+    }
+}
+
 ?>
 
 <div class="row d-flex justify-content-center">
@@ -15,7 +45,7 @@ if ($debug == 1) {
             <div class="card-body">
                 <div class="d-flex no-block align-items-center">
                     <div class="text-white">
-                        <h2 id="cardTotal">0</h2>
+                        <h2 id="cardTotal"><?= $cantTotal; ?></h2>
                         <h6>Total Pendientes</h6>
                     </div>
                     <div class="ml-auto">
@@ -32,7 +62,7 @@ if ($debug == 1) {
             <div class="card-body">
                 <div class="d-flex no-block align-items-center">
                     <div class="text-white">
-                        <h2 id="cardAno">0</h2>
+                        <h2 id="cardAno"><?= $cantAno; ?></h2>
                         <h6>Notas Este Año</h6>
                     </div>
                     <div class="ml-auto">
@@ -49,7 +79,7 @@ if ($debug == 1) {
             <div class="card-body">
                 <div class="d-flex no-block align-items-center">
                     <div class="text-white">
-                        <h2 id="cardMes">0</h2>
+                        <h2 id="cardMes"><?= $cantMes; ?></h2>
                         <h6>Notas Este Mes</h6>
                     </div>
                     <div class="ml-auto">
@@ -66,7 +96,7 @@ if ($debug == 1) {
             <div class="card-body">
                 <div class="d-flex no-block align-items-center">
                     <div class="text-white">
-                        <h2 id="cardSemana">0</h2>
+                        <h2 id="cardSemana"><?= $cantSemana; ?></h2>
                         <h6>Notas Esta Semana</h6>
                     </div>
                     <div class="ml-auto">
@@ -89,40 +119,15 @@ if ($debug == 1) {
             <th>Monto</th>
             <th>Moneda</th>
             <th>Obligatorio</th>
+            <th>Fecha Reg</th>
         </tr>
     </thead>
     <tbody>
         <?php
         $counter = 0;
 
-        $hoy          = new DateTime();
-        $inicioSemana = (clone $hoy)->modify('monday this week')->setTime(0, 0, 0);
-        $finSemana    = (clone $hoy)->modify('sunday this week')->setTime(23, 59, 59);
-        $mesActual    = $hoy->format('Y-m');
-        $anioActual   = $hoy->format('Y');
-
-        $cantSemana = 0;
-        $cantMes = 0;
-        $cantAno = 0;
-        $cantTotal = 0;
-
         foreach ($listaNotasCredito as $notaCredito) {
             $counter++;
-            $cantTotal++;
-
-            if (!empty($notaCredito['FechaNotaCredito'])) {
-                $fechaRefrencia = new DateTime($notaCredito['FechaNotaCredito']);
-
-                if ($fechaRefrencia >= $inicioSemana && $fechaRefrencia <= $finSemana) {
-                    $cantSemana++;
-                }
-                if ($fechaRefrencia->format('Y-m') == $mesActual) {
-                    $cantMes++;
-                }
-                if ($fechaRefrencia->format('Y') == $anioActual) {
-                    $cantAno++;
-                }
-            }
 
             $valorDescuento = '';
             switch ($notaCredito['TipoDescuento']) {
@@ -145,6 +150,7 @@ if ($debug == 1) {
                 <td class="text-right">$<?= number_format($notaCredito['Monto'], 2); ?></td>
                 <td class="text-center"><?= $notaCredito['Moneda']; ?></td>
                 <td class="text-center"><?= $obligatorio; ?></td>
+                <td><?= $notaCredito['FechaNotaCredito']; ?></td>
             </tr>
         <?php
         }
@@ -204,9 +210,4 @@ if ($debug == 1) {
             }
         ]
     });
-
-    $('#cardSemana').text('<?= $cantSemana; ?>');
-    $('#cardMes').text('<?= $cantMes; ?>');
-    $('#cardAno').text('<?= $cantAno; ?>');
-    $('#cardTotal').text('<?= $cantTotal; ?>');
 </script>

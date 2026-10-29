@@ -75,9 +75,11 @@ class NotasCreditoController extends Controller
     {
         $data = [];
         $filtros = [];
+        $filtrosCards = [];
 
         if (!empty($_POST['idProveedor'])) {
             $filtros['idProveedor'] = (int)$_POST['idProveedor'];
+            $filtrosCards['idProveedor'] = (int)$_POST['idProveedor'];
         }
 
         if (!empty($_POST['fechaInicial']) && !empty($_POST['fechaFinal'])) {
@@ -85,20 +87,17 @@ class NotasCreditoController extends Controller
         }
 
         $MDL_notasCredito = new NotasCredito_Mdl();
+
+        // Consulta para la tabla (filtrada por fechas)
         $dataNotasCredito = $MDL_notasCredito->obtenerNotasCreditoPendientes($filtros, 0, 'DESC');
+        $data['listaNotasCredito'] = $dataNotasCredito['success'] ? $dataNotasCredito['data'] : [];
+        // 2. Consulta para las CARDS (SIN filtro de fechas, solo proveedor si se seleccionó)
+        $dataNotasCards = $MDL_notasCredito->obtenerNotasCreditoPendientes($filtrosCards, 0, 'DESC');
+        $data['notasParaCards'] = $dataNotasCards['success'] ? $dataNotasCards['data'] : [];
 
         if ($this->debug == 1) {
             echo '<br><br>Resultado de obtenerNotasCreditoPendientes: ' . PHP_EOL;
             var_dump($dataNotasCredito);
-        }
-
-        if ($dataNotasCredito['success']) {
-            $data['listaNotasCredito'] = $dataNotasCredito['data'];
-            $data['cantResult'] = $dataNotasCredito['cantResult'];
-        } else {
-            $data['listaNotasCredito'] = [];
-            $data['cantResult'] = 0;
-            $data['errorMessage'] = $dataNotasCredito['message'];
         }
 
         // Cargar vista parcial de la tabla
