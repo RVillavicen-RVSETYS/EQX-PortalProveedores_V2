@@ -35,7 +35,7 @@ class Compras_Mdl
         $filtrosDisponibles = [
             'idProveedor' => ['tipoDato' => 'INT', 'sqlFiltro' => 'c.idProveedor = :idProveedor'],
             'estatusFactura' => ['tipoDato' => 'INT', 'sqlFiltro' => 'c.estatus = :estatusFactura'],
-            'estatusFactura2' => ['tipoDato' => 'INT', 'sqlFiltro' => 'c.estatus = :estatusFactura2'],
+            'estatusFactura2' => ['tipoDato' => 'INT', 'sqlFiltro' => ''],
             'entreFechasRecepcion' => ['tipoDato' => 'STRING', 'sqlFiltro' => '(c.fechaReg BETWEEN :fechaInicial AND :fechaFinal)'],
             'entreFechasPago' => ['tipoDato' => 'STRING', 'sqlFiltro' => '(c.fechaProbablePago BETWEEN :fechaInicial AND :fechaFinal)'],
             'tipoMoneda' => ['tipoDato' => 'STRING', 'sqlFiltro' => 'c.idCatTipoMoneda = :tipoMoneda'],
@@ -96,11 +96,11 @@ class Compras_Mdl
                         case 'estatusComplemento':
                             switch ($valorFiltro) {
                                 case '1':
-                                    $filtrosSQL .= ' AND c.totalPagos > c.totalComplementos';
+                                    $filtrosSQL .= ' AND c.totalPagos > c.totalComplementos AND cf.idCatMetodoPago != "PUE" ';
                                     break;
 
                                 case '2':
-                                    $filtrosSQL .= ' AND (c.totalComplementos > 0 OR COALESCE(cpd.CantComplementos, 0) > 0)';
+                                    $filtrosSQL .= ' AND (c.totalComplementos > 0 OR COALESCE(cpd.CantComplementos, 0) > 0) AND cf.idCatMetodoPago != "PUE"';
                                     break;
                                 case '3':
                                     $filtrosSQL .= " AND cf.idCatMetodoPago = 'PUE'";
@@ -113,17 +113,13 @@ class Compras_Mdl
                                 case '1':
                                     $filtrosSQL .= ' AND c.estatus = 1';
                                     break;
-
                                 case '2':
                                     $filtrosSQL .= ' AND c.estatus = 3';
                                     break;
-
                                 case '3':
                                     $filtrosSQL .= ' AND c.estatusFinal = 1';
                                     break;
                             }
-
-
                             break;
 
                         default:
