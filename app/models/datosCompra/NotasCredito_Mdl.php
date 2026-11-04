@@ -495,7 +495,7 @@ class NotasCredito_Mdl
             'idProveedor' => ['tipoDato' => 'INT', 'sqlFiltro' => 'p.noProveedor = :idProveedor'],
             'moneda'      => ['tipoDato' => 'STRING', 'sqlFiltro' => 'nc.Moneda = :moneda'],
             'obligatoria' => ['tipoDato' => 'INT', 'sqlFiltro' => 'nc.Obligatoria = :obligatoria'],
-            'entreFechas' => ['tipoDato' => 'DATES', 'sqlFiltro' => 'c.fechaCompra BETWEEN :fechaInicial AND :fechaFinal']
+            'entreFechas' => ['tipoDato' => 'DATES', 'sqlFiltro' => 'nc.fechaReg BETWEEN :fechaInicial AND :fechaFinal']
         ];
 
         $filtrosSQL = '';
@@ -543,11 +543,9 @@ class NotasCredito_Mdl
                         nc.IdNotaCredito,
                         nc.IdCompra,
                         nc.FolioCompra,
-                        c.idProveedor,
+                        nc.idProveedor,
                         COALESCE(p.nombre, 'PROVEEDOR NO IDENTIFICADO') AS NombreProveedor,
-                        c.fechaCompra AS FechaCompra,
-                        c.fechaReg AS FechaRegCompra,
-                        cnc.fechaReg AS FechaNotaCredito,
+                        DATE_FORMAT(nc.fechaReg, '%d/%m/%Y') AS FechaNotaCredito,
                         nc.Descripcion,
                         nc.Moneda,
                         nc.Monto,
@@ -555,9 +553,7 @@ class NotasCredito_Mdl
                         nc.ValorDescuento,
                         nc.Obligatoria
                     FROM vw_ext_PortalProveedores_NotasCredito nc
-                    INNER JOIN compras c ON nc.IdCompra = c.id
-                    LEFT JOIN proveedores p ON c.idProveedor = p.id
-                    LEFT JOIN compras_NotasCredito cnc ON nc.IdNotaCredito = cnc.id
+                    LEFT JOIN proveedores p ON nc.idProveedor = p.id
                     $whereSQL
                     ORDER BY nc.IdNotaCredito $orden
                     $limiteResult";

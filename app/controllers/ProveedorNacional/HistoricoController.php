@@ -192,9 +192,9 @@ class HistoricoController extends Controller
 
         $filtros = [
             'idProveedor' => $noProveedor,
-            'estatusFactura' => $estatusFactura ?: null,
+            'estatusFactura2' => $estatusFactura ?: null,
             'estatusComplemento' => $estatusComplemento,
-            'entreFechas' => $fechas
+            'entreFechasRecepcion' => $fechas
         ];
 
         $MDL_compras = new Compras_Mdl();

@@ -35,11 +35,13 @@ class Compras_Mdl
         $filtrosDisponibles = [
             'idProveedor' => ['tipoDato' => 'INT', 'sqlFiltro' => 'c.idProveedor = :idProveedor'],
             'estatusFactura' => ['tipoDato' => 'INT', 'sqlFiltro' => 'c.estatus = :estatusFactura'],
+            'estatusFactura2' => ['tipoDato' => 'INT', 'sqlFiltro' => 'c.estatus = :estatusFactura2'],
             'entreFechasRecepcion' => ['tipoDato' => 'STRING', 'sqlFiltro' => '(c.fechaReg BETWEEN :fechaInicial AND :fechaFinal)'],
             'entreFechasPago' => ['tipoDato' => 'STRING', 'sqlFiltro' => '(c.fechaProbablePago BETWEEN :fechaInicial AND :fechaFinal)'],
             'tipoMoneda' => ['tipoDato' => 'STRING', 'sqlFiltro' => 'c.idCatTipoMoneda = :tipoMoneda'],
             'pendientePago' => ['tipoDato' => 'STRING', 'sqlFiltro' => 'c.estatus !=  4 AND c.fechaVence IS NULL'],
             'pagada' => ['tipoDato' => 'INT', 'sqlFiltro' => ''],
+            'estatusComplemento'   => ['tipoDato' => 'INT', 'sqlFiltro' => ''],
             'pendienteAprobacion' => ['tipoDato' => 'INT', 'sqlFiltro' => '(c.estatus = 1 OR COALESCE(ncp.CantNotasPendientes, 0) > 0 OR COALESCE(cpp.CantComplementosPendientes, 0) > 0)'],
             'nacional' => ['tipoDato' => 'INT', 'sqlFiltro' => '']
         ];
@@ -90,6 +92,38 @@ class Compras_Mdl
                             if ($valorFiltro == 1) {
                                 $filtrosSQL .= ' AND ' . $filtrosDisponibles[$nombreFiltro]['sqlFiltro'];
                             }
+                            break;
+                        case 'estatusComplemento':
+                            switch ($valorFiltro) {
+                                case '1':
+                                    $filtrosSQL .= ' AND c.totalPagos > c.totalComplementos';
+                                    break;
+
+                                case '2':
+                                    $filtrosSQL .= ' AND (c.totalComplementos > 0 OR COALESCE(cpd.CantComplementos, 0) > 0)';
+                                    break;
+                                case '3':
+                                    $filtrosSQL .= " AND cf.idCatMetodoPago = 'PUE'";
+                                    break;
+                            }
+                            break;
+
+                        case 'estatusFactura2':
+                            switch ($valorFiltro) {
+                                case '1':
+                                    $filtrosSQL .= ' AND c.estatus = 1';
+                                    break;
+
+                                case '2':
+                                    $filtrosSQL .= ' AND c.estatus = 3';
+                                    break;
+
+                                case '3':
+                                    $filtrosSQL .= ' AND c.estatusFinal = 1';
+                                    break;
+                            }
+
+
                             break;
 
                         default:
