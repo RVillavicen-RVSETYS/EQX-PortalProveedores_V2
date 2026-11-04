@@ -20,7 +20,7 @@ if ($debug == 1) {
                 <th>Folio Interno</th>
                 <th>Status Fiscal</th>
                 <th>Probable Pago</th>
-                <th>Comp. Pago</th> 
+                <th>Comp. Pago</th>
                 <th class="no-exportar">Ver</th>
             </tr>
         </thead>
@@ -46,21 +46,26 @@ if ($debug == 1) {
                 }
 
                 $valida = '<center class="text-success"><i class="fas fa-check"></i></center>';
-                $compPago = '<center class="text-danger"><i class="fas fa-times"></i></center>';
+                //$compPago = '<center class="text-danger"><i class="fas fa-times"></i></center>';
+                if ($row['MetodoPago'] === 'PUE') {
+                    $compPago = '<center class="text-muted">No Requiere</center>';
+                } else {
+                    // 2. Si es PPD, evaluamos el estado del complemento
+                    $compPago = '<center class="text-danger"><i class="fas fa-times"></i></center>';
 
-                if ($row['totalPagos'] == $row['totalComplementos'] &&  $row['Total'] == $row['totalPagos']) {
-                    $compPago = '<center class="text-success"><i class="fas fa-check"></i></center>';
-                }
-                if ($row['totalPagos'] == $row['totalComplementos']) {
-                    if ($row['totalComplementos'] > 0) {
-                        $compPago = '<center class="text-success">Al Corriente</center>';
-                    } else {
-                        $compPago = '';
+                    if ($row['totalPagos'] == $row['totalComplementos'] &&  $row['Total'] == $row['totalPagos']) {
+                        $compPago = '<center class="text-success"><i class="fas fa-check"></i></center>';
                     }
-                    
-                }
-                if ($row['totalPagos'] > $row['totalComplementos']) {
-                    $compPago = '<center class="text-danger">Pendiente</center>';
+                    if ($row['totalPagos'] == $row['totalComplementos']) {
+                        if ($row['totalComplementos'] > 0) {
+                            $compPago = '<center class="text-success">Al Corriente</center>';
+                        } else {
+                            $compPago = '';
+                        }
+                    }
+                    if ($row['totalPagos'] > $row['totalComplementos']) {
+                        $compPago = '<center class="text-danger">Pendiente</center>';
+                    }
                 }
 
                 switch ($row['estatus']) {
@@ -120,8 +125,6 @@ if ($debug == 1) {
     </table>
 </div>
 <script>
-    
-
     $('#tableListaCompras').DataTable({
         iDisplayLength: 25,
         responsive: false,
@@ -130,7 +133,9 @@ if ($debug == 1) {
         scrollCollapse: true,
         autoWidth: true,
         bSort: true,
-        order: [[0, "desc"]],
+        order: [
+            [0, "desc"]
+        ],
         dom: 'Blfrtip',
         lengthMenu: [
             [10, 25, 50, -1],

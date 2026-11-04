@@ -63,7 +63,7 @@ foreach ($notasParaCards as $nota) {
                 <div class="d-flex no-block align-items-center">
                     <div class="text-white">
                         <h2 id="cardAno"><?= $cantAno; ?></h2>
-                        <h6>Notas Este Año</h6>
+                        <h6>Notas Pendientes Este Año</h6>
                     </div>
                     <div class="ml-auto">
                         <span class="text-white display-6"><i class="ti-stats-up"></i></span>
@@ -80,7 +80,7 @@ foreach ($notasParaCards as $nota) {
                 <div class="d-flex no-block align-items-center">
                     <div class="text-white">
                         <h2 id="cardMes"><?= $cantMes; ?></h2>
-                        <h6>Notas Este Mes</h6>
+                        <h6>Notas Pendientes Este Mes</h6>
                     </div>
                     <div class="ml-auto">
                         <span class="text-white display-6"><i class="ti-calendar"></i></span>
@@ -97,7 +97,7 @@ foreach ($notasParaCards as $nota) {
                 <div class="d-flex no-block align-items-center">
                     <div class="text-white">
                         <h2 id="cardSemana"><?= $cantSemana; ?></h2>
-                        <h6>Notas Esta Semana</h6>
+                        <h6>Notas Pendientes Esta Semana</h6>
                     </div>
                     <div class="ml-auto">
                         <span class="text-white display-6"><i class="ti-timer"></i></span>
