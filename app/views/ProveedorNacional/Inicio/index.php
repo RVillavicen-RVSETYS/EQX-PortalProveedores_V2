@@ -594,11 +594,11 @@ if ($notificaciones['success'] && !empty($notificaciones['data'])) {
                             $('#contentNotaCredito').empty();
                             $("#btnNotaCredito").addClass("d-none");
                             contadorFormNotas = 0;
-                            
+
                             // Verificar si hay HES pendientes
                             const cantHES = response.cantHES ?? 0;
                             const cantNC = response.cantNC ?? 0;
-                            
+
                             if (cantHES > 0) {
                                 // Hay HES pendientes, puede cargar factura
                                 // Si hay NC pendientes, mostrar información (opcional)
@@ -610,7 +610,7 @@ if ($notificaciones['success'] && !empty($notificaciones['data'])) {
                                 } else {
                                     lastNotasCredito = [];
                                 }
-                                
+
                             } else {
                                 $("#invalid_ordenCompra").html(response.messageHES || 'No hay HES pendientes para esta Orden de Compra');
                             }
@@ -648,13 +648,15 @@ if ($notificaciones['success'] && !empty($notificaciones['data'])) {
             $.ajax({
                 type: 'POST',
                 url: 'Inicio/verificaOrdenCompraNotaCredito',
-                data: { ordenCompra: oc.valor },
+                data: {
+                    ordenCompra: oc.valor
+                },
                 dataType: 'json',
                 success: function(response) {
                     if (response.success) {
                         $("#ordenCompraNC").addClass("is-valid");
                         lastNotasCredito = response.NC || [];
-                        obtenerFacturasPorOC(oc.valor);
+                        obtenerFacturas(oc.valor, lastNotasCredito);
                     } else {
                         $("#ordenCompraNC").addClass("is-invalid");
                         $("#invalid_ordenCompraNC").html(response.message || 'Error al validar la Orden de Compra para Nota de Crédito');
@@ -671,33 +673,47 @@ if ($notificaciones['success'] && !empty($notificaciones['data'])) {
             });
         }
 
-        function obtenerFacturasPorOC(ordenCompra) {
-            const $selectFactura = $('#idCompraNC');
+        function obtenerFacturas(ordenCompra, politicasNC = []) {
             const $campoFactura = $('#campoFacturaIngresada');
+            const $selectFactura = $('#idCompraNC');
+            const $invalidMsg = $('#invalid_idCompraNC');
 
-            $selectFactura.empty().append('<option value="">Seleccione una factura...</option>');
-            $campoFactura.hide();
+            $selectFactura.empty().append('<option value="">Cargando...</option>');
+            $invalidMsg.html('');
             $('#contentNotaCreditoNC').empty();
             $('#btnNotaCreditoNC').addClass('d-none');
+
+            // Extraer los IdNotaCredito de las políticas disponibles
+            const idsNotaCredito = politicasNC.map(nc => nc.IdNotaCredito || nc.idNotaCredito).filter(id => id);
 
             $.ajax({
                 type: 'POST',
                 url: 'Inicio/obtenerFacturasPorOC',
-                data: { ordenCompra: ordenCompra },
+                data: {
+                    ordenCompra: ordenCompra,
+                    idsNotaCredito: idsNotaCredito
+                },
                 dataType: 'json',
                 success: function(response) {
+                    $selectFactura.empty(); // Limpiar opciones
                     if (response.success && response.data && response.data.length > 0) {
+                        $selectFactura.append('<option value="">Seleccione una factura...</option>');
                         response.data.forEach(function(factura) {
-                            const text = `${factura.acuse} | ${factura.uuid} | ${factura.fechaReg}`;
-                            $selectFactura.append(new Option(text, factura.idCompra));
+                            // Formato: Acuse: 123 - Folio: A-456
+                            const texto = `Acuse: ${factura.idCompra} - Folio: ${factura.serie || ''}${factura.folio}`;
+                            $selectFactura.append(new Option(texto, factura.idCompra));
                         });
-                        $campoFactura.show();
+                        $campoFactura.show(); // Mostrar el campo
                     } else {
-                        $("#invalid_ordenCompraNC").html(response.message || 'No se encontraron facturas para esta OC');
+                        $selectFactura.append('<option value="">No se encontraron facturas</option>');
+                        $invalidMsg.html(response.message || 'No hay facturas para esta OC.');
+                        $campoFactura.show();
                     }
                 },
-                error: function() {
-                    $("#invalid_ordenCompraNC").html('Error al cargar facturas de la OC');
+                error: function(xhr, status, error) {
+                    $selectFactura.empty().append('<option value="">Error al cargar</option>');
+                    $invalidMsg.html('Error de comunicación con el servidor.');
+                    $campoFactura.hide();
                 }
             });
         }
@@ -926,14 +942,24 @@ if ($notificaciones['success'] && !empty($notificaciones['data'])) {
             });
 
             $(document).on('change', '#idCompraNC', function() {
-                const idCompra = $(this).val();
-                if (!idCompra) {
-                    $('#contentNotaCreditoNC').empty();
-                    $('#btnNotaCreditoNC').addClass('d-none');
-                    return;
+                const selectedInvoice = $(this).val();
+                const $contentNota = $('#contentNotaCreditoNC');
+                const $btnNota = $('#btnNotaCreditoNC');
+
+                // Limpiar formularios de NC previos
+                $contentNota.empty();
+                $btnNota.addClass("d-none");
+                contadorFormNotas = 0;
+                selectedNoteCreditIds.clear();
+
+                if (selectedInvoice) {
+                    if (lastNotasCredito && lastNotasCredito.length > 0) {
+                        cargarFormNotaCredito(lastNotasCredito, 'NC');
+                        $btnNota.removeClass("d-none");
+                    } else {
+                        notificaBad('Error: No hay notas de crédito disponibles. Por favor, valida nuevamente la Orden de Compra.');
+                    }
                 }
-                $('#contentNotaCreditoNC').empty();
-                cargarFormNotaCredito(lastNotasCredito, 'NC');
             });
 
             $("#Form_CargaNotaCredito").submit(function(e) {
@@ -1255,6 +1281,18 @@ if ($notificaciones['success'] && !empty($notificaciones['data'])) {
                 $(this).val(''); // Restablece el input
                 $(this).next('.custom-file-label').text('Elegir archivo...'); // Restablece el label
             });
+            if (idForm === 'Form_CargaNotaCredito') {
+                $('#campoFacturaIngresada').hide();
+                $('#idCompraNC').empty().append('<option value="">Seleccione una factura...</option>');
+                $('#contentNotaCreditoNC').empty();
+                $('#btnNotaCreditoNC').addClass('d-none');
+                $('#ordenCompraNC').removeClass("is-invalid is-valid");
+                $('#invalid_ordenCompraNC').html('');
+                $('#invalid_idCompraNC').html('');
+                contadorFormNotas = 0;
+                selectedNoteCreditIds.clear();
+                lastNotasCredito = [];
+            }
         }
     </script>
 

@@ -130,17 +130,9 @@ class NotasCredito_Mdl
 
     public function obtenerPoliticaPorIdNotaCredito($idNotaCredito)
     {
-        // Si vienen múltiples IDs separados por coma (ej: '21,22'), tomamos el primero para la política principal
-        if (is_string($idNotaCredito) && strpos($idNotaCredito, ',') !== false) {
-            $ids = explode(',', $idNotaCredito);
-            $idNotaCredito = (int)trim($ids[0]);
-        } else {
-            $idNotaCredito = (int)$idNotaCredito;
-        }
-
         self::$debug = 0; // Silencioso por defecto
         if (self::$debug) {
-            echo "<br>Buscando política de Nota de Crédito con ID: $idNotaCredito<br>";
+            echo "<br>Buscando política(s) de Nota de Crédito con ID: " . print_r($idNotaCredito, true) . "<br>";
         }
 
         try {
@@ -148,33 +140,85 @@ class NotasCredito_Mdl
                 throw new \Exception('El ID de la política no puede estar vacío.');
             }
 
-            // Usamos la vista del ERP para obtener los datos de la política
-            $sql = "SELECT * FROM vw_ext_PortalProveedores_NotasCredito WHERE IdNotaCredito = :idNotaCredito LIMIT 1";
-
-            $params = [':idNotaCredito' => $idNotaCredito];
-
-            if (self::$debug) {
-                $this->dbHES->imprimirConsulta($sql, $params, 'Obtener Política NC por ID');
+            // Normalizar a array de enteros válidos
+            if (is_array($idNotaCredito)) {
+                $idsArray = array_map('intval', $idNotaCredito);
+            } elseif (is_string($idNotaCredito) && strpos($idNotaCredito, ',') !== false) {
+                $idsArray = array_map('intval', explode(',', $idNotaCredito));
+            } else {
+                $idsArray = [(int)$idNotaCredito];
             }
 
+            $idsArray = array_values(array_filter($idsArray, function ($id) {
+                return $id > 0;
+            }));
+
+            if (empty($idsArray)) {
+                throw new \Exception('No se proporcionaron IDs válidos de política.');
+            }
+
+            // Si es un solo ID, consulta directa
+            if (count($idsArray) === 1) {
+                $sql = "SELECT * FROM vw_ext_PortalProveedores_NotasCredito WHERE IdNotaCredito = :idNotaCredito LIMIT 1";
+                $params = [':idNotaCredito' => $idsArray[0]];
+
+                if (self::$debug) {
+                    $this->dbHES->imprimirConsulta($sql, $params, 'Obtener Política NC por ID');
+                }
+
+                $stmt = $this->dbHES->prepare($sql);
+                $stmt->bindValue(':idNotaCredito', $idsArray[0], PDO::PARAM_INT);
+                $stmt->execute();
+
+                $politicaResult = $stmt->fetch(PDO::FETCH_ASSOC);
+
+                if ($politicaResult) {
+                    if (self::$debug) {
+                        echo '<br>Política encontrada:';
+                        var_dump($politicaResult);
+                    }
+                    return ['success' => true, 'data' => $politicaResult];
+                } else {
+                    return ['success' => false, 'message' => 'No se encontró una política de nota de crédito con el ID proporcionado.'];
+                }
+            }
+
+            // Si son múltiples IDs seleccionados para una sola NC
+            $placeholders = implode(',', array_fill(0, count($idsArray), '?'));
+            $sql = "SELECT * FROM vw_ext_PortalProveedores_NotasCredito WHERE IdNotaCredito IN ($placeholders)";
+
             $stmt = $this->dbHES->prepare($sql);
-            $stmt->bindValue(':idNotaCredito', $idNotaCredito, PDO::PARAM_INT);
+            foreach ($idsArray as $index => $idVal) {
+                $stmt->bindValue($index + 1, $idVal, PDO::PARAM_INT);
+            }
             $stmt->execute();
 
-            $politicaResult = $stmt->fetch(PDO::FETCH_ASSOC);
-            $cantResult = $stmt->rowCount();
+            $politicas = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-            if ($cantResult > 0) {
-                if (self::$debug) {
-                    echo '<br>Política encontrada:';
-                    var_dump($politicaResult);
+            if (!empty($politicas)) {
+                $primera = $politicas[0];
+                $montoTotal = 0;
+                $descripciones = [];
+
+                foreach ($politicas as $pol) {
+                    $montoTotal += (float)($pol['Monto'] ?? 0);
+                    if (!empty($pol['Descripcion'])) {
+                        $descripciones[] = $pol['Descripcion'];
+                    }
                 }
-                return ['success' => true, 'data' => $politicaResult];
+
+                $primera['Monto'] = $montoTotal;
+                $primera['Descripcion'] = implode(' | ', $descripciones);
+                $primera['politicasAgrupadas'] = $politicas;
+
+                if (self::$debug) {
+                    echo '<br>Políticas agrupadas encontradas (Total: ' . $montoTotal . '):';
+                    var_dump($primera);
+                }
+
+                return ['success' => true, 'data' => $primera];
             } else {
-                if (self::$debug) {
-                    echo '<br>No se encontró la política.';
-                }
-                return ['success' => false, 'message' => 'No se encontró una política de nota de crédito con el ID proporcionado.'];
+                return ['success' => false, 'message' => 'No se encontraron políticas de nota de crédito con los IDs proporcionados.'];
             }
         } catch (\Exception $e) {
             $timestamp = date("Y-m-d H:i:s");
