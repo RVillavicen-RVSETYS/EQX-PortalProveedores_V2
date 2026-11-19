@@ -1421,8 +1421,49 @@ class ReglasAplicadasv40
             }
         }
 
-        // 4. Validar Montos
+        // 4. Validar Moneda de la Nota de Crédito contra la Política / Sistema
+        $monedaNC = $dataXML['Comprobante']['Moneda'] ?? '';
+        $monedaEsperada = $configParaValidaciones['politicaNC']['Moneda'] ?? '';
+        if (!empty($monedaEsperada) && $monedaNC !== $monedaEsperada) {
+            if ($this->debug == 1) {
+                echo "<br> <b>* ERROR -- La moneda de la Nota de Crédito ($monedaNC) no coincide con la moneda registrada ($monedaEsperada).</b>";
+            }
+            $errorMessages[] = "* La moneda de la Nota de Crédito (<b>$monedaNC</b>) no coincide con la moneda registrada en el sistema (<b>$monedaEsperada</b>).<br>";
+        } else {
+            if ($this->debug == 1) {
+                echo "<br> * OK - Moneda de la Nota de Crédito válida: <b>$monedaNC</b>.";
+            }
+            $debugMessages[] = "OK - Moneda: <b>$monedaNC</b>.";
+        }
+
+        // 5. Validar Monto contra el monto registrado en la Política/ERP (Sin tolerancia)
         $totalNC = (float) ($dataXML['Comprobante']['Total'] ?? 0);
+        $montoEsperado = isset($configParaValidaciones['politicaNC']['Monto']) ? (float)$configParaValidaciones['politicaNC']['Monto'] : null;
+
+        if ($montoEsperado !== null) {
+            $totalNCRound = round($totalNC, 2);
+            $montoEsperadoRound = round($montoEsperado, 2);
+
+            // Sin tolerancia: deben coincidir exactamente a 2 decimales
+            if (abs($totalNCRound - $montoEsperadoRound) > 0.0001) {
+                $totalNC_f = number_format($totalNC, 2, '.', ',');
+                $montoEsperado_f = number_format($montoEsperado, 2, '.', ',');
+                if ($this->debug == 1) {
+                    echo "<br> <b>* ERROR -- El total de la Nota de Crédito ($$totalNC_f) no coincide con el monto registrado ($$montoEsperado_f).</b>";
+                }
+                $errorMessages[] = ($this->debug == 1)
+                    ? "* El total de la Nota de Crédito (<b>$$totalNC_f $monedaNC</b>) no coincide con el monto registrado en el sistema (<b>$$montoEsperado_f $monedaEsperada</b>).<br>"
+                    : "* El total de la Nota de Crédito no coincide con el monto registrado en el sistema.<br>";
+            } else {
+                $totalNC_f = number_format($totalNC, 2, '.', ',');
+                if ($this->debug == 1) {
+                    echo "<br> * OK - El total de la Nota de Crédito ($$totalNC_f) coincide exactamente con el monto registrado.";
+                }
+                $debugMessages[] = "OK - Monto contra registro ERP: El total de la NC ($$totalNC_f) coincide exactamente con el monto esperado.";
+            }
+        }
+
+        // 6. Validar que el total de la Nota de Crédito no supere el saldo de la factura original
         $idCompraOriginal = $configParaValidaciones['facturaOriginal']['acuse'];
 
         // Obtener los totales actualizados de la compra
@@ -1439,19 +1480,21 @@ class ReglasAplicadasv40
                 echo "<br> * OK - Totales de la factura original obtenidos correctamente.";
             }
             $saldoReal = (float) ($totalesCompra['data']['saldoCalculado'] ?? 0);
-            $saldoReal_f = number_format($saldoReal, 2);
+            $saldoReal_f = number_format($saldoReal, 2, '.', ',');
             $debugMessages[] = "OK - Saldo Real de la Factura: $ $saldoReal_f (<b>Total: {$totalesCompra['data']['totalFactura']} - NCs: {$totalesCompra['data']['totalNotasCredito']} - Pagos: {$totalesCompra['data']['totalPagado']}</b>).";
 
             if ($totalNC > $saldoReal) {
-                $totalNC_f = number_format($totalNC, 2);
-                $saldoReal_f = number_format($saldoReal, 2);
+                $totalNC_f = number_format($totalNC, 2, '.', ',');
                 if ($this->debug == 1) {
                     echo "<br> <b>* ERROR -- El total de la Nota de Crédito ($$totalNC_f) es mayor al saldo pendiente de la factura original ($$saldoReal_f).</b>";
                 }
-                $errorMessages[] = "* El total de la Nota de Crédito (<b>$$totalNC_f</b>) no puede ser mayor al saldo pendiente de la factura original (<b>$$saldoReal_f</b>).<br>";
+                $errorMessages[] = ($this->debug == 1)
+                    ? "* El total de la Nota de Crédito (<b>$$totalNC_f</b>) no puede ser mayor al saldo pendiente de la factura original (<b>$$saldoReal_f</b>).<br>"
+                    : "* El total de la Nota de Crédito no puede ser mayor al saldo pendiente de la factura original.<br>";
             } else {
+                $totalNC_f = number_format($totalNC, 2, '.', ',');
                 if ($this->debug == 1) {
-                    echo "<br> * OK - El total de la Nota de Crédito (<b>$$totalNC</b>) es válido contra el saldo de la factura (<b>$$saldoReal_f</b>).";
+                    echo "<br> * OK - El total de la Nota de Crédito (<b>$$totalNC_f</b>) es válido contra el saldo de la factura (<b>$$saldoReal_f</b>).";
                 }
                 $debugMessages[] = "OK - Montos: El total de la NC es válido contra el saldo de la factura.";
             }
